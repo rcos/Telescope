@@ -9,8 +9,12 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-# web server
+# command line argument parser
+clap = "~2"
+# actix web server
 actix-web = {version = "2.0.0", features = ["openssl"]}
+actix-rt = "1.0.0"
+actix-files = "~0.2"
 actix-session = "0.3.0" # session / cookie stuff
 actix-ratelimit = "0.2.1" # ratelimiting
 # html templating.
@@ -19,9 +23,13 @@ handlebars = {version = "3.1.0", features = ["dir_source"]}
 openssl = "0.10.29"
 # logging
 log = "0.4.8"
-env_logger = "0.7.1"
+env_logger = "0.7"
 # (de)serialization
 serde = "1.0.111"
 serde_json = "1.0.53"
 # generating QR codes (will be useful later for attendance QR codes perhaps)
 qrcodegen = "1.6.0"
+# cryptographically sound random number generation
+rand = "0.7.3"
+# lazily evaluated statics.
+lazy_static = "1.4.0"
