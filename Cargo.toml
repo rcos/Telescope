@@ -1,8 +1,27 @@
 [package]
 name = "telescope"
 version = "0.1.0"
-authors = ["Antonia Calia-Bogan <acaliabogan@acaliabogan.dev>"]
+authors = [
+    "Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"
+]
+
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
+# web server
+actix-web = {version = "2.0.0", features = ["openssl"]}
+actix-session = "0.3.0" # session / cookie stuff
+actix-ratelimit = "0.2.1" # ratelimiting
+# html templating.
+handlebars = {version = "3.1.0", features = ["dir_source"]}
+# tls/ssl certification.
+openssl = "0.10.29"
+# logging
+log = "0.4.8"
+env_logger = "0.7.1"
+# (de)serialization
+serde = "1.0.111"
+serde_json = "1.0.53"
+# generating QR codes (will be useful later for attendance QR codes perhaps)
+qrcodegen = "1.6.0"
