@@ -71,8 +71,6 @@ async fn main() -> std::io::Result<()> {
             .default_service(route().to(|| HttpResponse::NotFound()))
 
     })
-        //.bind("localhost:8088")
-        .maxconn(1000)
         .bind_openssl(config.bind_to.clone(), tls_builder)
         .map_err(|e| {
             error!("Could not bind to {}: {}", config.bind_to, e);
