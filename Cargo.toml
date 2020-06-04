@@ -20,7 +20,9 @@ actix-ratelimit = "0.2.1" # ratelimiting
 # html templating.
 handlebars = {version = "3.1.0", features = ["dir_source"]}
 # tls/ssl certification.
-openssl = "0.10.29"
+openssl = {version = "0.10", features = ["vendored"]}
+# exit code standardization
+exitcode = "1"
 # logging
 log = "0.4.8"
 env_logger = "0.7"
@@ -33,3 +35,7 @@ qrcodegen = "1.6.0"
 rand = "0.7.3"
 # lazily evaluated statics.
 lazy_static = "1.4.0"
+# derive builder pattern for structs
+derive_builder = "0.9.0"
+# derive accessor methods for structs
+property = "0.3.1"
