@@ -86,7 +86,7 @@ fn cli() -> Config {
         tls_cert_file: matches.value_of("TLS_CERT_FILE").unwrap().to_owned(),
         tls_key_file: matches.value_of("TLS_PRIV_KEY_FILE").unwrap().to_owned(),
         bind_to:
-            if matches.is_present("DEVELOPMENT") { Some("localhost:8433") }
+            if matches.is_present("DEVELOPMENT") { Some("localhost:8443") }
             else if matches.is_present("PRODUCTION") { Some("localhost:443") }
             else { None }
             .or(matches.value_of("BIND_TO"))

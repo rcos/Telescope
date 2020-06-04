@@ -17,13 +17,16 @@ use crate::env::{
     CONFIG
 };
 
+use actix_files as afs;
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
 use std::process::exit;
+use actix_web::{HttpServer, App, middleware, HttpResponse};
+use actix_web::web::route;
 
 
 #[actix_rt::main]
-async fn main() {
+async fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
     let config: &Config = &*CONFIG;
@@ -61,5 +64,21 @@ async fn main() {
         .unwrap();
     info!("Handlebars templates registered.");
 
-    
+    HttpServer::new(move || {
+        App::new()
+            .wrap(middleware::Logger::default())
+            .service(afs::Files::new("/static/", "static"))
+            .default_service(route().to(|| HttpResponse::NotFound()))
+
+    })
+        //.bind("localhost:8088")
+        .maxconn(1000)
+        .bind_openssl(config.bind_to.clone(), tls_builder)
+        .map_err(|e| {
+            error!("Could not bind to {}: {}", config.bind_to, e);
+            exit(e.raw_os_error().unwrap_or(1))
+        })
+        .unwrap()
+        .run()
+        .await
 }
