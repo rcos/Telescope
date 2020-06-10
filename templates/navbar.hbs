@@ -1,16 +1,21 @@
-<div class="w3-bar {{theme_class}}">
+<nav class="w3-container w3-bar w3-theme">
     <div class="navbar-left">
+        <a href="/" class="w3-bar-item w3-button w3-red"><b>RCOS</b></a>
+        <a href="/achievements" class="w3-bar-item w3-button w3-theme">Achievements</a>
+        <a href="/projects" class="w3-bar-item w3-button w3-theme">Projects</a>
+        <a href="/developers" class="w3-bar-item w3-button w3-theme">Developers</a>
+        <a href="/sponsors" class="w3-bar-item w3-button w3-theme">Sponsors</a>
         {{#each left_items}}
-            <a href="{{this.location}}" class="w3-bar-item w3-button {{this.styling}}">
+            <a href="{{this.location}}" class="w3-bar-item w3-button w3-theme {{this.styling}}">
                 {{this.text}}
             </a>
         {{/each}}
     </div>
     <div class="navbar-right">
         {{#each right_items}}
-            <a href="{{this.location}}" class="w3-bar-item w3-button {{this.styling}}">
+            <a href="{{this.location}}" class="w3-bar-item w3-button w3-theme {{this.styling}}">
                 {{this.text}}
             </a>
         {{/each}}
     </div>
-</div>
+</nav>

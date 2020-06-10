@@ -26,7 +26,6 @@ impl NavbarItem {
 /// A navbar definition.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Navbar {
-    theme_class: String,
     left_items: Vec<NavbarItem>,
     right_items: Vec<NavbarItem>
 }
@@ -34,21 +33,19 @@ pub struct Navbar {
 impl Navbar {
     /// Create a new navbar with the default options.
     pub fn new() -> Self {
-        let mut s = Self::default();
-        s.add_defaults();
-        s
+        Self::default()
     }
 
-    /// Set the theme class of this navbar.
-    pub fn theme(mut self, theme_class: impl Into<String>) -> Self {
-        self.set_theme(theme_class);
-        self
-    }
-
-    /// Set the theming css class of this navbar.
-    pub fn set_theme(&mut self, theme_class: impl Into<String>) {
-        self.theme_class = theme_class.into();
-    }
+    // /// Set the theme class of this navbar.
+    // pub fn theme(mut self, theme_class: impl Into<String>) -> Self {
+    //     self.set_theme(theme_class);
+    //     self
+    // }
+    //
+    // /// Set the theming css class of this navbar.
+    // pub fn set_theme(&mut self, theme_class: impl Into<String>) {
+    //     self.theme_class = theme_class.into();
+    // }
 
     /// Add a navbar item to the left side of the navbar.
     pub fn add_left(
@@ -91,25 +88,6 @@ impl Navbar {
     ) -> Self {
         self.add_right(location, text, style);
         self
-    }
-
-    /// Add the default navbar items:
-    /// RCOS homepage
-    /// Achievements
-    /// Projects
-    /// Developers
-    /// Sponsors
-    pub fn add_defaults(&mut self) {
-        let items = [
-            ("RCOS", "/", "w3-text-red"),
-            ("Achievements", "/achievements", ""),
-            ("Projects", "/projects", ""),
-            ("Developers", "/developers", ""),
-            ("Sponsors", "/sponsors", "")
-        ];
-        for (text, path, style) in &items {
-            self.add_left(*path, *text, *style);
-        }
     }
 
     /// Render using the template registry
