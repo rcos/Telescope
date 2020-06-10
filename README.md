@@ -24,5 +24,5 @@ $ # Development profile (for testing on local machine).
 $ cargo run -- --development
 
 $ # Production profile (used for deploying in production environments).
-$ cargo run --relaease -- --production
+$ cargo run --release -- --production
 ```
