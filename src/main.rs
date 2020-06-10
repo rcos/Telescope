@@ -1,4 +1,3 @@
-
 #[macro_use]
 extern crate log;
 
@@ -6,39 +5,25 @@ extern crate log;
 extern crate lazy_static;
 
 mod env;
-use crate::env::{
-    Config,
-    CONFIG
-};
+use crate::env::{Config, CONFIG};
 
 mod web;
-use web::{
-    index, login
-};
+use web::{index, login};
 
 mod templates;
 
+use crate::web::app_data::AppData;
 use actix_files as afs;
-use handlebars::Handlebars;
-use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
-use std::process::exit;
-use actix_web::{
-    HttpServer,
-    App,
-    middleware,
-    HttpResponse,
-    web as aweb,
-    web::{
-        Data
-    }
-};
-use rand::rngs::OsRng;
-use rand::Rng;
+use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 use actix_session::CookieSession;
 use actix_web::cookie::SameSite;
-use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
+use actix_web::{middleware, web as aweb, web::Data, App, HttpResponse, HttpServer};
+use handlebars::Handlebars;
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use rand::rngs::OsRng;
+use rand::Rng;
+use std::process::exit;
 use std::time::Duration;
-use crate::web::app_data::AppData;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -58,20 +43,28 @@ async fn main() -> std::io::Result<()> {
     tls_builder
         .set_private_key_file(&config.tls_key_file, SslFiletype::PEM)
         .map_err(|e| {
-            error!("Could not read TLS/SSL private key at {}: {}", config.tls_key_file, e);
+            error!(
+                "Could not read TLS/SSL private key at {}: {}",
+                config.tls_key_file, e
+            );
             exit(exitcode::NOINPUT)
         })
         .unwrap();
-    tls_builder.set_certificate_chain_file(&config.tls_cert_file)
+    tls_builder
+        .set_certificate_chain_file(&config.tls_cert_file)
         .map_err(|e| {
-            error!("Could not read TLS/SSL certificate chain file at {}: {}", config.tls_cert_file, e);
+            error!(
+                "Could not read TLS/SSL certificate chain file at {}: {}",
+                config.tls_cert_file, e
+            );
             exit(exitcode::NOINPUT)
         })
         .unwrap();
 
     // register handlebars templates
     let mut template_registry = Handlebars::new();
-    template_registry.register_templates_directory(".hbs", "templates")
+    template_registry
+        .register_templates_directory(".hbs", "templates")
         .map_err(|e| {
             error!("Failed to properly register handlebars templates: {}", e);
             exit(1)
@@ -81,7 +74,7 @@ async fn main() -> std::io::Result<()> {
 
     // generate a random key to encrypt cookies.
     let mut rng = OsRng::default();
-    let mut cookie_key = [0u8;32];
+    let mut cookie_key = [0u8; 32];
     rng.fill(&mut cookie_key);
 
     // memory store for rate limiting.
@@ -93,32 +86,29 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
-            .wrap(CookieSession::signed(&cookie_key)
-                .same_site(SameSite::Strict)
-                .http_only(true)
+            .wrap(
+                CookieSession::signed(&cookie_key)
+                    .same_site(SameSite::Strict)
+                    .http_only(true),
             )
-            .wrap(RateLimiter::new(
-                MemoryStoreActor::from(ratelimit_memstore.clone()).start())
-                // rate limit: 100 requests max per minute
-                .with_interval(Duration::from_secs(60))
-                .with_max_requests(100)
+            .wrap(
+                RateLimiter::new(MemoryStoreActor::from(ratelimit_memstore.clone()).start())
+                    // rate limit: 100 requests max per minute
+                    .with_interval(Duration::from_secs(60))
+                    .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())
-            .service(afs::Files::new("/static", "static")
-                .show_files_listing()
-            )
-            .service(aweb::resource("/")
-                .route(aweb::get().to(index::index_service))
-            )
+            .service(afs::Files::new("/static", "static").show_files_listing())
+            .service(aweb::resource("/").route(aweb::get().to(index::index_service)))
             .service(aweb::resource("/login"))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
-        .bind_openssl(config.bind_to.clone(), tls_builder)
-        .map_err(|e| {
-            error!("Could not bind to {}: {}", config.bind_to, e);
-            exit(e.raw_os_error().unwrap_or(1))
-        })
-        .unwrap()
-        .run()
-        .await
+    .bind_openssl(config.bind_to.clone(), tls_builder)
+    .map_err(|e| {
+        error!("Could not bind to {}: {}", config.bind_to, e);
+        exit(e.raw_os_error().unwrap_or(1))
+    })
+    .unwrap()
+    .run()
+    .await
 }
