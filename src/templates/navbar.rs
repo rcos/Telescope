@@ -8,32 +8,63 @@ pub struct NavbarItem {
     /// The text of the item. This may not get rendered
     /// (if using google material design font, for example, this ligatures into a single symbol)
     text: String,
-    /// Any extra styling added to the navbar item.
-    styling: String
+    /// Whether this item of the navbar is focussed
+    focus: bool,
+    /// Style extras added onto the the element at render time.
+    /// This is localized entirely to this module and serves to make the
+    /// Homepage button bold.
+    style_extras: String
 }
 
 impl NavbarItem {
     /// Create a navbar item.
-    fn new(location: impl Into<String>, text: impl Into<String>, styling: impl Into<String>) -> Self {
+    fn new(location: impl Into<String>, text: impl Into<String>) -> Self {
         Self {
             location: location.into(),
             text: text.into(),
-            styling: styling.into()
+            focus: false,
+            style_extras: "".to_owned()
         }
     }
 }
 
 /// A navbar definition.
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Navbar {
     left_items: Vec<NavbarItem>,
-    right_items: Vec<NavbarItem>
+    right_items: Vec<NavbarItem>,
 }
 
 impl Navbar {
-    /// Create a new navbar with the default options.
-    pub fn new() -> Self {
-        Self::default()
+
+    /// Get an empty navbar object.
+    pub const fn empty() -> Self {
+        Self {
+            left_items: Vec::new(),
+            right_items: Vec::new()
+        }
+    }
+
+    /// Navbar with homepage, achievement page, projects, developers and sponsors
+    pub fn with_defaults() -> Self {
+        let mut s = Self::empty()
+            .add_left_builder("/", "RCOS");
+        // make homepage button bold.
+        s.left_items[0].style_extras = "font-weight:bold;".to_owned();
+        // add remaining buttons
+        s
+            .add_left_builder("/achievements", "Achievements")
+            .add_left_builder("/projects", "Projects")
+            .add_left_builder("/developers", "Developers")
+            .add_left_builder("/sponsors", "Sponsors")
+    }
+
+    /// Create a navbar without a signed in user. This is a default navbar with
+    /// "Sign up" and "Login" buttons.
+    pub fn userless() -> Self {
+        Self::with_defaults()
+            .add_right_builder("/sign-up", "Sign Up")
+            .add_right_builder("/login", "Login")
     }
 
     // /// Set the theme class of this navbar.
@@ -52,9 +83,8 @@ impl Navbar {
         &mut self,
         location: impl Into<String>,
         text: impl Into<String>,
-        style: impl Into<String>
     ) {
-        self.left_items.push(NavbarItem::new(location, text, style))
+        self.left_items.push(NavbarItem::new(location, text))
     }
 
     /// Add a navbar item to the left side of the navbar using the builder pattern.
@@ -62,9 +92,8 @@ impl Navbar {
         mut self,
         location: impl Into<String>,
         text: impl Into<String>,
-        style: impl Into<String>
     ) -> Self {
-        self.add_left(location, text, style);
+        self.add_left(location, text);
         self
     }
 
@@ -73,9 +102,8 @@ impl Navbar {
         &mut self,
         location: impl Into<String>,
         text: impl Into<String>,
-        style: impl Into<String>
     ) {
-        self.right_items.push(NavbarItem::new(location, text, style))
+        self.right_items.push(NavbarItem::new(location, text))
     }
 
 
@@ -83,10 +111,9 @@ impl Navbar {
     pub fn add_right_builder(
         mut self,
         location: impl Into<String>,
-        text: impl Into<String>,
-        style: impl Into<String>
+        text: impl Into<String>
     ) -> Self {
-        self.add_right(location, text, style);
+        self.add_right(location, text);
         self
     }
 

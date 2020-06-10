@@ -14,11 +14,9 @@ pub async fn index_service(
     app_data: Data<AppData>,
 ) -> HttpResponse {
     let handlebars = &app_data.template_registry;
-    let page_content = Navbar::new()
-        .add_right_builder("/login", "Login", "");
+    let page_content = Navbar::userless().render(handlebars).unwrap();
     let page = Page::new(
-        "RCOS",
-        page_content.render(handlebars).unwrap(),
+        "RCOS", page_content,
     );
     HttpResponse::Ok().body(page.render(handlebars).unwrap())
 }

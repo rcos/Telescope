@@ -1,16 +1,15 @@
 <nav class="w3-container w3-bar w3-theme w3-mobile">
-    <a href="/" class="w3-bar-item w3-button w3-red w3-mobile"><b>RCOS</b></a>
-    <a href="/achievements" class="w3-bar-item w3-button w3-theme w3-mobile">Achievements</a>
-    <a href="/projects" class="w3-bar-item w3-button w3-theme w3-mobile">Projects</a>
-    <a href="/developers" class="w3-bar-item w3-button w3-theme w3-mobile">Developers</a>
-    <a href="/sponsors" class="w3-bar-item w3-button w3-theme w3-mobile">Sponsors</a>
     {{#each left_items}}
-        <a href="{{this.location}}" class="w3-bar-item w3-button w3-theme w3-mobile {{this.styling}}">
+        <a href="{{this.location}}"
+           class="w3-bar-item w3-button w3-theme w3-mobile {{#if focused}}w3-metro-red{{/if}}"
+           style="{{style_extras}}">
             {{this.text}}
         </a>
     {{/each}}
     {{#each right_items}}
-        <a href="{{this.location}}" class="w3-bar-item w3-button w3-theme w3-mobile w3-right {{this.styling}}">
+        <a href="{{this.location}}"
+           class="w3-bar-item w3-button w3-theme w3-mobile w3-right {{#if focused}}w3-metro-red{{/if}}"
+           style="{{style_extras}}">
             {{this.text}}
         </a>
     {{/each}}

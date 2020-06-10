@@ -104,7 +104,7 @@ async fn main() -> std::io::Result<()> {
                     .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())
-            .service(afs::Files::new("/static", "static").show_files_listing())
+            .service(afs::Files::new("/static", "static"))
             .service(aweb::resource("/").route(aweb::get().to(index::index_service)))
             .service(aweb::resource("/login"))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))

@@ -1,4 +1,5 @@
 use handlebars::{Handlebars, RenderError};
+use crate::templates::navbar::Navbar;
 
 
 /// A page on the RCOS website.
@@ -6,6 +7,8 @@ use handlebars::{Handlebars, RenderError};
 pub struct Page {
     /// The page title.
     page_title: String,
+    /// The navbar at the top of the page.
+    navbar: Navbar,
     /// The inner html for this webpage. This is rendered unescaped. Do not let the user get stuff
     /// Ensure that no user input gets rendered into this unescaped (as it will create an XSS vulnerability).
     page_body: String,
@@ -17,6 +20,7 @@ impl Page {
         Self {
             page_title: title.into(),
             page_body: body.into(),
+            navbar: Navbar::with_defaults()
         }
     }
 
