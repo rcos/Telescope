@@ -15,7 +15,7 @@ pub async fn index_service(
 ) -> HttpResponse {
     let handlebars = &app_data.template_registry;
     let page_content = Navbar::new()
-        .add_right_builder("/login", "Login", false);
+        .add_right_builder("/login", "Login", "");
     let page = Page::new(
         "RCOS",
         page_content.render(handlebars).unwrap(),

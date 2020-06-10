@@ -8,14 +8,17 @@ pub struct NavbarItem {
     /// The text of the item. This may not get rendered
     /// (if using google material design font, for example, this ligatures into a single symbol)
     text: String,
+    /// Any extra styling added to the navbar item.
+    styling: String
 }
 
 impl NavbarItem {
     /// Create a navbar item.
-    fn new(location: impl Into<String>, text: impl Into<String>) -> Self {
+    fn new(location: impl Into<String>, text: impl Into<String>, styling: impl Into<String>) -> Self {
         Self {
             location: location.into(),
-            text: text.into()
+            text: text.into(),
+            styling: styling.into()
         }
     }
 }
@@ -52,8 +55,9 @@ impl Navbar {
         &mut self,
         location: impl Into<String>,
         text: impl Into<String>,
+        style: impl Into<String>
     ) {
-        self.left_items.push(NavbarItem::new(location, text))
+        self.left_items.push(NavbarItem::new(location, text, style))
     }
 
     /// Add a navbar item to the left side of the navbar using the builder pattern.
@@ -61,8 +65,9 @@ impl Navbar {
         mut self,
         location: impl Into<String>,
         text: impl Into<String>,
+        style: impl Into<String>
     ) -> Self {
-        self.add_left(location, text);
+        self.add_left(location, text, style);
         self
     }
 
@@ -71,8 +76,9 @@ impl Navbar {
         &mut self,
         location: impl Into<String>,
         text: impl Into<String>,
+        style: impl Into<String>
     ) {
-        self.right_items.push(NavbarItem::new(location, text))
+        self.right_items.push(NavbarItem::new(location, text, style))
     }
 
 
@@ -80,9 +86,10 @@ impl Navbar {
     pub fn add_right_builder(
         mut self,
         location: impl Into<String>,
-        text: impl Into<String>
+        text: impl Into<String>,
+        style: impl Into<String>
     ) -> Self {
-        self.add_right(location, text);
+        self.add_right(location, text, style);
         self
     }
 
@@ -94,14 +101,14 @@ impl Navbar {
     /// Sponsors
     pub fn add_defaults(&mut self) {
         let items = [
-            ("RCOS", "/"),
-            ("Achievements", "/achievements"),
-            ("Projects", "/projects"),
-            ("Developers", "/developers"),
-            ("Sponsors", "/sponsors")
+            ("RCOS", "/", "w3-text-red"),
+            ("Achievements", "/achievements", ""),
+            ("Projects", "/projects", ""),
+            ("Developers", "/developers", ""),
+            ("Sponsors", "/sponsors", "")
         ];
-        for (text, path) in &items {
-            self.add_left(*path, *text);
+        for (text, path, style) in &items {
+            self.add_left(*path, *text, *style);
         }
     }
 

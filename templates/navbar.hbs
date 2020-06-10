@@ -1,12 +1,16 @@
 <div class="w3-bar {{theme_class}}">
     <div class="navbar-left">
         {{#each left_items}}
-            <a href="{{this.location}}" class="w3-bar-item">{{this.text}}</a>
+            <a href="{{this.location}}" class="w3-bar-item w3-button {{this.styling}}">
+                {{this.text}}
+            </a>
         {{/each}}
     </div>
     <div class="navbar-right">
         {{#each right_items}}
-            <a href="{{this.location}}" class="w3-bar-item w3-button">{{this.text}}</a>
+            <a href="{{this.location}}" class="w3-bar-item w3-button {{this.styling}}">
+                {{this.text}}
+            </a>
         {{/each}}
     </div>
 </div>
