@@ -1,0 +1,12 @@
+<div class="w3-bar">
+    <div class="navbar-left">
+        {{#each left_items}}
+            <a href="{{this.location}}" class="w3-bar-item {{this.classes}}">{{this.text}}</a>
+        {{/each}}
+    </div>
+    <div class="navbar-right">
+        {{#each right_items}}
+            <a href="{{this.location}}" class="w3-bar-item {{this.classes}}">{{this.text}}</a>
+        {{/each}}
+    </div>
+</div>

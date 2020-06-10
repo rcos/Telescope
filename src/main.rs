@@ -4,6 +4,9 @@ extern crate log;
 #[macro_use]
 extern crate lazy_static;
 
+#[macro_use]
+extern crate serde;
+
 mod env;
 use crate::env::{Config, CONFIG};
 
@@ -70,6 +73,9 @@ async fn main() -> std::io::Result<()> {
             exit(1)
         })
         .unwrap();
+    // Use handlebars strict mode so that we get an error when we try to render a
+    // non-existent field
+    template_registry.set_strict_mode(true);
     info!("Handlebars templates registered.");
 
     // generate a random key to encrypt cookies.

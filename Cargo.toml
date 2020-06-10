@@ -35,7 +35,3 @@ qrcodegen = "1.6.0"
 rand = "0.7"
 # lazily evaluated statics.
 lazy_static = "1.4.0"
-# derive builder pattern for structs
-# derive_builder = "0.9.0"
-# derive accessor methods for structs
-# property = "0.3.1"
