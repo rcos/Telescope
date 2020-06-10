@@ -13,7 +13,7 @@ pub struct Page {
 
 impl Page {
     /// Create a new web page.
-    pub fn new(title: impl Into<String>, body: impl Into<String>, theme: Theme) -> Self {
+    pub fn new(title: impl Into<String>, body: impl Into<String>) -> Self {
         Self {
             page_title: title.into(),
             page_body: body.into(),

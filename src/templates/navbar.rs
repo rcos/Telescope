@@ -5,9 +5,6 @@ use handlebars::{Handlebars, RenderError};
 pub struct NavbarItem {
     /// The location to redirect to.
     location: String,
-    /// The classes that should be used to label this item.
-    /// These are added to the existing w3-navbar-item class.
-    classes: String,
     /// The text of the item. This may not get rendered
     /// (if using google material design font, for example, this ligatures into a single symbol)
     text: String,
@@ -15,10 +12,9 @@ pub struct NavbarItem {
 
 impl NavbarItem {
     /// Create a navbar item.
-    fn new(location: impl Into<String>, text: impl Into<String>, material_icon: bool) -> Self {
+    fn new(location: impl Into<String>, text: impl Into<String>) -> Self {
         Self {
             location: location.into(),
-            classes: (if material_icon {"material-icons"} else {""}).to_owned(),
             text: text.into()
         }
     }
@@ -27,6 +23,7 @@ impl NavbarItem {
 /// A navbar definition.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Navbar {
+    theme_class: String,
     left_items: Vec<NavbarItem>,
     right_items: Vec<NavbarItem>
 }
@@ -39,14 +36,24 @@ impl Navbar {
         s
     }
 
+    /// Set the theme class of this navbar.
+    pub fn theme(mut self, theme_class: impl Into<String>) -> Self {
+        self.set_theme(theme_class);
+        self
+    }
+
+    /// Set the theming css class of this navbar.
+    pub fn set_theme(&mut self, theme_class: impl Into<String>) {
+        self.theme_class = theme_class.into();
+    }
+
     /// Add a navbar item to the left side of the navbar.
     pub fn add_left(
         &mut self,
         location: impl Into<String>,
         text: impl Into<String>,
-        material_icon: bool
     ) {
-        self.left_items.push(NavbarItem::new(location, text, material_icon))
+        self.left_items.push(NavbarItem::new(location, text))
     }
 
     /// Add a navbar item to the left side of the navbar using the builder pattern.
@@ -54,9 +61,8 @@ impl Navbar {
         mut self,
         location: impl Into<String>,
         text: impl Into<String>,
-        material_icon: bool
     ) -> Self {
-        self.add_left(location, text, material_icon);
+        self.add_left(location, text);
         self
     }
 
@@ -65,9 +71,8 @@ impl Navbar {
         &mut self,
         location: impl Into<String>,
         text: impl Into<String>,
-        material_icon: bool
     ) {
-        self.right_items.push(NavbarItem::new(location, text, material_icon))
+        self.right_items.push(NavbarItem::new(location, text))
     }
 
 
@@ -75,10 +80,9 @@ impl Navbar {
     pub fn add_right_builder(
         mut self,
         location: impl Into<String>,
-        text: impl Into<String>,
-        material_icon: bool
+        text: impl Into<String>
     ) -> Self {
-        self.add_right(location, text, material_icon);
+        self.add_right(location, text);
         self
     }
 
@@ -97,7 +101,7 @@ impl Navbar {
             ("Sponsors", "/sponsors")
         ];
         for (text, path) in &items {
-            self.add_left(*path, *text, false);
+            self.add_left(*path, *text);
         }
     }
 
