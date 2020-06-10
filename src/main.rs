@@ -3,12 +3,6 @@
 extern crate log;
 
 #[macro_use]
-extern crate derive_builder;
-
-#[macro_use]
-extern crate property;
-
-#[macro_use]
 extern crate lazy_static;
 
 mod env;
@@ -17,13 +11,34 @@ use crate::env::{
     CONFIG
 };
 
+mod web;
+use web::{
+    index, login
+};
+
+mod templates;
+
 use actix_files as afs;
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
 use std::process::exit;
-use actix_web::{HttpServer, App, middleware, HttpResponse};
-use actix_web::web::route;
-
+use actix_web::{
+    HttpServer,
+    App,
+    middleware,
+    HttpResponse,
+    web as aweb,
+    web::{
+        Data
+    }
+};
+use rand::rngs::OsRng;
+use rand::Rng;
+use actix_session::CookieSession;
+use actix_web::cookie::SameSite;
+use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
+use std::time::Duration;
+use crate::web::app_data::AppData;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -64,12 +79,39 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
     info!("Handlebars templates registered.");
 
+    // generate a random key to encrypt cookies.
+    let mut rng = OsRng::default();
+    let mut cookie_key = [0u8;32];
+    rng.fill(&mut cookie_key);
+
+    // memory store for rate limiting.
+    let ratelimit_memstore = MemoryStore::new();
+
+    // Create appdata (handlebars registry storage object currently)
+    let app_data = AppData::new(template_registry);
+
     HttpServer::new(move || {
         App::new()
+            .data(app_data.clone())
+            .wrap(CookieSession::signed(&cookie_key)
+                .same_site(SameSite::Strict)
+                .http_only(true)
+            )
+            .wrap(RateLimiter::new(
+                MemoryStoreActor::from(ratelimit_memstore.clone()).start())
+                // rate limit: 100 requests max per minute
+                .with_interval(Duration::from_secs(60))
+                .with_max_requests(100)
+            )
             .wrap(middleware::Logger::default())
-            .service(afs::Files::new("/static/", "static"))
-            .default_service(route().to(|| HttpResponse::NotFound()))
-
+            .service(afs::Files::new("/static", "static")
+                .show_files_listing()
+            )
+            .service(aweb::resource("/")
+                .route(aweb::get().to(index::index_service))
+            )
+            .service(aweb::resource("/login"))
+            .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
         .bind_openssl(config.bind_to.clone(), tls_builder)
         .map_err(|e| {

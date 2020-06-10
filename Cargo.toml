@@ -32,10 +32,10 @@ serde_json = "1.0.53"
 # generating QR codes (will be useful later for attendance QR codes perhaps)
 qrcodegen = "1.6.0"
 # cryptographically sound random number generation
-rand = "0.7.3"
+rand = "0.7"
 # lazily evaluated statics.
 lazy_static = "1.4.0"
 # derive builder pattern for structs
-derive_builder = "0.9.0"
+# derive_builder = "0.9.0"
 # derive accessor methods for structs
-property = "0.3.1"
+# property = "0.3.1"
