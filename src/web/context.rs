@@ -1,13 +1,12 @@
-use actix_web::{HttpRequest, FromRequest};
-use actix_session::Session;
-use actix_web::web::Data;
 use crate::web::app_data::AppData;
+use actix_session::Session;
+use actix_web::dev::{Payload, PayloadStream};
+use actix_web::web::Data;
+use actix_web::Error;
+use actix_web::{FromRequest, HttpRequest};
+use futures::future::{ok, Ready};
 use handlebars::{Handlebars, RenderError};
 use serde::Serialize;
-use actix_web::dev::{PayloadStream, Payload};
-use futures::future::{Ready, ok};
-use actix_web::Error;
-
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -31,7 +30,7 @@ impl PageContext {
         Self {
             app_data: data,
             request,
-            session
+            session,
         }
     }
 
@@ -63,9 +62,7 @@ impl FromRequest for PageContext {
         let request = HttpRequest::from_request(req, payload)
             .into_inner()
             .unwrap();
-        let session = Session::from_request(req, payload)
-            .into_inner()
-            .unwrap();
+        let session = Session::from_request(req, payload).into_inner().unwrap();
         ok(Self::new(app_data, request, session))
     }
 }

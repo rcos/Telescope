@@ -11,7 +11,7 @@ mod env;
 use crate::env::{Config, CONFIG};
 
 mod web;
-use web::{index, login};
+use web::index;
 
 mod templates;
 
@@ -20,7 +20,7 @@ use actix_files as afs;
 use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 use actix_session::CookieSession;
 use actix_web::cookie::SameSite;
-use actix_web::{middleware, web as aweb, web::Data, App, HttpResponse, HttpServer};
+use actix_web::{middleware, web as aweb, App, HttpResponse, HttpServer};
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use rand::rngs::OsRng;

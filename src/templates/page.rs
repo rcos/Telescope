@@ -1,8 +1,6 @@
-use handlebars::{Handlebars, RenderError};
 use crate::templates::navbar::Navbar;
-use crate::web::PageContext;
 use crate::web::context::Template;
-
+use crate::web::PageContext;
 
 /// A page on the RCOS website.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -22,7 +20,7 @@ impl Page {
         Self {
             page_title: title.into(),
             page_body: body.into(),
-            navbar: pc.render(&Navbar::from_context(pc)).unwrap()
+            navbar: pc.render(&Navbar::from_context(pc)).unwrap(),
         }
     }
 }
