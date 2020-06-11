@@ -1,22 +1,14 @@
-use crate::web::app_data::AppData;
-use actix_session::Session;
-use actix_web::{web as aweb, web::Data, HttpRequest, HttpResponse};
-use crate::templates::{
-    page::Page,
-    navbar::Navbar,
-};
+use actix_web::HttpResponse;
+use crate::templates::page::Page;
+use crate::web::PageContext;
 
 /// Index / landing page.
 /// All requests here will be GET.
-pub async fn index_service(
-    req: HttpRequest,
-    session: Session,
-    app_data: Data<AppData>,
-) -> HttpResponse {
-    let handlebars = &app_data.template_registry;
-    let page_content = Navbar::userless().render(handlebars).unwrap();
+pub async fn index_service(pc: PageContext) -> HttpResponse {
     let page = Page::new(
-        "RCOS", page_content,
+        "RCOS",
+        "Hello World",
+        &pc
     );
-    HttpResponse::Ok().body(page.render(handlebars).unwrap())
+    HttpResponse::Ok().body(pc.render(&page).unwrap())
 }

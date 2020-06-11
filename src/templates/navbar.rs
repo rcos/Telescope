@@ -1,4 +1,5 @@
 use handlebars::{Handlebars, RenderError};
+use crate::web::{Template, PageContext};
 
 /// An item in the top navigation bar.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -36,9 +37,8 @@ pub struct Navbar {
 }
 
 impl Navbar {
-
     /// Get an empty navbar object.
-    pub const fn empty() -> Self {
+    const fn empty() -> Self {
         Self {
             left_items: Vec::new(),
             right_items: Vec::new()
@@ -46,7 +46,7 @@ impl Navbar {
     }
 
     /// Navbar with homepage, achievement page, projects, developers and sponsors
-    pub fn with_defaults() -> Self {
+    fn with_defaults() -> Self {
         let mut s = Self::empty()
             .add_left_builder("/", "RCOS");
         // make homepage button bold.
@@ -61,22 +61,58 @@ impl Navbar {
 
     /// Create a navbar without a signed in user. This is a default navbar with
     /// "Sign up" and "Login" buttons.
-    pub fn userless() -> Self {
+    fn userless() -> Self {
         Self::with_defaults()
             .add_right_builder("/sign-up", "Sign Up")
             .add_right_builder("/login", "Login")
     }
 
-    // /// Set the theme class of this navbar.
-    // pub fn theme(mut self, theme_class: impl Into<String>) -> Self {
-    //     self.set_theme(theme_class);
-    //     self
-    // }
-    //
-    // /// Set the theming css class of this navbar.
-    // pub fn set_theme(&mut self, theme_class: impl Into<String>) {
-    //     self.theme_class = theme_class.into();
-    // }
+    /// Set the focused item in the navbar.
+    /// (This searches through all existing items in the navbar and turns on focus on
+    /// the one who's text matches)
+    fn set_focus<T>(&mut self, path: T) where String: PartialEq<T> {
+        let iter = self.left_items.iter_mut().chain(self.right_items.iter_mut());
+        for nav_item in iter {
+            if nav_item.location == path {
+                nav_item.focus = true;
+            } else {
+                nav_item.focus = false;
+            }
+        }
+    }
+
+    /// Create a navbar based on the page context.
+    pub fn from_context(pc: &PageContext) -> Self {
+        let mut bar: Navbar =
+            if let Some(auth_token) = pc.session().get::<String>("auth_token").unwrap() { // todo: change this use of unwrap into something more robust
+                unimplemented!()
+            } else {
+                Self::userless()
+            };
+
+        let matches = [
+            "achievements",
+            "projects",
+            "developers",
+            "sponsors",
+            "login",
+            "sign-up"
+        ];
+
+        let mut found = false;
+        for path in matches.iter() {
+            if pc.request().path().starts_with(path) {
+                found = true;
+                bar.set_focus("/".to_owned()+path);
+                break;
+            }
+        }
+        if !found {
+            bar.set_focus("/");
+        }
+
+        return bar;
+    }
 
     /// Add a navbar item to the left side of the navbar.
     pub fn add_left(
@@ -116,9 +152,8 @@ impl Navbar {
         self.add_right(location, text);
         self
     }
+}
 
-    /// Render using the template registry
-    pub fn render(&self, registry: &Handlebars) -> Result<String, RenderError> {
-        registry.render("navbar", self)
-    }
+impl Template for Navbar {
+    const TEMPLATE_NAME: &'static str = "navbar";
 }

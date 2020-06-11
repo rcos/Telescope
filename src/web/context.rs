@@ -1,10 +1,13 @@
-use actix_web::HttpRequest;
+use actix_web::{HttpRequest, FromRequest};
 use actix_session::Session;
 use actix_web::web::Data;
 use crate::web::app_data::AppData;
 use handlebars::{Handlebars, RenderError};
 use serde::Serialize;
-use crate::templates::navbar::Navbar;
+use actix_web::dev::{PayloadStream, Payload};
+use futures::future::{Ready, ok};
+use actix_web::Error;
+
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -32,13 +35,37 @@ impl PageContext {
         }
     }
 
+    /// Get the HttpRequest that originated this page context.
+    pub fn request(&self) -> &HttpRequest {
+        &self.request
+    }
+
+    /// Get the associated user session (cookies) that originated with this page context.
+    pub fn session(&self) -> &Session {
+        &self.session
+    }
+
     /// Render a template using the handlebars templates in this context.
     pub fn render<T: Template>(&self, template: &T) -> Result<String, RenderError> {
         template.render(self.app_data.template_registry.as_ref())
     }
+}
 
-    /// Get the appropriate navbar for this context.
-    pub fn get_navbar(&self) -> Navbar {
-        unimplemented!()
+impl FromRequest for PageContext {
+    type Error = Error;
+    type Future = Ready<Result<Self, Self::Error>>;
+    type Config = ();
+
+    fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
+        let app_data = Data::<AppData>::from_request(req, payload)
+            .into_inner()
+            .unwrap();
+        let request = HttpRequest::from_request(req, payload)
+            .into_inner()
+            .unwrap();
+        let session = Session::from_request(req, payload)
+            .into_inner()
+            .unwrap();
+        ok(Self::new(app_data, request, session))
     }
 }

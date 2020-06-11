@@ -1771,6 +1771,7 @@ dependencies = [
  "clap",
  "env_logger",
  "exitcode",
+ "futures",
  "handlebars",
  "lazy_static",
  "log",

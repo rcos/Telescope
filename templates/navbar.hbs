@@ -1,14 +1,14 @@
 <nav class="w3-container w3-bar w3-theme w3-mobile">
     {{#each left_items}}
         <a href="{{this.location}}"
-           class="w3-bar-item w3-button w3-theme w3-mobile {{#if focused}}w3-metro-red{{/if}}"
+           class="w3-bar-item w3-button w3-mobile {{#if this.focus}}w3-metro-red{{else}}w3-theme{{/if}}"
            style="{{style_extras}}">
             {{this.text}}
         </a>
     {{/each}}
     {{#each right_items}}
         <a href="{{this.location}}"
-           class="w3-bar-item w3-button w3-theme w3-mobile w3-right {{#if focused}}w3-metro-red{{/if}}"
+           class="w3-bar-item w3-button w3-mobile w3-right {{#if this.focus}}w3-metro-red{{else}}w3-theme{{/if}}"
            style="{{style_extras}}">
             {{this.text}}
         </a>

@@ -9,4 +9,4 @@ pub mod cookies;
 /// Page Context holder.
 pub mod context;
 /// Re-export PageContext.
-pub use context::PageContext;
+pub use context::*;
