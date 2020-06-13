@@ -11,7 +11,9 @@ mod env;
 use crate::env::{Config, CONFIG};
 
 mod web;
-use web::index;
+use web::{
+    index,
+};
 
 mod templates;
 
@@ -106,7 +108,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .service(afs::Files::new("/static", "static"))
             .service(aweb::resource("/").route(aweb::get().to(index::index_service)))
-            .service(aweb::resource("/login"))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)

@@ -44,6 +44,11 @@ impl PageContext {
         &self.session
     }
 
+    /// Get associated Handlebars template registry for manual template rendering.
+    pub fn handlebars(&self) -> &Handlebars<'static> {
+        self.app_data.template_registry.as_ref()
+    }
+
     /// Render a template using the handlebars templates in this context.
     pub fn render<T: Template>(&self, template: &T) -> Result<String, RenderError> {
         template.render(self.app_data.template_registry.as_ref())

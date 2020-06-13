@@ -1,8 +1,15 @@
 use crate::web::{PageContext, Template};
 
-/// An item in the top navigation bar.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct NavbarItem {
+trait MakeNavItem {
+    /// Turn something into a navbar item.
+    fn make(&self, pc: &PageContext) -> NavbarItem;
+}
+
+/// A button that just links to a another part of the site (or another site entirely.)
+/// This is good for most items on the header bar.
+#[derive(Clone, Debug, Serialize)]
+pub struct NavbarLink {
+    is_root: bool,
     /// The location to redirect to.
     location: String,
     /// The text of the item. This may not get rendered
@@ -10,145 +17,167 @@ pub struct NavbarItem {
     text: String,
     /// Whether this item of the navbar is focussed
     focus: bool,
-    /// Style extras added onto the the element at render time.
-    /// This is localized entirely to this module and serves to make the
-    /// Homepage button bold.
-    style_extras: String,
+    /// Whether this item is on the right side of the navbar.
+    right: bool,
+}
+
+impl NavbarLink {
+    /// Create a new navbar link button.
+    fn new(location: impl Into<String>, text: impl Into<String>) -> Self {
+        let loc = location.into();
+        Self {
+            location: loc.clone(),
+            text: text.into(),
+            focus: false,
+            right: false,
+            is_root: loc == "/"
+        }
+    }
+
+    /// Move this link to the right side of the navbar.
+    fn right(mut self) -> Self {
+        self.right = true;
+        self
+    }
+}
+
+impl MakeNavItem for NavbarLink {
+    /// Adapt a navbar link into a navbar item.
+    fn make(&self, pc: &PageContext) -> NavbarItem {
+        let mut render = self.clone();
+        // if the webpage path starts with the nav item location, focus on that nav item.
+        let path = &render.location[1..];
+        let focus = pc.request().path().starts_with(path);
+        render.focus = focus;
+        NavbarItem::new(
+            pc.render(&render).unwrap(),
+            "",
+            self.is_root
+        )
+    }
+}
+
+impl Template for NavbarLink {
+    const TEMPLATE_NAME: &'static str = "navbar/link";
+}
+
+/// A button that opens a modal. Used only for the login button currently.
+#[derive(Clone, Debug, Serialize)]
+pub struct NavbarModal {
+    /// If this modal is on the right side of the nav bar.
+    right: bool,
+    /// The id in the html page of the modal.
+    id: String,
+    /// The html of the modal dialogue.
+    inner: String,
+    /// The header of the modal dialogue, and the text of the button.
+    text: String,
+}
+
+impl NavbarModal {
+    /// Create a new modal navbar item.
+    fn new(id: impl Into<String>, header: impl Into<String>, inner: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            text: header.into(),
+            inner: inner.into(),
+            right: false
+        }
+    }
+
+    /// Set this to be on the right side of the navbar.
+    fn right(mut self) -> Self {
+        self.right = true;
+        self
+    }
+}
+
+impl MakeNavItem for NavbarModal {
+    /// Adapt a navbar modal into a navbar item.
+    fn make(&self, pc: &PageContext) -> NavbarItem {
+        NavbarItem::new(
+            pc.handlebars().render("navbar/modal-button", self).unwrap(),
+            pc.handlebars().render("navbar/modal-body", self).unwrap(),
+            false,
+        )
+    }
+}
+
+/// An adapter type for items in the navbar.
+#[derive(Clone, Debug, Serialize, Default)]
+pub struct NavbarItem {
+    is_root: bool,
+    /// The code placed in the navbar.
+    navbar_inner: String,
+    /// The code (if any) that needs to be placed in the page body.
+    body_inner: String
 }
 
 impl NavbarItem {
-    /// Create a navbar item.
-    fn new(location: impl Into<String>, text: impl Into<String>) -> Self {
-        Self {
-            location: location.into(),
-            text: text.into(),
-            focus: false,
-            style_extras: "".to_owned(),
-        }
+    /// Constructor
+    fn new(navbar_inner: String, body_inner: impl Into<String>, is_root: bool) -> Self {
+        Self {navbar_inner, body_inner: body_inner.into(), is_root}
     }
 }
 
 /// A navbar definition.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Navbar {
-    left_items: Vec<NavbarItem>,
-    right_items: Vec<NavbarItem>,
+    items: Vec<NavbarItem>,
 }
 
 impl Navbar {
     /// Get an empty navbar object.
     const fn empty() -> Self {
         Self {
-            left_items: Vec::new(),
-            right_items: Vec::new(),
+            items: Vec::new(),
         }
+    }
+
+    /// Add a navbar item to the navbar.
+    /// Assume items are added left to right.
+    fn add(&mut self, pc: &PageContext, item: impl MakeNavItem) -> &mut Self {
+        self.items.push(item.make(pc));
+        self
+    }
+
+    fn add_builder(mut self, pc: &PageContext, item: impl MakeNavItem) -> Self {
+        self.add(pc, item);
+        self
     }
 
     /// Navbar with homepage, achievement page, projects, developers and sponsors
-    fn with_defaults() -> Self {
-        let mut s = Self::empty().add_left_builder("/", "RCOS");
-        // make homepage button bold.
-        s.left_items[0].style_extras = "font-weight:bold;".to_owned();
-        // add remaining buttons
-        s.add_left_builder("/achievements", "Achievements")
-            .add_left_builder("/projects", "Projects")
-            .add_left_builder("/developers", "Developers")
-            .add_left_builder("/sponsors", "Sponsors")
-    }
-
-    /// Create a navbar without a signed in user. This is a default navbar with
-    /// "Sign up" and "Login" buttons.
-    fn userless() -> Self {
-        Self::with_defaults()
-            .add_right_builder("/sign-up", "Sign Up")
-            .add_right_builder("/login", "Login")
-    }
-
-    /// Set the focused item in the navbar.
-    /// (This searches through all existing items in the navbar and turns on focus on
-    /// the one who's text matches)
-    fn set_focus<T>(&mut self, path: T)
-    where
-        String: PartialEq<T>,
-    {
-        let iter = self
-            .left_items
-            .iter_mut()
-            .chain(self.right_items.iter_mut());
-        for nav_item in iter {
-            if nav_item.location == path {
-                nav_item.focus = true;
-            } else {
-                nav_item.focus = false;
-            }
-        }
+    fn with_defaults(pc: &PageContext) -> Self {
+        Self::empty()
+            .add_builder(pc, NavbarLink::new("/", "RCOS"))
+            .add_builder(pc, NavbarLink::new("/projects", "Projects"))
+            .add_builder(pc, NavbarLink::new("/developers", "Developers"))
+            .add_builder(pc, NavbarLink::new("/sponsors", "Sponsors"))
     }
 
     /// Create a navbar based on the page context.
     pub fn from_context(pc: &PageContext) -> Self {
-        let mut bar: Navbar =
-            if let Some(auth_token) = pc.session().get::<String>("auth_token").unwrap() {
-                // todo: change this use of unwrap into something more robust
-                unimplemented!()
-            } else {
-                Self::userless()
-            };
-
-        let matches = [
-            "achievements",
-            "projects",
-            "developers",
-            "sponsors",
-            "login",
-            "sign-up",
-        ];
-
-        let mut found = false;
-        for path in matches.iter() {
-            if pc.request().path().starts_with(path) {
-                found = true;
-                bar.set_focus("/".to_owned() + path);
-                break;
-            }
+        let mut navbar = Self::with_defaults(pc);
+        if let Some(auth_token) = pc.session().get::<String>("auth_token").unwrap() {
+            // todo: change this use of unwrap into something more robust
+            unimplemented!()
+        } else {
+            navbar
+                .add(
+                    pc,
+                    NavbarModal::new(
+                        "login",
+                        "Login",
+                        include_str!("../../static/pages/login.html")
+                    ).right()
+                )
+                .add(pc, NavbarLink::new("/sign-up", "Sign Up").right());
         }
-        if !found {
-            bar.set_focus("/");
-        }
-
-        return bar;
+        return navbar;
     }
 
-    /// Add a navbar item to the left side of the navbar.
-    pub fn add_left(&mut self, location: impl Into<String>, text: impl Into<String>) {
-        self.left_items.push(NavbarItem::new(location, text))
-    }
-
-    /// Add a navbar item to the left side of the navbar using the builder pattern.
-    pub fn add_left_builder(
-        mut self,
-        location: impl Into<String>,
-        text: impl Into<String>,
-    ) -> Self {
-        self.add_left(location, text);
-        self
-    }
-
-    /// Add a navbar item to the right side of the navbar.
-    pub fn add_right(&mut self, location: impl Into<String>, text: impl Into<String>) {
-        self.right_items.push(NavbarItem::new(location, text))
-    }
-
-    /// Add a navbar item to the right side of the navbar using the builder pattern.
-    pub fn add_right_builder(
-        mut self,
-        location: impl Into<String>,
-        text: impl Into<String>,
-    ) -> Self {
-        self.add_right(location, text);
-        self
-    }
 }
 
 impl Template for Navbar {
-    const TEMPLATE_NAME: &'static str = "navbar";
+    const TEMPLATE_NAME: &'static str = "navbar/navbar";
 }
