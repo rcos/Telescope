@@ -40,4 +40,4 @@ futures = "0.3"
 # Cryptographically sound SHA hashing algorithms
 sha2 = "0.9"
 # ORM and query building (to interact with Postgres Database)
-diesel = {version="1.4.5", features = ["postgres"]}
+#diesel = {version="1.4.5", features = ["postgres"]}
