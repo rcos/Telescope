@@ -6,6 +6,5 @@ use std::collections::HashMap;
 /// Guarded to only post requests.
 pub fn auth_service(pc: PageContext, login: Form<HashMap<String, String>>) -> HttpResponse {
     let session = pc.session();
-    dbg!(&login);
-    todo!()
+
 }

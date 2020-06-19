@@ -5,8 +5,10 @@ as the RCOS website.
 ### Prerequisites:
 1. Install rust. See [https://www.rust-lang.org/](https://www.rust-lang.org/) 
     for more details.
-2. Clone this repository.
-3. Generate self-signed TLS/SSL certificate and keys for testing: 
+2. Install Postgres. See [https://www.postgresql.org/](https://www.postgresql.org/) 
+    for instructions on how to do this. 
+3. Clone this repository.
+4. Generate self-signed TLS/SSL certificate and keys for testing: 
     ```shell script
     $ openssl req -x509 -newkey rsa:4096 -nodes -keyout tls-ssl/private-key.pem -out tls-ssl/certificate.pem -days 365
     ```

@@ -7,6 +7,9 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde;
 
+#[macro_use]
+extern crate diesel;
+
 mod env;
 use crate::env::{Config, CONFIG};
 
