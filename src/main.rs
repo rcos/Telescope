@@ -11,9 +11,7 @@ mod env;
 use crate::env::{Config, CONFIG};
 
 mod web;
-use web::{
-    index,
-};
+use web::*;
 
 mod templates;
 
@@ -29,6 +27,8 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use std::process::exit;
 use std::time::Duration;
+use actix_web::guard::MethodGuard;
+use actix_web::web::{get, post, route};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -107,7 +107,9 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(middleware::Logger::default())
             .service(afs::Files::new("/static", "static"))
-            .service(aweb::resource("/").route(aweb::get().to(index::index_service)))
+            .route("/", get().to(index::index_service))
+            .route("/sponsors", get().to(sponsors::sponsors_page))
+            .route("/auth", post().to(auth::auth_service))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)
