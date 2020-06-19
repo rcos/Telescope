@@ -10,6 +10,7 @@ as the RCOS website.
 3. Clone this repository.
 4. Generate self-signed TLS/SSL certificate and keys for testing: 
     ```shell script
+    $ mkdir tls-ssl
     $ openssl req -x509 -newkey rsa:4096 -nodes -keyout tls-ssl/private-key.pem -out tls-ssl/certificate.pem -days 365
     ```
    If you are running this in production, do not do this. Instead, you should use
