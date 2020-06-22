@@ -30,8 +30,7 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use std::process::exit;
 use std::time::Duration;
-use actix_web::guard::MethodGuard;
-use actix_web::web::{get, post, route};
+use actix_web::web::{get, post};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
