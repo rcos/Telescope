@@ -4,6 +4,7 @@ use std::env;
 const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
 const TLS_PRIV_KEY_FILE_ENV_VAR: &'static str = "PRIV_KEY_FILE";
+const DATABASE_URL_ENV_VAR: &'static str = "DATABASE_URL";
 
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
@@ -12,6 +13,7 @@ pub struct Config {
     pub tls_cert_file: String,
     pub tls_key_file: String,
     pub bind_to: String,
+    pub db_url: String,
 }
 
 lazy_static! {
@@ -32,6 +34,9 @@ pub fn init() {
 /// variables where necessary. Construct and return the configuration specified.
 /// Initializes logging and returns config.
 fn cli() -> Config {
+    // set env vars from a ".env" file if available.
+    dotenv::dotenv().ok();
+
     let matches = App::new("telescope")
         .about("Telescope: the RCOS webapp.")
         .author(env!("CARGO_PKG_AUTHORS").replace(",", "\n").as_str()) // use the authors specified in Cargo.toml at compile time.
@@ -70,6 +75,14 @@ fn cli() -> Config {
                 .help("Specify where to bind the web server."),
         )
         .arg(
+            Arg::with_name("DATABASE_URL")
+                .takes_value(true)
+                .short("D")
+                .long("database-url")
+                .help("Database URL passed to Diesel")
+                .env(DATABASE_URL_ENV_VAR)
+        )
+        .arg(
             Arg::with_name("PRODUCTION")
                 .help("Set web server to bind to localhost:443 (the standard https port).")
                 .long("production"),
@@ -94,14 +107,15 @@ fn cli() -> Config {
         tls_cert_file: matches.value_of("TLS_CERT_FILE").unwrap().to_owned(),
         tls_key_file: matches.value_of("TLS_PRIV_KEY_FILE").unwrap().to_owned(),
         bind_to: if matches.is_present("DEVELOPMENT") {
-            Some("localhost:8443")
-        } else if matches.is_present("PRODUCTION") {
-            Some("localhost:443")
-        } else {
-            None
-        }
-        .or(matches.value_of("BIND_TO"))
-        .unwrap()
-        .to_owned(),
+                Some("localhost:8443")
+            } else if matches.is_present("PRODUCTION") {
+                Some("localhost:443")
+            } else {
+                None
+            }
+                .or(matches.value_of("BIND_TO"))
+                .unwrap()
+                .to_owned(),
+        db_url: matches.value_of("DATABASE_URL").unwrap().to_owned(),
     }
 }

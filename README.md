@@ -3,12 +3,25 @@ Telescope intends to replace [Observatory](https://github.com/rcos/observatory-s
 as the RCOS website.
 
 ### Prerequisites:
-1. Install rust. See [https://www.rust-lang.org/](https://www.rust-lang.org/) 
-    for more details.
-2. Install Postgres. See [https://www.postgresql.org/](https://www.postgresql.org/) 
-    for instructions on how to do this. 
-3. Clone this repository.
-4. Generate self-signed TLS/SSL certificate and keys for testing: 
+1. Install dependencies:
+    1. Rust (see [https://www.rust-lang.org/](https://www.rust-lang.org/))
+        ```shell script
+        $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        $ source ~/.cargo/env
+        ```
+    2. Postgres (see [https://www.postgresql.org/](https://www.postgresql.org/))
+        ```shell script
+        $ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+        $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        $ sudo apt update
+        $ sudo apt-get install postgresql libpq-dev
+        ```
+    3. Diesel client (see [https://diesel.rs/](https://diesel.rs/))
+        ```shell script
+        $ cargo install diesel_cli --no-default-features --features postgres
+        ``` 
+2. Clone this repository.
+3. Generate self-signed TLS/SSL certificate and keys for testing: 
     ```shell script
     $ mkdir tls-ssl
     $ openssl req -x509 -newkey rsa:4096 -nodes -keyout tls-ssl/private-key.pem -out tls-ssl/certificate.pem -days 365
