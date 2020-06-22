@@ -23,6 +23,7 @@ use actix_files as afs;
 use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 use actix_session::CookieSession;
 use actix_web::cookie::SameSite;
+use actix_web::web::{get, post};
 use actix_web::{middleware, web as aweb, App, HttpResponse, HttpServer};
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
@@ -30,7 +31,6 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use std::process::exit;
 use std::time::Duration;
-use actix_web::web::{get, post};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {

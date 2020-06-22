@@ -1,9 +1,6 @@
 use crate::templates::page::Page;
 use crate::web::PageContext;
-use actix_web::{
-    HttpResponse,
-};
-
+use actix_web::HttpResponse;
 
 /// Index / landing page.
 /// All requests here will be GET.
