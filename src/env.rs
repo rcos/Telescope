@@ -5,6 +5,7 @@ const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
 const TLS_PRIV_KEY_FILE_ENV_VAR: &'static str = "PRIV_KEY_FILE";
 const DATABASE_URL_ENV_VAR: &'static str = "DATABASE_URL";
+const BINDING_ENV_VAR: &'static str = "BIND_TO";
 
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
@@ -69,10 +70,12 @@ fn cli() -> Config {
         )
         .arg(
             Arg::with_name("BIND_TO")
+                .env(BINDING_ENV_VAR)
                 .takes_value(true)
                 .short("B")
                 .long("bind-to")
-                .help("Specify where to bind the web server."),
+                .help("Specify where to bind the web server.")
+                .required_unless_one(&["DEVELOPMENT", "PRODUCTION"])
         )
         .arg(
             Arg::with_name("DATABASE_URL")
@@ -81,6 +84,7 @@ fn cli() -> Config {
                 .long("database-url")
                 .help("Database URL passed to Diesel")
                 .env(DATABASE_URL_ENV_VAR)
+                .required_unless_one(&["DEVELOPMENT"])
         )
         .arg(
             Arg::with_name("PRODUCTION")
@@ -89,13 +93,9 @@ fn cli() -> Config {
         )
         .arg(
             Arg::with_name("DEVELOPMENT")
-                .help("Set web server to bind to localhost:8443 (testing port).")
+                .help("Set web server to bind to localhost:8443 (testing port). \
+                Sets the database url to test.db")
                 .long("development"),
-        )
-        .group(
-            ArgGroup::with_name("BINDING")
-                .args(&["DEVELOPMENT", "PRODUCTION", "BIND_TO"])
-                .required(true),
         )
         .get_matches();
 
@@ -116,6 +116,13 @@ fn cli() -> Config {
                 .or(matches.value_of("BIND_TO"))
                 .unwrap()
                 .to_owned(),
-        db_url: matches.value_of("DATABASE_URL").unwrap().to_owned(),
+        db_url: matches.value_of("DATABASE_URL")
+            .or(if matches.is_present("DEVELOPMENT") {
+                Some("test.db")
+            } else {
+                None
+            })
+            .unwrap()
+            .to_owned(),
     }
 }
