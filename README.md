@@ -30,6 +30,11 @@ as the RCOS website.
    a certificate signed by a trusted certificate authority. See 
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
+4. Create a `.env` file to store your database config and other environment 
+    variables to be used at runtime. 
+    ```shell script
+    DATABASE_URL="postgres://username:password@localhost/telescope"
+    ```
 
 ### Running:
 ```shell script

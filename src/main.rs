@@ -7,6 +7,9 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde;
 
+#[macro_use]
+extern crate diesel;
+
 // #[macro_use]
 // extern crate diesel;
 
@@ -17,6 +20,9 @@ mod web;
 use web::*;
 
 mod templates;
+
+mod schema;
+mod db; // Model for the database.
 
 use crate::web::app_data::AppData;
 use actix_files as afs;
