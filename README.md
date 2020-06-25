@@ -35,6 +35,10 @@ as the RCOS website.
     ```shell script
     DATABASE_URL="postgres://username:password@localhost/telescope"
     ```
+5. Run the database migrations (this will create a development database locally).
+    ```shell script
+    $ diesel migration run
+    ```
 
 ### Running:
 ```shell script

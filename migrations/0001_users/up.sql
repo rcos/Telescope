@@ -1,8 +1,8 @@
 -- Your SQL goes here
 
-CREATE TABLE telescope.telescope.users (
-    -- user id
-    id SERIAL PRIMARY KEY,
+CREATE TABLE users (
+    -- (universally unique) user id
+    uuid UUID PRIMARY KEY,
     -- name
     name VARCHAR(100) NOT NULL,
     -- profile picture url

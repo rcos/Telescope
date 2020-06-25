@@ -37,6 +37,8 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use std::process::exit;
 use std::time::Duration;
+use diesel::r2d2::ConnectionManager;
+use diesel::PgConnection;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -88,6 +90,20 @@ async fn main() -> std::io::Result<()> {
     template_registry.set_strict_mode(true);
     info!("Handlebars templates registered.");
 
+    // Set up database connection pool.
+    let manager = ConnectionManager::<PgConnection>::new(&config.db_url);
+    let pool = diesel::r2d2::Pool::builder()
+        .build(manager)
+        .map_err(|e| {
+            error!("Could not create database connection pool {}", e);
+            exit(1);
+        })
+        .unwrap();
+    info!("Created database connection pool.");
+
+    // Create appdata object.
+    let app_data = AppData::new(template_registry, pool);
+
     // generate a random key to encrypt cookies.
     let mut rng = OsRng::default();
     let mut cookie_key = [0u8; 32];
@@ -95,9 +111,6 @@ async fn main() -> std::io::Result<()> {
 
     // memory store for rate limiting.
     let ratelimit_memstore = MemoryStore::new();
-
-    // Create appdata (handlebars registry storage object currently)
-    let app_data = AppData::new(template_registry);
 
     HttpServer::new(move || {
         App::new()

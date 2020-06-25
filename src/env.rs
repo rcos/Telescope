@@ -1,5 +1,6 @@
-use clap::{App, Arg, ArgGroup};
+use clap::{App, Arg};
 use std::env;
+use std::process::exit;
 
 const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
@@ -29,6 +30,7 @@ pub fn init() {
     info!("telescope {}", env!("CARGO_PKG_VERSION"));
     info!("TLS/SSL certificate location: {}", cfg.tls_cert_file);
     info!("TLS/SSL private key location: {}", cfg.tls_key_file);
+    info!("Database url: {}", cfg.db_url);
 }
 
 /// Digest and handle arguments from the command line. Read arguments from environment
@@ -82,9 +84,8 @@ fn cli() -> Config {
                 .takes_value(true)
                 .short("D")
                 .long("database-url")
-                .help("Database URL passed to Diesel")
+                .help("Database URL passed to diesel.")
                 .env(DATABASE_URL_ENV_VAR)
-                .required_unless_one(&["DEVELOPMENT"])
         )
         .arg(
             Arg::with_name("PRODUCTION")
@@ -93,8 +94,7 @@ fn cli() -> Config {
         )
         .arg(
             Arg::with_name("DEVELOPMENT")
-                .help("Set web server to bind to localhost:8443 (testing port). \
-                Sets the database url to test.db")
+                .help("Set web server to bind to localhost:8443 (testing port).")
                 .long("development"),
         )
         .get_matches();
@@ -117,10 +117,9 @@ fn cli() -> Config {
                 .unwrap()
                 .to_owned(),
         db_url: matches.value_of("DATABASE_URL")
-            .or(if matches.is_present("DEVELOPMENT") {
-                Some("test.db")
-            } else {
-                None
+            .ok_or_else(|| {
+                error!("DATABASE_URL must be specified.");
+                exit(exitcode::NOINPUT)
             })
             .unwrap()
             .to_owned(),

@@ -1,5 +1,5 @@
 use crate::templates::navbar::login_button::LoginButton;
-use crate::web::{PageContext, Template};
+use crate::web::{PageContext, Template, cookies};
 
 mod items;
 mod login_button;
@@ -60,7 +60,7 @@ impl Navbar {
     /// Create a navbar based on the page context.
     pub fn from_context(pc: &PageContext) -> Self {
         let mut navbar = Self::with_defaults(pc);
-        if let Some(auth_token) = pc.session().get::<String>("auth_token").unwrap() {
+        if let Some(session_token) = pc.session().get::<String>(cookies::SESSION_COOKIE).unwrap() {
             // todo: change this use of unwrap into something more robust
             unimplemented!()
         } else {
