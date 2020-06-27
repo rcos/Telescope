@@ -1,3 +1,2 @@
-use diesel::PgConnection;
-
-// pub fn new_user(conn: &PgConnection, name: )
+pub mod users;
+pub use users::*;

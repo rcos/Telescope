@@ -93,6 +93,10 @@ async fn main() -> std::io::Result<()> {
     // Set up database connection pool.
     let manager = ConnectionManager::<PgConnection>::new(&config.db_url);
     let pool = diesel::r2d2::Pool::builder()
+        // max 12 connections at once
+        .max_size(12)
+        // if a connection cannot be pulled from the pool in 20 seconds, timeout
+        .connection_timeout(Duration::from_secs(20))
         .build(manager)
         .map_err(|e| {
             error!("Could not create database connection pool {}", e);
@@ -130,7 +134,7 @@ async fn main() -> std::io::Result<()> {
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(index::index_service))
             .route("/sponsors", get().to(sponsors::sponsors_page))
-            .route("/auth", post().to(auth::auth_service))
+            .route("/login", post().to(login::login_service))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)

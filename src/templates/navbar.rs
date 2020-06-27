@@ -1,5 +1,5 @@
 use crate::templates::navbar::login_button::LoginButton;
-use crate::web::{PageContext, Template, cookies};
+use crate::web::{RequestContext, Template, cookies};
 
 mod items;
 mod login_button;
@@ -38,18 +38,18 @@ impl Navbar {
 
     /// Add a navbar item to the navbar.
     /// Assume items are added left to right.
-    fn add(&mut self, pc: &PageContext, item: impl MakeNavItem) -> &mut Self {
+    fn add(&mut self, pc: &RequestContext, item: impl MakeNavItem) -> &mut Self {
         self.items.push(item.make(pc));
         self
     }
 
-    fn add_builder(mut self, pc: &PageContext, item: impl MakeNavItem) -> Self {
+    fn add_builder(mut self, pc: &RequestContext, item: impl MakeNavItem) -> Self {
         self.add(pc, item);
         self
     }
 
     /// Navbar with homepage, achievement page, projects, developers and sponsors
-    fn with_defaults(pc: &PageContext) -> Self {
+    fn with_defaults(pc: &RequestContext) -> Self {
         Self::empty()
             .add_builder(pc, NavbarLink::new("/", "RCOS"))
             .add_builder(pc, NavbarLink::new("/projects", "Projects"))
@@ -58,7 +58,7 @@ impl Navbar {
     }
 
     /// Create a navbar based on the page context.
-    pub fn from_context(pc: &PageContext) -> Self {
+    pub fn from_context(pc: &RequestContext) -> Self {
         let mut navbar = Self::with_defaults(pc);
         if let Some(session_token) = pc.session().get::<String>(cookies::SESSION_COOKIE).unwrap() {
             // todo: change this use of unwrap into something more robust
