@@ -14,14 +14,22 @@ as the RCOS website.
         $ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
         $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
         $ sudo apt update
-        $ sudo apt-get install postgresql libpq-dev
+        $ sudo apt install postgresql libpq-dev
         ```
     3. Diesel client (see [https://diesel.rs/](https://diesel.rs/))
         ```shell script
         $ cargo install diesel_cli --no-default-features --features postgres
         ``` 
-2. Clone this repository.
-3. Generate self-signed TLS/SSL certificate and keys for testing: 
+2. Make sure that you have a user and password set up in postgres and can log in
+    with a password. You may have to modify `/etc/postgresql/12/main/pg_hba.conf` 
+    (or something along those lines) to use md5 authentication rather than peer 
+    authentication. You will know this works when you can log in to postgres 
+    using
+    ```shell script
+    $ psql -U <username> -W
+    ```
+3. Clone this repository.
+4. Generate self-signed TLS/SSL certificate and keys for testing: 
     ```shell script
     $ mkdir tls-ssl
     $ openssl req -x509 -newkey rsa:4096 -nodes -keyout tls-ssl/private-key.pem -out tls-ssl/certificate.pem -days 365
@@ -30,12 +38,12 @@ as the RCOS website.
    a certificate signed by a trusted certificate authority. See 
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
-4. Create a `.env` file to store your database config and other environment 
+5. Create a `.env` file to store your database config and other environment 
     variables to be used at runtime. 
     ```shell script
-    DATABASE_URL="postgres://username:password@localhost/telescope"
+    DATABASE_URL="postgres://<username>:<password>@localhost/<database>"
     ```
-5. Run the database migrations (this will create a development database locally).
+6. Run the database migrations (this will create a development database locally).
     ```shell script
     $ diesel migration run
     ```

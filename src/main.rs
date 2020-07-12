@@ -10,9 +10,6 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
-// #[macro_use]
-// extern crate diesel;
-
 mod env;
 use crate::env::{Config, CONFIG};
 
