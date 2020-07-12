@@ -1,5 +1,5 @@
-use crate::templates::navbar::NavbarItem;
 use crate::web::{PageContext, Template};
+use crate::templates::navbar::NavbarItem;
 
 pub trait MakeNavItem {
     /// Turn something into a navbar item.
@@ -31,7 +31,7 @@ impl NavbarLink {
             text: text.into(),
             focus: false,
             right: false,
-            is_root: loc == "/",
+            is_root: loc == "/"
         }
     }
 
@@ -50,7 +50,10 @@ impl MakeNavItem for NavbarLink {
         let path = &render.location[1..];
         let focus = pc.request().path().starts_with(path);
         render.focus = focus;
-        NavbarItem::new(pc.render(&render).unwrap(), "")
+        NavbarItem::new(
+            pc.render(&render).unwrap(),
+            "",
+        )
     }
 }
 
@@ -78,7 +81,7 @@ impl NavbarModal {
             id: id.into(),
             text: header.into(),
             inner: inner.into(),
-            right: false,
+            right: false
         }
     }
 

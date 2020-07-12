@@ -1,8 +1,8 @@
-use crate::templates::navbar::login_button::LoginButton;
 use crate::web::{PageContext, Template};
+use crate::templates::navbar::login_button::LoginButton;
 
-mod items;
 mod login_button;
+mod items;
 use items::*;
 
 /// An adapter type for items in the navbar.
@@ -11,16 +11,13 @@ pub struct NavbarItem {
     /// The code placed in the navbar.
     navbar_inner: String,
     /// The code (if any) that needs to be placed in the page body.
-    body_inner: String,
+    body_inner: String
 }
 
 impl NavbarItem {
     /// Constructor
     fn new(navbar_inner: String, body_inner: impl Into<String>) -> Self {
-        Self {
-            navbar_inner,
-            body_inner: body_inner.into(),
-        }
+        Self {navbar_inner, body_inner: body_inner.into()}
     }
 }
 
@@ -33,7 +30,9 @@ pub struct Navbar {
 impl Navbar {
     /// Get an empty navbar object.
     const fn empty() -> Self {
-        Self { items: Vec::new() }
+        Self {
+            items: Vec::new(),
+        }
     }
 
     /// Add a navbar item to the navbar.
@@ -67,12 +66,17 @@ impl Navbar {
             navbar
                 .add(
                     pc,
-                    NavbarModal::new("login", "Login", pc.render(&LoginButton).unwrap()).right(),
+                    NavbarModal::new(
+                        "login",
+                        "Login",
+                        pc.render(&LoginButton).unwrap()
+                    ).right()
                 )
                 .add(pc, NavbarLink::new("/sign-up", "Sign Up").right());
         }
         return navbar;
     }
+
 }
 
 impl Template for Navbar {
