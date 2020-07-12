@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>
+            {{page_title}}
+        </title>
+        <link rel="stylesheet" href="static/styles/base.css" type="text/css">
+        <link rel="icon" type="image/png" href="static/favicon.png">
+
+        <!--
+        Use W3.CSS for styling and elements. This makes a lot of stuff much easier.
+        See https://www.w3schools.com/w3css/default.asp for details.
+
+        We currently only support dark theme. We will add more options in the future.
+
+        We also import flat and metro colors sets.
+
+        We also get the W3 code color js library to do code highlighting for a few languages.
+        -->
+        <!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css"> -->
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
+        <script src="https://www.w3schools.com/lib/w3codecolor.js" type="application/javascript"></script>
+
+        <!--
+        Use Material Icons via css.
+        See https://material.io/resources/icons/?style=baseline.
+        -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              rel="stylesheet">
+
+        <!--
+        Use font-awesome icons through CSS include.
+        See https://fontawesome.com/v4.7.0/icons/.
+        -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+              rel="stylesheet">
+
+    </head>
+    <body>
+        {{{navbar}}}
+        {{{page_body}}}
+    </body>
+</html>
