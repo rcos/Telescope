@@ -59,3 +59,10 @@ $ cargo run -- --development
 $ # Production profile (used for deploying in production environments).
 $ cargo run --release -- --production
 ```
+
+### Installation Debugging:
+If you have issues running the website, here are a few things you can check/try:
+1. All prerequisites are installed.
+2. If you use Windows Subsystem for Linux, make sure that it's installed correctly. There have recently been issues with the installation of WSL2 and Rust: https://github.com/rust-lang/rustup/issues/2293
+3. One you compile the website, launch it at the local IP address that your terminal generates. Make sure that 'https://' precedes the IP address.
+4. If you get a blank page when launching the website, you need to regenerate your TLS/SSL certificate and keys. If that doesn't work, then switch browsers (e.g. Firefox, Chrome).
