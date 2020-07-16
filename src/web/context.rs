@@ -1,15 +1,26 @@
 use crate::web::app_data::AppData;
 use actix_session::Session;
-use actix_web::dev::{Payload, PayloadStream};
-use actix_web::web::{Data, block};
-use actix_web::Error;
-use actix_web::{FromRequest, HttpRequest};
+use actix_web::{
+    dev::{
+        Payload,
+        PayloadStream
+    },
+    web::Data,
+    Error,
+    FromRequest,
+    HttpRequest
+};
 use futures::future::{ok, Ready};
 use handlebars::{Handlebars, RenderError};
 use serde::Serialize;
-use r2d2::{PooledConnection, Pool};
-use diesel::r2d2::ConnectionManager;
-use diesel::PgConnection;
+use diesel::{
+    r2d2::{
+        ConnectionManager,
+        PooledConnection,
+        Pool
+    },
+    PgConnection
+};
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -62,7 +73,7 @@ impl RequestContext {
     ///
     /// ## Panics:
     /// - If a database connection is not available.
-    pub async fn get_db_connection(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
+    pub fn get_db_connection(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
         let db_conn_pool: &Pool<ConnectionManager<PgConnection>> = &self.app_data.db_connection_pool;
         db_conn_pool
             .get()
