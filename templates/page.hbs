@@ -6,6 +6,7 @@
         <title>
             {{page_title}}
         </title>
+        {{{navbar}}}
         <link rel="stylesheet" href="static/styles/base.css" type="text/css">
         <link rel="icon" type="image/png" href="static/favicon.png">
 
@@ -41,8 +42,40 @@
               rel="stylesheet">
 
     </head>
+
+    <style>
+        body {
+            color: #eee;
+            background: #191919
+        }
+        img {
+            padding: 50px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 40em;
+        }
+        h2 {
+            color: #eee;
+            margin-left: 80px;
+            margin-right: 80px;
+        }
+        p {
+            margin-left: 80px;
+            margin-right: 80px;
+        }
+    </style>
+
     <body>
-        {{{navbar}}}
-        {{{page_body}}}
+        <img src="/static/lockup-red.webp" class="card-img-top">
+        <h2>About</h2>
+        <p>
+            Our Mission is to cultivate an inclusive, creative, and entrepreneurial
+            community that seeks to empower students to develop open-source
+            solutions to real-world problems. 
+        </p>
+
+        <h2>Sponsors</h2>
+        
     </body>
 </html>
