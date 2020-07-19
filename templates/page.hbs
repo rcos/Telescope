@@ -41,41 +41,60 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
               rel="stylesheet">
 
+        <!--
+        Here, we define all of our CSS stylizations for our HTML tags
+        -->
+        <style>
+            body {
+                color: #eee;
+                background: #191919
+            }
+            img {
+                padding: 50px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 40em;
+            }
+            footer {
+                text-align: center;
+                margin-top: -20px;
+            }
+            .box {
+                height: 200px;
+                width: 200px;
+                margin-left: 40px;
+                margin-right: 40px;
+                margin-bottom: 40px;
+                border: 1px double rgba(220,227,248,0.59);
+                border-radius: 20px;
+            }
+        </style>
     </head>
 
-    <style>
-        body {
-            color: #eee;
-            background: #191919
-        }
-        img {
-            padding: 50px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 40em;
-        }
-        h2 {
-            color: #eee;
-            margin-left: 80px;
-            margin-right: 80px;
-        }
-        p {
-            margin-left: 80px;
-            margin-right: 80px;
-        }
-    </style>
-
     <body>
-        <img src="/static/lockup-red.webp" class="card-img-top">
-        <h2>About</h2>
-        <p>
-            Our Mission is to cultivate an inclusive, creative, and entrepreneurial
-            community that seeks to empower students to develop open-source
-            solutions to real-world problems. 
-        </p>
+        <img src="/static/lockup-red.webp">
+            <div style="margin-left:80px; margin-right:80px">
+            <h2>About</h2>
+            <p>
+                Our Mission is to cultivate an inclusive, creative, and entrepreneurial
+                community that seeks to empower students to develop open-source
+                solutions to real-world problems. 
+            </p>
 
-        <h2>Sponsors</h2>
-        
+            <h2>Sponsors</h2>
+            <div class = "box">
+
+            </div>
+        </div>
     </body>
+
+    <footer>
+        <div>
+            Created by RCOS developers, for RCOS developers.
+            <a href="https://github.com/rcos/Telescope/" style="color: dodgerblue">
+                See us on Github!
+            </a>
+        </div>
+    </footer>
 </html>
