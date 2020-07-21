@@ -1,26 +1,12 @@
 use crate::web::app_data::AppData;
 use actix_session::Session;
-use actix_web::{
-    dev::{
-        Payload,
-        PayloadStream
-    },
-    web::Data,
-    Error,
-    FromRequest,
-    HttpRequest
-};
+use actix_web::dev::{Payload, PayloadStream};
+use actix_web::web::Data;
+use actix_web::Error;
+use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ok, Ready};
 use handlebars::{Handlebars, RenderError};
 use serde::Serialize;
-use diesel::{
-    r2d2::{
-        ConnectionManager,
-        PooledConnection,
-        Pool
-    },
-    PgConnection
-};
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -32,13 +18,13 @@ pub trait Template: Serialize + Sized {
 }
 
 /// The items making up a page context (the context in which a request has been made.)
-pub struct RequestContext {
+pub struct PageContext {
     app_data: Data<AppData>,
     request: HttpRequest,
     session: Session,
 }
 
-impl RequestContext {
+impl PageContext {
     /// Construct a new page context from a request and site data.
     pub fn new(data: Data<AppData>, request: HttpRequest, session: Session) -> Self {
         Self {
@@ -67,25 +53,9 @@ impl RequestContext {
     pub fn render<T: Template>(&self, template: &T) -> Result<String, RenderError> {
         template.render(self.app_data.template_registry.as_ref())
     }
-
-    /// Get a database connection. This may block for up to the amount of time specified
-    /// in the connection pool config in `main.rs` (currently 15 sec).
-    ///
-    /// ## Panics:
-    /// - If a database connection is not available.
-    pub fn get_db_connection(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
-        let db_conn_pool: &Pool<ConnectionManager<PgConnection>> = &self.app_data.db_connection_pool;
-        db_conn_pool
-            .get()
-            .map_err(|e| {
-                error!("Could not get database connection: {}", e);
-                e
-            })
-            .unwrap()
-    }
 }
 
-impl FromRequest for RequestContext {
+impl FromRequest for PageContext {
     type Error = Error;
     type Future = Ready<Result<Self, Self::Error>>;
     type Config = ();

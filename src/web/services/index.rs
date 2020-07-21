@@ -1,10 +1,15 @@
 use crate::templates::page::Page;
-use crate::web::RequestContext;
-use actix_web::HttpResponse;
+use crate::web::PageContext;
+use actix_web::{
+    HttpResponse,
+    http::Method,
+    web::Form,
+};
+
 
 /// Index / landing page.
 /// All requests here will be GET.
-pub async fn index_service(pc: RequestContext) -> HttpResponse {
+pub async fn index_service(pc: PageContext) -> HttpResponse {
     let page = Page::new("RCOS", "Hello World", &pc);
     HttpResponse::Ok().body(pc.render(&page).unwrap())
 }

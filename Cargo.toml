@@ -11,8 +11,6 @@ edition = "2018"
 [dependencies]
 # command line argument parser
 clap = "~2"
-# environment variable reading through dotenv (.env files)
-dotenv = "0.15.0"
 # actix web server
 actix-web = {version = "2.0.0", features = ["openssl"]}
 actix-rt = "1.0.0"
@@ -41,7 +39,5 @@ lazy_static = "1.4.0"
 futures = "0.3"
 # Cryptographically sound SHA hashing algorithms
 sha2 = "0.9"
-# Universally unique identifier generation
-uuid = {version = "0.8", features = ["serde", "v4"]}
 # ORM and query building (to interact with Postgres Database)
-diesel = {version = "1.4.5", features = ["postgres", "r2d2"]}
+#diesel = {version="1.4.5", features = ["postgres"]}

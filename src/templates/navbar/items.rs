@@ -1,9 +1,9 @@
+use crate::web::{PageContext, Template};
 use crate::templates::navbar::NavbarItem;
-use crate::web::{RequestContext, Template};
 
 pub trait MakeNavItem {
     /// Turn something into a navbar item.
-    fn make(&self, pc: &RequestContext) -> NavbarItem;
+    fn make(&self, pc: &PageContext) -> NavbarItem;
 }
 
 /// A button that just links to a another part of the site (or another site entirely.)
@@ -31,7 +31,7 @@ impl NavbarLink {
             text: text.into(),
             focus: false,
             right: false,
-            is_root: loc == "/",
+            is_root: loc == "/"
         }
     }
 
@@ -44,13 +44,16 @@ impl NavbarLink {
 
 impl MakeNavItem for NavbarLink {
     /// Adapt a navbar link into a navbar item.
-    fn make(&self, pc: &RequestContext) -> NavbarItem {
+    fn make(&self, pc: &PageContext) -> NavbarItem {
         let mut render = self.clone();
         // if the webpage path starts with the nav item location, focus on that nav item.
         let path = &render.location[1..];
         let focus = pc.request().path().starts_with(path);
         render.focus = focus;
-        NavbarItem::new(pc.render(&render).unwrap(), "")
+        NavbarItem::new(
+            pc.render(&render).unwrap(),
+            "",
+        )
     }
 }
 
@@ -78,7 +81,7 @@ impl NavbarModal {
             id: id.into(),
             text: header.into(),
             inner: inner.into(),
-            right: false,
+            right: false
         }
     }
 
@@ -91,7 +94,7 @@ impl NavbarModal {
 
 impl MakeNavItem for NavbarModal {
     /// Adapt a navbar modal into a navbar item.
-    fn make(&self, pc: &RequestContext) -> NavbarItem {
+    fn make(&self, pc: &PageContext) -> NavbarItem {
         NavbarItem::new(
             pc.handlebars().render("navbar/modal-button", self).unwrap(),
             pc.handlebars().render("navbar/modal-body", self).unwrap(),
