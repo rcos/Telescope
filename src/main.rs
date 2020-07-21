@@ -7,8 +7,8 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde;
 
-// #[macro_use]
-// extern crate diesel;
+#[macro_use]
+extern crate diesel;
 
 mod env;
 use crate::env::{Config, CONFIG};
@@ -18,11 +18,15 @@ use web::*;
 
 mod templates;
 
+mod schema;
+mod db; // Model for the database.
+
 use crate::web::app_data::AppData;
 use actix_files as afs;
 use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 use actix_session::CookieSession;
 use actix_web::cookie::SameSite;
+use actix_web::web::{get, post};
 use actix_web::{middleware, web as aweb, App, HttpResponse, HttpServer};
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
@@ -30,8 +34,8 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use std::process::exit;
 use std::time::Duration;
-use actix_web::guard::MethodGuard;
-use actix_web::web::{get, post, route};
+use diesel::r2d2::ConnectionManager;
+use diesel::PgConnection;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -83,6 +87,24 @@ async fn main() -> std::io::Result<()> {
     template_registry.set_strict_mode(true);
     info!("Handlebars templates registered.");
 
+    // Set up database connection pool.
+    let manager = ConnectionManager::<PgConnection>::new(&config.db_url);
+    let pool = diesel::r2d2::Pool::builder()
+        // max 12 connections at once
+        .max_size(12)
+        // if a connection cannot be pulled from the pool in 20 seconds, timeout
+        .connection_timeout(Duration::from_secs(20))
+        .build(manager)
+        .map_err(|e| {
+            error!("Could not create database connection pool {}", e);
+            exit(1);
+        })
+        .unwrap();
+    info!("Created database connection pool.");
+
+    // Create appdata object.
+    let app_data = AppData::new(template_registry, pool);
+
     // generate a random key to encrypt cookies.
     let mut rng = OsRng::default();
     let mut cookie_key = [0u8; 32];
@@ -90,9 +112,6 @@ async fn main() -> std::io::Result<()> {
 
     // memory store for rate limiting.
     let ratelimit_memstore = MemoryStore::new();
-
-    // Create appdata (handlebars registry storage object currently)
-    let app_data = AppData::new(template_registry);
 
     HttpServer::new(move || {
         App::new()
@@ -112,7 +131,7 @@ async fn main() -> std::io::Result<()> {
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(index::index_service))
             .route("/sponsors", get().to(sponsors::sponsors_page))
-            .route("/auth", post().to(auth::auth_service))
+            .route("/login", post().to(login::login_service))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)

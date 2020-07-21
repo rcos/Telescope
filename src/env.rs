@@ -1,9 +1,12 @@
-use clap::{App, Arg, ArgGroup};
+use clap::{App, Arg};
 use std::env;
+use std::process::exit;
 
 const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
 const TLS_PRIV_KEY_FILE_ENV_VAR: &'static str = "PRIV_KEY_FILE";
+const DATABASE_URL_ENV_VAR: &'static str = "DATABASE_URL";
+const BINDING_ENV_VAR: &'static str = "BIND_TO";
 
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
@@ -12,6 +15,7 @@ pub struct Config {
     pub tls_cert_file: String,
     pub tls_key_file: String,
     pub bind_to: String,
+    pub db_url: String,
 }
 
 lazy_static! {
@@ -26,12 +30,16 @@ pub fn init() {
     info!("telescope {}", env!("CARGO_PKG_VERSION"));
     info!("TLS/SSL certificate location: {}", cfg.tls_cert_file);
     info!("TLS/SSL private key location: {}", cfg.tls_key_file);
+    info!("Database url: {}", cfg.db_url);
 }
 
 /// Digest and handle arguments from the command line. Read arguments from environment
 /// variables where necessary. Construct and return the configuration specified.
 /// Initializes logging and returns config.
 fn cli() -> Config {
+    // set env vars from a ".env" file if available.
+    dotenv::dotenv().ok();
+
     let matches = App::new("telescope")
         .about("Telescope: the RCOS webapp.")
         .author(env!("CARGO_PKG_AUTHORS").replace(",", "\n").as_str()) // use the authors specified in Cargo.toml at compile time.
@@ -64,10 +72,20 @@ fn cli() -> Config {
         )
         .arg(
             Arg::with_name("BIND_TO")
+                .env(BINDING_ENV_VAR)
                 .takes_value(true)
                 .short("B")
                 .long("bind-to")
-                .help("Specify where to bind the web server."),
+                .help("Specify where to bind the web server.")
+                .required_unless_one(&["DEVELOPMENT", "PRODUCTION"])
+        )
+        .arg(
+            Arg::with_name("DATABASE_URL")
+                .takes_value(true)
+                .short("D")
+                .long("database-url")
+                .help("Database URL passed to diesel.")
+                .env(DATABASE_URL_ENV_VAR)
         )
         .arg(
             Arg::with_name("PRODUCTION")
@@ -79,11 +97,6 @@ fn cli() -> Config {
                 .help("Set web server to bind to localhost:8443 (testing port).")
                 .long("development"),
         )
-        .group(
-            ArgGroup::with_name("BINDING")
-                .args(&["DEVELOPMENT", "PRODUCTION", "BIND_TO"])
-                .required(true),
-        )
         .get_matches();
 
     // init logger
@@ -94,14 +107,21 @@ fn cli() -> Config {
         tls_cert_file: matches.value_of("TLS_CERT_FILE").unwrap().to_owned(),
         tls_key_file: matches.value_of("TLS_PRIV_KEY_FILE").unwrap().to_owned(),
         bind_to: if matches.is_present("DEVELOPMENT") {
-            Some("localhost:8443")
-        } else if matches.is_present("PRODUCTION") {
-            Some("localhost:443")
-        } else {
-            None
-        }
-        .or(matches.value_of("BIND_TO"))
-        .unwrap()
-        .to_owned(),
+                Some("localhost:8443")
+            } else if matches.is_present("PRODUCTION") {
+                Some("localhost:443")
+            } else {
+                None
+            }
+                .or(matches.value_of("BIND_TO"))
+                .unwrap()
+                .to_owned(),
+        db_url: matches.value_of("DATABASE_URL")
+            .ok_or_else(|| {
+                error!("DATABASE_URL must be specified.");
+                exit(exitcode::NOINPUT)
+            })
+            .unwrap()
+            .to_owned(),
     }
 }
