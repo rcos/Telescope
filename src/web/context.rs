@@ -21,6 +21,7 @@ use diesel::{
     },
     PgConnection
 };
+use crate::model::root::ApiContext;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -82,6 +83,12 @@ impl RequestContext {
                 e
             })
             .unwrap()
+    }
+
+    /// Get an API context object (a partial sub-context of this context) to execute
+    /// GraphQL API requests in.
+    pub fn get_api_context(&self) -> ApiContext {
+        ApiContext::new(&self.app_data.db_connection_pool)
     }
 }
 
