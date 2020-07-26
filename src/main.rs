@@ -112,8 +112,6 @@ async fn main() -> std::io::Result<()> {
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(index::index_service))
             .route("/sponsors", get().to(sponsors::sponsors_page))
-            .route("/projects", get().to(projects::projects_page))
-            .route("/developers", get().to(developers::developers_page))
             .route("/auth", post().to(auth::auth_service))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
