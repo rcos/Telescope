@@ -1,12 +1,15 @@
-use juniper::RootNode;
+use juniper::{RootNode, FieldResult, FieldError, Value};
 
 use diesel::{
+    prelude::*,
     r2d2::{
         Pool,
         ConnectionManager
     },
     PgConnection,
 };
+use crate::model::User;
+use crate::schema::users::dsl::users;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -39,7 +42,20 @@ pub struct MutationRoot;
 
 #[juniper::object(Context = ApiContext)]
 impl QueryRoot {
-
+    #[graphql(description = "List of all users.")]
+    pub fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
+        let mut conn = ctx.connection_pool
+            .get()
+            .map_err(|e| {
+                error!("Could not get database connection.");
+                FieldError::new(e, Value::null())
+            })?;
+        users.load(&conn)
+            .map_err(|e| {
+                error!("Could not load users from database.");
+                FieldError::new(e, Value::null())
+            })
+    }
 }
 
 #[juniper::object(Context = ApiContext)]
