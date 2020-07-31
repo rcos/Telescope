@@ -41,11 +41,12 @@ as the RCOS website.
 5. Create a `.env` file to store your database config and other environment 
     variables to be used at runtime. 
     ```shell script
-    DATABASE_URL="postgres://<username>:<password>@localhost/<database>"
+    DATABASE_URL="postgres://<username>:<password>@localhost/telescope"
     ```
-6. Run the database migrations (this will create a development database locally).
+6. Run the database setup. This will create a database and run all of the 
+    necessary migrations.
     ```shell script
-    $ diesel migration run
+    $ diesel setup
     ```
 
 ### Running:
