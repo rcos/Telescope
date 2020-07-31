@@ -19,7 +19,10 @@ use web::*;
 mod templates;
 
 mod schema;
-mod db; // Model for the database.
+mod db;
+
+/// Object model.
+mod model;
 
 use crate::web::app_data::AppData;
 use actix_files as afs;
@@ -128,6 +131,7 @@ async fn main() -> std::io::Result<()> {
                     .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())
+            .configure(model::register)
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(index::index_service))
             .route("/sponsors", get().to(sponsors::sponsors_page))

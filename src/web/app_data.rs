@@ -8,7 +8,7 @@ use diesel::PgConnection;
 pub struct AppData {
     /// The handlebars template registry.
     pub template_registry: Arc<Handlebars<'static>>,
-    /// Database thread pool
+    /// Database connection pool
     pub db_connection_pool: Pool<ConnectionManager<PgConnection>>,
 }
 
