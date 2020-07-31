@@ -47,5 +47,3 @@ uuid = {version = "0.7", features = ["serde", "v4"]}
 diesel = {version = "1.4.5", features = ["postgres", "r2d2", "uuidv07", "chrono", "serde_json"]}
 # GraphQL queries and API system.
 juniper = "0.14.2"
-# URL parsing an manipulation
-url = "2.1.1"
