@@ -39,7 +39,7 @@ as the RCOS website.
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
 5. Create a `.env` file to store your database config and other environment 
-    variables to be used at runtime. 
+    variables to be used at runtime.  Enter the following line into the `.env` file:
     ```shell script
     DATABASE_URL="postgres://<username>:<password>@localhost/telescope"
     ```
