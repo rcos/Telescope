@@ -6,7 +6,7 @@ use actix_web::Error;
 use super::root::ApiContext;
 
 
-#[derive(Insertable, Queryable, juniper::GraphQLObject, Debug, Clone)]
+#[derive(Insertable, Queryable, juniper::GraphQLObject, Debug, Clone, Serialize, Deserialize)]
 #[table_name="users"]
 #[graphql(description="An RCOS user")]
 pub struct User {

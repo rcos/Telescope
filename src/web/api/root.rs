@@ -10,6 +10,7 @@ use diesel::{
 };
 use super::User;
 use crate::schema::users::dsl::users;
+use crate::web::api::Email;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -55,6 +56,11 @@ impl QueryRoot {
                 error!("Could not load users from database.");
                 FieldError::new(e, Value::null())
             })
+    }
+
+    #[graphql(description = "List of user emails.")]
+    pub fn emails(ctx: &ApiContext) -> FieldResult<Vec<Email>> {
+        unimplemented!()
     }
 }
 

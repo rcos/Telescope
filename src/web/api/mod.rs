@@ -1,6 +1,9 @@
 mod root;
 pub use root::ApiContext;
 
+mod emails;
+pub use emails::Email;
+
 mod users;
 pub use users::User;
 
