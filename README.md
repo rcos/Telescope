@@ -43,10 +43,11 @@ as the RCOS website.
     ```shell script
     DATABASE_URL="postgres://<username>:<password>@localhost/telescope"
     ```
-6. Run the database setup. This will create a database and run all of the 
-    necessary migrations.
+6. Run the database setup and migrations. This will create a database and then 
+    run all of the necessary migrations.
     ```shell script
     $ diesel setup
+    $ diesel migration run
     ```
 
 ### Running:
