@@ -3,7 +3,7 @@ use crate::schema::users;
 
 use actix_web::Error;
 
-use crate::model::root::ApiContext;
+use super::root::ApiContext;
 
 
 #[derive(Insertable, Queryable, juniper::GraphQLObject, Debug, Clone)]

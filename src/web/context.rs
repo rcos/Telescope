@@ -1,5 +1,10 @@
-use crate::web::app_data::AppData;
+use crate::{
+    web::app_data::AppData,
+    web::api::ApiContext
+};
+
 use actix_session::Session;
+
 use actix_web::{
     dev::{
         Payload,
@@ -10,9 +15,13 @@ use actix_web::{
     FromRequest,
     HttpRequest
 };
+
 use futures::future::{ok, Ready};
+
 use handlebars::{Handlebars, RenderError};
+
 use serde::Serialize;
+
 use diesel::{
     r2d2::{
         ConnectionManager,
@@ -21,7 +30,6 @@ use diesel::{
     },
     PgConnection
 };
-use crate::model::root::ApiContext;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {

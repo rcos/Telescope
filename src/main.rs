@@ -21,9 +21,6 @@ mod templates;
 mod schema;
 mod db;
 
-/// Object model.
-mod model;
-
 use crate::web::app_data::AppData;
 use actix_files as afs;
 use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
@@ -39,6 +36,9 @@ use std::process::exit;
 use std::time::Duration;
 use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
+use crate::templates::static_pages::sponsors::SponsorsPage;
+use crate::templates::static_pages::index::LandingPage;
+use crate::templates::StaticPage;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -131,10 +131,10 @@ async fn main() -> std::io::Result<()> {
                     .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())
-            .configure(model::register)
+            .configure(web::api::register)
             .service(afs::Files::new("/static", "static"))
-            .route("/", get().to(index::index_service))
-            .route("/sponsors", get().to(sponsors::sponsors_page))
+            .route("/", get().to(LandingPage::handle))
+            .route("/sponsors", get().to(SponsorsPage::handle))
             .route("/login", post().to(login::login_service))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })

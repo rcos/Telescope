@@ -1,4 +1,5 @@
-pub mod root;
+mod root;
+pub use root::ApiContext;
 
 mod users;
 pub use users::User;
@@ -9,10 +10,7 @@ use actix_web::{
     Error
 };
 
-use root::{
-    ApiContext,
-    Schema
-};
+use root::Schema;
 
 use juniper::http::{
     GraphQLRequest,

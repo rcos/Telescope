@@ -1,5 +1,4 @@
-use crate::model::User;
-use diesel::{RunQueryDsl,};
+use crate::web::api::User;
 use crate::web::RequestContext;
 use actix_web::{
     web::block,

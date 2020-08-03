@@ -8,7 +8,7 @@ use diesel::{
     },
     PgConnection,
 };
-use crate::model::User;
+use super::User;
 use crate::schema::users::dsl::users;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
