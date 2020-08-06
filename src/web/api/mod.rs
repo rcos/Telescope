@@ -7,6 +7,9 @@ pub use emails::Email;
 mod users;
 pub use users::User;
 
+mod auth;
+pub use auth::PasswordRequirements;
+
 use actix_web::{
     web,
     HttpResponse,

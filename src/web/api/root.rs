@@ -10,7 +10,7 @@ use diesel::{
 };
 use super::User;
 use crate::schema::users::dsl::users;
-use crate::web::api::Email;
+use crate::web::api::{Email, PasswordRequirements};
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -60,6 +60,11 @@ impl QueryRoot {
 
     #[graphql(description = "List of user emails.")]
     pub fn emails(ctx: &ApiContext) -> FieldResult<Vec<Email>> {
+        unimplemented!()
+    }
+
+    #[grapql(description = "Checks if a password is valid.")]
+    pub fn is_valid_password(ctx: &ApiContext) -> FieldResult<PasswordRequirements> {
         unimplemented!()
     }
 }
