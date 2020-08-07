@@ -63,9 +63,9 @@ impl QueryRoot {
         unimplemented!()
     }
 
-    #[grapql(description = "Checks if a password is valid.")]
-    pub fn is_valid_password(ctx: &ApiContext) -> FieldResult<PasswordRequirements> {
-        unimplemented!()
+    #[graphql(description = "Checks if a password is valid.")]
+    pub fn password_requirements(password: String) -> PasswordRequirements {
+        PasswordRequirements::for_password(&password)
     }
 }
 

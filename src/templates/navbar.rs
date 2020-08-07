@@ -27,13 +27,17 @@ impl NavbarItem {
 /// A navbar definition.
 #[derive(Clone, Debug, Serialize)]
 pub struct Navbar {
-    items: Vec<NavbarItem>,
+    left_items: Vec<NavbarItem>,
+    right_items: Vec<NavbarItem>
 }
 
 impl Navbar {
     /// Get an empty navbar object.
     const fn empty() -> Self {
-        Self { items: Vec::new() }
+        Self {
+            left_items: Vec::new(),
+            right_items: Vec::new()
+        }
     }
 
     /// Add a navbar item to the navbar.
@@ -51,7 +55,7 @@ impl Navbar {
     /// Navbar with homepage, achievement page, projects, developers and sponsors
     fn with_defaults(pc: &RequestContext) -> Self {
         Self::empty()
-            .add_builder(pc, NavbarLink::new("/", "RCOS"))
+            .add_builder(pc, NavbarLink::new("/", "Home"))
             .add_builder(pc, NavbarLink::new("/projects", "Projects"))
             .add_builder(pc, NavbarLink::new("/developers", "Developers"))
             .add_builder(pc, NavbarLink::new("/sponsors", "Sponsors"))

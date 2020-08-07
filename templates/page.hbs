@@ -9,39 +9,15 @@
         <link rel="stylesheet" href="static/styles/base.css" type="text/css">
         <link rel="icon" type="image/png" href="static/favicon.png">
 
-        <!--
-        Use W3.CSS for styling and elements. This makes a lot of stuff much easier.
-        See https://www.w3schools.com/w3css/default.asp for details.
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
 
-        We currently only support dark theme. We will add more options in the future.
-
-        We also import flat and metro colors sets.
-
-        We also get the W3 code color js library to do code highlighting for a few languages.
-        -->
-        <!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css"> -->
-        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
-        <script src="https://www.w3schools.com/lib/w3codecolor.js" type="application/javascript"></script>
-
-        <!--
-        Use Material Icons via css.
-        See https://material.io/resources/icons/?style=baseline.
-        -->
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-              rel="stylesheet">
-
-        <!--
-        Use font-awesome icons through CSS include.
-        See https://fontawesome.com/v4.7.0/icons/.
-        -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-              rel="stylesheet">
-
+        <!-- Bootstrap JS, Popper.js, and jQuery -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js" integrity="sha384-XEerZL0cuoUbHE4nZReLT7nx9gQrQreJekYhJD9WNWhH8nEW+0c5qq7aIo2Wl30J" crossorigin="anonymous"></script>
     </head>
-    <body>
+    <body class="bg-dark">
         {{{navbar}}}
         {{{page_body}}}
     </body>

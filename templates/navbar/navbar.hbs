@@ -1,7 +1,10 @@
-<nav class="w3-container w3-bar w3-theme w3-mobile">
-    {{#each items}}
-        {{{this.navbar_inner}}}
-    {{/each}}
+<nav class="navbar navbar-dark sticky-top">
+    <a class="navbar-brand" href="#">RCOS</a>
+    <div id="navbar" class="collapse navbar-collapse">
+        {{#each items}}
+            {{{this.navbar_inner}}}
+        {{/each}}
+    </div>
 </nav>
 {{#each items}}
     {{{this.body_inner}}}
