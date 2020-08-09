@@ -10,23 +10,8 @@
         <link rel="icon" type="image/png" href="static/favicon.png">
 
         <!--
-        Use W3.CSS for styling and elements. This makes a lot of stuff much easier.
-        See https://www.w3schools.com/w3css/default.asp for details.
-
-        We currently only support dark theme. We will add more options in the future.
-
-        We also import flat and metro colors sets.
-
-        We also get the W3 code color js library to do code highlighting for a few languages.
-        -->
-        <!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css"> -->
-        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
-        <script src="https://www.w3schools.com/lib/w3codecolor.js" type="application/javascript"></script>
-
-        <!-- Adding some additional styles from BootStrap
+        Use Bootstrap CSS for styling and elements. This makes a lot of stuff much easier.
+        See https://getbootstrap.com/docs/3.3/css/ for details
         -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous" />
@@ -46,13 +31,16 @@
               rel="stylesheet">
     </head>
 
-    <body>
+    <body style="background-color: #f2f2f2">
         {{{navbar}}}
         {{{page_body}}}
     </body>
 
-    <footer>
-        <div>
+    <footer class="footer text-center mt-auto py-3">
+        <div class="container">
+            <p>Telescope | An RCOS Project | Version: <code>???</code></p>
+        </div>
+        <div class="container">
             Created by RCOS developers, for RCOS developers.
             <a href="https://github.com/rcos/Telescope/" style="color: dodgerblue">
                 Come see us on Github!

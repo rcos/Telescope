@@ -1,3 +1,7 @@
+/*
+ * Project wide CSS imported into page.hbs
+ */
+
 img {
     padding: 50px;
     display: block;
@@ -9,6 +13,7 @@ footer {
     text-align: center;
     margin-bottom: 15px;
 }
+
 .box {
     height: 200px;
     width: 200px;
