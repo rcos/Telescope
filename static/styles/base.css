@@ -1,5 +1,5 @@
 /*
- * Project wide CSS imported into page.hbs
+ * Project wide CSS imported into page.hbs (not sure if this is working outside of page.hbs)
  */
 
 img {
@@ -12,14 +12,4 @@ img {
 footer {
     text-align: center;
     margin-bottom: 15px;
-}
-
-.box {
-    height: 200px;
-    width: 200px;
-    margin-left: 40px;
-    margin-right: 40px;
-    margin-bottom: 40px;
-    border: 1px double rgba(220,227,248,0.59);
-    border-radius: 20px;
 }
