@@ -12,14 +12,17 @@ pub struct NavbarItem {
     navbar_inner: String,
     /// The code (if any) that needs to be placed in the page body.
     body_inner: String,
+    /// Whether this item is active.
+    active: bool
 }
 
 impl NavbarItem {
     /// Constructor
-    fn new(navbar_inner: String, body_inner: impl Into<String>) -> Self {
+    fn new(navbar_inner: String, body_inner: impl Into<String>, active: bool) -> Self {
         Self {
             navbar_inner,
             body_inner: body_inner.into(),
+            active
         }
     }
 }
@@ -40,40 +43,40 @@ impl Navbar {
         }
     }
 
-    /// Add a navbar item to the navbar.
-    /// Assume items are added left to right.
-    fn add(&mut self, pc: &RequestContext, item: impl MakeNavItem) -> &mut Self {
-        self.items.push(item.make(pc));
+    fn add_left(&mut self, ctx: &RequestContext, item: impl MakeNavItem) -> &mut Self {
+        self.left_items.push(item.make(ctx));
         self
     }
 
-    fn add_builder(mut self, pc: &RequestContext, item: impl MakeNavItem) -> Self {
-        self.add(pc, item);
+    fn add_right(&mut self, ctx: &RequestContext, item: impl MakeNavItem) -> &mut Self {
+        self.right_items.push(item.make(ctx));
         self
     }
 
     /// Navbar with homepage, achievement page, projects, developers and sponsors
-    fn with_defaults(pc: &RequestContext) -> Self {
-        Self::empty()
-            .add_builder(pc, NavbarLink::new("/", "Home"))
-            .add_builder(pc, NavbarLink::new("/projects", "Projects"))
-            .add_builder(pc, NavbarLink::new("/developers", "Developers"))
-            .add_builder(pc, NavbarLink::new("/sponsors", "Sponsors"))
+    fn with_defaults(ctx: &RequestContext) -> Self {
+        let mut r = Self::empty();
+        r
+            .add_left(ctx, NavbarLink::new("/", "Home"))
+            .add_left(ctx, NavbarLink::new("/projects", "Projects"))
+            .add_left(ctx, NavbarLink::new("/developers", "Developers"))
+            .add_left(ctx, NavbarLink::new("/sponsors", "Sponsors"));
+        return r;
     }
 
     /// Create a navbar based on the page context.
-    pub fn from_context(pc: &RequestContext) -> Self {
-        let mut navbar = Self::with_defaults(pc);
-        if let Some(session_token) = pc.session().get::<String>(cookies::SESSION_COOKIE).unwrap() {
+    pub fn from_context(ctx: &RequestContext) -> Self {
+        let mut navbar = Self::with_defaults(ctx);
+        if let Some(session_token) = ctx.session().get::<String>(cookies::SESSION_COOKIE).unwrap() {
             // todo: change this use of unwrap into something more robust
             unimplemented!()
         } else {
             navbar
-                .add(
-                    pc,
-                    NavbarModal::new("login", "Login", pc.render(&LoginButton).unwrap()).right(),
+                .add_right(
+                    ctx,
+                    NavbarModal::new("login", "Login", ctx.render(&LoginButton).unwrap()),
                 )
-                .add(pc, NavbarLink::new("/sign-up", "Sign Up").right());
+                .add_right(ctx, NavbarLink::new("/sign-up", "Sign Up"));
         }
         return navbar;
     }

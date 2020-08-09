@@ -1,11 +1,27 @@
-<nav class="navbar navbar-dark sticky-top">
-    <a class="navbar-brand" href="#">RCOS</a>
-    <div id="navbar" class="collapse navbar-collapse">
-        {{#each items}}
-            {{{this.navbar_inner}}}
-        {{/each}}
-    </div>
+<nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
+    <a class="navbar-brand" href="/">RCOS</a>
+    <nav class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+            {{#each left_items}}
+                <li class="nav-item {{#if this.active}}active{{/if}}">
+                    {{{this.navbar_inner}}}
+                </li>
+            {{/each}}
+        </ul>
+        <ul class="navbar-nav">
+            {{#each right_items}}
+                <li class="nav-item {{#if this.active}}active{{/if}}">
+                    {{{this.navbar_inner}}}
+                </li>
+            {{/each}}
+        </ul>
+    </nav>
 </nav>
-{{#each items}}
+
+{{#each left_items}}
+    {{{this.body_inner}}}
+{{/each}}
+
+{{#each right_items}}
     {{{this.body_inner}}}
 {{/each}}

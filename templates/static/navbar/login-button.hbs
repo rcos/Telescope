@@ -1,5 +1,6 @@
-<form class="w3-container" method="post" action="/login">
-    <div class="w3-section">
+
+<form method="post" action="/login">
+    <div class="modal-body">
         <label>
             <b>Username</b>
             <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Username" name="user" required>
@@ -8,7 +9,16 @@
             <b>Password</b>
             <input class="w3-input w3-border" type="password" placeholder="Password" name="pass" required>
         </label>
-        <input class="w3-check w3-section" type="checkbox" checked="checked" name="save"> Remember me
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" checked="checked" name="save">
+            <label class="form-check-label">Remember Me</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+
+    </div>
+    <div class="w3-section">
+
         <div class="w3-container">
             <a class="w3-left w3-button w3-light-gray" href="/forgot-pass">Forgot password</a>
             <div class="w3-padding w3-border-0 w3-right">

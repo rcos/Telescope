@@ -1,10 +1,13 @@
-<div id="{{id}}-modal" class="w3-modal w3-mobile">
-    <div class="w3-modal-content w3-card-4 w3-animate-top w3-container w3-mobile w3-theme-l1">
-        <i class="w3-display-topright material-icons w3-black"
-           onclick="document.getElementById('{{id}}-modal').style.display='none'">
-            close
-        </i>
-        <header class=""><h2>{{text}}</h2></header>
+<div id="{{id}}-modal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <h5 class="modal-header">
+                {{text}}
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
         {{{inner}}}
     </div>
 </div>
