@@ -67,7 +67,7 @@ impl Navbar {
     /// Create a navbar based on the page context.
     pub fn from_context(ctx: &RequestContext) -> Self {
         let mut navbar = Self::with_defaults(ctx);
-        if let Some(session_token) = ctx.session().get::<String>(cookies::SESSION_COOKIE).unwrap() {
+        if let Some(id) = ctx.identity().identity() {
             // todo: change this use of unwrap into something more robust
             unimplemented!()
         } else {

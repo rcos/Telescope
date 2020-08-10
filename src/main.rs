@@ -21,24 +21,33 @@ mod templates;
 mod schema;
 mod db;
 
-use crate::web::app_data::AppData;
 use actix_files as afs;
 use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
-use actix_session::CookieSession;
-use actix_web::cookie::SameSite;
-use actix_web::web::{get, post};
+use actix_web::web::{
+    get,
+    post
+};
 use actix_web::{middleware, web as aweb, App, HttpResponse, HttpServer};
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use rand::rngs::OsRng;
 use rand::Rng;
 use std::process::exit;
-use std::time::Duration;
+use chrono::Duration as chronoDuration;
+use std::time::Duration as stdDuration;
 use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
-use crate::templates::static_pages::sponsors::SponsorsPage;
-use crate::templates::static_pages::index::LandingPage;
-use crate::templates::StaticPage;
+use crate::{
+    templates::{
+        static_pages::{
+            sponsors::SponsorsPage,
+            index::LandingPage
+        },
+        StaticPage
+    },
+    web::app_data::AppData
+};
+use actix_identity::{IdentityService, CookieIdentityPolicy};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -96,7 +105,7 @@ async fn main() -> std::io::Result<()> {
         // max 12 connections at once
         .max_size(12)
         // if a connection cannot be pulled from the pool in 20 seconds, timeout
-        .connection_timeout(Duration::from_secs(20))
+        .connection_timeout(stdDuration::from_secs(20))
         .build(manager)
         .map_err(|e| {
             error!("Could not create database connection pool {}", e);
@@ -109,9 +118,7 @@ async fn main() -> std::io::Result<()> {
     let app_data = AppData::new(template_registry, pool);
 
     // generate a random key to encrypt cookies.
-    let mut rng = OsRng::default();
-    let mut cookie_key = [0u8; 32];
-    rng.fill(&mut cookie_key);
+    let cookie_key = OsRng::default().gen::<[u8; 32]>();
 
     // memory store for rate limiting.
     let ratelimit_memstore = MemoryStore::new();
@@ -119,15 +126,17 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
-            .wrap(
-                CookieSession::signed(&cookie_key)
-                    .same_site(SameSite::Strict)
-                    .http_only(true),
-            )
+            .wrap(IdentityService::new(
+                CookieIdentityPolicy::new(&cookie_key)
+                    .name(cookies::AUTH_TOKEN)
+                    .secure(true)
+                    // Cookies / sessions expire after 24 hours
+                    .max_age_time(chronoDuration::hours(24))
+            ))
             .wrap(
                 RateLimiter::new(MemoryStoreActor::from(ratelimit_memstore.clone()).start())
                     // rate limit: 100 requests max per minute
-                    .with_interval(Duration::from_secs(60))
+                    .with_interval(stdDuration::from_secs(60))
                     .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())
@@ -136,6 +145,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", get().to(LandingPage::handle))
             .route("/sponsors", get().to(SponsorsPage::handle))
             .route("/login", post().to(login::login_service))
+            .route("/forgot", get().to(|| HttpResponse::InternalServerError()))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)

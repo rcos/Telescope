@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 /// Guarded to only post requests.
 pub async fn login_service(req_ctx: RequestContext, login: Form<HashMap<String, String>>,) -> HttpResponse {
-    let session = req_ctx.session();
+    let identity = req_ctx.identity();
 
     dbg!(login);
     unimplemented!()

@@ -1,3 +1,8 @@
-# Unstable currently
-#merge_imports = true
+unstable_feautures = true
+merge_imports = true
+# reorder_impl_items = true
+
+reorder_imports = true
+reorder_modules = true
+merge_derives = true
 newline_style = "Native"
