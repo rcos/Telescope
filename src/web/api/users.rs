@@ -1,20 +1,19 @@
-use uuid::Uuid;
 use crate::schema::users;
+use uuid::Uuid;
 
 use actix_web::Error;
 
 use super::root::ApiContext;
 
-
 #[derive(Insertable, Queryable, juniper::GraphQLObject, Debug, Clone, Serialize, Deserialize)]
-#[table_name="users"]
-#[graphql(description="An RCOS user")]
+#[table_name = "users"]
+#[graphql(description = "An RCOS user")]
 pub struct User {
     pub id: Uuid,
     pub name: String,
     pub avi_location: Option<String>,
     #[graphql(skip)]
-    pub hashed_pwd: String
+    pub hashed_pwd: String,
 }
 
 // #[juniper::object(Context = ApiContext)]
@@ -40,4 +39,3 @@ impl User {
     //     })
     // }
 }
-

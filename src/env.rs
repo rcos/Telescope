@@ -77,7 +77,7 @@ fn cli() -> Config {
                 .short("B")
                 .long("bind-to")
                 .help("Specify where to bind the web server.")
-                .required_unless_one(&["DEVELOPMENT", "PRODUCTION"])
+                .required_unless_one(&["DEVELOPMENT", "PRODUCTION"]),
         )
         .arg(
             Arg::with_name("DATABASE_URL")
@@ -85,7 +85,7 @@ fn cli() -> Config {
                 .short("D")
                 .long("database-url")
                 .help("Database URL passed to diesel.")
-                .env(DATABASE_URL_ENV_VAR)
+                .env(DATABASE_URL_ENV_VAR),
         )
         .arg(
             Arg::with_name("PRODUCTION")
@@ -107,16 +107,17 @@ fn cli() -> Config {
         tls_cert_file: matches.value_of("TLS_CERT_FILE").unwrap().to_owned(),
         tls_key_file: matches.value_of("TLS_PRIV_KEY_FILE").unwrap().to_owned(),
         bind_to: if matches.is_present("DEVELOPMENT") {
-                Some("localhost:8443")
-            } else if matches.is_present("PRODUCTION") {
-                Some("localhost:443")
-            } else {
-                None
-            }
-                .or(matches.value_of("BIND_TO"))
-                .unwrap()
-                .to_owned(),
-        db_url: matches.value_of("DATABASE_URL")
+            Some("localhost:8443")
+        } else if matches.is_present("PRODUCTION") {
+            Some("localhost:443")
+        } else {
+            None
+        }
+        .or(matches.value_of("BIND_TO"))
+        .unwrap()
+        .to_owned(),
+        db_url: matches
+            .value_of("DATABASE_URL")
             .ok_or_else(|| {
                 error!("DATABASE_URL must be specified.");
                 exit(exitcode::NOINPUT)

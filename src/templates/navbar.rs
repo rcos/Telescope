@@ -1,5 +1,7 @@
-use crate::templates::navbar::login_button::LoginButton;
-use crate::web::{RequestContext, Template, cookies};
+use crate::{
+    templates::navbar::login_button::LoginButton,
+    web::{cookies, RequestContext, Template},
+};
 
 mod items;
 mod login_button;
@@ -13,7 +15,7 @@ pub struct NavbarItem {
     /// The code (if any) that needs to be placed in the page body.
     body_inner: String,
     /// Whether this item is active.
-    active: bool
+    active: bool,
 }
 
 impl NavbarItem {
@@ -22,7 +24,7 @@ impl NavbarItem {
         Self {
             navbar_inner,
             body_inner: body_inner.into(),
-            active
+            active,
         }
     }
 }
@@ -31,7 +33,7 @@ impl NavbarItem {
 #[derive(Clone, Debug, Serialize)]
 pub struct Navbar {
     left_items: Vec<NavbarItem>,
-    right_items: Vec<NavbarItem>
+    right_items: Vec<NavbarItem>,
 }
 
 impl Navbar {
@@ -39,7 +41,7 @@ impl Navbar {
     const fn empty() -> Self {
         Self {
             left_items: Vec::new(),
-            right_items: Vec::new()
+            right_items: Vec::new(),
         }
     }
 
@@ -56,8 +58,7 @@ impl Navbar {
     /// Navbar with homepage, achievement page, projects, developers and sponsors
     fn with_defaults(ctx: &RequestContext) -> Self {
         let mut r = Self::empty();
-        r
-            .add_left(ctx, NavbarLink::new("/", "Home"))
+        r.add_left(ctx, NavbarLink::new("/", "Home"))
             .add_left(ctx, NavbarLink::new("/projects", "Projects"))
             .add_left(ctx, NavbarLink::new("/developers", "Developers"))
             .add_left(ctx, NavbarLink::new("/sponsors", "Sponsors"));

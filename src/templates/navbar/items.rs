@@ -74,7 +74,7 @@ impl MakeNavItem for NavbarModal {
         NavbarItem::new(
             pc.handlebars().render("navbar/modal-button", self).unwrap(),
             pc.handlebars().render("navbar/modal-body", self).unwrap(),
-            false
+            false,
         )
     }
 }

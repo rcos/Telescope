@@ -1,17 +1,9 @@
-use crate::{
-    web::app_data::AppData,
-    web::api::ApiContext
-};
+use crate::{web::api::ApiContext, web::app_data::AppData};
 
 use actix_web::{
-    dev::{
-        Payload,
-        PayloadStream
-    },
+    dev::{Payload, PayloadStream},
     web::Data,
-    Error,
-    FromRequest,
-    HttpRequest
+    Error, FromRequest, HttpRequest,
 };
 
 use futures::future::{ok, Ready};
@@ -21,12 +13,8 @@ use handlebars::{Handlebars, RenderError};
 use serde::Serialize;
 
 use diesel::{
-    r2d2::{
-        ConnectionManager,
-        PooledConnection,
-        Pool
-    },
-    PgConnection
+    r2d2::{ConnectionManager, Pool, PooledConnection},
+    PgConnection,
 };
 
 use actix_identity::Identity;
@@ -83,7 +71,8 @@ impl RequestContext {
     /// ## Panics:
     /// - If a database connection is not available.
     pub fn get_db_connection(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
-        let db_conn_pool: &Pool<ConnectionManager<PgConnection>> = &self.app_data.db_connection_pool;
+        let db_conn_pool: &Pool<ConnectionManager<PgConnection>> =
+            &self.app_data.db_connection_pool;
         db_conn_pool
             .get()
             .map_err(|e| {
@@ -112,9 +101,7 @@ impl FromRequest for RequestContext {
         let request = HttpRequest::from_request(req, payload)
             .into_inner()
             .unwrap();
-        let identity = Identity::from_request(req, payload)
-            .into_inner()
-            .unwrap();
+        let identity = Identity::from_request(req, payload).into_inner().unwrap();
         ok(Self::new(app_data, request, identity))
     }
 }

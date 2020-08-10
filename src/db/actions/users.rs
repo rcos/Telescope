@@ -1,9 +1,6 @@
 use crate::web::api::User;
 use crate::web::RequestContext;
-use actix_web::{
-    web::block,
-    error::BlockingError
-};
+use actix_web::{error::BlockingError, web::block};
 use diesel::result::Error;
 
 // /// Create a new user and insert into database.

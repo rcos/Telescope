@@ -1,16 +1,13 @@
-use juniper::{RootNode, FieldResult, FieldError, Value};
+use juniper::{FieldError, FieldResult, RootNode, Value};
 
-use diesel::{
-    prelude::*,
-    r2d2::{
-        Pool,
-        ConnectionManager
-    },
-    PgConnection,
-};
 use super::User;
 use crate::schema::users::dsl::users;
 use crate::web::api::{Email, PasswordRequirements};
+use diesel::{
+    prelude::*,
+    r2d2::{ConnectionManager, Pool},
+    PgConnection,
+};
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -20,7 +17,7 @@ pub struct ApiContext {
     /// Database connection pool.
     pub connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// Schema object to execute GraphQl queries.
-    pub schema: Schema
+    pub schema: Schema,
 }
 
 impl ApiContext {
@@ -28,11 +25,10 @@ impl ApiContext {
     pub fn new(pool: &Pool<ConnectionManager<PgConnection>>) -> Self {
         ApiContext {
             schema: Schema::new(QueryRoot, MutationRoot),
-            connection_pool: pool.clone()
+            connection_pool: pool.clone(),
         }
     }
 }
-
 
 /// The root of all graphql queries.
 pub struct QueryRoot;
@@ -40,22 +36,18 @@ pub struct QueryRoot;
 /// The root of all graphql mutations.
 pub struct MutationRoot;
 
-
 #[juniper::object(Context = ApiContext)]
 impl QueryRoot {
     #[graphql(description = "List of all users.")]
     pub fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
-        let mut conn = ctx.connection_pool
-            .get()
-            .map_err(|e| {
-                error!("Could not get database connection.");
-                FieldError::new(e, Value::null())
-            })?;
-        users.load(&conn)
-            .map_err(|e| {
-                error!("Could not load users from database.");
-                FieldError::new(e, Value::null())
-            })
+        let mut conn = ctx.connection_pool.get().map_err(|e| {
+            error!("Could not get database connection.");
+            FieldError::new(e, Value::null())
+        })?;
+        users.load(&conn).map_err(|e| {
+            error!("Could not load users from database.");
+            FieldError::new(e, Value::null())
+        })
     }
 
     #[graphql(description = "List of user emails.")]
@@ -70,6 +62,4 @@ impl QueryRoot {
 }
 
 #[juniper::object(Context = ApiContext)]
-impl MutationRoot {
-
-}
+impl MutationRoot {}

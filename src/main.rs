@@ -18,36 +18,37 @@ use web::*;
 
 mod templates;
 
-mod schema;
 mod db;
+mod schema;
 
-use actix_files as afs;
-use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
-use actix_web::web::{
-    get,
-    post
-};
-use actix_web::{middleware, web as aweb, App, HttpResponse, HttpServer};
-use handlebars::Handlebars;
-use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-use rand::rngs::OsRng;
-use rand::Rng;
-use std::process::exit;
-use chrono::Duration as chronoDuration;
-use std::time::Duration as stdDuration;
-use diesel::r2d2::ConnectionManager;
-use diesel::PgConnection;
 use crate::{
     templates::{
-        static_pages::{
-            sponsors::SponsorsPage,
-            index::LandingPage
-        },
-        StaticPage
+        static_pages::{index::LandingPage, sponsors::SponsorsPage},
+        StaticPage,
     },
-    web::app_data::AppData
+    web::app_data::AppData,
 };
-use actix_identity::{IdentityService, CookieIdentityPolicy};
+
+use actix_files as afs;
+
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+
+use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
+
+use actix_web::{
+    middleware, web as aweb,
+    web::{get, post},
+    App, HttpResponse, HttpServer,
+};
+
+
+use diesel::{r2d2::ConnectionManager, PgConnection};
+
+use rand::{rngs::OsRng, Rng};
+
+use handlebars::Handlebars;
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use std::process::exit;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -105,7 +106,7 @@ async fn main() -> std::io::Result<()> {
         // max 12 connections at once
         .max_size(12)
         // if a connection cannot be pulled from the pool in 20 seconds, timeout
-        .connection_timeout(stdDuration::from_secs(20))
+        .connection_timeout(std::time::Duration::from_secs(20))
         .build(manager)
         .map_err(|e| {
             error!("Could not create database connection pool {}", e);
@@ -131,12 +132,12 @@ async fn main() -> std::io::Result<()> {
                     .name(cookies::AUTH_TOKEN)
                     .secure(true)
                     // Cookies / sessions expire after 24 hours
-                    .max_age_time(chronoDuration::hours(24))
+                    .max_age_time(chrono::Duration::hours(24)),
             ))
             .wrap(
                 RateLimiter::new(MemoryStoreActor::from(ratelimit_memstore.clone()).start())
                     // rate limit: 100 requests max per minute
-                    .with_interval(stdDuration::from_secs(60))
+                    .with_interval(std::time::Duration::from_secs(60))
                     .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())

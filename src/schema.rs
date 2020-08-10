@@ -52,7 +52,4 @@ table! {
 
 joinable!(emails -> users (userid));
 
-allow_tables_to_appear_in_same_query!(
-    emails,
-    users,
-);
+allow_tables_to_appear_in_same_query!(emails, users,);

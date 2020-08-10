@@ -1,7 +1,7 @@
+use crate::templates::page::Page;
 use crate::web::{RequestContext, Template};
 use actix_web::HttpResponse;
 use serde::Serialize;
-use crate::templates::page::Page;
 
 pub mod index;
 pub mod sponsors;
@@ -27,4 +27,3 @@ pub trait StaticPage: Serialize + Sized + Default {
         HttpResponse::Ok().body(Self::render(&ctx))
     }
 }
-
