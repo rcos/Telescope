@@ -1,6 +1,16 @@
 <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
     <a class="navbar-brand" href="/">RCOS</a>
-    <nav class="collapse navbar-collapse">
+    <button class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbar"
+            aria-controls="navbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+    >
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <nav id="navbar" class="navbar-collapse collapse">
         <ul class="navbar-nav mr-auto">
             {{#each left_items}}
                 <li class="nav-item {{#if this.active}}active{{/if}}">
