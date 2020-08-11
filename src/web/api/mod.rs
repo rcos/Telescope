@@ -1,6 +1,9 @@
 mod root;
 pub use root::ApiContext;
 
+mod recoveries;
+pub use recoveries::Recovery;
+
 mod emails;
 pub use emails::Email;
 

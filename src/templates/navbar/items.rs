@@ -55,15 +55,23 @@ pub struct NavbarModal {
     inner: String,
     /// The header of the modal dialogue, and the text of the button.
     text: String,
+    /// The Bootstrap button class
+    button_class: String
 }
 
 impl NavbarModal {
     /// Create a new modal navbar item.
-    pub fn new(id: impl Into<String>, header: impl Into<String>, inner: impl Into<String>) -> Self {
+    pub fn new(
+        id: impl Into<String>,
+        header: impl Into<String>,
+        class: impl Into<String>,
+        inner: impl Into<String>,
+    ) -> Self {
         Self {
             id: id.into(),
             text: header.into(),
             inner: inner.into(),
+            button_class: class.into()
         }
     }
 }

@@ -1,5 +1,3 @@
--- Your SQL goes here
-
 CREATE TABLE confirmations (
     -- the universally unique invite id
     invite_id UUID UNIQUE NOT NULL,

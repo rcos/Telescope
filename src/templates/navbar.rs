@@ -1,13 +1,17 @@
+
 use crate::{
-    templates::navbar::login_button::LoginButton,
+    templates::navbar::login_modal::LoginModal,
     web::{cookies, RequestContext, Template},
 };
 
 use uuid::Uuid;
 
+mod login_modal;
+mod sign_up_modal;
+
 mod items;
-mod login_button;
 use items::*;
+use crate::templates::navbar::sign_up_modal::SignUpModal;
 
 /// An adapter type for items in the navbar.
 #[derive(Clone, Debug, Serialize, Default)]
@@ -72,10 +76,23 @@ impl Navbar {
     fn without_user(ctx: &RequestContext) -> Self {
         let mut n = Self::with_defaults(ctx);
         n
-            .add_right(ctx, NavbarLink::new("/sign-up", "Sign Up"))
             .add_right(
                 ctx,
-                NavbarModal::new("login", "Login", ctx.render(&LoginButton).unwrap()),
+                NavbarModal::new(
+                    "login",
+                    "Login",
+                    "btn-secondary",
+                    ctx.render(&LoginModal).unwrap()
+                )
+            )
+            .add_right(
+                ctx,
+                NavbarModal::new(
+                    "register",
+                    "Sign Up",
+                    "btn-secondary",
+                    ctx.render(&SignUpModal).unwrap()
+                )
             );
 
         n
