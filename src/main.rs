@@ -148,7 +148,7 @@ async fn main() -> std::io::Result<()> {
             .route("/login", post().to(login::login_service))
             .route("/logout", get().to(logout::logout_service))
             .route("/forgot", get().to(forgot::recovery_service))
-            .route("/register", post().to(sign_up::registration_service))
+            .route("/register", post().to(register::registration_service))
             .default_service(aweb::route().to(|| HttpResponse::NotFound()))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)
