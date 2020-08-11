@@ -6,5 +6,5 @@ use uuid::Uuid;
 #[graphql(description = "An email of an RCOS user.")]
 pub struct Email {
     pub email: String,
-    pub userid: Uuid,
+    pub user_id: Uuid,
 }

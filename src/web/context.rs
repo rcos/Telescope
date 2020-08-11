@@ -55,6 +55,9 @@ impl RequestContext {
         &self.identity
     }
 
+    /// Check if a user is logged in (via identity)
+    pub fn logged_in(&self) -> bool {self.identity.identity().is_some()}
+
     /// Get associated Handlebars template registry for manual template rendering.
     pub fn handlebars(&self) -> &Handlebars<'static> {
         self.app_data.template_registry.as_ref()

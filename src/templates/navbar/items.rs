@@ -33,7 +33,7 @@ impl NavbarLink {
 impl MakeNavItem for NavbarLink {
     /// Adapt a navbar link into a navbar item.
     fn make(&self, pc: &RequestContext) -> NavbarItem {
-        let mut render = self.clone();
+        let render = self.clone();
         // if the webpage path starts with the nav item location, focus on that nav item.
         let path = &render.location[1..];
         let focus = pc.request().path().starts_with(path);
@@ -78,3 +78,4 @@ impl MakeNavItem for NavbarModal {
         )
     }
 }
+

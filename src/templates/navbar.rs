@@ -3,6 +3,8 @@ use crate::{
     web::{cookies, RequestContext, Template},
 };
 
+use uuid::Uuid;
+
 mod items;
 mod login_button;
 use items::*;
@@ -61,25 +63,44 @@ impl Navbar {
         r.add_left(ctx, NavbarLink::new("/", "Home"))
             .add_left(ctx, NavbarLink::new("/projects", "Projects"))
             .add_left(ctx, NavbarLink::new("/developers", "Developers"))
-            .add_left(ctx, NavbarLink::new("/sponsors", "Sponsors"));
+            .add_left(ctx, NavbarLink::new("/sponsors", "Sponsors"))
+            .add_left(ctx, NavbarLink::new("/blog", "Blog"));
         return r;
+    }
+
+    /// Get a navbar without a user logged in.
+    fn without_user(ctx: &RequestContext) -> Self {
+        let mut n = Self::with_defaults(ctx);
+        n
+            .add_right(ctx, NavbarLink::new("/sign-up", "Sign Up"))
+            .add_right(
+                ctx,
+                NavbarModal::new("login", "Login", ctx.render(&LoginButton).unwrap()),
+            );
+
+        n
     }
 
     /// Create a navbar based on the page context.
     pub fn from_context(ctx: &RequestContext) -> Self {
-        let mut navbar = Self::with_defaults(ctx);
-        if let Some(id) = ctx.identity().identity() {
-            // todo: change this use of unwrap into something more robust
-            unimplemented!()
-        } else {
-            navbar
-                .add_right(
-                    ctx,
-                    NavbarModal::new("login", "Login", ctx.render(&LoginButton).unwrap()),
-                )
-                .add_right(ctx, NavbarLink::new("/sign-up", "Sign Up"));
-        }
-        return navbar;
+        ctx.identity()
+            .identity()
+            .and_then(|id: String| {
+                Uuid::parse_str(id.as_str()).ok()
+            })
+            .map_or(Self::without_user(ctx), |uuid| {
+                let mut navbar = Self::with_defaults(ctx);
+                navbar
+                    .add_right(
+                        ctx,
+                        NavbarLink::new(
+                            format!("/profile/{}", uuid.to_hyphenated()),
+                            "Profile"
+                        )
+                    )
+                    .add_right(ctx, NavbarLink::new("/logout", "Logout"));
+                navbar
+            })
     }
 }
 

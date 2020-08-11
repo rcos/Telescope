@@ -18,7 +18,6 @@ use web::*;
 
 mod templates;
 
-mod db;
 mod schema;
 
 use crate::{

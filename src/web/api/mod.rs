@@ -10,6 +10,9 @@ pub use users::User;
 mod auth;
 pub use auth::PasswordRequirements;
 
+mod confirmations;
+pub use confirmations::Confirmation;
+
 use actix_web::{web, Error, HttpResponse};
 
 use root::Schema;

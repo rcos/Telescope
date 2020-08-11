@@ -54,4 +54,6 @@ diesel = {version = "1.4.5", features = ["postgres", "r2d2", "uuidv07", "chrono"
 # GraphQL queries and API system.
 juniper = "0.14.2"
 # Date/Time utilities
-chrono = "0.4"
+chrono = {version = "0.4", features = ["serde"]}
+# Parsing and storing URLs
+url = "2"

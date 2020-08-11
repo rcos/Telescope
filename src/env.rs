@@ -1,21 +1,40 @@
 use clap::{App, Arg};
 use std::env;
 use std::process::exit;
+use url::Url;
 
 const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
 const TLS_PRIV_KEY_FILE_ENV_VAR: &'static str = "PRIV_KEY_FILE";
 const DATABASE_URL_ENV_VAR: &'static str = "DATABASE_URL";
 const BINDING_ENV_VAR: &'static str = "BIND_TO";
+const SMTP_SENDER_NAME_ENV_VAR: &'static str = "SMTP_SENDER_NAME";
+const SMTP_USERNAME_ENV_VAR: &'static str = "SMTP_USERNAME";
+const SMTP_PASSWORD_ENV_VAR: &'static str = "SMTP_PASSWORD";
+const SMTP_HOST_ENV_VAR: &'static str = "SMTP_HOST";
+const SMTP_PORT_ENV_VAR: &'static str = "SMTP_PORT";
 
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Config {
     pub tls_cert_file: String,
     pub tls_key_file: String,
     pub bind_to: String,
     pub db_url: String,
+
+    /*
+    /// Domain. For development this will be 0.0.0.0.
+    /// For production, it will likely be rcos.io.
+    pub domain: Url,
+    */
+
+    // Email Parameters
+    pub smtp_sender_name: String,
+    pub smtp_username: String,
+    pub smtp_password: String,
+    pub smtp_host: Option<String>,
+    pub smtp_port: u16
 }
 
 lazy_static! {
@@ -28,9 +47,7 @@ pub fn init() {
     let cfg: &Config = &*CONFIG;
     info!("Starting up...");
     info!("telescope {}", env!("CARGO_PKG_VERSION"));
-    info!("TLS/SSL certificate location: {}", cfg.tls_cert_file);
-    info!("TLS/SSL private key location: {}", cfg.tls_key_file);
-    info!("Database url: {}", cfg.db_url);
+    trace!("Config: \n{}", serde_json::to_string_pretty(cfg).unwrap());
 }
 
 /// Digest and handle arguments from the command line. Read arguments from environment
@@ -62,12 +79,12 @@ fn cli() -> Config {
         )
         .arg(
             Arg::with_name("LOG_LEVEL")
-                .help("Set the log level (or verbosity).")
+                .help("Set the log level (or verbosity). \
+                    See https://docs.rs/env_logger/0.7.1/env_logger/ for reference.")
                 .env(LOG_LEVEL_ENV_VAR)
                 .takes_value(true)
                 .long("log-level")
                 .short("v")
-                .possible_values(&["trace", "debug", "info", "warn", "error"])
                 .default_value("info"),
         )
         .arg(
@@ -80,12 +97,56 @@ fn cli() -> Config {
                 .required_unless_one(&["DEVELOPMENT", "PRODUCTION"]),
         )
         .arg(
-            Arg::with_name("DATABASE_URL")
+            Arg::with_name(DATABASE_URL_ENV_VAR)
                 .takes_value(true)
                 .short("D")
                 .long("database-url")
                 .help("Database URL passed to diesel.")
                 .env(DATABASE_URL_ENV_VAR),
+        )
+        .arg(
+            Arg::with_name(SMTP_SENDER_NAME_ENV_VAR)
+                .takes_value(true)
+                .long("smpt-sender-name")
+                .help("Name associated with account verification emails.")
+                .env(SMTP_SENDER_NAME_ENV_VAR)
+                .default_value("RCOS Telescope")
+        )
+        .arg(
+            Arg::with_name(SMTP_USERNAME_ENV_VAR)
+                .takes_value(true)
+                .long("smtp-username")
+                .help("Username to access SMTP email server.")
+                .env(SMTP_USERNAME_ENV_VAR)
+        )
+        .arg(
+            Arg::with_name(SMTP_PASSWORD_ENV_VAR)
+                .takes_value(true)
+                .long("smtp-pass")
+                .help("Password to access SMTP email server.")
+                .env(SMTP_PASSWORD_ENV_VAR)
+        )
+        .arg(
+            Arg::with_name(SMTP_HOST_ENV_VAR)
+                .takes_value(true)
+                .long("smtp-host")
+                .env(SMTP_HOST_ENV_VAR)
+                .help(format!(
+                    "SMTP email server host. If left unspecified, mail will be sent to {}",
+                    std::env::temp_dir().display()
+                ).as_str())
+        )
+        .arg(
+            Arg::with_name(SMTP_PORT_ENV_VAR)
+                .takes_value(true)
+                .validator(|e| e.parse::<u16>()
+                    .map_err(|e| e.to_string())
+                    .map(|_| ())
+                )
+                .help("SMTP email server port")
+                .default_value("25")
+                .long("smtp-port")
+                .env(SMTP_PORT_ENV_VAR)
         )
         .arg(
             Arg::with_name("PRODUCTION")
@@ -116,13 +177,23 @@ fn cli() -> Config {
         .or(matches.value_of("BIND_TO"))
         .unwrap()
         .to_owned(),
-        db_url: matches
-            .value_of("DATABASE_URL")
-            .ok_or_else(|| {
-                error!("DATABASE_URL must be specified.");
-                exit(exitcode::NOINPUT)
-            })
+        db_url: required(matches.value_of(DATABASE_URL_ENV_VAR), DATABASE_URL_ENV_VAR),
+        smtp_sender_name: matches.value_of(SMTP_SENDER_NAME_ENV_VAR).unwrap().to_owned(),
+        smtp_username: required(matches.value_of(SMTP_USERNAME_ENV_VAR), SMTP_USERNAME_ENV_VAR),
+        smtp_password: required(matches.value_of(SMTP_PASSWORD_ENV_VAR), SMTP_PASSWORD_ENV_VAR),
+        smtp_host: matches.value_of(SMTP_HOST_ENV_VAR).map(|s| s.to_owned()),
+        smtp_port: matches.value_of(SMTP_PORT_ENV_VAR)
+            .and_then(|p| p.parse::<u16>().ok())
             .unwrap()
-            .to_owned(),
     }
+}
+
+fn required(opt: Option<&str>, env: &'static str) -> String {
+    opt
+        .ok_or_else(|| {
+            error!("{} must be specified.", env);
+            exit(exitcode::NOINPUT)
+        })
+        .unwrap()
+        .to_owned()
 }
