@@ -1,3 +1,4 @@
+pub mod jumbotron;
 pub mod with_alert;
 pub mod navbar;
 pub mod page;

@@ -48,6 +48,7 @@ use rand::{rngs::OsRng, Rng};
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::process::exit;
+use crate::templates::jumbotron::Jumbotron;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -149,7 +150,7 @@ async fn main() -> std::io::Result<()> {
             .route("/logout", get().to(logout::logout_service))
             .route("/forgot", get().to(forgot::recovery_service))
             .route("/register", post().to(register::registration_service))
-            .default_service(aweb::route().to(|| HttpResponse::NotFound()))
+            .default_service(aweb::route().to(p404::not_found))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)
     .map_err(|e| {

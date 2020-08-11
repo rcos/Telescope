@@ -1,3 +1,14 @@
-body {
-    margin: 0;
+:root {
+    --rcos-color: #ff1a1a
+}
+
+.btn-rcos {
+    background: var(--rcos-color);
+    color: var(--light);
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
