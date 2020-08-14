@@ -6,28 +6,12 @@
         <title>
             {{page_title}}
         </title>
-        {{{navbar}}}
         <link rel="stylesheet" href="static/styles/base.css" type="text/css">
         <link rel="icon" type="image/png" href="static/favicon.png">
 
         <!--
-        Use W3.CSS for styling and elements. This makes a lot of stuff much easier.
-        See https://www.w3schools.com/w3css/default.asp for details.
-
-        We currently only support dark theme. We will add more options in the future.
-
-        We also import flat and metro colors sets.
-
-        We also get the W3 code color js library to do code highlighting for a few languages.
-        -->
-        <!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css"> -->
-        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
-        <script src="https://www.w3schools.com/lib/w3codecolor.js" type="application/javascript"></script>
-
-        <!-- Adding some additional styles from BootStrap
+        Use Bootstrap CSS for styling and elements. This makes a lot of stuff much easier.
+        See https://getbootstrap.com/docs/3.3/css/ for details
         -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous" />
@@ -47,90 +31,16 @@
               rel="stylesheet">
     </head>
 
-    <body>
-        <img src="/static/lockup-red.webp">
-            <div style="margin-left:80px; margin-right:80px; margin-bottom:20px;">
-                <h2>About</h2>
-                <p>
-                    Our Mission is to cultivate an inclusive, creative, and entrepreneurial
-                    community that seeks to empower students to develop open-source
-                    solutions to real-world problems. 
-                </p>
-
-                <h2>Sponsors</h2>
-                <!-- The sponsor blurbs probably need to be updated -->
-                <div class="card-columns">
-                    <div class="card">
-                        <img src="/static/sponsors/red-hat.svg" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">RedHat</h4>
-                            <p class="card-text">
-                                RedHat has funded student projects and learning workshops, including Introduction to Open Source
-                                Software.
-                            </p>
-                            <a href="https://redhat.com/about" target="_blank" class="card-link stretched-link">About</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <img src="/static/sponsors/mozilla.svg" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">Mozilla</h4>
-                            <p class="card-text">
-                                Helped with leadership program for mentors.
-                            </p>
-                            <a href="https://mozilla.org" target="_blank" class="card-link stretched-link">About</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <img src="/static/sponsors/google.svg" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">Google</h4>
-                            <p class="card-text">
-                                Donated MAGPis and Cardboard VR.
-                            </p>
-                            <a href="https://about.google" target="_blank" class="card-link stretched-link">About</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <img src="/static/sponsors/osi.webp" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">Open Source Initiative</h4>
-                            <p class="card-text">
-                                Educational Institution Member that has provided opportunities for students.
-                            </p>
-                            <a href="https://opensource.org" target="_blank" class="card-link stretched-link">About</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <img src="/static/sponsors/hfoss.webp" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">NSF HFOSS</h4>
-                            <p class="card-text">
-                                Affliated member with Trinity, Connecticut College and Wesleyan University
-                            </p>
-                            <a href="http://hfoss.org" target="_blank" class="card-link stretched-link">About</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <img src="/static/sponsors/microsoft.svg" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">Microsoft</h4>
-                            <p class="card-text">
-                                Partially Funded Student projects through the Microsoft employee program.
-                            </p>
-                            <a href="https://microsoft.com/about" target="_blank" class="card-link stretched-link">About</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <body style="background-color: #f2f2f2">
+        {{{navbar}}}
+        {{{page_body}}}
     </body>
 
-    <footer>
-        <div>
-            Sponsor logos By Source, Fair Use courtesy of WikiPedia
+    <footer class="footer text-center mt-auto py-3">
+        <div class="container">
+            <p>Telescope | An RCOS Project | Version: <code>???</code></p>
         </div>
-        <div>
+        <div class="container">
             Created by RCOS developers, for RCOS developers.
             <a href="https://github.com/rcos/Telescope/" style="color: dodgerblue">
                 Come see us on Github!
