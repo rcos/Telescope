@@ -1,21 +1,22 @@
-<!--
-We're using W3 for the navbar at the moment until we can switch it over to Bootstrap.
-See https://www.w3schools.com/w3css/default.asp for details.
--->
-<!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css"> -->
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
-<script src="https://www.w3schools.com/lib/w3codecolor.js" type="application/javascript"></script>
-
-<div id="{{id}}-modal" class="w3-modal w3-mobile">
-    <div class="w3-modal-content w3-card-4 w3-animate-top w3-container w3-mobile w3-theme-l1">
-        <i class="w3-display-topright material-icons w3-black"
-           onclick="document.getElementById('{{id}}-modal').style.display='none'">
-            close
-        </i>
-        <header class=""><h2>{{text}}</h2></header>
-        {{{inner}}}
+<div id="{{id}}-modal"
+     class="modal fade"
+     data-backdrop="static"
+     data-keyboard="false"
+     tabindex="-1"
+     aria-labelledby="{{id}}-modal-label"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h5 id="{{id}}-modal-label" class="modal-title">{{text}}</h5>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </header>
+            {{{inner}}}
+        </div>
     </div>
 </div>

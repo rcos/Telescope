@@ -2,48 +2,55 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>
             {{page_title}}
         </title>
         <link rel="stylesheet" href="static/styles/base.css" type="text/css">
         <link rel="icon" type="image/png" href="static/favicon.png">
 
-        <!--
-        Use Bootstrap CSS for styling and elements. This makes a lot of stuff much easier.
-        See https://getbootstrap.com/docs/3.3/css/ for details
-        -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous" />
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
 
-        <!--
-        Use Material Icons via css.
-        See https://material.io/resources/icons/?style=baseline.
-        -->
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-              rel="stylesheet">
-
-        <!--
-        Use font-awesome icons through CSS include.
-        See https://fontawesome.com/v4.7.0/icons/.
-        -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-              rel="stylesheet">
+        <!-- Bootstrap JS, Popper.js, and jQuery -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js" integrity="sha384-XEerZL0cuoUbHE4nZReLT7nx9gQrQreJekYhJD9WNWhH8nEW+0c5qq7aIo2Wl30J" crossorigin="anonymous"></script>
     </head>
-
-    <body style="background-color: #f2f2f2">
-        {{{navbar}}}
+    <body class="bg-light text-dark">
+        <header>
+            {{{navbar}}}
+        </header>
         {{{page_body}}}
+        <!--
+        <footer class="footer">
+            <div class="container text-center py-2">
+                <a class="bg-dark" href="https://github.com/rcos/Telescope">
+                    Telescope
+                </a>
+                Version: {{version}}
+                <br>
+                <a href="https://github.com/rcos/Telescope/issues/new/choose">
+                    Found an issue?
+                </a>
+            </div>
+        </footer>
+        -->
     </body>
 
     <footer class="footer text-center mt-auto py-3">
         <div class="container">
-            <p>Telescope | An RCOS Project | Version: <code>???</code></p>
+            <p>
+                <a href="https://github.com/rcos/Telescope/">Telescope</a>
+                |
+                <a href="https://github.com/rcos/">An RCOS Project</a>
+                | Version: <code>{{version}}</code>
+            </p>
         </div>
         <div class="container">
             Created by RCOS developers, for RCOS developers.
-            <a href="https://github.com/rcos/Telescope/" style="color: dodgerblue">
-                Come see us on Github!
+            <a href="https://github.com/rcos/Telescope/issues/new/choose">
+                Found an issue?
             </a>
         </div>
     </footer>

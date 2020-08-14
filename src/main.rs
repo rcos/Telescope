@@ -19,26 +19,36 @@ use web::*;
 mod templates;
 
 mod schema;
-mod db;
 
-/// Object model.
-mod model;
+use crate::{
+    templates::{
+        static_pages::{index::LandingPage, sponsors::SponsorsPage},
+        StaticPage,
+    },
+    web::app_data::AppData,
+};
 
-use crate::web::app_data::AppData;
 use actix_files as afs;
+
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+
 use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
-use actix_session::CookieSession;
-use actix_web::cookie::SameSite;
-use actix_web::web::{get, post};
-use actix_web::{middleware, web as aweb, App, HttpResponse, HttpServer};
+
+use actix_web::{
+    middleware, web as aweb,
+    web::{get, post},
+    App, HttpResponse, HttpServer,
+};
+
+
+use diesel::{r2d2::ConnectionManager, PgConnection};
+
+use rand::{rngs::OsRng, Rng};
+
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-use rand::rngs::OsRng;
-use rand::Rng;
 use std::process::exit;
-use std::time::Duration;
-use diesel::r2d2::ConnectionManager;
-use diesel::PgConnection;
+use crate::templates::jumbotron::Jumbotron;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -96,7 +106,7 @@ async fn main() -> std::io::Result<()> {
         // max 12 connections at once
         .max_size(12)
         // if a connection cannot be pulled from the pool in 20 seconds, timeout
-        .connection_timeout(Duration::from_secs(20))
+        .connection_timeout(std::time::Duration::from_secs(20))
         .build(manager)
         .map_err(|e| {
             error!("Could not create database connection pool {}", e);
@@ -109,9 +119,7 @@ async fn main() -> std::io::Result<()> {
     let app_data = AppData::new(template_registry, pool);
 
     // generate a random key to encrypt cookies.
-    let mut rng = OsRng::default();
-    let mut cookie_key = [0u8; 32];
-    rng.fill(&mut cookie_key);
+    let cookie_key = OsRng::default().gen::<[u8; 32]>();
 
     // memory store for rate limiting.
     let ratelimit_memstore = MemoryStore::new();
@@ -119,26 +127,30 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
-            .wrap(
-                CookieSession::signed(&cookie_key)
-                    .same_site(SameSite::Strict)
-                    .http_only(true),
-            )
+            .wrap(IdentityService::new(
+                CookieIdentityPolicy::new(&cookie_key)
+                    .name(cookies::AUTH_TOKEN)
+                    .secure(true)
+                    // Cookies / sessions expire after 24 hours
+                    .max_age_time(chrono::Duration::hours(24)),
+            ))
             .wrap(
                 RateLimiter::new(MemoryStoreActor::from(ratelimit_memstore.clone()).start())
                     // rate limit: 100 requests max per minute
-                    .with_interval(Duration::from_secs(60))
+                    .with_interval(std::time::Duration::from_secs(60))
                     .with_max_requests(100),
             )
             .wrap(middleware::Logger::default())
-            .configure(model::register)
+            .configure(web::api::register)
             .service(afs::Files::new("/static", "static"))
-            .route("/", get().to(index::index_service))
-            .route("/sponsors", get().to(sponsors::sponsors_page))
-            .route("/projects", get().to(projects::projects_page))
-            .route("/developers", get().to(developers::developers_page))
+            .route("/", get().to(LandingPage::handle))
+            .route("/sponsors", get().to(SponsorsPage::handle))
+            .route("/blog", get().to(blog::blog_service))
             .route("/login", post().to(login::login_service))
-            .default_service(aweb::route().to(|| HttpResponse::NotFound()))
+            .route("/logout", get().to(logout::logout_service))
+            .route("/forgot", get().to(forgot::recovery_service))
+            .route("/register", post().to(register::registration_service))
+            .default_service(aweb::route().to(p404::not_found))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)
     .map_err(|e| {

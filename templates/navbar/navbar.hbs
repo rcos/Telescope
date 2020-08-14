@@ -1,19 +1,37 @@
-<!--
-We're using W3 for the navbar at the moment until we can switch it over to Bootstrap.
-See https://www.w3schools.com/w3css/default.asp for details.
--->
-<!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css"> -->
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
-<script src="https://www.w3schools.com/lib/w3codecolor.js" type="application/javascript"></script>
-
-<nav class="w3-container w3-bar w3-theme w3-mobile">
-    {{#each items}}
-        {{{this.navbar_inner}}}
-    {{/each}}
+<nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
+    <a class="navbar-brand" href="/">RCOS</a>
+    <button class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbar"
+            aria-controls="navbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+    >
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <nav id="navbar" class="navbar-collapse collapse">
+        <ul class="navbar-nav mr-auto">
+            {{#each left_items}}
+                <li class="nav-item {{#if this.active}}active{{/if}}">
+                    {{{this.navbar_inner}}}
+                </li>
+            {{/each}}
+        </ul>
+        <ul class="navbar-nav">
+            {{#each right_items}}
+                <li class="nav-item {{#if this.active}}active{{/if}}">
+                    {{{this.navbar_inner}}}
+                </li>
+            {{/each}}
+        </ul>
+    </nav>
 </nav>
-{{#each items}}
+
+{{#each left_items}}
+    {{{this.body_inner}}}
+{{/each}}
+
+{{#each right_items}}
     {{{this.body_inner}}}
 {{/each}}

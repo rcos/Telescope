@@ -1,27 +1,23 @@
-use crate::web::app_data::AppData;
-use actix_session::Session;
+use crate::{web::api::ApiContext, web::app_data::AppData};
+
 use actix_web::{
-    dev::{
-        Payload,
-        PayloadStream
-    },
+    dev::{Payload, PayloadStream},
     web::Data,
-    Error,
-    FromRequest,
-    HttpRequest
+    Error, FromRequest, HttpRequest,
 };
+
 use futures::future::{ok, Ready};
+
 use handlebars::{Handlebars, RenderError};
+
 use serde::Serialize;
+
 use diesel::{
-    r2d2::{
-        ConnectionManager,
-        PooledConnection,
-        Pool
-    },
-    PgConnection
+    r2d2::{ConnectionManager, Pool, PooledConnection},
+    PgConnection,
 };
-use crate::model::root::ApiContext;
+
+use actix_identity::Identity;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -36,16 +32,16 @@ pub trait Template: Serialize + Sized {
 pub struct RequestContext {
     app_data: Data<AppData>,
     request: HttpRequest,
-    session: Session,
+    identity: Identity,
 }
 
 impl RequestContext {
     /// Construct a new page context from a request and site data.
-    pub fn new(data: Data<AppData>, request: HttpRequest, session: Session) -> Self {
+    pub fn new(data: Data<AppData>, request: HttpRequest, identity: Identity) -> Self {
         Self {
             app_data: data,
             request,
-            session,
+            identity,
         }
     }
 
@@ -55,9 +51,12 @@ impl RequestContext {
     }
 
     /// Get the associated user session (cookies) that originated with this page context.
-    pub fn session(&self) -> &Session {
-        &self.session
+    pub fn identity(&self) -> &Identity {
+        &self.identity
     }
+
+    /// Check if a user is logged in (via identity)
+    pub fn logged_in(&self) -> bool {self.identity.identity().is_some()}
 
     /// Get associated Handlebars template registry for manual template rendering.
     pub fn handlebars(&self) -> &Handlebars<'static> {
@@ -75,7 +74,8 @@ impl RequestContext {
     /// ## Panics:
     /// - If a database connection is not available.
     pub fn get_db_connection(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
-        let db_conn_pool: &Pool<ConnectionManager<PgConnection>> = &self.app_data.db_connection_pool;
+        let db_conn_pool: &Pool<ConnectionManager<PgConnection>> =
+            &self.app_data.db_connection_pool;
         db_conn_pool
             .get()
             .map_err(|e| {
@@ -104,7 +104,7 @@ impl FromRequest for RequestContext {
         let request = HttpRequest::from_request(req, payload)
             .into_inner()
             .unwrap();
-        let session = Session::from_request(req, payload).into_inner().unwrap();
-        ok(Self::new(app_data, request, session))
+        let identity = Identity::from_request(req, payload).into_inner().unwrap();
+        ok(Self::new(app_data, request, identity))
     }
 }
