@@ -1,9 +1,17 @@
-use crate::templates::navbar::login_button::LoginButton;
-use crate::web::{RequestContext, Template, cookies};
+
+use crate::{
+    templates::navbar::login_modal::LoginModal,
+    web::{cookies, RequestContext, Template},
+};
+
+use uuid::Uuid;
+
+mod login_modal;
+mod sign_up_modal;
 
 mod items;
-mod login_button;
 use items::*;
+use crate::templates::navbar::sign_up_modal::SignUpModal;
 
 /// An adapter type for items in the navbar.
 #[derive(Clone, Debug, Serialize, Default)]
@@ -12,14 +20,17 @@ pub struct NavbarItem {
     navbar_inner: String,
     /// The code (if any) that needs to be placed in the page body.
     body_inner: String,
+    /// Whether this item is active.
+    active: bool,
 }
 
 impl NavbarItem {
     /// Constructor
-    fn new(navbar_inner: String, body_inner: impl Into<String>) -> Self {
+    fn new(navbar_inner: String, body_inner: impl Into<String>, active: bool) -> Self {
         Self {
             navbar_inner,
             body_inner: body_inner.into(),
+            active,
         }
     }
 }
@@ -27,51 +38,86 @@ impl NavbarItem {
 /// A navbar definition.
 #[derive(Clone, Debug, Serialize)]
 pub struct Navbar {
-    items: Vec<NavbarItem>,
+    left_items: Vec<NavbarItem>,
+    right_items: Vec<NavbarItem>,
 }
 
 impl Navbar {
     /// Get an empty navbar object.
     const fn empty() -> Self {
-        Self { items: Vec::new() }
+        Self {
+            left_items: Vec::new(),
+            right_items: Vec::new(),
+        }
     }
 
-    /// Add a navbar item to the navbar.
-    /// Assume items are added left to right.
-    fn add(&mut self, pc: &RequestContext, item: impl MakeNavItem) -> &mut Self {
-        self.items.push(item.make(pc));
+    fn add_left(&mut self, ctx: &RequestContext, item: impl MakeNavItem) -> &mut Self {
+        self.left_items.push(item.make(ctx));
         self
     }
 
-    fn add_builder(mut self, pc: &RequestContext, item: impl MakeNavItem) -> Self {
-        self.add(pc, item);
+    fn add_right(&mut self, ctx: &RequestContext, item: impl MakeNavItem) -> &mut Self {
+        self.right_items.push(item.make(ctx));
         self
     }
 
     /// Navbar with homepage, achievement page, projects, developers and sponsors
-    fn with_defaults(pc: &RequestContext) -> Self {
-        Self::empty()
-            .add_builder(pc, NavbarLink::new("/", "RCOS"))
-            .add_builder(pc, NavbarLink::new("/projects", "Projects"))
-            .add_builder(pc, NavbarLink::new("/developers", "Developers"))
-            .add_builder(pc, NavbarLink::new("/sponsors", "Sponsors"))
+    fn with_defaults(ctx: &RequestContext) -> Self {
+        let mut r = Self::empty();
+        r.add_left(ctx, NavbarLink::new("/", "Home"))
+            .add_left(ctx, NavbarLink::new("/projects", "Projects"))
+            .add_left(ctx, NavbarLink::new("/developers", "Developers"))
+            .add_left(ctx, NavbarLink::new("/sponsors", "Sponsors"))
+            .add_left(ctx, NavbarLink::new("/blog", "Blog"));
+        return r;
+    }
+
+    /// Get a navbar without a user logged in.
+    fn without_user(ctx: &RequestContext) -> Self {
+        let mut n = Self::with_defaults(ctx);
+        n
+            .add_right(
+                ctx,
+                NavbarModal::new(
+                    "login",
+                    "Login",
+                    "btn-secondary",
+                    ctx.render(&LoginModal).unwrap()
+                )
+            )
+            .add_right(
+                ctx,
+                NavbarModal::new(
+                    "register",
+                    "Sign Up",
+                    "btn-secondary",
+                    ctx.render(&SignUpModal).unwrap()
+                )
+            );
+
+        n
     }
 
     /// Create a navbar based on the page context.
-    pub fn from_context(pc: &RequestContext) -> Self {
-        let mut navbar = Self::with_defaults(pc);
-        if let Some(session_token) = pc.session().get::<String>(cookies::SESSION_COOKIE).unwrap() {
-            // todo: change this use of unwrap into something more robust
-            unimplemented!()
-        } else {
-            navbar
-                .add(
-                    pc,
-                    NavbarModal::new("login", "Login", pc.render(&LoginButton).unwrap()).right(),
-                )
-                .add(pc, NavbarLink::new("/sign-up", "Sign Up").right());
-        }
-        return navbar;
+    pub fn from_context(ctx: &RequestContext) -> Self {
+        ctx.identity()
+            .identity()
+            .and_then(|id: String| {
+                Uuid::parse_str(id.as_str()).ok()
+            })
+            .map_or(Self::without_user(ctx), |uuid| {
+                let mut navbar = Self::with_defaults(ctx);
+                navbar
+                    .add_right(
+                        ctx,
+                        NavbarLink::new(
+                            format!("/profile/{}", uuid.to_hyphenated()),
+                            "Profile"
+                        )
+                    )
+                    .add_right(ctx, NavbarLink::new("/logout", "Logout"));
+                navbar
+            })
     }
 }
 

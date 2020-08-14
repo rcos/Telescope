@@ -15,10 +15,16 @@ clap = "~2"
 dotenv = "0.15.0"
 # actix web server
 actix-web = {version = "2.0.0", features = ["openssl"]}
+# actix runtime
 actix-rt = "1.0.0"
+# static file serving
 actix-files = "~0.2"
-actix-session = "0.3.0" # session / cookie stuff
-actix-ratelimit = "0.2.1" # ratelimiting
+## session cookies
+#actix-session = "0.3.0"
+# identity service -- cookie authentication
+actix-identity = "0.2"
+# ratelimiting
+actix-ratelimit = "0.2.1"
 # html templating.
 handlebars = {version = "3.1.0", features = ["dir_source"]}
 # tls/ssl certification.
@@ -47,3 +53,7 @@ uuid = {version = "0.7", features = ["serde", "v4"]}
 diesel = {version = "1.4.5", features = ["postgres", "r2d2", "uuidv07", "chrono", "serde_json"]}
 # GraphQL queries and API system.
 juniper = "0.14.2"
+# Date/Time utilities
+chrono = {version = "0.4", features = ["serde"]}
+# Parsing and storing URLs
+url = "2"

@@ -1,23 +1,26 @@
-pub mod root;
+mod root;
+pub use root::ApiContext;
+
+mod recoveries;
+pub use recoveries::Recovery;
+
+mod emails;
+pub use emails::Email;
 
 mod users;
 pub use users::User;
 
-use actix_web::{
-    web,
-    HttpResponse,
-    Error
-};
+mod auth;
+pub use auth::PasswordRequirements;
 
-use root::{
-    ApiContext,
-    Schema
-};
+mod confirmations;
+pub use confirmations::Confirmation;
 
-use juniper::http::{
-    GraphQLRequest,
-    graphiql::graphiql_source
-};
+use actix_web::{web, Error, HttpResponse};
+
+use root::Schema;
+
+use juniper::http::{graphiql::graphiql_source, GraphQLRequest};
 
 use crate::web::RequestContext;
 
@@ -29,17 +32,15 @@ pub async fn graphql_api(
     let api_ctx = ctx.get_api_context();
 
     let res = web::block(move || {
-            let res = data.execute(&api_ctx.schema, &api_ctx);
-            Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
-        })
-        .await
-        .map_err(Error::from)?;
+        let res = data.execute(&api_ctx.schema, &api_ctx);
+        Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
+    })
+    .await
+    .map_err(Error::from)?;
 
-    Ok(
-        HttpResponse::Ok()
-            .content_type("application/json")
-            .body(res)
-    )
+    Ok(HttpResponse::Ok()
+        .content_type("application/json")
+        .body(res))
 }
 
 /// Service for interactive GraphQL playground.

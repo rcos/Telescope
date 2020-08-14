@@ -16,10 +16,6 @@ pub struct NavbarLink {
     /// The text of the item. This may not get rendered
     /// (if using google material design font, for example, this ligatures into a single symbol)
     text: String,
-    /// Whether this item of the navbar is focussed
-    focus: bool,
-    /// Whether this item is on the right side of the navbar.
-    right: bool,
 }
 
 impl NavbarLink {
@@ -29,28 +25,20 @@ impl NavbarLink {
         Self {
             location: loc.clone(),
             text: text.into(),
-            focus: false,
-            right: false,
             is_root: loc == "/",
         }
-    }
-
-    /// Move this link to the right side of the navbar.
-    pub fn right(mut self) -> Self {
-        self.right = true;
-        self
     }
 }
 
 impl MakeNavItem for NavbarLink {
     /// Adapt a navbar link into a navbar item.
     fn make(&self, pc: &RequestContext) -> NavbarItem {
-        let mut render = self.clone();
+        let render = self.clone();
         // if the webpage path starts with the nav item location, focus on that nav item.
         let path = &render.location[1..];
         let focus = pc.request().path().starts_with(path);
-        render.focus = focus;
-        NavbarItem::new(pc.render(&render).unwrap(), "")
+        // render.focus = focus;
+        NavbarItem::new(pc.render(&render).unwrap(), "", focus)
     }
 }
 
@@ -61,31 +49,30 @@ impl Template for NavbarLink {
 /// A button that opens a modal. Used only for the login button currently.
 #[derive(Clone, Debug, Serialize)]
 pub struct NavbarModal {
-    /// If this modal is on the right side of the nav bar.
-    right: bool,
     /// The id in the html page of the modal.
     id: String,
     /// The html of the modal dialogue.
     inner: String,
     /// The header of the modal dialogue, and the text of the button.
     text: String,
+    /// The Bootstrap button class
+    button_class: String
 }
 
 impl NavbarModal {
     /// Create a new modal navbar item.
-    pub fn new(id: impl Into<String>, header: impl Into<String>, inner: impl Into<String>) -> Self {
+    pub fn new(
+        id: impl Into<String>,
+        header: impl Into<String>,
+        class: impl Into<String>,
+        inner: impl Into<String>,
+    ) -> Self {
         Self {
             id: id.into(),
             text: header.into(),
             inner: inner.into(),
-            right: false,
+            button_class: class.into()
         }
-    }
-
-    /// Set this to be on the right side of the navbar.
-    pub fn right(mut self) -> Self {
-        self.right = true;
-        self
     }
 }
 
@@ -95,6 +82,8 @@ impl MakeNavItem for NavbarModal {
         NavbarItem::new(
             pc.handlebars().render("navbar/modal-button", self).unwrap(),
             pc.handlebars().render("navbar/modal-body", self).unwrap(),
+            false,
         )
     }
 }
+

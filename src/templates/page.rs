@@ -12,6 +12,8 @@ pub struct Page {
     /// The inner html for this webpage. This is rendered unescaped. Do not let the user get stuff
     /// Ensure that no user input gets rendered into this unescaped (as it will create an XSS vulnerability).
     page_body: String,
+    /// The version of this project.
+    version: &'static str,
 }
 
 impl Page {
@@ -21,6 +23,7 @@ impl Page {
             page_title: title.into(),
             page_body: body.into(),
             navbar: pc.render(&Navbar::from_context(pc)).unwrap(),
+            version: env!("CARGO_PKG_VERSION")
         }
     }
 }
