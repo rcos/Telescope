@@ -2,13 +2,24 @@
     --rcos-color: #ff1a1a
 }
 
-.btn-rcos {
+/*
+    RCOS themed buttons.
+ */
+.btn.btn-rcos {
     background: var(--rcos-color);
     color: var(--light);
 }
 
+/*
+    Below is a set of rules to keep the footer at the bottom of the page.
+*/
+html {
+    position: relative;
+    min-height: 100%;
+}
+
 .footer {
-    position: absolute;
-    bottom: 0;
+    position: relative;
     width: 100%;
+    top: 0;
 }
