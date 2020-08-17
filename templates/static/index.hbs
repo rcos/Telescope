@@ -1,14 +1,20 @@
-<div class="container-md mt-3" role="main">
-    <div class="card bg-light text-dark mb-3 mw-100 p-2">
-        <div class="row no-gutters">
-            <div class="col-4">
-                <img class="card-img my-auto d-block" src="/static/rcos-banner.webp" alt="RCOS banner">
-            </div>
-            <div class="col-8">
+<div class="card rounded-0" style="background-color:#da291c; color:white">
+    <div class="card-body text-center">
+        <h3 class="card-title mt-3" style="font-family:Arial">Welcome to the Rensselaer Center for Open Source<h3>
+    </div>
+</div>
+
+<div class="container-md" role="main">
+    <div class="row no-gutters mt-4 ml-3">
+        <div class="col-sm-4 p-2 mt-3 ml-3">
+            <img class="card-img my-auto d-block" src="/static/rcos-banner.webp" alt="RCOS banner">
+        </div>
+        <div class="col-sm-7 ml-5">
+            <div class="card text-dark p-3 mb-3 shadow-sm" style="background-color:#eeeeee">
                 <div class="card-body">
-                    <h5 class="card-title">
+                    <h4 class="card-title">
                         Mission Statement
-                    </h5>
+                    </h4>
                     <p class="card-text">
                         Our Mission is to cultivate an inclusive, creative, and entrepreneurial
                         community that seeks to empower students to develop open-source
@@ -19,8 +25,8 @@
         </div>
     </div>
 
-    <section class="card-deck mb-3">
-        <div class="card bg-light text-dark">
+    <section class="card-deck pb-3 ml-2 mr-2 border-bottom">
+        <div class="card bg-light text-dark border-light">
             <div class="card-body text-center">
                 <h3 class="card-title">
                     Developers
@@ -33,7 +39,7 @@
                 </a>
             </div>
         </div>
-        <div class="card bg-light text-dark">
+        <div class="card bg-light text-dark border-light">
             <div class="card-body text-center">
                 <h3 class="card-title">
                     Projects
@@ -46,35 +52,82 @@
                 </a>
             </div>
         </div>
-        <div class="card bg-light text-dark">
+        <div class="card bg-light text-dark border-light">
             <div class="card-body text-center">
                 <h3 class="card-title">
-                    Sponsors
+                    Achievements
                 </h3>
                 <p class="card-text">
-                    Many thanks to our sponsors, who can be viewed here:
+                    We do cool things. Come see what those things are.
                 </p>
-                <a type="button" class="btn btn-rcos" href="/sponsors">
-                    View Sponsors
+                <a type="button" class="btn btn-rcos" href="/blog">
+                    View Achievements
                 </a>
             </div>
         </div>
     </section>
 
-    <section class="card-deck mb-3">
-        <div class="card bg-light text-dark">
-            <div class="card-body text-center">
-                <h4 class="card-title">
-                    Mattermost
-                </h4>
-                <p class="card-text">
-                    We use Mattermost to communicate about projects, meetings, and
-                    other RCOS related events.
-                </p>
-                <a type="button" class="btn btn-rcos" href="https://chat.rcos.io">
-                    RCOS Mattermost
-                </a>
+    <div class="row no-gutters mt-4 mb-3">
+        <div class="col-sm-8 p-2 pr-4" style="font-family:Arial">
+            <p class="card-text">
+                RCOS is a group of RPI students who work on  a variety of open source projects, which can be seen on the <a href="/projects">projects</a> page. To see our meeting times and presentation schedule, look <a href="https://docs.google.com/spreadsheets/d/1A6naU2lG5ALS7RELFpeG__QHaUjLbwXmCGIyzGJum7s/edit#gid=0">here</a>. For more thorough information about RCOS, consult the <a href="https://handbook.rcos.io/">RCOS Handbook<a/>.
+            </p>
+            <h4 class="card-text">Benefits of being an RCOS member</h4>
+            <ul class="card-text">
+                <li>The opportunity to help society by creating useful software.</li>
+                <li>An excellent environment to share your skills with your peers and learn from them as well.</li>
+                <li>Great practice in the code review process, a very important skill for your software career!</li>
+                <li>Practice giving and receiving feedback. Learning how to discuss technical and non-technical aspects of a project in a constructive fashion is a critical skill that employers look for!</li>
+            </ul>
+            <h4 class="card-text">Details</h4>
+            <p class="card-text">
+                Students can participate in RCOS for course credit or for a stipend. At the beginning of each semester, the Internal Advisory Board will review project proposals and decide which projects should receive financial support.
+            </p>
+            <h4 class="card-text">Contact</h4>
+            <p class="card-text">
+                For information and inquiry, please contact us via e-mail at <a href="mailto: coordinators@rcos.io">coordinators@rcos.io</a>.
+            </p>
+            <h4 class="card-text">Donations</h4>
+            <p class="card-text">
+                RCOS uses funds to financially support open source software development. Follow this <a href="https://securelb.imodules.com/s/1225/giving/index.aspx?sid=1225&gid=1&pgid=1947&cid=4524&appealcode=WGAFP&_ga=1.191668650.1206279174.1408978267">link</a> if you can help us out by donating!
+            </p>
+        </div>
+        <div class="col-sm-4">
+            <div class="card bg-light text-dark text-center mr-2 shadow-sm">
+                <h4 class="card-header">Mattermost</h4>
+                <div class="card-body">
+                    <p class="card-text">
+                        We use Mattermost to communicate about projects, meetings, and
+                        other RCOS events.
+                    </p>
+                    <a type="button" class="btn btn-rcos mt-1" href="https://chat.rcos.io">
+                        RCOS Mattermost
+                    </a>
+                </div>
+            </div>
+            <div class="card bg-light text-dark mt-4 mr-2 shadow-sm">
+                <h4 class="card-header text-center">Statistics</h4>
+                <!--
+                    Eventually these statistics need to be updated with actual data.
+                -->
+                <div class="row no-gutters mt-4 mb-3">
+                    <div class="col-sm-9 text-right">
+                        <ul class="mr-3" style="list-style-type:none;">
+                            <li>
+                                <b>Active Projects:</b> <a class="ml-4">0</a>
+                            </li>
+                            <li>
+                                <b>Past Projects:</b> <a class="ml-4">0</a>
+                            </li>
+                            <li>
+                                <b>Active Developers:</b> <a class="ml-4">0</a>
+                            </li>
+                            <li>
+                                <b>Past Developers:</b> <a class="ml-4">0</a>
+                            </li>
+                        </ul>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 </div>

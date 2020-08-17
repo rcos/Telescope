@@ -18,6 +18,10 @@ html {
     min-height: 100%;
 }
 
+a {
+    color:dodgerblue;
+}
+
 .footer {
     position: relative;
     width: 100%;

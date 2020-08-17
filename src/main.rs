@@ -22,7 +22,7 @@ mod schema;
 
 use crate::{
     templates::{
-        static_pages::{index::LandingPage, sponsors::SponsorsPage},
+        static_pages::{index::LandingPage, sponsors::SponsorsPage, projects::ProjectsPage, developers::DevelopersPage},
         StaticPage,
     },
     web::app_data::AppData,
@@ -144,6 +144,8 @@ async fn main() -> std::io::Result<()> {
             .configure(web::api::register)
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(LandingPage::handle))
+            .route("/projects", get().to(ProjectsPage::handle))
+            .route("/developers", get().to(DevelopersPage::handle))
             .route("/sponsors", get().to(SponsorsPage::handle))
             .route("/blog", get().to(blog::blog_service))
             .route("/login", post().to(login::login_service))
