@@ -88,7 +88,11 @@ impl RequestContext {
     /// Get an API context object (a partial sub-context of this context) to execute
     /// GraphQL API requests in.
     pub fn get_api_context(&self) -> ApiContext {
-        ApiContext::new(&self.app_data.db_connection_pool)
+        ApiContext {
+            connection_pool: self.app_data.db_connection_pool.clone(),
+            schema: ApiContext::get_schema(),
+            identity: self.identity.identity()
+        }
     }
 }
 

@@ -46,7 +46,7 @@ lazy_static = "1.4.0"
 # utilities for dealing with async futures
 futures = "0.3"
 # Pasword hashing and verification
-bcrypt = "0.8.1"
+rust-argon2 = "0.8"
 # Universally unique identifier generation
 uuid = {version = "0.7", features = ["serde", "v4"]}
 # ORM and query building (to interact with Postgres Database)

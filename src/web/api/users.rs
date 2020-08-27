@@ -12,7 +12,9 @@ pub struct User {
     pub id: Uuid,
     pub name: String,
     pub avi_location: Option<String>,
+    /// The hashed user password.
     #[graphql(skip)]
+    #[serde(skip)]
     pub hashed_pwd: String,
 }
 

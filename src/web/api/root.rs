@@ -8,6 +8,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
+use crate::web::RequestContext;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -18,15 +19,14 @@ pub struct ApiContext {
     pub connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// Schema object to execute GraphQl queries.
     pub schema: Schema,
+    /// Identity object to do authentication
+    pub identity: Option<String>
 }
 
 impl ApiContext {
-    /// Create a new API context object.
-    pub fn new(pool: &Pool<ConnectionManager<PgConnection>>) -> Self {
-        ApiContext {
-            schema: Schema::new(QueryRoot, MutationRoot),
-            connection_pool: pool.clone(),
-        }
+    /// Get the GraphQL schema object.
+    pub fn get_schema() -> Schema {
+        Schema::new(QueryRoot, MutationRoot)
     }
 }
 
