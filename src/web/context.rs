@@ -28,6 +28,9 @@ pub trait Template: Serialize + Sized {
     }
 }
 
+/// Database connection type.
+pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
+
 /// The items making up a page context (the context in which a request has been made.)
 pub struct RequestContext {
     app_data: Data<AppData>,
@@ -73,7 +76,7 @@ impl RequestContext {
     ///
     /// ## Panics:
     /// - If a database connection is not available.
-    pub fn get_db_connection(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
+    pub fn get_db_connection(&self) -> DbConnection {
         let db_conn_pool: &Pool<ConnectionManager<PgConnection>> =
             &self.app_data.db_connection_pool;
         db_conn_pool
@@ -88,11 +91,7 @@ impl RequestContext {
     /// Get an API context object (a partial sub-context of this context) to execute
     /// GraphQL API requests in.
     pub fn get_api_context(&self) -> ApiContext {
-        ApiContext {
-            connection_pool: self.app_data.db_connection_pool.clone(),
-            schema: ApiContext::get_schema(),
-            identity: self.identity.identity()
-        }
+        ApiContext::new(self.app_data.db_connection_pool.clone(), self)
     }
 }
 

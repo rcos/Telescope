@@ -29,7 +29,7 @@ pub async fn graphql_api(
     ctx: RequestContext,
     data: web::Json<GraphQLRequest>,
 ) -> Result<HttpResponse, Error> {
-    let api_ctx = ctx.get_api_context();
+    let api_ctx: ApiContext = ctx.get_api_context();
 
     let res = web::block(move || {
         let res = data.execute(&api_ctx.schema, &api_ctx);

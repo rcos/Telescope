@@ -2,13 +2,22 @@ use juniper::{FieldError, FieldResult, RootNode, Value};
 
 use super::User;
 use crate::schema::users::dsl::users;
-use crate::web::api::{Email, PasswordRequirements};
+
 use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
-use crate::web::RequestContext;
+
+use crate::web::{
+    RequestContext,
+    DbConnection,
+    api::{
+        Email,
+        PasswordRequirements
+    }
+};
+use actix_identity::Identity;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -16,17 +25,30 @@ pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
 /// Context accessible to juniper when resolving GraphQl API requests.
 pub struct ApiContext {
     /// Database connection pool.
-    pub connection_pool: Pool<ConnectionManager<PgConnection>>,
+    connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// Schema object to execute GraphQl queries.
     pub schema: Schema,
-    /// Identity object to do authentication
-    pub identity: Option<String>
 }
 
 impl ApiContext {
+    pub fn new(connection_pool: Pool<ConnectionManager<PgConnection>>, parent: &RequestContext) -> Self {
+        Self {
+            connection_pool,
+            schema: Self::make_schema(),
+        }
+    }
+
     /// Get the GraphQL schema object.
-    pub fn get_schema() -> Schema {
+    pub fn make_schema() -> Schema {
         Schema::new(QueryRoot, MutationRoot)
+    }
+
+    /// Get a database connection. Log any errors and then map to a juniper error type.
+    pub fn get_db_conn(&self) -> FieldResult<DbConnection> {
+        self.connection_pool.get().map_err(|e| {
+            error!("Could not get database connecttion: {}", e);
+            FieldError::new(e, Value::null())
+        })
     }
 }
 
@@ -40,10 +62,7 @@ pub struct MutationRoot;
 impl QueryRoot {
     #[graphql(description = "List of all users.")]
     pub fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
-        let mut conn = ctx.connection_pool.get().map_err(|e| {
-            error!("Could not get database connection.");
-            FieldError::new(e, Value::null())
-        })?;
+        let mut conn = ctx.get_db_conn()?;
         users.load(&conn).map_err(|e| {
             error!("Could not load users from database.");
             FieldError::new(e, Value::null())
@@ -58,6 +77,15 @@ impl QueryRoot {
     #[graphql(description = "Checks if a password is valid.")]
     pub fn password_requirements(password: String) -> PasswordRequirements {
         PasswordRequirements::for_password(&password)
+    }
+
+    #[graphql(description = "\
+        Login a user (modifying the identity token stored in the user cookies). \
+        Returns the user object of the logged in user.\
+    ")]
+    pub fn login(ctx: &ApiContext, email: String, password: String) -> FieldResult<User> {
+        let mut conn = ctx.get_db_conn()?;
+        unimplemented!()
     }
 }
 

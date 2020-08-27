@@ -5,21 +5,24 @@ use actix_web::Error;
 
 use super::root::ApiContext;
 
-#[derive(Insertable, Queryable, juniper::GraphQLObject, Debug, Clone, Serialize, Deserialize)]
+#[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]
 #[table_name = "users"]
-#[graphql(description = "An RCOS user")]
 pub struct User {
     pub id: Uuid,
     pub name: String,
     pub avi_location: Option<String>,
     /// The hashed user password.
-    #[graphql(skip)]
     #[serde(skip)]
     pub hashed_pwd: String,
 }
 
-// #[juniper::object(Context = ApiContext)]
+#[juniper::object(Context = ApiContext)]
+#[graphql(description = "An RCOS user")]
 impl User {
+    #[graphql(description = "Universally unique user identifier")]
+    pub fn id(&self) -> &Uuid {
+        &self.id
+    }
     // Create a new user from a name and a password. Randomly generate a UUID. Do not set profile
     // picture yet.
     //#[graphql(skip)]
