@@ -56,4 +56,6 @@ juniper = "0.14.2"
 # Date/Time utilities
 chrono = {version = "0.4", features = ["serde"]}
 # Parsing and storing URLs
-url = "2"
+#url = "2"
+# Regular expressions
+regex = "1"

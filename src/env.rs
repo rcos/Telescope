@@ -1,7 +1,6 @@
 use clap::{App, Arg};
 use std::env;
 use std::process::exit;
-use url::Url;
 
 const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
@@ -13,6 +12,8 @@ const SMTP_USERNAME_ENV_VAR: &'static str = "SMTP_USERNAME";
 const SMTP_PASSWORD_ENV_VAR: &'static str = "SMTP_PASSWORD";
 const SMTP_HOST_ENV_VAR: &'static str = "SMTP_HOST";
 const SMTP_PORT_ENV_VAR: &'static str = "SMTP_PORT";
+const SYSADMIN_EMAIL_ENV_VAR: &'static str = "ADMIN_EMAIL";
+const SYSADMIN_PASSWORD_ENV_VAR: &'static str = "ADMIN_PASSWORD";
 
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
@@ -34,7 +35,10 @@ pub struct Config {
     pub smtp_username: String,
     pub smtp_password: String,
     pub smtp_host: Option<String>,
-    pub smtp_port: u16
+    pub smtp_port: u16,
+
+    // Sysadmin info (email, password)
+    pub sysadmin: Option<(String, String)>,
 }
 
 lazy_static! {
@@ -149,14 +153,30 @@ fn cli() -> Config {
                 .env(SMTP_PORT_ENV_VAR)
         )
         .arg(
+            Arg::with_name("CREATE_SYSADMIN")
+                .help(&format!("Create a sysadmin account using the email and \
+                    password specified in the .env file using {} for the email \
+                    and {} for the password.",
+                              SYSADMIN_EMAIL_ENV_VAR, SYSADMIN_PASSWORD_ENV_VAR))
+                .long("create-sysadmin-account")
+                .takes_value(true)
+                .possible_values(&["true", "false"])
+                //.default_value("false")
+        )
+        .arg(
             Arg::with_name("PRODUCTION")
-                .help("Set web server to bind to localhost:443 (the standard https port).")
-                .long("production"),
+                .help("\
+                    Set web server to bind to localhost:443 (the standard https port).")
+                .long("production")
+                .short("p")
         )
         .arg(
             Arg::with_name("DEVELOPMENT")
-                .help("Set web server to bind to localhost:8443 (testing port).")
-                .long("development"),
+                .help("\
+                    Set web server to bind to localhost:8443 (testing port). \
+                    Generate an admin account unless otherwise specified.")
+                .long("development")
+                .short("d")
         )
         .get_matches();
 
@@ -184,7 +204,35 @@ fn cli() -> Config {
         smtp_host: matches.value_of(SMTP_HOST_ENV_VAR).map(|s| s.to_owned()),
         smtp_port: matches.value_of(SMTP_PORT_ENV_VAR)
             .and_then(|p| p.parse::<u16>().ok())
-            .unwrap()
+            .unwrap(),
+        sysadmin: {
+            matches.value_of("CREATE_SYSADMIN")
+                .or_else(|| {
+                    if matches.is_present("DEVELOPMENT") {
+                        Some("true")
+                    } else {
+                        None
+                    }
+                })
+                .map(|v| v == "true")
+                .map(|b| {
+                    if b {
+                        Some((
+                            env_only_required(
+                                SYSADMIN_EMAIL_ENV_VAR,
+                                "System admin login email"
+                            ),
+                            env_only_required(
+                                SYSADMIN_PASSWORD_ENV_VAR,
+                                "System admin password"
+                            )
+                        ))
+                    } else {
+                        None
+                    }
+                })
+                .flatten()
+        }
     }
 }
 
@@ -196,4 +244,13 @@ fn required(opt: Option<&str>, env: &'static str) -> String {
         })
         .unwrap()
         .to_owned()
+}
+
+fn env_only_required(env_var: &'static str, name: &str) -> String {
+    env::var(env_var)
+        .map_err(|_| {
+            error!("{} must be specified in .env file using {}.", name, env_var);
+            exit(exitcode::NOINPUT)
+        })
+        .unwrap()
 }

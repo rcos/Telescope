@@ -20,12 +20,22 @@ mod templates;
 
 mod schema;
 
+mod models;
+
 use crate::{
     templates::{
         static_pages::{index::LandingPage, sponsors::SponsorsPage},
         StaticPage,
     },
     web::app_data::AppData,
+    models::{
+        User,
+        Email,
+        password_requirements::{
+            PasswordRequirements,
+            MIN_LENGTH
+        }
+    },
 };
 
 use actix_files as afs;
@@ -37,18 +47,18 @@ use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 use actix_web::{
     middleware, web as aweb,
     web::{get, post},
-    App, HttpResponse, HttpServer,
+    App, HttpServer,
 };
 
 
-use diesel::{r2d2::ConnectionManager, PgConnection};
+use diesel::{r2d2::ConnectionManager, PgConnection, Connection, RunQueryDsl};
 
 use rand::{rngs::OsRng, Rng};
 
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::process::exit;
-use crate::templates::jumbotron::Jumbotron;
+use uuid::Uuid;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -114,6 +124,48 @@ async fn main() -> std::io::Result<()> {
         })
         .unwrap();
     info!("Created database connection pool.");
+
+    if let Some((admin_email, admin_password)) = &config.sysadmin {
+        let user: User = User::new("Telescope admin", admin_password)
+            .map_err(|e: PasswordRequirements| {
+                error!("Admin password {} failed to satisfy password requirements.", admin_password);
+                if !e.not_common_password {
+                    error!("Admin password {} is too common. Please choose a different password.", admin_password);
+                }
+                if !e.is_min_len {
+                    error!("Admin password {} is too short. \
+                        Please choose a password more than {} characters.", admin_password, MIN_LENGTH)
+                }
+                exit(exitcode::DATAERR)
+            })
+            .unwrap();
+        let email = Email::new(user.id, admin_email)
+            .unwrap_or_else(|| {
+                error!("Admin email {} is not a valid email.", admin_email);
+                exit(exitcode::DATAERR);
+            });
+
+        let conn = pool.get().unwrap();
+        conn.transaction::<(), diesel::result::Error, _>(|| {
+            use crate::schema::users::dsl::users;
+            use crate::schema::emails::dsl::emails;
+
+            diesel::insert_into(users)
+                .values(user)
+                .execute(&conn)?;
+
+            diesel::insert_into(emails)
+                .values(email)
+                .execute(&conn)?;
+
+            Ok(())
+        })
+            .map_err(|e| {
+                error!("Could not add admin user to database: {}", e);
+                exit(1)
+            })
+            .unwrap();
+    }
 
     // Create appdata object.
     let app_data = AppData::new(template_registry, pool);

@@ -1,23 +1,23 @@
 use juniper::{FieldError, FieldResult, RootNode, Value};
 
-use super::User;
-use crate::schema::users::dsl::users;
-
 use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
 
-use crate::web::{
-    RequestContext,
-    DbConnection,
-    api::{
+use crate::{
+    models::{
         Email,
-        PasswordRequirements
+        User
+    },
+    web::{
+        RequestContext,
+        DbConnection,
+        api::PasswordRequirements
     }
 };
-use actix_identity::Identity;
+use uuid::Uuid;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -28,14 +28,22 @@ pub struct ApiContext {
     connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// Schema object to execute GraphQl queries.
     pub schema: Schema,
+    /// User identity UUID.
+    identity: Uuid,
 }
 
 impl ApiContext {
-    pub fn new(connection_pool: Pool<ConnectionManager<PgConnection>>, parent: &RequestContext) -> Self {
-        Self {
-            connection_pool,
-            schema: Self::make_schema(),
-        }
+    /// Try to make a new API context. Return none if not logged in.
+    pub fn new(connection_pool: Pool<ConnectionManager<PgConnection>>, parent: &RequestContext) -> Option<Self> {
+        parent.identity()
+            .identity()
+            .map(|id| Uuid::parse_str(&id).ok())
+            .flatten()
+            .map(|uuid| Self {
+                connection_pool,
+                schema: Self::make_schema(),
+                identity: uuid
+            })
     }
 
     /// Get the GraphQL schema object.
@@ -62,6 +70,7 @@ pub struct MutationRoot;
 impl QueryRoot {
     #[graphql(description = "List of all users.")]
     pub fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
+        use crate::schema::users::dsl::*;
         let mut conn = ctx.get_db_conn()?;
         users.load(&conn).map_err(|e| {
             error!("Could not load users from database.");
@@ -77,15 +86,6 @@ impl QueryRoot {
     #[graphql(description = "Checks if a password is valid.")]
     pub fn password_requirements(password: String) -> PasswordRequirements {
         PasswordRequirements::for_password(&password)
-    }
-
-    #[graphql(description = "\
-        Login a user (modifying the identity token stored in the user cookies). \
-        Returns the user object of the logged in user.\
-    ")]
-    pub fn login(ctx: &ApiContext, email: String, password: String) -> FieldResult<User> {
-        let mut conn = ctx.get_db_conn()?;
-        unimplemented!()
     }
 }
 

@@ -2112,10 +2112,10 @@ dependencies = [
  "openssl",
  "qrcodegen",
  "rand 0.7.3",
+ "regex",
  "rust-argon2",
  "serde",
  "serde_json",
- "url",
  "uuid",
 ]
 

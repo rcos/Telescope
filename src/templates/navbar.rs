@@ -1,7 +1,7 @@
 
 use crate::{
     templates::navbar::login_modal::LoginModal,
-    web::{cookies, RequestContext, Template},
+    web::{RequestContext, Template},
 };
 
 use uuid::Uuid;

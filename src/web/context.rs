@@ -90,7 +90,7 @@ impl RequestContext {
 
     /// Get an API context object (a partial sub-context of this context) to execute
     /// GraphQL API requests in.
-    pub fn get_api_context(&self) -> ApiContext {
+    pub fn get_api_context(&self) -> Option<ApiContext> {
         ApiContext::new(self.app_data.db_connection_pool.clone(), self)
     }
 }

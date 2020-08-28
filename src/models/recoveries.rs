@@ -25,6 +25,4 @@ impl Recovery {
     fn get_expiration_from_now() -> DateTime<Local> {
         Local::now() + Self::get_expiration_duration()
     }
-
-
 }
