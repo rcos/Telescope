@@ -5,6 +5,8 @@ use serde::Serialize;
 
 pub mod index;
 pub mod sponsors;
+pub mod projects;
+pub mod developers;
 
 /// A piece of static content that can be rendered in a Page object.
 pub trait StaticPage: Serialize + Sized + Default {
