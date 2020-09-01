@@ -58,7 +58,6 @@ use rand::{rngs::OsRng, Rng};
 use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::process::exit;
-use uuid::Uuid;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -126,7 +125,7 @@ async fn main() -> std::io::Result<()> {
     info!("Created database connection pool.");
 
     if let Some((admin_email, admin_password)) = &config.sysadmin {
-        let user: User = User::new("Telescope admin", admin_password)
+        let mut user: User = User::new("Telescope admin", admin_password)
             .map_err(|e: PasswordRequirements| {
                 error!("Admin password {} failed to satisfy password requirements.", admin_password);
                 if !e.not_common_password {
@@ -144,6 +143,8 @@ async fn main() -> std::io::Result<()> {
                 error!("Admin email {} is not a valid email.", admin_email);
                 exit(exitcode::DATAERR);
             });
+
+        user.sysadmin = true;
 
         let conn = pool.get().unwrap();
         conn.transaction::<(), diesel::result::Error, _>(|| {

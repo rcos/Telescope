@@ -12,9 +12,11 @@ pub struct User {
     pub id: Uuid,
     pub name: String,
     pub avi_location: Option<String>,
-    pub bio: Option<String>,
-    pub github: Option<String>,
+    pub bio: String,
+    pub github_link: Option<String>,
     pub chat_handle: Option<String>,
+    /// Is this user a telescope admin.
+    pub sysadmin: bool,
     /// The hashed user password.
     #[serde(skip)]
     #[graphql(skip)]
@@ -62,9 +64,10 @@ impl User {
             id: uuid,
             name: name.into(),
             avi_location: None,
-            bio: None,
-            github: None,
+            bio: String::default(),
+            github_link: None,
             chat_handle: None,
+            sysadmin: false,
             hashed_pwd
         })
     }
