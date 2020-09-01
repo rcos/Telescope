@@ -3,23 +3,27 @@
 }
 
 /*
-    RCOS themed buttons.
- */
+RCOS themed buttons.
+*/
 .btn.btn-rcos {
     background: var(--rcos-color);
     color: var(--light);
 }
 
 /*
-    Below is a set of rules to keep the footer at the bottom of the page.
+RCOS Themed landing page banner
+*/
+.rcos-banner {
+    color: white;
+    background: var(--rcos-color);
+}
+
+/*
+Below is a set of rules to keep the footer at the bottom of the page.
 */
 html {
     position: relative;
     min-height: 100%;
-}
-
-a {
-    color:dodgerblue;
 }
 
 .footer {
