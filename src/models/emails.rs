@@ -8,16 +8,19 @@ lazy_static!{
     };
 }
 
+/// Field structure must match that in the SQL migration.
+/// (for diesel reasons it seems)
 #[derive(Clone, Serialize, Deserialize, Insertable, Queryable, Debug, juniper::GraphQLObject)]
 #[table_name = "emails"]
 #[graphql(description = "An email of an RCOS user.")]
 pub struct Email {
-    /// User id of associated user
-    pub user_id: Uuid,
-    /// is this email displayed on the website publicly?
-    pub is_visible: bool,
     /// The email
     pub email: String,
+    /// is this email displayed on the website publicly?
+    #[graphql(skip)]
+    pub is_visible: bool,
+    /// User id of associated user
+    pub user_id: Uuid,
 }
 
 impl Email {

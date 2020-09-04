@@ -80,7 +80,15 @@ impl QueryRoot {
 
     #[graphql(description = "List of user emails.")]
     pub fn emails(ctx: &ApiContext) -> FieldResult<Vec<Email>> {
-        unimplemented!()
+        use crate::schema::emails::dsl::*;
+        let conn = ctx.get_db_conn()?;
+        emails
+            .filter(is_visible)
+            .load(&conn)
+            .map_err(|e| {
+                error!("Could not load emails from database");
+                FieldError::new(e, Value::null())
+            })
     }
 
     #[graphql(description = "Checks if a password is valid.")]
