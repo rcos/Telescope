@@ -114,8 +114,11 @@ impl Navbar {
                             format!("/profile/{}", uuid.to_hyphenated()),
                             "Profile"
                         )
+                            .class("mr-2 mb-2 btn btn-primary")
                     )
-                    .add_right(ctx, NavbarLink::new("/logout", "Logout"));
+                    .add_right(ctx,
+                               NavbarLink::new("/logout", "Logout")
+                                   .class("mr-2 mb-2 btn btn-secondary"));
                 navbar
             })
     }

@@ -44,7 +44,7 @@ pub async fn login_service(
         let login_password: String = login.get(PASSWORD_FIELD).unwrap().clone();
         let conn_pool_clone = req_ctx.clone_connection_pool();
 
-        let mut db_res: Vec<(Uuid, String)> = block(move || {
+        let mut db_res: Vec<(Uuid, String, String)> = block(move || {
             use diesel::prelude::*;
             use crate::schema::{
                 emails::dsl::*,
@@ -54,8 +54,8 @@ pub async fn login_service(
             emails.inner_join(users)
                 .filter(email.eq(login_email))
                 .limit(1)
-                .select((id, hashed_pwd))
-                .load::<(Uuid, String)>(&conn)
+                .select((id, hashed_pwd, name))
+                .load(&conn)
         }).await?;
 
         if db_res.is_empty() {
@@ -68,7 +68,7 @@ pub async fn login_service(
             );
             Ok(HttpResponse::NotFound().body(page))
         } else {
-            let (user_id, hashed_pass) = db_res.pop().unwrap();
+            let (user_id, hashed_pass, name) = db_res.pop().unwrap();
             let verified: bool = argon2::
                 verify_encoded(hashed_pass.as_str(), login_password.as_bytes())
                 .map_err(|e| {
@@ -79,7 +79,14 @@ pub async fn login_service(
             if verified {
                 identity.remember(User::format_uuid(user_id));
                 Ok(HttpResponse::Ok()
-                    .body(LandingPage::render(&req_ctx)))
+                    .body(WithAlert::render_into_page(
+                        &req_ctx,
+                        LandingPage::PAGE_TITLE,
+                        "success",
+                        format!("Welcome {}!", name),
+                        &LandingPage
+                    ))
+                )
             }
             else {
                 let page = WithAlert::render_into_page(
