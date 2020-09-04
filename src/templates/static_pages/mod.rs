@@ -29,3 +29,7 @@ pub trait StaticPage: Serialize + Sized + Default {
         HttpResponse::Ok().body(Self::render(&ctx))
     }
 }
+
+impl<T> Template for T where T: StaticPage {
+    const TEMPLATE_NAME: &'static str = Self::TEMPLATE_NAME;
+}

@@ -74,24 +74,26 @@ impl RequestContext {
     /// Get a database connection. This may block for up to the amount of time specified
     /// in the connection pool config in `main.rs` (currently 15 sec).
     ///
-    /// ## Panics:
-    /// - If a database connection is not available.
-    pub fn get_db_connection(&self) -> DbConnection {
+    /// Return None if a connection could not be created.
+    pub fn get_db_connection(&self) -> Option<DbConnection> {
         let db_conn_pool: &Pool<ConnectionManager<PgConnection>> =
             &self.app_data.db_connection_pool;
         db_conn_pool
             .get()
-            .map_err(|e| {
-                error!("Could not get database connection: {}", e);
-                e
-            })
-            .unwrap()
+            .ok()
+    }
+
+    /// Clone the connection pool. This can be useful for async operation,
+    /// as this Context is not threadsafe (since HTTPRequest isn't) but Connection
+    /// pools are.
+    pub fn clone_connection_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
+        self.app_data.db_connection_pool.clone()
     }
 
     /// Get an API context object (a partial sub-context of this context) to execute
     /// GraphQL API requests in.
     pub fn get_api_context(&self) -> Option<ApiContext> {
-        ApiContext::new(self.app_data.db_connection_pool.clone(), self)
+        ApiContext::new(self.clone_connection_pool(), self)
     }
 }
 

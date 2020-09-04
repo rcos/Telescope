@@ -71,4 +71,11 @@ impl User {
             hashed_pwd
         })
     }
+
+    /// Format a uuid into a lowercase hyphenated string.
+    pub fn format_uuid(id: Uuid) -> String {
+        id.to_hyphenated()
+            .encode_lower(&mut Uuid::encode_buffer())
+            .to_string()
+    }
 }

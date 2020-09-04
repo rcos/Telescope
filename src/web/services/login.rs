@@ -1,17 +1,107 @@
-use crate::web::RequestContext;
-use actix_web::web::Form;
-use actix_web::HttpResponse;
+use actix_web::{
+    web::{
+        Form,
+        block
+    },
+    HttpResponse,
+    Error
+};
 use std::collections::HashMap;
 use actix_identity::Identity;
+use crate::{
+    web::{
+        RequestContext,
+        DbConnection
+    },
+    templates::{
+        with_alert::WithAlert,
+        static_pages::index::LandingPage,
+        static_pages::StaticPage
+    }
+};
+use uuid::Uuid;
+use crate::models::User;
+
+const EMAIL_FIELD: &'static str = "email";
+const PASSWORD_FIELD: &'static str = "pass";
 
 /// Guarded to only post requests.
+///
+/// On successful login, set the secret secure identity cookie
+/// to the user id and redirect the user to the page they are currently on.
+///
+/// On failure, return the landing page with an alert as to why they couldn't
+/// login.
 pub async fn login_service(
     req_ctx: RequestContext,
     login: Form<HashMap<String, String>>,
-) -> HttpResponse {
+) -> Result<HttpResponse, Error> {
     let identity: &Identity = req_ctx.identity();
+    let location = req_ctx.request().uri();
+    if login.contains_key(EMAIL_FIELD) && login.contains_key(PASSWORD_FIELD) {
+        let login_email_ref = login.get(EMAIL_FIELD).unwrap();
+        let login_email: String = login_email_ref.clone();
+        let login_password: String = login.get(PASSWORD_FIELD).unwrap().clone();
+        let conn_pool_clone = req_ctx.clone_connection_pool();
 
+        let mut db_res: Vec<(Uuid, String)> = block(move || {
+            use diesel::prelude::*;
+            use crate::schema::{
+                emails::dsl::*,
+                users::dsl::*,
+            };
+            let conn: DbConnection = conn_pool_clone.get().unwrap();
+            emails.inner_join(users)
+                .filter(email.eq(login_email))
+                .limit(1)
+                .select((id, hashed_pwd))
+                .load::<(Uuid, String)>(&conn)
+        }).await?;
 
+        if db_res.is_empty() {
+            let page = WithAlert::render_into_page(
+                &req_ctx,
+                LandingPage::PAGE_TITLE,
+                "danger",
+                format!("No user exists with email {}", login_email_ref),
+                &LandingPage
+            );
+            Ok(HttpResponse::NotFound().body(page))
+        } else {
+            let (user_id, hashed_pass) = db_res.pop().unwrap();
+            let verified: bool = argon2::
+                verify_encoded(hashed_pass.as_str(), login_password.as_bytes())
+                .map_err(|e| {
+                    error!("Argon2 verification error {}", e);
+                    e
+                })
+                .unwrap_or(false);
+            if verified {
+                identity.remember(User::format_uuid(user_id));
+                Ok(HttpResponse::Ok()
+                    .body(LandingPage::render(&req_ctx)))
+            }
+            else {
+                let page = WithAlert::render_into_page(
+                    &req_ctx,
+                    LandingPage::PAGE_TITLE,
+                    "danger",
+                    "Incorrect Password.",
+                    &LandingPage
+                );
+                Ok(HttpResponse::NotFound().body(page))
+            }
+        }
 
-    unimplemented!()
+    } else {
+        let page = WithAlert::render_into_page(
+            &req_ctx,
+            LandingPage::PAGE_TITLE,
+            "danger",
+            "Failed to login -- malformed request.",
+            &LandingPage
+        );
+        Ok(HttpResponse::BadRequest()
+            .body(page))
+    }
 }

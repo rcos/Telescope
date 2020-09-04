@@ -159,6 +159,7 @@ async fn main() -> std::io::Result<()> {
                 .values(email)
                 .execute(&conn)?;
 
+            info!("Successfully added admin user");
             Ok(())
         })
             .map_err(|e| {
