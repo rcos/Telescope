@@ -16,3 +16,5 @@ pub use recoveries::Recovery;
 pub mod password_requirements;
 #[cfg(test)]
 mod password_requirement_tests;
+
+pub mod markdown;

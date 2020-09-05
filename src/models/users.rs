@@ -8,17 +8,23 @@ use crate::web::api::PasswordRequirements;
 #[table_name = "users"]
 #[graphql(description = "A telescope user.")]
 pub struct User {
-    #[graphql(description = "Universally unique user identifier")]
+    /// User's universally unique identifier
     pub id: Uuid,
+    /// User's name.
     pub name: String,
+    /// Optionally, a link to the user's avatar (profile picture).
     pub avi_location: Option<String>,
+    /// The user's bio. This is in commonmark markdown format.
     pub bio: String,
+    /// A link to the user's Github
     pub github_link: Option<String>,
+    // FIXME: Discord & Mattermost integration.
+    /// The user's discord or mattermost chat handle.
+    /// (Since RCOS transfered to discord, this is in limbo)
     pub chat_handle: Option<String>,
     /// Is this user a telescope admin.
     pub sysadmin: bool,
     /// The hashed user password.
-    #[serde(skip)]
     #[graphql(skip)]
     pub hashed_pwd: String,
 }

@@ -57,3 +57,5 @@ juniper = "0.14.2"
 chrono = {version = "0.4", features = ["serde"]}
 # Regular expressions
 regex = "1"
+# Markdown - HTML rendering
+pulldown-cmark = "0.8"
