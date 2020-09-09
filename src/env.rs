@@ -1,6 +1,7 @@
-use clap::{App, Arg};
+use clap::{App, Arg, ArgGroup};
 use std::env;
 use std::process::exit;
+use std::path::Path;
 
 const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
 const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
@@ -14,6 +15,29 @@ const SMTP_HOST_ENV_VAR: &'static str = "SMTP_HOST";
 const SMTP_PORT_ENV_VAR: &'static str = "SMTP_PORT";
 const SYSADMIN_EMAIL_ENV_VAR: &'static str = "ADMIN_EMAIL";
 const SYSADMIN_PASSWORD_ENV_VAR: &'static str = "ADMIN_PASSWORD";
+
+/// Stores the configuration of the server's email
+#[derive(Debug, Serialize)]
+pub enum EmailConfig {
+    StubConfig {
+        sender_name: String,
+        dummy_username: String,
+        dummy_host: String
+    },
+    FileTransportConfig {
+        temp_dir: String,
+        sender_name: String,
+        dummy_username: String,
+        dummy_host: String,
+    },
+    LiveConfig {
+        port: u16,
+        host: String,
+        username: String,
+        password: String,
+        sender_name: String
+    }
+}
 
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
@@ -30,12 +54,7 @@ pub struct Config {
     pub domain: Url,
     */
 
-    // Email Parameters
-    pub smtp_sender_name: String,
-    pub smtp_username: String,
-    pub smtp_password: String,
-    pub smtp_host: Option<String>,
-    pub smtp_port: u16,
+    pub email_config: EmailConfig,
 
     // Sysadmin info (email, password)
     pub sysadmin: Option<(String, String)>,
@@ -44,6 +63,23 @@ pub struct Config {
 lazy_static! {
     /// Global web server configuration.
     pub static ref CONFIG: Config = cli();
+}
+
+/// Validate that the string has the path of a file that we can see.
+fn is_file(s: String) -> Result<(), String> {
+    let p = Path::new(&s);
+    if p.is_file() {
+        Ok(())
+    }
+    else if !p.exists() {
+        Err(format!("{} does not exist.", p.display()))
+    }
+    else if p.is_dir() {
+        Err(format!("{} is a directory.", p.display()))
+    }
+    else {
+        Err(format!("{} is not a file.", p.display()))
+    }
 }
 
 /// After the global configuration is initialized, log it as info.
@@ -61,17 +97,22 @@ fn cli() -> Config {
     // set env vars from a ".env" file if available.
     dotenv::dotenv().ok();
 
+    let global_tmp_dir = env::temp_dir().to_str().unwrap();
+
     let matches = App::new("telescope")
         .about("Telescope: the RCOS webapp.")
-        .author(env!("CARGO_PKG_AUTHORS").replace(",", "\n").as_str()) // use the authors specified in Cargo.toml at compile time.
-        .version(env!("CARGO_PKG_VERSION")) // use the version specified in Cargo.toml at compile time.
+        // use the authors specified in Cargo.toml at compile time.
+        .author(env!("CARGO_PKG_AUTHORS").replace(",", "\n").as_str())
+        // use the version specified in Cargo.toml at compile time.
+        .version(env!("CARGO_PKG_VERSION"))
         .arg(
             Arg::with_name("TLS_CERT_FILE")
                 .long("tls-cert")
                 .help("TLS/SSL certificate file. This is passed to OpenSSL.")
                 .env(TLS_CERT_FILE_ENV_VAR)
                 .takes_value(true)
-                .default_value("tls-ssl/certificate.pem"),
+                .default_value("tls-ssl/certificate.pem")
+                .validator(is_file)
         )
         .arg(
             Arg::with_name("TLS_PRIV_KEY_FILE")
@@ -79,7 +120,8 @@ fn cli() -> Config {
                 .long("tls-key")
                 .help("TLS/SSL private key file. This is passed to OpenSSL.")
                 .takes_value(true)
-                .default_value("tls-ssl/private-key.pem"),
+                .default_value("tls-ssl/private-key.pem")
+                .validator(is_file)
         )
         .arg(
             Arg::with_name("LOG_LEVEL")
@@ -109,9 +151,26 @@ fn cli() -> Config {
                 .env(DATABASE_URL_ENV_VAR),
         )
         .arg(
+            Arg::with_name("EMAIL_TRANSPORT")
+                .takes_value(true)
+                .possible_values(&[
+                    "stub", "temp-dir", "SMTP"
+                ])
+                .use_delimiter(true)
+                .short("E")
+                .long("email-transport")
+                .required_unless("DEVELOPMENT")
+                .help(format!("Stub prints emails to standard output, temp-dir saves emails in \
+                    files in {}, SMTP sends emails using an SMTP server.",
+                              env::temp_dir().display()).as_str())
+                .default_value_if("DEVELOPMENT", None, "stub")
+
+        )
+        .arg(
             Arg::with_name(SMTP_SENDER_NAME_ENV_VAR)
                 .takes_value(true)
-                .long("smpt-sender-name")
+                .empty_values(false)
+                .long("email-sender-name")
                 .help("Name associated with account verification emails.")
                 .env(SMTP_SENDER_NAME_ENV_VAR)
                 .default_value("RCOS Telescope")
@@ -135,10 +194,7 @@ fn cli() -> Config {
                 .takes_value(true)
                 .long("smtp-host")
                 .env(SMTP_HOST_ENV_VAR)
-                .help(format!(
-                    "SMTP email server host. If left unspecified, mail will be sent to {}",
-                    std::env::temp_dir().display()
-                ).as_str())
+                .help("SMTP host to use.")
         )
         .arg(
             Arg::with_name(SMTP_PORT_ENV_VAR)
@@ -159,9 +215,9 @@ fn cli() -> Config {
                     and {} for the password.",
                               SYSADMIN_EMAIL_ENV_VAR, SYSADMIN_PASSWORD_ENV_VAR))
                 .long("create-sysadmin-account")
+                .short("I")
                 .takes_value(true)
                 .possible_values(&["true", "false"])
-                //.default_value("false")
         )
         .arg(
             Arg::with_name("PRODUCTION")
@@ -174,7 +230,9 @@ fn cli() -> Config {
             Arg::with_name("DEVELOPMENT")
                 .help("\
                     Set web server to bind to localhost:8443 (testing port). \
-                    Generate an admin account unless otherwise specified.")
+                    Generate an admin account unless otherwise specified. \
+                    Print server generated emails to the standard output unless \
+                        otherwise specified")
                 .long("development")
                 .short("d")
         )

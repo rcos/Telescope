@@ -59,3 +59,5 @@ chrono = {version = "0.4", features = ["serde"]}
 regex = "1"
 # Markdown - HTML rendering
 pulldown-cmark = "0.8"
+# Sending emails.
+lettre = {version = "0.9", features = ["serde-impls"]}

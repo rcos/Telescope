@@ -13,6 +13,8 @@ pub struct User {
     /// User's name.
     pub name: String,
     /// Optionally, a link to the user's avatar (profile picture).
+    ///
+    /// Use the default statically served avatar photo if this is not available.
     pub avi_location: Option<String>,
     /// The user's bio. This is in commonmark markdown format.
     pub bio: String,
