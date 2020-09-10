@@ -86,4 +86,9 @@ impl User {
             .encode_lower(&mut Uuid::encode_buffer())
             .to_string()
     }
+
+    /// Format the associated user id into a string.
+    pub fn id_str(&self) -> String {
+        Self::format_uuid(self.id)
+    }
 }

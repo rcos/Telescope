@@ -1,20 +1,11 @@
-use clap::{App, Arg, ArgGroup};
 use std::env;
-use std::process::exit;
-use std::path::Path;
+use structopt::StructOpt;
 
-const LOG_LEVEL_ENV_VAR: &'static str = "LOG_LEVEL";
-const TLS_CERT_FILE_ENV_VAR: &'static str = "CERT_FILE";
-const TLS_PRIV_KEY_FILE_ENV_VAR: &'static str = "PRIV_KEY_FILE";
-const DATABASE_URL_ENV_VAR: &'static str = "DATABASE_URL";
-const BINDING_ENV_VAR: &'static str = "BIND_TO";
 const SMTP_SENDER_NAME_ENV_VAR: &'static str = "SMTP_SENDER_NAME";
 const SMTP_USERNAME_ENV_VAR: &'static str = "SMTP_USERNAME";
 const SMTP_PASSWORD_ENV_VAR: &'static str = "SMTP_PASSWORD";
 const SMTP_HOST_ENV_VAR: &'static str = "SMTP_HOST";
 const SMTP_PORT_ENV_VAR: &'static str = "SMTP_PORT";
-const SYSADMIN_EMAIL_ENV_VAR: &'static str = "ADMIN_EMAIL";
-const SYSADMIN_PASSWORD_ENV_VAR: &'static str = "ADMIN_PASSWORD";
 
 /// Stores the configuration of the server's email
 #[derive(Debug, Serialize)]
@@ -39,47 +30,97 @@ pub enum EmailConfig {
     }
 }
 
+// The name, about, version, and authors are given by cargo.
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
 /// a lazy static before the server is launched.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, StructOpt)]
+#[structopt(about = "The RCOS webapp", rename_all = "screaming-snake")]
 pub struct Config {
+    /// The TLS certificate. See the readme for instructions to generate your
+    /// own.
+    #[structopt(long = "tls-cert-file", default_value = "tls-ssl/certificate.pem", env)]
     pub tls_cert_file: String,
-    pub tls_key_file: String,
+
+    /// The TLS private key file. See the readme for instructions to generate
+    /// your own.
+    #[structopt(long = "tls-priv-key", default_value = "tls-ssl/private-key.pem", env)]
+    pub tls_priv_key_file: String,
+
+    /// Set the log level (or verbosity).
+    /// See https://docs.rs/env_logger/0.7.1/env_logger/ for reference.
+    #[structopt(
+        short = "v",
+        long = "log-level",
+        default_value = "info",
+        default_value_if("DEVELOPMENT", None, "info,telescope=trace"),
+        env
+    )]
+    log_level: String,
+
+    /// The URL to bind the running server to.
+    #[structopt(
+        short = "B",
+        long = "bind-to",
+        env,
+        default_value_ifs(&[
+            ("DEVELOPMENT", None, "localhost:8443"),
+            ("PRODUCTION", None, "localhost:443")
+        ]),
+    )]
     pub bind_to: String,
+
+    /// The domain that telescope is running at.
+    /// This is used to redirect callbacks to after going offsite for
+    /// authentication. This is also used to generate confirmation links
+    /// that get emailed to users.
+    #[structopt(short = "U", long = "domain", env)]
+    pub domain: String,
+
+    /// The URL the Postgres Database is running at.
+    /// This is passed directly to diesel.
+    #[structopt(short = "D", long = "database-url", env)]
     pub db_url: String,
 
-    /*
-    /// Domain. For development this will be 0.0.0.0.
-    /// For production, it will likely be rcos.io.
-    pub domain: Url,
-    */
+    /// Create a sysadmin account on startup.
+    #[structopt(
+        short = "S",
+        long = "create-sysadmin",
+        requires_all(&["SYSADMIN_EMAIL", "SYSADMIN_PASSWORD"])
+    )]
+    pub create_sysadmin: bool,
 
-    pub email_config: EmailConfig,
+    /// The email to seed the sysadmin account with.
+    #[structopt(long = "sysadmin-email", env = "ADMIN_EMAIL")]
+    pub sysadmin_email: Option<String>,
 
-    // Sysadmin info (email, password)
-    pub sysadmin: Option<(String, String)>,
+    /// The password to seed the sysadmin account with.
+    #[structopt(long = "sysadmin-pass", env = "ADMIN_PASSWORD")]
+    pub sysadmin_password: Option<String>,
+
+    /// Use Development profile. This sets the following defaults:
+    ///
+    /// BIND_TO: localhost:8443
+    #[structopt(
+        short = "d",
+        long = "development",
+        conflicts_with("PRODUCTION")
+    )]
+    development: bool,
+
+    /// Use Production profile. This sets the following defaults:
+    ///
+    /// BIND_TO: localhost:443
+    #[structopt(
+        short = "p",
+        long = "production",
+        conflicts_with("DEVELOPMENT")
+    )]
+    production: bool,
 }
 
 lazy_static! {
     /// Global web server configuration.
     pub static ref CONFIG: Config = cli();
-}
-
-/// Validate that the string has the path of a file that we can see.
-fn is_file(s: String) -> Result<(), String> {
-    let p = Path::new(&s);
-    if p.is_file() {
-        Ok(())
-    }
-    else if !p.exists() {
-        Err(format!("{} does not exist.", p.display()))
-    }
-    else if p.is_dir() {
-        Err(format!("{} is a directory.", p.display()))
-    }
-    else {
-        Err(format!("{} is not a file.", p.display()))
-    }
 }
 
 /// After the global configuration is initialized, log it as info.
@@ -98,58 +139,7 @@ fn cli() -> Config {
     dotenv::dotenv().ok();
 
     let global_tmp_dir = env::temp_dir().to_str().unwrap();
-
-    let matches = App::new("telescope")
-        .about("Telescope: the RCOS webapp.")
-        // use the authors specified in Cargo.toml at compile time.
-        .author(env!("CARGO_PKG_AUTHORS").replace(",", "\n").as_str())
-        // use the version specified in Cargo.toml at compile time.
-        .version(env!("CARGO_PKG_VERSION"))
-        .arg(
-            Arg::with_name("TLS_CERT_FILE")
-                .long("tls-cert")
-                .help("TLS/SSL certificate file. This is passed to OpenSSL.")
-                .env(TLS_CERT_FILE_ENV_VAR)
-                .takes_value(true)
-                .default_value("tls-ssl/certificate.pem")
-                .validator(is_file)
-        )
-        .arg(
-            Arg::with_name("TLS_PRIV_KEY_FILE")
-                .env(TLS_PRIV_KEY_FILE_ENV_VAR)
-                .long("tls-key")
-                .help("TLS/SSL private key file. This is passed to OpenSSL.")
-                .takes_value(true)
-                .default_value("tls-ssl/private-key.pem")
-                .validator(is_file)
-        )
-        .arg(
-            Arg::with_name("LOG_LEVEL")
-                .help("Set the log level (or verbosity). \
-                    See https://docs.rs/env_logger/0.7.1/env_logger/ for reference.")
-                .env(LOG_LEVEL_ENV_VAR)
-                .takes_value(true)
-                .long("log-level")
-                .short("v")
-                .default_value("info"),
-        )
-        .arg(
-            Arg::with_name("BIND_TO")
-                .env(BINDING_ENV_VAR)
-                .takes_value(true)
-                .short("B")
-                .long("bind-to")
-                .help("Specify where to bind the web server.")
-                .required_unless_one(&["DEVELOPMENT", "PRODUCTION"]),
-        )
-        .arg(
-            Arg::with_name(DATABASE_URL_ENV_VAR)
-                .takes_value(true)
-                .short("D")
-                .long("database-url")
-                .help("Database URL passed to diesel.")
-                .env(DATABASE_URL_ENV_VAR),
-        )
+        /*
         .arg(
             Arg::with_name("EMAIL_TRANSPORT")
                 .takes_value(true)
@@ -208,7 +198,9 @@ fn cli() -> Config {
                 .long("smtp-port")
                 .env(SMTP_PORT_ENV_VAR)
         )
-        .arg(
+        */
+    /*
+    .arg(
             Arg::with_name("CREATE_SYSADMIN")
                 .help(&format!("Create a sysadmin account using the email and \
                     password specified in the .env file using {} for the email \
@@ -219,42 +211,20 @@ fn cli() -> Config {
                 .takes_value(true)
                 .possible_values(&["true", "false"])
         )
-        .arg(
-            Arg::with_name("PRODUCTION")
-                .help("\
-                    Set web server to bind to localhost:443 (the standard https port).")
-                .long("production")
-                .short("p")
-        )
-        .arg(
-            Arg::with_name("DEVELOPMENT")
-                .help("\
-                    Set web server to bind to localhost:8443 (testing port). \
-                    Generate an admin account unless otherwise specified. \
-                    Print server generated emails to the standard output unless \
-                        otherwise specified")
-                .long("development")
-                .short("d")
-        )
-        .get_matches();
 
-    // init logger
-    env::set_var(LOG_LEVEL_ENV_VAR, matches.value_of("LOG_LEVEL").unwrap());
-    env_logger::init_from_env(LOG_LEVEL_ENV_VAR);
+     */
+    let config: Config = Config::from_args();
 
+    env_logger::builder()
+        .parse_filters(&config.log_level)
+        .init();
+
+    return config;
+
+    /*
     Config {
         tls_cert_file: matches.value_of("TLS_CERT_FILE").unwrap().to_owned(),
         tls_key_file: matches.value_of("TLS_PRIV_KEY_FILE").unwrap().to_owned(),
-        bind_to: if matches.is_present("DEVELOPMENT") {
-            Some("localhost:8443")
-        } else if matches.is_present("PRODUCTION") {
-            Some("localhost:443")
-        } else {
-            None
-        }
-        .or(matches.value_of("BIND_TO"))
-        .unwrap()
-        .to_owned(),
         db_url: required(matches.value_of(DATABASE_URL_ENV_VAR), DATABASE_URL_ENV_VAR),
         smtp_sender_name: matches.value_of(SMTP_SENDER_NAME_ENV_VAR).unwrap().to_owned(),
         smtp_username: required(matches.value_of(SMTP_USERNAME_ENV_VAR), SMTP_USERNAME_ENV_VAR),
@@ -292,23 +262,5 @@ fn cli() -> Config {
                 .flatten()
         }
     }
-}
-
-fn required(opt: Option<&str>, env: &'static str) -> String {
-    opt
-        .ok_or_else(|| {
-            error!("{} must be specified.", env);
-            exit(exitcode::NOINPUT)
-        })
-        .unwrap()
-        .to_owned()
-}
-
-fn env_only_required(env_var: &'static str, name: &str) -> String {
-    env::var(env_var)
-        .map_err(|_| {
-            error!("{} must be specified in .env file using {}.", name, env_var);
-            exit(exitcode::NOINPUT)
-        })
-        .unwrap()
+     */
 }

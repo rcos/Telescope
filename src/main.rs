@@ -10,6 +10,9 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
+#[macro_use]
+extern crate structopt;
+
 mod env;
 use crate::env::{Config, CONFIG};
 
@@ -75,11 +78,11 @@ async fn main() -> std::io::Result<()> {
         })
         .unwrap();
     tls_builder
-        .set_private_key_file(&config.tls_key_file, SslFiletype::PEM)
+        .set_private_key_file(&config.tls_priv_key_file, SslFiletype::PEM)
         .map_err(|e| {
             error!(
                 "Could not read TLS/SSL private key at {}: {}",
-                config.tls_key_file, e
+                config.tls_priv_key_file, e
             );
             exit(exitcode::NOINPUT)
         })
@@ -124,7 +127,9 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
     info!("Created database connection pool.");
 
-    if let Some((admin_email, admin_password)) = &config.sysadmin {
+    if config.create_sysadmin {
+        let admin_password = config.sysadmin_password.as_ref().unwrap();
+        let admin_email = config.sysadmin_email.as_ref().unwrap();
         let mut user: User = User::new("Telescope admin", admin_password)
             .map_err(|e: PasswordRequirements| {
                 error!("Admin password {} failed to satisfy password requirements.", admin_password);
@@ -152,14 +157,14 @@ async fn main() -> std::io::Result<()> {
             use crate::schema::emails::dsl::emails;
 
             diesel::insert_into(users)
-                .values(user)
+                .values(&user)
                 .execute(&conn)?;
 
             diesel::insert_into(emails)
                 .values(email)
                 .execute(&conn)?;
 
-            info!("Successfully added admin user");
+            info!("Successfully added admin user (id: {})", user.id_str());
             Ok(())
         })
             .map_err(|e| {

@@ -16,7 +16,12 @@ as the RCOS website.
         $ sudo apt update
         $ sudo apt install postgresql libpq-dev
         ```
-    3. Diesel client (see [https://diesel.rs/](https://diesel.rs/))
+    3. OpenSSL and libssl (see [https://www.openssl.org/](https://www.openssl.org/) for more info)
+        ```shell script
+        $ sudo apt update
+        $ sudo apt install openssl libssl-dev libssl-doc
+        ```
+    4. Diesel client (see [https://diesel.rs/](https://diesel.rs/))
         ```shell script
         $ cargo install diesel_cli --no-default-features --features postgres
         ``` 

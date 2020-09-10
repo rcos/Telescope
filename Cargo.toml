@@ -4,13 +4,14 @@ version = "0.1.0"
 authors = [
     "Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"
 ]
+description = "The RCOS webapp"
 
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 # command line argument parser
-clap = "~2"
+structopt = "0.3"
 # environment variable reading through dotenv (.env files)
 dotenv = "0.15.0"
 # actix web server
