@@ -60,6 +60,8 @@ impl ApiContext {
     }
 }
 
+impl juniper::Context for ApiContext {}
+
 /// The root of all graphql queries.
 pub struct QueryRoot;
 
@@ -68,8 +70,13 @@ pub struct MutationRoot;
 
 #[juniper::object(Context = ApiContext)]
 impl QueryRoot {
-    #[graphql(description = "List of all users.")]
-    pub fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
+    /// Telescope Version
+    fn version() -> &'static str {
+        env!("CARGO_PKG_VERSION")
+    }
+
+    /// Get a list of all users.
+    fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
         use crate::schema::users::dsl::*;
         let mut conn = ctx.get_db_conn()?;
         users.load(&conn).map_err(|e| {
@@ -78,7 +85,7 @@ impl QueryRoot {
         })
     }
 
-    #[graphql(description = "List of user emails.")]
+    /// Get a list of all emails
     pub fn emails(ctx: &ApiContext) -> FieldResult<Vec<Email>> {
         use crate::schema::emails::dsl::*;
         let conn = ctx.get_db_conn()?;
@@ -91,7 +98,7 @@ impl QueryRoot {
             })
     }
 
-    #[graphql(description = "Checks if a password is valid.")]
+    /// Check if a password satisfies password validity requirements.
     pub fn password_requirements(password: String) -> PasswordRequirements {
         PasswordRequirements::for_password(&password)
     }
