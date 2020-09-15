@@ -8,6 +8,7 @@ use crate::web::api::{
 };
 use juniper::{FieldResult, FieldError, Value};
 use crate::models::Email;
+use diesel::BoolExpressionMethods;
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]
@@ -85,7 +86,7 @@ impl User {
 
         let db_results: QueryResult<Vec<(User, Email)>> = users::table
             .inner_join(emails::table)
-            .filter(users::dsl::id.eq(self.id))
+            .filter(users::dsl::id.eq(self.id).and(emails::dsl::is_visible))
             .load(&conn);
 
         db_results
