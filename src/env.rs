@@ -1,34 +1,7 @@
 use std::env;
 use structopt::StructOpt;
-
-const SMTP_SENDER_NAME_ENV_VAR: &'static str = "SMTP_SENDER_NAME";
-const SMTP_USERNAME_ENV_VAR: &'static str = "SMTP_USERNAME";
-const SMTP_PASSWORD_ENV_VAR: &'static str = "SMTP_PASSWORD";
-const SMTP_HOST_ENV_VAR: &'static str = "SMTP_HOST";
-const SMTP_PORT_ENV_VAR: &'static str = "SMTP_PORT";
-
-/// Stores the configuration of the server's email
-#[derive(Debug, Serialize)]
-pub enum EmailConfig {
-    StubConfig {
-        sender_name: String,
-        dummy_username: String,
-        dummy_host: String
-    },
-    FileTransportConfig {
-        temp_dir: String,
-        sender_name: String,
-        dummy_username: String,
-        dummy_host: String,
-    },
-    LiveConfig {
-        port: u16,
-        host: String,
-        username: String,
-        password: String,
-        sender_name: String
-    }
-}
+use std::path::PathBuf;
+use structopt::clap::ArgGroup;
 
 // The name, about, version, and authors are given by cargo.
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
@@ -59,7 +32,7 @@ pub struct Config {
 
     /// The URL to bind the running server to.
     #[structopt(
-        short = "B",
+        short = "b",
         long = "bind-to",
         env,
         default_value_ifs(&[
@@ -97,13 +70,99 @@ pub struct Config {
     #[structopt(long = "sysadmin-pass", env = "ADMIN_PASSWORD")]
     pub sysadmin_password: Option<String>,
 
+    /// Set how sending emails to users is handled.
+    /// There are three options here:
+    /// - Stub: Print generated emails to the standard output
+    /// - File: Save emails to a directory in the file system.
+    /// - SMTP: Log into an email server over smtp and send the generated
+    ///     emails to their recipients.
+    #[structopt(
+        short = "e",
+        long = "email",
+        env = "EMAIL",
+        default_value_if("DEVELOPMENT", None, "stub"),
+        possible_values(&[
+            "stub",
+            "file",
+            "smtp"
+        ]),
+        requires_all(&[
+            "EMAIL_SENDER_NAME",
+            "EMAIL_USER",
+            "EMAIL_HOST",
+        ]),
+        requires_ifs(&[
+            ("smtp", "SMTP_PASSWORD"),
+            ("smtp", "SMTP_PORT"),
+            // name of manually created group later
+            ("file", "EMAIL_FILE_OPTION"),
+        ])
+    )]
+    pub email_senders: Vec<String>,
+
+    /// Display name of the sender of system emails.
+    #[structopt(
+        long = "email-sender-name",
+        env = "EMAIL_SENDER",
+        default_value_if("DEVELOPMENT", None, "RCOS Telescope")
+    )]
+    pub email_sender_name: Option<String>,
+
+    /// The username in the server email address
+    /// (the part before the @ symbol).
+    #[structopt(
+        long = "email-user",
+        env,
+        default_value_if("DEVELOPMENT", None, "telescope")
+    )]
+    pub email_user: Option<String>,
+
+    // email_file_dir and email_use_temp_dir are grouped together manually using
+    // clap in the cli function. This just makes specifying the requirement rules
+    // easier.
+
+    /// The directory to save emails to when saving emails to the
+    /// filesystem.
+    #[structopt(
+        long = "email-file-dir",
+        env,
+    )]
+    pub email_file_dir: Option<PathBuf>,
+
+    /// Default the email save directory to the system temp directory.
+    /// The location of this will be operating system dependent.
+    #[structopt(long = "email-sys-temp")]
+    email_use_temp_dir: bool,
+
+    /// The host in the server email address.
+    /// (the part after the @ symbol).
+    #[structopt(
+        long = "email-host",
+        env,
+        default_value_if("DEVELOPMENT", None, "rcos.io")
+    )]
+    pub email_host: Option<String>,
+
+    /// The host to log into via SMTP to send emails to users.
+    #[structopt(long = "smtp-password", env)]
+    pub smtp_password: Option<String>,
+
+    /// The port of the SMTP server that this server uses to send mail.
+    #[structopt(long = "smtp-port", env)]
+    pub smtp_port: Option<u16>,
+
     /// Use Development profile. This sets the following defaults:
     ///
     /// BIND_TO: localhost:8443
+    /// LOG_LEVEL: info,telescope=trace
+    /// EMAIL_SENDER: RCOS Telescope
+    /// EMAIL: stub
+    /// EMAIL_USER: telescope
+    /// EMAIL_HOST: rcos.io
     #[structopt(
         short = "d",
         long = "development",
-        conflicts_with("PRODUCTION")
+        conflicts_with("PRODUCTION"),
     )]
     development: bool,
 
@@ -139,128 +198,22 @@ fn cli() -> Config {
     dotenv::dotenv().ok();
 
     let global_tmp_dir = env::temp_dir().to_str().unwrap();
-        /*
-        .arg(
-            Arg::with_name("EMAIL_TRANSPORT")
-                .takes_value(true)
-                .possible_values(&[
-                    "stub", "temp-dir", "SMTP"
-                ])
-                .use_delimiter(true)
-                .short("E")
-                .long("email-transport")
-                .required_unless("DEVELOPMENT")
-                .help(format!("Stub prints emails to standard output, temp-dir saves emails in \
-                    files in {}, SMTP sends emails using an SMTP server.",
-                              env::temp_dir().display()).as_str())
-                .default_value_if("DEVELOPMENT", None, "stub")
+    let mut config: Config = Config::from_clap(
+        &Config::clap()
+            .group(
+                ArgGroup::with_name("EMAIL_FILE_OPTION")
+                    .args(&["EMAIL_USE_TEMP_DIR", "EMAIL_FILE_DIR"])
+            )
+            .get_matches()
+    );
 
-        )
-        .arg(
-            Arg::with_name(SMTP_SENDER_NAME_ENV_VAR)
-                .takes_value(true)
-                .empty_values(false)
-                .long("email-sender-name")
-                .help("Name associated with account verification emails.")
-                .env(SMTP_SENDER_NAME_ENV_VAR)
-                .default_value("RCOS Telescope")
-        )
-        .arg(
-            Arg::with_name(SMTP_USERNAME_ENV_VAR)
-                .takes_value(true)
-                .long("smtp-username")
-                .help("Username to access SMTP email server.")
-                .env(SMTP_USERNAME_ENV_VAR)
-        )
-        .arg(
-            Arg::with_name(SMTP_PASSWORD_ENV_VAR)
-                .takes_value(true)
-                .long("smtp-pass")
-                .help("Password to access SMTP email server.")
-                .env(SMTP_PASSWORD_ENV_VAR)
-        )
-        .arg(
-            Arg::with_name(SMTP_HOST_ENV_VAR)
-                .takes_value(true)
-                .long("smtp-host")
-                .env(SMTP_HOST_ENV_VAR)
-                .help("SMTP host to use.")
-        )
-        .arg(
-            Arg::with_name(SMTP_PORT_ENV_VAR)
-                .takes_value(true)
-                .validator(|e| e.parse::<u16>()
-                    .map_err(|e| e.to_string())
-                    .map(|_| ())
-                )
-                .help("SMTP email server port")
-                .default_value("25")
-                .long("smtp-port")
-                .env(SMTP_PORT_ENV_VAR)
-        )
-        */
-    /*
-    .arg(
-            Arg::with_name("CREATE_SYSADMIN")
-                .help(&format!("Create a sysadmin account using the email and \
-                    password specified in the .env file using {} for the email \
-                    and {} for the password.",
-                              SYSADMIN_EMAIL_ENV_VAR, SYSADMIN_PASSWORD_ENV_VAR))
-                .long("create-sysadmin-account")
-                .short("I")
-                .takes_value(true)
-                .possible_values(&["true", "false"])
-        )
-
-     */
-    let config: Config = Config::from_args();
+    if config.email_use_temp_dir {
+        config.email_file_dir = Some(env::temp_dir());
+    }
 
     env_logger::builder()
         .parse_filters(&config.log_level)
         .init();
 
     return config;
-
-    /*
-    Config {
-        tls_cert_file: matches.value_of("TLS_CERT_FILE").unwrap().to_owned(),
-        tls_key_file: matches.value_of("TLS_PRIV_KEY_FILE").unwrap().to_owned(),
-        db_url: required(matches.value_of(DATABASE_URL_ENV_VAR), DATABASE_URL_ENV_VAR),
-        smtp_sender_name: matches.value_of(SMTP_SENDER_NAME_ENV_VAR).unwrap().to_owned(),
-        smtp_username: required(matches.value_of(SMTP_USERNAME_ENV_VAR), SMTP_USERNAME_ENV_VAR),
-        smtp_password: required(matches.value_of(SMTP_PASSWORD_ENV_VAR), SMTP_PASSWORD_ENV_VAR),
-        smtp_host: matches.value_of(SMTP_HOST_ENV_VAR).map(|s| s.to_owned()),
-        smtp_port: matches.value_of(SMTP_PORT_ENV_VAR)
-            .and_then(|p| p.parse::<u16>().ok())
-            .unwrap(),
-        sysadmin: {
-            matches.value_of("CREATE_SYSADMIN")
-                .or_else(|| {
-                    if matches.is_present("DEVELOPMENT") {
-                        Some("true")
-                    } else {
-                        None
-                    }
-                })
-                .map(|v| v == "true")
-                .map(|b| {
-                    if b {
-                        Some((
-                            env_only_required(
-                                SYSADMIN_EMAIL_ENV_VAR,
-                                "System admin login email"
-                            ),
-                            env_only_required(
-                                SYSADMIN_PASSWORD_ENV_VAR,
-                                "System admin password"
-                            )
-                        ))
-                    } else {
-                        None
-                    }
-                })
-                .flatten()
-        }
-    }
-     */
 }
