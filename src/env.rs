@@ -46,7 +46,7 @@ pub struct Config {
     /// This is used to redirect callbacks to after going offsite for
     /// authentication. This is also used to generate confirmation links
     /// that get emailed to users.
-    #[structopt(short = "U", long = "domain", env)]
+    #[structopt(long = "domain", env)]
     pub domain: String,
 
     /// The URL the Postgres Database is running at.
