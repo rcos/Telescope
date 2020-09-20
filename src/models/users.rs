@@ -12,6 +12,8 @@ use crate::{
 };
 
 use juniper::{FieldResult, FieldError, Value};
+use actix_web::web::block;
+use crate::web::{RequestContext, DbConnection};
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]
@@ -164,5 +166,26 @@ impl User {
     /// Format the associated user id into a string.
     pub fn id_str(&self) -> String {
         Self::format_uuid(self.id)
+    }
+
+    /// Get a user from the database by user id asynchronously.
+    ///
+    /// Return none if user is not found.
+    pub async fn get_from_db_by_id(conn: DbConnection, uid: Uuid) -> Option<User> {
+        use crate::schema::users::dsl::*;
+        use diesel::prelude::*;
+
+        block(move || {
+            users
+                .find(uid)
+                .first::<User>(&conn)
+                .optional()
+        })
+            .await
+            .map_err(|e| {
+                error!("Could not get user from database: {}", e);
+                e
+            })
+            .unwrap()
     }
 }

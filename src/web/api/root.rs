@@ -54,7 +54,7 @@ impl ApiContext {
     /// Get a database connection. Log any errors and then map to a juniper error type.
     pub fn get_db_conn(&self) -> FieldResult<DbConnection> {
         self.connection_pool.get().map_err(|e| {
-            error!("Could not get database connecttion: {}", e);
+            error!("Could not get database connection: {}", e);
             FieldError::new(e, Value::null())
         })
     }
