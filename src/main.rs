@@ -13,8 +13,6 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
-#[macro_use]
-extern crate structopt;
 
 mod env;
 use crate::env::{Config, CONFIG};

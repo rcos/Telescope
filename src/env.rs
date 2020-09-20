@@ -197,7 +197,6 @@ fn cli() -> Config {
     // set env vars from a ".env" file if available.
     dotenv::dotenv().ok();
 
-    let global_tmp_dir = env::temp_dir().to_str().unwrap();
     let mut config: Config = Config::from_clap(
         &Config::clap()
             .group(

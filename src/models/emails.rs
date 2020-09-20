@@ -4,7 +4,6 @@ use regex::Regex;
 use crate::web::api::ApiContext;
 use juniper::{FieldResult, FieldError, Value};
 use crate::models::User;
-use diesel::QueryDsl;
 
 lazy_static!{
     static ref EMAIL_REGEX: Regex = {

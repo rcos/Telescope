@@ -2,13 +2,16 @@ use crate::schema::users;
 use uuid::Uuid;
 
 use argon2::{self, Config};
-use crate::web::api::{
-    PasswordRequirements,
-    ApiContext
+
+use crate::{
+    models::Email,
+    web::api::{
+        PasswordRequirements,
+        ApiContext
+    }
 };
+
 use juniper::{FieldResult, FieldError, Value};
-use crate::models::Email;
-use diesel::BoolExpressionMethods;
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]

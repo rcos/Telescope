@@ -37,7 +37,6 @@ pub async fn login_service(
     login: Form<HashMap<String, String>>,
 ) -> Result<HttpResponse, Error> {
     let identity: &Identity = req_ctx.identity();
-    let location = req_ctx.request().uri();
     if login.contains_key(EMAIL_FIELD) && login.contains_key(PASSWORD_FIELD) {
         let login_email_ref = login.get(EMAIL_FIELD).unwrap();
         let login_email: String = login_email_ref.clone();
