@@ -1,4 +1,7 @@
 #[macro_use]
+extern crate actix_web;
+
+#[macro_use]
 extern crate log;
 
 #[macro_use]
@@ -45,7 +48,7 @@ use actix_files as afs;
 
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 
-use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
+//use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
 use actix_web::{
     middleware, web as aweb,
@@ -113,7 +116,7 @@ async fn main() -> std::io::Result<()> {
     info!("Handlebars templates registered.");
 
     // Set up database connection pool.
-    let manager = ConnectionManager::<PgConnection>::new(&config.db_url);
+    let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
     let pool = diesel::r2d2::Pool::builder()
         // max 12 connections at once
         .max_size(12)
@@ -180,8 +183,10 @@ async fn main() -> std::io::Result<()> {
     // generate a random key to encrypt cookies.
     let cookie_key = OsRng::default().gen::<[u8; 32]>();
 
+    /*
     // memory store for rate limiting.
     let ratelimit_memstore = MemoryStore::new();
+     */
 
     HttpServer::new(move || {
         App::new()
@@ -191,20 +196,23 @@ async fn main() -> std::io::Result<()> {
                     .name(cookies::AUTH_TOKEN)
                     .secure(true)
                     // Cookies / sessions expire after 24 hours
-                    .max_age_time(chrono::Duration::hours(24)),
+                    .max_age_time(time::Duration::hours(24)),
             ))
+            /*
             .wrap(
                 RateLimiter::new(MemoryStoreActor::from(ratelimit_memstore.clone()).start())
                     // rate limit: 100 requests max per minute
                     .with_interval(std::time::Duration::from_secs(60))
                     .with_max_requests(100),
             )
+             */
             .wrap(middleware::Logger::default())
             .configure(web::api::register)
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(LandingPage::handle))
             .route("/projects", get().to(ProjectsPage::handle))
             .route("/developers", get().to(DevelopersPage::handle))
+            .service(profile::profile_service)
             .route("/sponsors", get().to(SponsorsPage::handle))
             .route("/blog", get().to(blog::blog_service))
             .route("/login", post().to(login::login_service))

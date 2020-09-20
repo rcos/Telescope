@@ -52,7 +52,7 @@ pub struct Config {
     /// The URL the Postgres Database is running at.
     /// This is passed directly to diesel.
     #[structopt(short = "D", long = "database-url", env)]
-    pub db_url: String,
+    pub database_url: String,
 
     /// Create a sysadmin account on startup.
     #[structopt(

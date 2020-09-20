@@ -29,7 +29,7 @@ pub struct ApiContext {
     /// Schema object to execute GraphQl queries.
     pub schema: Schema,
     /// User identity UUID.
-    identity: Uuid,
+    pub identity: Uuid,
 }
 
 impl ApiContext {
@@ -73,6 +73,22 @@ impl QueryRoot {
     /// Telescope Version
     fn version() -> &'static str {
         env!("CARGO_PKG_VERSION")
+    }
+
+    /// Get the currently logged in user.
+    fn me(ctx: &ApiContext) -> FieldResult<User> {
+        use crate::schema::users::dsl::*;
+
+        let uid = ctx.identity;
+        let mut conn = ctx.get_db_conn()?;
+
+        users
+            .find(uid)
+            .first(&conn)
+            .map_err(|e| {
+                error!("Could not find user for id {}: {}", uid, e);
+                FieldError::new("User not found.", Value::null())
+            })
     }
 
     /// Get a list of all users.

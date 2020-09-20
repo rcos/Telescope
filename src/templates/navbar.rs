@@ -118,7 +118,9 @@ impl Navbar {
                     )
                     .add_right(ctx,
                                NavbarLink::new("/logout", "Logout")
-                                   .class("mr-2 mb-2 btn btn-secondary"));
+                                   .class("mr-2 mb-2 btn btn-secondary"))
+                    // Add API access for users.
+                    .add_left(ctx, NavbarLink::new("/playground", "API"));
                 navbar
             })
     }
