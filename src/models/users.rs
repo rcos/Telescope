@@ -188,4 +188,25 @@ impl User {
             })
             .unwrap()
     }
+
+    /// Get a user's emails from the database. Return empty vector if there are no
+    /// emails found. Returned emails will be sorted by visibility, and then
+    /// alphabetically.
+    pub async fn get_emails_from_db(conn: DbConnection, uid: Uuid) -> Vec<Email> {
+        use crate::schema::emails::dsl::*;
+        use diesel::prelude::*;
+
+        block::<_, Vec<Email>, _>(move || {
+            emails
+                .filter(user_id.eq(uid))
+                .order((is_visible.asc(), email.asc()))
+                .load(&conn)
+        })
+            .await
+            .map_err(|e| {
+                error!("Could not query database: {}", e);
+                e
+            })
+            .unwrap()
+    }
 }
