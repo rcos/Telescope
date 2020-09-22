@@ -30,9 +30,9 @@ impl WithAlert {
         alert_content: impl Into<String>,
         base: &T
     ) -> String {
-        let base_rendered = renderer.render(base).unwrap();
+        let base_rendered = renderer.render(base);
         let w_alert = Self::new(alert_content, alert_class, base_rendered);
-        renderer.render(&w_alert).unwrap()
+        renderer.render(&w_alert)
     }
 
     /// Render an alert above a template and then place the entire thing in a
@@ -46,7 +46,7 @@ impl WithAlert {
     ) -> String {
         let page_content = Self::on_template(renderer, alert_class, alert_content, base);
         let page_template = Page::new(page_title, page_content, renderer);
-        renderer.render(&page_template).unwrap()
+        renderer.render(&page_template)
     }
 }
 

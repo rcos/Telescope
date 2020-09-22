@@ -82,7 +82,7 @@ impl Navbar {
                     "login",
                     "Login",
                     "btn-secondary",
-                    ctx.render(&LoginModal).unwrap()
+                    ctx.render(&LoginModal)
                 )
             )
             .add_right(
@@ -91,7 +91,7 @@ impl Navbar {
                     "register",
                     "Sign Up",
                     "btn-secondary",
-                    ctx.render(&SignUpModal).unwrap()
+                    ctx.render(&SignUpModal)
                 )
             );
 

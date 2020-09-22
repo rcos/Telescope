@@ -1,19 +1,20 @@
-use crate::schema::users;
-use uuid::Uuid;
-
-use argon2::{self, Config};
 
 use crate::{
+    schema::users,
     models::Email,
-    web::api::{
-        PasswordRequirements,
-        ApiContext
+    web::{
+        DbConnection,
+        api::{
+            PasswordRequirements,
+            ApiContext
+        }
     }
 };
 
-use juniper::{FieldResult, FieldError, Value};
+use argon2::{self, Config};
 use actix_web::web::block;
-use crate::web::{RequestContext, DbConnection};
+use juniper::{FieldResult, FieldError, Value};
+use uuid::Uuid;
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]
@@ -189,10 +190,11 @@ impl User {
             .unwrap()
     }
 
+    // TODO: Test?
     /// Get a user's emails from the database. Return empty vector if there are no
     /// emails found. Returned emails will be sorted by visibility, and then
     /// alphabetically.
-    pub async fn get_emails_from_db(conn: DbConnection, uid: Uuid) -> Vec<Email> {
+    pub async fn get_emails_from_db_by_id(conn: DbConnection, uid: Uuid) -> Vec<Email> {
         use crate::schema::emails::dsl::*;
         use diesel::prelude::*;
 
@@ -208,5 +210,10 @@ impl User {
                 e
             })
             .unwrap()
+    }
+
+    /// See the get_emails_from_db_by_id
+    pub async fn get_emails_from_db(&self, conn: DbConnection) -> Vec<Email> {
+        User::get_emails_from_db_by_id(conn, self.id).await
     }
 }

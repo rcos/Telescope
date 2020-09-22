@@ -1,5 +1,16 @@
 <div class="container-md" role="main">
-    <h4> {{name}} </h4>
-    {{#if picture}}
-    {{/if}}
+    <div class="card text-dark">
+        <div class="row no-gutters">
+            <div class="col-md-3 mr-3">
+                <img src="{{{picture}}}" alt="Profile Picture" class="card-img">
+            </div>
+            <div class="col-md-8 mt-1">
+                <h2> {{name}} </h2>
+                <div class="card-text">
+                    <h5 class="text-muted">Bio</h5>
+                    {{{bio}}}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

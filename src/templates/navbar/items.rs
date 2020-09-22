@@ -46,11 +46,12 @@ impl MakeNavItem for NavbarLink {
     /// Adapt a navbar link into a navbar item.
     fn make(&self, pc: &RequestContext) -> NavbarItem {
         let render = self.clone();
-        // if the webpage path starts with the nav item location, focus on that nav item.
-        let path = &render.location[1..];
-        let focus = pc.request().path().starts_with(path);
+        // if the webpage path is the same as the nav item location,
+        // focus on that nav item.
+        let path = render.location.as_str();
+        let focus = pc.request().path() == render.location;
         // render.focus = focus;
-        NavbarItem::new(pc.render(&render).unwrap(), "", focus)
+        NavbarItem::new(pc.render(&render), "", focus)
     }
 }
 

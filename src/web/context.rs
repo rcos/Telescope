@@ -67,8 +67,13 @@ impl RequestContext {
     }
 
     /// Render a template using the handlebars templates in this context.
-    pub fn render<T: Template>(&self, template: &T) -> Result<String, RenderError> {
+    pub fn render<T: Template>(&self, template: &T) -> String {
         template.render(self.app_data.template_registry.as_ref())
+            .map_err(|e| {
+                error!("Handlebars rendering error: {}", e);
+                e
+            })
+            .unwrap_or("Handlebars rendering error".into())
     }
 
     /// Get a database connection. This may block for up to the amount of time specified
