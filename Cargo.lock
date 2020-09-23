@@ -2410,7 +2410,6 @@ version = "0.1.0"
 dependencies = [
  "actix-files",
  "actix-identity",
- "actix-rt",
  "actix-web",
  "chrono",
  "diesel",

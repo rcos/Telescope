@@ -1,12 +1,30 @@
-use crate::{web::api::ApiContext, web::app_data::AppData};
+use crate::{
+    web::{
+        api::ApiContext,
+        app_data::AppData
+    },
+    models::User
+};
 
 use actix_web::{
     dev::{Payload, PayloadStream},
-    web::Data,
-    Error, FromRequest, HttpRequest,
+    web::{
+        Data,
+        block
+    },
+    Error,
+    FromRequest,
+    HttpRequest,
 };
 
-use futures::future::{ok, Ready};
+use futures::future::{
+    ok,
+    err,
+    Ready,
+    FutureExt,
+    TryFutureExt,
+    BoxFuture
+};
 
 use handlebars::{Handlebars, RenderError};
 
@@ -18,6 +36,7 @@ use diesel::{
 };
 
 use actix_identity::Identity;
+use uuid::Uuid;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -119,5 +138,45 @@ impl FromRequest for RequestContext {
             .unwrap();
         let identity = Identity::from_request(req, payload).into_inner().unwrap();
         ok(Self::new(app_data, request, identity))
+    }
+}
+
+/// The user currently logged in.
+impl FromRequest for User {
+    // We loose actix's error reporting here because actix-web's errors are not thread
+    // safe for some reason.
+    type Error = ();
+    type Future = BoxFuture<'static, Result<Self, Self::Error>>;
+    type Config = ();
+
+    fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
+        let ctx = RequestContext::from_request(req, payload)
+            .into_inner()
+            // this should unwrap fine as long as the implementation above
+            // always returns ok
+            .unwrap();
+
+        let db_conn_pool = ctx.clone_connection_pool();
+        let uid_res = ctx
+            .identity
+            .identity()
+            .ok_or(())
+            .and_then(|s| Uuid::parse_str(s.as_str()).map_err(|_| ()));
+
+        if uid_res.is_err() {
+            return err(uid_res.err().unwrap()).boxed();
+        }
+
+        let uid = uid_res.unwrap();
+
+        block(move || db_conn_pool.get())
+            .boxed()
+            .map_err(move |_| ())
+            .boxed()
+            .and_then(move |conn: DbConnection| {
+                User::get_from_db_by_id(conn, uid)
+                    .then(|opt| async { opt.ok_or(()) })
+            })
+            .boxed()
     }
 }

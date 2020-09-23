@@ -121,4 +121,8 @@ impl QueryRoot {
 }
 
 #[juniper::object(Context = ApiContext)]
-impl MutationRoot {}
+impl MutationRoot {
+    pub fn change_name() -> User {
+        unimplemented!()
+    }
+}

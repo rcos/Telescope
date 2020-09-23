@@ -16,8 +16,6 @@ structopt = "0.3"
 dotenv = "0.15.0"
 # actix web server
 actix-web = {version = "3", features = ["openssl"]}
-# actix runtime
-actix-rt = "1.0.0"
 # static file serving
 actix-files = "0.3"
 # identity service -- cookie authentication

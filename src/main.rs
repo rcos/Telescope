@@ -63,7 +63,7 @@ use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::process::exit;
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
