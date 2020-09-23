@@ -20,9 +20,6 @@ use crate::{
     }
 };
 
-use futures::future::OptionFuture;
-use futures::TryFutureExt;
-
 /// The service to display a user profile. The user is specified by the id in the
 /// request path.
 #[get("/profile/{uid}")]

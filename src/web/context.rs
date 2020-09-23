@@ -19,11 +19,8 @@ use actix_web::{
 
 use futures::future::{
     ok,
-    err,
     Ready,
-    FutureExt,
     TryFutureExt,
-    BoxFuture
 };
 
 use handlebars::{Handlebars, RenderError};
@@ -125,11 +122,7 @@ impl RequestContext {
 
     /// Asynchronously get the logged in user if there is one.
     pub async fn user_identity(&self) -> Option<User> {
-        let id = self.identity
-            .identity()
-            .and_then(|s| Uuid::parse_str(s.as_str()).ok());
-
-        match id {
+        match self.user_id_identity() {
             Some(uid) =>  {
                 User::get_from_db_by_id(
                     self.get_db_connection().await,
@@ -138,6 +131,14 @@ impl RequestContext {
             },
             None => None
         }
+    }
+
+    /// Get the user id of the logged in user. This should be preferred
+    /// to `get_user_identity` when possible to avoid an extra database query.
+    pub fn user_id_identity(&self) -> Option<Uuid> {
+        self.identity
+            .identity()
+            .and_then(|s| Uuid::parse_str(s.as_str()).ok())
     }
 }
 
