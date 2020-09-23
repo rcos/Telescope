@@ -95,18 +95,18 @@ impl RequestContext {
             .unwrap_or("Handlebars rendering error".into())
     }
 
-    /// Get a database connection. This may block for up to the amount of time specified
-    /// in the connection pool config in `main.rs` (currently 15 sec).
-    /// If a connection is not available, this method will panic.
-    pub fn get_db_connection(&self) -> DbConnection {
-        let db_conn_pool: &Pool<ConnectionManager<PgConnection>> =
-            &self.app_data.db_connection_pool;
-        db_conn_pool
-            .get()
-            .map_err(|e| {
-                error!("Could not get database connection: {}", e);
-                e
-            })
+    /// Asynchronously get a database connection.
+    pub async fn get_db_connection(&self) -> DbConnection {
+        let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_connection_pool();
+        block(move || {
+            db_conn_pool
+                .get()
+                .map_err(|e| {
+                    error!("Could not get database connection: {}", e);
+                    e
+                })
+        })
+            .await
             .unwrap()
     }
 
@@ -121,6 +121,23 @@ impl RequestContext {
     /// GraphQL API requests in.
     pub fn get_api_context(&self) -> Option<ApiContext> {
         ApiContext::new(self.clone_connection_pool(), self)
+    }
+
+    /// Asynchronously get the logged in user if there is one.
+    pub async fn user_identity(&self) -> Option<User> {
+        let id = self.identity
+            .identity()
+            .and_then(|s| Uuid::parse_str(s.as_str()).ok());
+
+        match id {
+            Some(uid) =>  {
+                User::get_from_db_by_id(
+                    self.get_db_connection().await,
+                    uid
+                ).await
+            },
+            None => None
+        }
     }
 }
 
@@ -138,45 +155,5 @@ impl FromRequest for RequestContext {
             .unwrap();
         let identity = Identity::from_request(req, payload).into_inner().unwrap();
         ok(Self::new(app_data, request, identity))
-    }
-}
-
-/// The user currently logged in.
-impl FromRequest for User {
-    // We loose actix's error reporting here because actix-web's errors are not thread
-    // safe for some reason.
-    type Error = ();
-    type Future = BoxFuture<'static, Result<Self, Self::Error>>;
-    type Config = ();
-
-    fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
-        let ctx = RequestContext::from_request(req, payload)
-            .into_inner()
-            // this should unwrap fine as long as the implementation above
-            // always returns ok
-            .unwrap();
-
-        let db_conn_pool = ctx.clone_connection_pool();
-        let uid_res = ctx
-            .identity
-            .identity()
-            .ok_or(())
-            .and_then(|s| Uuid::parse_str(s.as_str()).map_err(|_| ()));
-
-        if uid_res.is_err() {
-            return err(uid_res.err().unwrap()).boxed();
-        }
-
-        let uid = uid_res.unwrap();
-
-        block(move || db_conn_pool.get())
-            .boxed()
-            .map_err(move |_| ())
-            .boxed()
-            .and_then(move |conn: DbConnection| {
-                User::get_from_db_by_id(conn, uid)
-                    .then(|opt| async { opt.ok_or(()) })
-            })
-            .boxed()
     }
 }

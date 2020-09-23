@@ -12,6 +12,7 @@ use crate::{
     templates::{
         profile::Profile,
         jumbotron::Jumbotron,
+        page::Page
     },
     models::{
         User,
@@ -20,14 +21,14 @@ use crate::{
 };
 
 use futures::future::OptionFuture;
-use crate::templates::page::Page;
+use futures::TryFutureExt;
 
 /// The service to display a user profile. The user is specified by the id in the
 /// request path.
 #[get("/profile/{uid}")]
 pub async fn profile_service(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
     let t_uid: Uuid = user_id.into_inner();
-    let target = User::get_from_db_by_id(ctx.get_db_connection(), t_uid).await;
+    let target = User::get_from_db_by_id(ctx.get_db_connection().await, t_uid).await;
 
     if target.is_none() {
         return HttpResponse::NotFound()
@@ -40,22 +41,12 @@ pub async fn profile_service(ctx: RequestContext, user_id: Path<Uuid>) -> HttpRe
     } else {
         let user = target.unwrap();
 
-        let viewer = OptionFuture::from({
-            ctx.identity()
-                .identity()
-                .map(|s| Uuid::parse_str(s.as_str()).ok())
-                .flatten()
-                .map(|v_uid| {
-                    User::get_from_db_by_id(ctx.get_db_connection(), v_uid)
-                })
-        })
-            .await
-            .flatten();
+        let viewer = ctx.user_identity().await;
 
         // generate gravatar url
 
         // emails should always be non-empty on existing user.
-        let emails = user.get_emails_from_db(ctx.get_db_connection()).await;
+        let emails = user.get_emails_from_db(ctx.get_db_connection().await).await;
         let gravatar_email: &str = emails.first().unwrap().email.as_str();
         let gravatar_hash = md5::compute(gravatar_email.trim().to_lowercase());
         let gravatar_base_url = "https://www.gravatar.com/avatar/";
