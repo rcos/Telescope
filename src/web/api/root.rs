@@ -7,15 +7,8 @@ use diesel::{
 };
 
 use crate::{
-    models::{
-        Email,
-        User
-    },
-    web::{
-        RequestContext,
-        DbConnection,
-        api::PasswordRequirements
-    }
+    models::{Email, User},
+    web::{api::PasswordRequirements, DbConnection, RequestContext},
 };
 use uuid::Uuid;
 
@@ -34,15 +27,19 @@ pub struct ApiContext {
 
 impl ApiContext {
     /// Try to make a new API context. Return none if not logged in.
-    pub fn new(connection_pool: Pool<ConnectionManager<PgConnection>>, parent: &RequestContext) -> Option<Self> {
-        parent.identity()
+    pub fn new(
+        connection_pool: Pool<ConnectionManager<PgConnection>>,
+        parent: &RequestContext,
+    ) -> Option<Self> {
+        parent
+            .identity()
             .identity()
             .map(|id| Uuid::parse_str(&id).ok())
             .flatten()
             .map(|uuid| Self {
                 connection_pool,
                 schema: Self::make_schema(),
-                identity: uuid
+                identity: uuid,
             })
     }
 
@@ -82,13 +79,10 @@ impl QueryRoot {
         let uid = ctx.identity;
         let mut conn = ctx.get_db_conn()?;
 
-        users
-            .find(uid)
-            .first(&conn)
-            .map_err(|e| {
-                error!("Could not find user for id {}: {}", uid, e);
-                FieldError::new("User not found.", Value::null())
-            })
+        users.find(uid).first(&conn).map_err(|e| {
+            error!("Could not find user for id {}: {}", uid, e);
+            FieldError::new("User not found.", Value::null())
+        })
     }
 
     /// Get a list of all users.
@@ -105,13 +99,10 @@ impl QueryRoot {
     pub fn emails(ctx: &ApiContext) -> FieldResult<Vec<Email>> {
         use crate::schema::emails::dsl::*;
         let conn = ctx.get_db_conn()?;
-        emails
-            .filter(is_visible)
-            .load(&conn)
-            .map_err(|e| {
-                error!("Could not load emails from database");
-                FieldError::new(e, Value::null())
-            })
+        emails.filter(is_visible).load(&conn).map_err(|e| {
+            error!("Could not load emails from database");
+            FieldError::new(e, Value::null())
+        })
     }
 
     /// Check if a password satisfies password validity requirements.
@@ -121,4 +112,4 @@ impl QueryRoot {
 }
 
 #[juniper::object(Context = ApiContext)]
-impl MutationRoot { }
+impl MutationRoot {}

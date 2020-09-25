@@ -1,7 +1,7 @@
 use std::env;
-use structopt::StructOpt;
 use std::path::PathBuf;
 use structopt::clap::ArgGroup;
+use structopt::StructOpt;
 
 // The name, about, version, and authors are given by cargo.
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
@@ -120,13 +120,9 @@ pub struct Config {
     // email_file_dir and email_use_temp_dir are grouped together manually using
     // clap in the cli function. This just makes specifying the requirement rules
     // easier.
-
     /// The directory to save emails to when saving emails to the
     /// filesystem.
-    #[structopt(
-        long = "email-file-dir",
-        env,
-    )]
+    #[structopt(long = "email-file-dir", env)]
     pub email_file_dir: Option<PathBuf>,
 
     /// Default the email save directory to the system temp directory.
@@ -159,21 +155,13 @@ pub struct Config {
     /// EMAIL: stub
     /// EMAIL_USER: telescope
     /// EMAIL_HOST: rcos.io
-    #[structopt(
-        short = "d",
-        long = "development",
-        conflicts_with("PRODUCTION"),
-    )]
+    #[structopt(short = "d", long = "development", conflicts_with("PRODUCTION"))]
     development: bool,
 
     /// Use Production profile. This sets the following defaults:
     ///
     /// BIND_TO: localhost:443
-    #[structopt(
-        short = "p",
-        long = "production",
-        conflicts_with("DEVELOPMENT")
-    )]
+    #[structopt(short = "p", long = "production", conflicts_with("DEVELOPMENT"))]
     production: bool,
 }
 
@@ -201,9 +189,9 @@ fn cli() -> Config {
         &Config::clap()
             .group(
                 ArgGroup::with_name("EMAIL_FILE_OPTION")
-                    .args(&["EMAIL_USE_TEMP_DIR", "EMAIL_FILE_DIR"])
+                    .args(&["EMAIL_USE_TEMP_DIR", "EMAIL_FILE_DIR"]),
             )
-            .get_matches()
+            .get_matches(),
     );
 
     if config.email_use_temp_dir {

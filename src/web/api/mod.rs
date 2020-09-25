@@ -5,11 +5,10 @@ pub use crate::models::password_requirements::PasswordRequirements;
 
 use actix_web::{web, Error, HttpResponse};
 
-
 use juniper::http::{graphiql::graphiql_source, GraphQLRequest};
 
-use crate::web::RequestContext;
 use crate::templates::jumbotron::Jumbotron;
+use crate::web::RequestContext;
 
 /// Handler for GraphQL API requests.
 pub async fn graphql_api(
@@ -22,16 +21,14 @@ pub async fn graphql_api(
             let res = data.execute(&api_ctx.schema, &api_ctx);
             Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
         })
-            .await
-            .map_err(Error::from)?;
+        .await
+        .map_err(Error::from)?;
 
         Ok(HttpResponse::Ok()
             .content_type("application/json")
             .body(res))
-
     } else {
-        Ok(HttpResponse::Unauthorized()
-            .body("You must be logged in to make API requests."))
+        Ok(HttpResponse::Unauthorized().body("You must be logged in to make API requests."))
     }
 }
 
@@ -46,7 +43,7 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
                 &req_ctx,
                 "RCOS - Unauthorized",
                 "Unauthorized",
-                "You must login to access the API playground."
+                "You must login to access the API playground.",
             ))
     } else {
         HttpResponse::Ok()

@@ -1,4 +1,3 @@
-
 use super::password_requirements::PasswordRequirements;
 
 #[test]

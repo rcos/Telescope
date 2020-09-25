@@ -1,19 +1,15 @@
-
 use crate::{
-    schema::users,
     models::Email,
+    schema::users,
     web::{
+        api::{ApiContext, PasswordRequirements},
         DbConnection,
-        api::{
-            PasswordRequirements,
-            ApiContext
-        }
-    }
+    },
 };
 
-use argon2::{self, Config};
 use actix_web::web::block;
-use juniper::{FieldResult, FieldError, Value};
+use argon2::{self, Config};
+use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
 
 /// A telescope user.
@@ -41,7 +37,6 @@ pub struct User {
     /// The hashed user password.
     pub hashed_pwd: String,
 }
-
 
 /// GraphQL API operations on users.
 #[juniper::object(
@@ -80,13 +75,12 @@ impl User {
 
     // computed fields below
 
-
     // this code may block, but since its only executed by juniper
     // it should always be executed on an async thread pool anyways.
     /// Public emails of this user.
     fn emails(&self, ctx: &ApiContext) -> FieldResult<Vec<Email>> {
-        use diesel::prelude::*;
         use crate::schema::emails;
+        use diesel::prelude::*;
 
         let conn = ctx.get_db_conn()?;
 
@@ -100,10 +94,7 @@ impl User {
                 error!("Could not query database: {}", e);
                 FieldError::new("Could not query database.", Value::null())
             })
-            .map(|v: Vec<(User, Email)>| {
-                v.into_iter().map(|(u, e)| e).collect()
-            })
-
+            .map(|v: Vec<(User, Email)>| v.into_iter().map(|(u, e)| e).collect())
     }
 }
 
@@ -134,7 +125,7 @@ impl User {
         let reqs = PasswordRequirements::for_password(password);
 
         if !reqs.are_satisfied() {
-           return Err(reqs);
+            return Err(reqs);
         }
 
         let uuid = Uuid::new_v4();
@@ -142,8 +133,9 @@ impl User {
         let hashed_pwd = argon2::hash_encoded(
             password.as_bytes(),
             &uuid.as_bytes()[..],
-            &Self::make_argon_config()
-        ).unwrap();
+            &Self::make_argon_config(),
+        )
+        .unwrap();
 
         Ok(Self {
             id: uuid,
@@ -153,7 +145,7 @@ impl User {
             github_link: None,
             chat_handle: None,
             sysadmin: false,
-            hashed_pwd
+            hashed_pwd,
         })
     }
 
@@ -176,12 +168,7 @@ impl User {
         use crate::schema::users::dsl::*;
         use diesel::prelude::*;
 
-        block(move || {
-            users
-                .find(uid)
-                .first::<User>(&conn)
-                .optional()
-        })
+        block(move || users.find(uid).first::<User>(&conn).optional())
             .await
             .map_err(|e| {
                 error!("Could not get user from database: {}", e);
@@ -204,12 +191,12 @@ impl User {
                 .order((is_visible.asc(), email.asc()))
                 .load(&conn)
         })
-            .await
-            .map_err(|e| {
-                error!("Could not query database: {}", e);
-                e
-            })
-            .unwrap()
+        .await
+        .map_err(|e| {
+            error!("Could not query database: {}", e);
+            e
+        })
+        .unwrap()
     }
 
     /// See the get_emails_from_db_by_id

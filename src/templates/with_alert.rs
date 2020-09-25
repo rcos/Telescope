@@ -1,12 +1,12 @@
-use crate::web::{Template, RequestContext};
 use crate::templates::page::Page;
+use crate::web::{RequestContext, Template};
 
 /// A template for adding an alert to another page.
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct WithAlert {
     alert_content: String,
     alert_class: String,
-    content: String
+    content: String,
 }
 
 impl WithAlert {
@@ -14,12 +14,12 @@ impl WithAlert {
     fn new(
         alert_content: impl Into<String>,
         alert_class: impl Into<String>,
-        content: impl Into<String>
+        content: impl Into<String>,
     ) -> Self {
         Self {
             alert_content: alert_content.into(),
             alert_class: alert_class.into(),
-            content: content.into()
+            content: content.into(),
         }
     }
 
@@ -28,7 +28,7 @@ impl WithAlert {
         renderer: &RequestContext,
         alert_class: impl Into<String>,
         alert_content: impl Into<String>,
-        base: &T
+        base: &T,
     ) -> String {
         let base_rendered = renderer.render(base);
         let w_alert = Self::new(alert_content, alert_class, base_rendered);
@@ -42,7 +42,7 @@ impl WithAlert {
         page_title: impl Into<String>,
         alert_class: impl Into<String>,
         alert_content: impl Into<String>,
-        base: &T
+        base: &T,
     ) -> String {
         let page_content = Self::on_template(renderer, alert_class, alert_content, base);
         let page_template = Page::new(page_title, page_content, renderer);

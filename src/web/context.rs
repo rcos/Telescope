@@ -1,27 +1,15 @@
 use crate::{
-    web::{
-        api::ApiContext,
-        app_data::AppData
-    },
-    models::User
+    models::User,
+    web::{api::ApiContext, app_data::AppData},
 };
 
 use actix_web::{
     dev::{Payload, PayloadStream},
-    web::{
-        Data,
-        block
-    },
-    Error,
-    FromRequest,
-    HttpRequest,
+    web::{block, Data},
+    Error, FromRequest, HttpRequest,
 };
 
-use futures::future::{
-    ok,
-    Ready,
-    TryFutureExt,
-};
+use futures::future::{ok, Ready};
 
 use handlebars::{Handlebars, RenderError};
 
@@ -75,7 +63,9 @@ impl RequestContext {
     }
 
     /// Check if a user is logged in (via identity)
-    pub fn logged_in(&self) -> bool {self.identity.identity().is_some()}
+    pub fn logged_in(&self) -> bool {
+        self.identity.identity().is_some()
+    }
 
     /// Get associated Handlebars template registry for manual template rendering.
     pub fn handlebars(&self) -> &Handlebars<'static> {
@@ -84,7 +74,8 @@ impl RequestContext {
 
     /// Render a template using the handlebars templates in this context.
     pub fn render<T: Template>(&self, template: &T) -> String {
-        template.render(self.app_data.template_registry.as_ref())
+        template
+            .render(self.app_data.template_registry.as_ref())
             .map_err(|e| {
                 error!("Handlebars rendering error: {}", e);
                 e
@@ -96,15 +87,13 @@ impl RequestContext {
     pub async fn get_db_connection(&self) -> DbConnection {
         let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_connection_pool();
         block(move || {
-            db_conn_pool
-                .get()
-                .map_err(|e| {
-                    error!("Could not get database connection: {}", e);
-                    e
-                })
+            db_conn_pool.get().map_err(|e| {
+                error!("Could not get database connection: {}", e);
+                e
+            })
         })
-            .await
-            .unwrap()
+        .await
+        .unwrap()
     }
 
     /// Clone the connection pool. This can be useful for async operation,
@@ -123,13 +112,8 @@ impl RequestContext {
     /// Asynchronously get the logged in user if there is one.
     pub async fn user_identity(&self) -> Option<User> {
         match self.user_id_identity() {
-            Some(uid) =>  {
-                User::get_from_db_by_id(
-                    self.get_db_connection().await,
-                    uid
-                ).await
-            },
-            None => None
+            Some(uid) => User::get_from_db_by_id(self.get_db_connection().await, uid).await,
+            None => None,
         }
     }
 

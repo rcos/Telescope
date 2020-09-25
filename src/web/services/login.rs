@@ -1,26 +1,17 @@
-use actix_web::{
-    web::{
-        Form,
-        block
+use crate::models::User;
+use crate::{
+    templates::{
+        static_pages::index::LandingPage, static_pages::StaticPage, with_alert::WithAlert,
     },
-    HttpResponse,
-    Error
+    web::{DbConnection, RequestContext},
+};
+use actix_identity::Identity;
+use actix_web::{
+    web::{block, Form},
+    Error, HttpResponse,
 };
 use std::collections::HashMap;
-use actix_identity::Identity;
-use crate::{
-    web::{
-        RequestContext,
-        DbConnection
-    },
-    templates::{
-        with_alert::WithAlert,
-        static_pages::index::LandingPage,
-        static_pages::StaticPage
-    }
-};
 use uuid::Uuid;
-use crate::models::User;
 
 const EMAIL_FIELD: &'static str = "email";
 const PASSWORD_FIELD: &'static str = "pass";
@@ -44,18 +35,17 @@ pub async fn login_service(
         let conn_pool_clone = req_ctx.clone_connection_pool();
 
         let mut db_res: Vec<(Uuid, String, String)> = block(move || {
+            use crate::schema::{emails::dsl::*, users::dsl::*};
             use diesel::prelude::*;
-            use crate::schema::{
-                emails::dsl::*,
-                users::dsl::*,
-            };
             let conn: DbConnection = conn_pool_clone.get().unwrap();
-            emails.inner_join(users)
+            emails
+                .inner_join(users)
                 .filter(email.eq(login_email))
                 .limit(1)
                 .select((id, hashed_pwd, name))
                 .load(&conn)
-        }).await?;
+        })
+        .await?;
 
         if db_res.is_empty() {
             let page = WithAlert::render_into_page(
@@ -63,51 +53,46 @@ pub async fn login_service(
                 LandingPage::PAGE_TITLE,
                 "danger",
                 format!("No user exists with email {}", login_email_ref),
-                &LandingPage
+                &LandingPage,
             );
             Ok(HttpResponse::NotFound().body(page))
         } else {
             let (user_id, hashed_pass, name) = db_res.pop().unwrap();
-            let verified: bool = argon2::
-                verify_encoded(hashed_pass.as_str(), login_password.as_bytes())
-                .map_err(|e| {
-                    error!("Argon2 verification error {}", e);
-                    e
-                })
-                .unwrap_or(false);
+            let verified: bool =
+                argon2::verify_encoded(hashed_pass.as_str(), login_password.as_bytes())
+                    .map_err(|e| {
+                        error!("Argon2 verification error {}", e);
+                        e
+                    })
+                    .unwrap_or(false);
             if verified {
                 identity.remember(User::format_uuid(user_id));
-                Ok(HttpResponse::Ok()
-                    .body(WithAlert::render_into_page(
-                        &req_ctx,
-                        LandingPage::PAGE_TITLE,
-                        "success",
-                        format!("Welcome {}!", name),
-                        &LandingPage
-                    ))
-                )
-            }
-            else {
+                Ok(HttpResponse::Ok().body(WithAlert::render_into_page(
+                    &req_ctx,
+                    LandingPage::PAGE_TITLE,
+                    "success",
+                    format!("Welcome {}!", name),
+                    &LandingPage,
+                )))
+            } else {
                 let page = WithAlert::render_into_page(
                     &req_ctx,
                     LandingPage::PAGE_TITLE,
                     "danger",
                     "Incorrect Password.",
-                    &LandingPage
+                    &LandingPage,
                 );
                 Ok(HttpResponse::NotFound().body(page))
             }
         }
-
     } else {
         let page = WithAlert::render_into_page(
             &req_ctx,
             LandingPage::PAGE_TITLE,
             "danger",
             "Failed to login -- malformed request.",
-            &LandingPage
+            &LandingPage,
         );
-        Ok(HttpResponse::BadRequest()
-            .body(page))
+        Ok(HttpResponse::BadRequest().body(page))
     }
 }

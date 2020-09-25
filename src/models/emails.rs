@@ -1,14 +1,14 @@
-use crate::schema::emails;
-use uuid::Uuid;
-use regex::Regex;
-use crate::web::api::ApiContext;
-use juniper::{FieldResult, FieldError, Value};
 use crate::models::User;
+use crate::schema::emails;
+use crate::web::api::ApiContext;
+use juniper::{FieldError, FieldResult, Value};
+use regex::Regex;
+use uuid::Uuid;
 
-lazy_static!{
-    static ref EMAIL_REGEX: Regex = {
-        Regex::new(r#"^[[:alpha:]]+@[[:alpha:]]+(\.[[:alpha:]]+)+$"#).unwrap()
-    };
+lazy_static! {
+    static ref EMAIL_REGEX: Regex = Regex::new(
+        r#"^[[:alpha:]]+@[[:alpha:]]+(\.[[:alpha:]]+)+$"#
+    ).unwrap();
 }
 
 /// Field structure must match that in the SQL migration.
@@ -47,12 +47,16 @@ impl Email {
             .limit(1)
             .load(&conn);
 
-        results.map_err(|e| {
-            error!("Could not query database: {}", e);
-            FieldError::new("Could not query database.", Value::null())
-        })?
+        results
+            .map_err(|e| {
+                error!("Could not query database: {}", e);
+                FieldError::new("Could not query database.", Value::null())
+            })?
             .pop()
-            .ok_or(FieldError::new("Could not find associated user.", Value::null()))
+            .ok_or(FieldError::new(
+                "Could not find associated user.",
+                Value::null(),
+            ))
             .map(|(e, u)| u)
     }
 }
@@ -71,11 +75,10 @@ impl Email {
             Some(Self {
                 user_id,
                 email,
-                is_visible: false
+                is_visible: false,
             })
         } else {
             None
         }
-
     }
 }

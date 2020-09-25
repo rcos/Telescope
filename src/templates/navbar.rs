@@ -1,4 +1,3 @@
-
 use crate::{
     templates::navbar::login_modal::LoginModal,
     web::{RequestContext, Template},
@@ -10,8 +9,8 @@ mod login_modal;
 mod sign_up_modal;
 
 mod items;
-use items::*;
 use crate::templates::navbar::sign_up_modal::SignUpModal;
+use items::*;
 
 /// An adapter type for items in the navbar.
 #[derive(Clone, Debug, Serialize, Default)]
@@ -75,25 +74,19 @@ impl Navbar {
     /// Get a navbar without a user logged in.
     fn without_user(ctx: &RequestContext) -> Self {
         let mut n = Self::with_defaults(ctx);
-        n
-            .add_right(
-                ctx,
-                NavbarModal::new(
-                    "login",
-                    "Login",
-                    "btn-secondary",
-                    ctx.render(&LoginModal)
-                )
-            )
-            .add_right(
-                ctx,
-                NavbarModal::new(
-                    "register",
-                    "Sign Up",
-                    "btn-secondary",
-                    ctx.render(&SignUpModal)
-                )
-            );
+        n.add_right(
+            ctx,
+            NavbarModal::new("login", "Login", "btn-secondary", ctx.render(&LoginModal)),
+        )
+        .add_right(
+            ctx,
+            NavbarModal::new(
+                "register",
+                "Sign Up",
+                "btn-secondary",
+                ctx.render(&SignUpModal),
+            ),
+        );
 
         n
     }
@@ -102,23 +95,19 @@ impl Navbar {
     pub fn from_context(ctx: &RequestContext) -> Self {
         ctx.identity()
             .identity()
-            .and_then(|id: String| {
-                Uuid::parse_str(id.as_str()).ok()
-            })
+            .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
             .map_or(Self::without_user(ctx), |uuid| {
                 let mut navbar = Self::with_defaults(ctx);
                 navbar
                     .add_right(
                         ctx,
-                        NavbarLink::new(
-                            format!("/profile/{}", uuid.to_hyphenated()),
-                            "Profile"
-                        )
-                            .class("mr-2 mb-2 btn btn-primary")
+                        NavbarLink::new(format!("/profile/{}", uuid.to_hyphenated()), "Profile")
+                            .class("mr-2 mb-2 btn btn-primary"),
                     )
-                    .add_right(ctx,
-                               NavbarLink::new("/logout", "Logout")
-                                   .class("mr-2 mb-2 btn btn-secondary"))
+                    .add_right(
+                        ctx,
+                        NavbarLink::new("/logout", "Logout").class("mr-2 mb-2 btn btn-secondary"),
+                    )
                     // Add API access for users.
                     .add_left(ctx, NavbarLink::new("/playground", "API"));
                 navbar

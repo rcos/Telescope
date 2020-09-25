@@ -23,7 +23,7 @@ impl Page {
             page_title: title.into(),
             page_body: body.into(),
             navbar: pc.render(&Navbar::from_context(pc)),
-            version: env!("CARGO_PKG_VERSION")
+            version: env!("CARGO_PKG_VERSION"),
         }
     }
 }

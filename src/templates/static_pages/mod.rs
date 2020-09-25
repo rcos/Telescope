@@ -3,10 +3,10 @@ use crate::web::{RequestContext, Template};
 use actix_web::HttpResponse;
 use serde::Serialize;
 
-pub mod index;
-pub mod sponsors;
-pub mod projects;
 pub mod developers;
+pub mod index;
+pub mod projects;
+pub mod sponsors;
 
 /// A piece of static content that can be rendered in a Page object.
 pub trait StaticPage: Serialize + Sized + Default {
@@ -30,6 +30,9 @@ pub trait StaticPage: Serialize + Sized + Default {
     }
 }
 
-impl<T> Template for T where T: StaticPage {
+impl<T> Template for T
+where
+    T: StaticPage,
+{
     const TEMPLATE_NAME: &'static str = Self::TEMPLATE_NAME;
 }

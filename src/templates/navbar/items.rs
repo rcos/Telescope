@@ -28,7 +28,7 @@ impl NavbarLink {
             location: loc.clone(),
             text: text.into(),
             is_root: loc == "/",
-            class: "nav-link".to_string()
+            class: "nav-link".to_string(),
         }
     }
 
@@ -69,7 +69,7 @@ pub struct NavbarModal {
     /// The header of the modal dialogue, and the text of the button.
     text: String,
     /// The Bootstrap button class
-    button_class: String
+    button_class: String,
 }
 
 impl NavbarModal {
@@ -84,7 +84,7 @@ impl NavbarModal {
             id: id.into(),
             text: header.into(),
             inner: inner.into(),
-            button_class: class.into()
+            button_class: class.into(),
         }
     }
 }
@@ -99,4 +99,3 @@ impl MakeNavItem for NavbarModal {
         )
     }
 }
-

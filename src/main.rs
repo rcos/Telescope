@@ -13,7 +13,6 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
-
 mod env;
 use crate::env::{Config, CONFIG};
 
@@ -27,19 +26,18 @@ mod schema;
 mod models;
 
 use crate::{
+    models::{
+        password_requirements::{PasswordRequirements, MIN_LENGTH},
+        Email, User,
+    },
     templates::{
-        static_pages::{index::LandingPage, sponsors::SponsorsPage, projects::ProjectsPage, developers::DevelopersPage},
+        static_pages::{
+            developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
+            sponsors::SponsorsPage,
+        },
         StaticPage,
     },
     web::app_data::AppData,
-    models::{
-        User,
-        Email,
-        password_requirements::{
-            PasswordRequirements,
-            MIN_LENGTH
-        }
-    },
 };
 
 use actix_files as afs;
@@ -54,8 +52,7 @@ use actix_web::{
     App, HttpServer,
 };
 
-
-use diesel::{r2d2::ConnectionManager, PgConnection, Connection, RunQueryDsl};
+use diesel::{r2d2::ConnectionManager, Connection, PgConnection, RunQueryDsl};
 
 use rand::{rngs::OsRng, Rng};
 
@@ -133,46 +130,50 @@ async fn main() -> std::io::Result<()> {
         let admin_email = config.sysadmin_email.as_ref().unwrap();
         let mut user: User = User::new("Telescope admin", admin_password)
             .map_err(|e: PasswordRequirements| {
-                error!("Admin password {} failed to satisfy password requirements.", admin_password);
+                error!(
+                    "Admin password {} failed to satisfy password requirements.",
+                    admin_password
+                );
                 if !e.not_common_password {
-                    error!("Admin password {} is too common. Please choose a different password.", admin_password);
+                    error!(
+                        "Admin password {} is too common. Please choose a different password.",
+                        admin_password
+                    );
                 }
                 if !e.is_min_len {
-                    error!("Admin password {} is too short. \
-                        Please choose a password more than {} characters.", admin_password, MIN_LENGTH)
+                    error!(
+                        "Admin password {} is too short. \
+                        Please choose a password more than {} characters.",
+                        admin_password, MIN_LENGTH
+                    )
                 }
                 exit(exitcode::DATAERR)
             })
             .unwrap();
-        let email = Email::new(user.id, admin_email)
-            .unwrap_or_else(|| {
-                error!("Admin email {} is not a valid email.", admin_email);
-                exit(exitcode::DATAERR);
-            });
+        let email = Email::new(user.id, admin_email).unwrap_or_else(|| {
+            error!("Admin email {} is not a valid email.", admin_email);
+            exit(exitcode::DATAERR);
+        });
 
         user.sysadmin = true;
 
         let conn = pool.get().unwrap();
         conn.transaction::<(), diesel::result::Error, _>(|| {
-            use crate::schema::users::dsl::users;
             use crate::schema::emails::dsl::emails;
+            use crate::schema::users::dsl::users;
 
-            diesel::insert_into(users)
-                .values(&user)
-                .execute(&conn)?;
+            diesel::insert_into(users).values(&user).execute(&conn)?;
 
-            diesel::insert_into(emails)
-                .values(email)
-                .execute(&conn)?;
+            diesel::insert_into(emails).values(email).execute(&conn)?;
 
             info!("Successfully added admin user (id: {})", user.id_str());
             Ok(())
         })
-            .map_err(|e| {
-                error!("Could not add admin user to database: {}", e);
-                exit(1)
-            })
-            .unwrap();
+        .map_err(|e| {
+            error!("Could not add admin user to database: {}", e);
+            exit(1)
+        })
+        .unwrap();
     }
 
     // Create appdata object.

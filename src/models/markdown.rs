@@ -1,9 +1,4 @@
-
-use pulldown_cmark::{
-    Parser,
-    Options,
-    html::push_html
-};
+use pulldown_cmark::{html::push_html, Options, Parser};
 
 // TODO: test for XSS
 /// Render markdown to HTML.

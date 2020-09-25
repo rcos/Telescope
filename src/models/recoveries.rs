@@ -1,8 +1,7 @@
-
 use crate::schema::lost_passwords;
 
+use chrono::{DateTime, Duration, Local};
 use uuid::Uuid;
-use chrono::{DateTime, Local, Duration};
 
 #[derive(Clone, Debug, Queryable, Insertable, Serialize, Deserialize)]
 #[table_name = "lost_passwords"]
@@ -12,7 +11,7 @@ pub struct Recovery {
     /// The user ID
     user_id: Uuid,
     /// When this recovery expires.
-    expiration: DateTime<Local>
+    expiration: DateTime<Local>,
 }
 
 impl Recovery {
