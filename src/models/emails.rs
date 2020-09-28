@@ -1,9 +1,15 @@
-use crate::models::User;
-use crate::schema::emails;
-use crate::web::api::ApiContext;
+use crate::{
+    models::User,
+    schema::emails,
+    web::{
+        DbConnection,
+        api::graphql::ApiContext
+    }
+};
 use juniper::{FieldError, FieldResult, Value};
 use regex::Regex;
 use uuid::Uuid;
+use actix_web::web::block;
 
 lazy_static! {
     static ref EMAIL_REGEX: Regex = Regex::new(
@@ -80,5 +86,21 @@ impl Email {
         } else {
             None
         }
+    }
+
+    /// Try to get a user based on an email from the database.
+    pub async fn get_user_from_db_by_email(conn: DbConnection, email_: String) -> Option<User> {
+        block::<_, (Email, User), _>(move || {
+            use crate::schema::{
+                users::dsl::*,
+                emails::dsl::*
+            };
+            use diesel::prelude::*;
+            emails.inner_join(users)
+                .filter(email.eq(email_))
+                .first(&conn)
+        }).await
+            .ok()
+            .map(|(e, u)| u)
     }
 }

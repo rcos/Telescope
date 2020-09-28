@@ -7,8 +7,15 @@ use diesel::{
 };
 
 use crate::{
-    models::{Email, User},
-    web::{api::PasswordRequirements, DbConnection, RequestContext},
+    models::{
+        Email,
+        User,
+        PasswordRequirements
+    },
+    web::{
+        DbConnection,
+        RequestContext,
+    },
 };
 use uuid::Uuid;
 

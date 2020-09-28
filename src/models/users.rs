@@ -1,8 +1,11 @@
 use crate::{
-    models::Email,
+    models::{
+        Email,
+        PasswordRequirements
+    },
     schema::users,
     web::{
-        api::{ApiContext, PasswordRequirements},
+        api::graphql::ApiContext,
         DbConnection,
     },
 };

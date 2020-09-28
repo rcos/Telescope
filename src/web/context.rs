@@ -1,6 +1,9 @@
 use crate::{
     models::User,
-    web::{api::ApiContext, app_data::AppData},
+    web::{
+        api::graphql::ApiContext,
+        app_data::AppData
+    },
 };
 
 use actix_web::{

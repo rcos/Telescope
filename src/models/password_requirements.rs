@@ -3,9 +3,6 @@ use std::collections::HashSet;
 /// Commonly used passwords to protect against.
 pub const COMMON_PASSWORDS: &'static [&'static str] = &["password", "12345"];
 
-/// Minimum password length is 5 characters.
-pub const MIN_LENGTH: usize = 5;
-
 lazy_static! {
     pub static ref COMMON_PASSWORD_SET: HashSet<&'static str> = {
         let mut hs = HashSet::with_capacity(COMMON_PASSWORDS.len());
@@ -30,6 +27,9 @@ pub struct PasswordRequirements {
 }
 
 impl PasswordRequirements {
+    /// Minimum password length.
+    pub const MIN_PASSWORD_LENGTH: usize = 5;
+
     /// Get a list of common passwords.
     pub fn common_passwords() -> &'static [&'static str] {
         &*COMMON_PASSWORDS
@@ -43,7 +43,7 @@ impl PasswordRequirements {
     /// Check if a password satisfies the password requirement set.
     pub fn for_password(pass: &str) -> Self {
         Self {
-            is_min_len: pass.len() >= MIN_LENGTH,
+            is_min_len: pass.len() >= Self::MIN_PASSWORD_LENGTH,
             not_common_password: !COMMON_PASSWORD_SET.contains(pass),
         }
     }

@@ -27,7 +27,7 @@ mod models;
 
 use crate::{
     models::{
-        password_requirements::{PasswordRequirements, MIN_LENGTH},
+        PasswordRequirements,
         Email, User,
     },
     templates::{
@@ -144,7 +144,7 @@ async fn main() -> std::io::Result<()> {
                     error!(
                         "Admin password {} is too short. \
                         Please choose a password more than {} characters.",
-                        admin_password, MIN_LENGTH
+                        admin_password, PasswordRequirements::MIN_PASSWORD_LENGTH
                     )
                 }
                 exit(exitcode::DATAERR)
@@ -206,7 +206,7 @@ async fn main() -> std::io::Result<()> {
             )
              */
             .wrap(middleware::Logger::default())
-            .configure(web::api::register)
+            .configure(web::api::register_apis)
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(LandingPage::handle))
             .route("/projects", get().to(ProjectsPage::handle))
