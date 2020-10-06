@@ -13,7 +13,7 @@
     <nav id="navbar" class="navbar-collapse collapse">
         <ul class="navbar-nav mr-auto">
             {{#each left_items}}
-                <li class="nav-item {{#if this.active}}active{{/if}}">
+                <li class="nav-item {{#if this.is_active}}active{{/if}}">
                     <a href="{{this.location}}" class="{{this.class}}">
                         {{this.text}}
                     </a>
@@ -22,7 +22,7 @@
         </ul>
         <ul class="navbar-nav">
             {{#each right_items}}
-                <li class="nav-item {{#if this.active}}active{{/if}}">
+                <li class="nav-item {{#if this.is_active}}active{{/if}}">
                     <a href="{{this.location}}" class="{{this.class}}">
                         {{this.text}}
                     </a>

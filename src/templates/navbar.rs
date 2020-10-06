@@ -8,7 +8,7 @@ use uuid::Uuid;
 /// This is good for most items on the header bar.
 #[derive(Clone, Debug, Serialize)]
 pub struct NavbarLink {
-    is_root: bool,
+    /// This is the active (current) page.
     is_active: bool,
     /// The location to redirect to.
     location: String,
@@ -28,7 +28,6 @@ impl NavbarLink {
             is_active: ctx.request().path() == &loc,
             location: loc.clone(),
             text: text.into(),
-            is_root: loc == "/",
             class: "nav-link".to_string(),
         }
     }
@@ -108,5 +107,5 @@ impl Navbar {
 }
 
 impl Template for Navbar {
-    const TEMPLATE_NAME: &'static str = "navbar/navbar";
+    const TEMPLATE_NAME: &'static str = "navbar";
 }
