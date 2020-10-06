@@ -14,24 +14,20 @@
         <ul class="navbar-nav mr-auto">
             {{#each left_items}}
                 <li class="nav-item {{#if this.active}}active{{/if}}">
-                    {{{this.navbar_inner}}}
+                    <a href="{{this.location}}" class="{{this.class}}">
+                        {{this.text}}
+                    </a>
                 </li>
             {{/each}}
         </ul>
         <ul class="navbar-nav">
             {{#each right_items}}
                 <li class="nav-item {{#if this.active}}active{{/if}}">
-                    {{{this.navbar_inner}}}
+                    <a href="{{this.location}}" class="{{this.class}}">
+                        {{this.text}}
+                    </a>
                 </li>
             {{/each}}
         </ul>
     </nav>
 </nav>
-
-{{#each left_items}}
-    {{{this.body_inner}}}
-{{/each}}
-
-{{#each right_items}}
-    {{{this.body_inner}}}
-{{/each}}

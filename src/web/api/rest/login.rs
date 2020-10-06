@@ -1,8 +1,5 @@
 
-use actix_web::{
-    web::Json,
-    Result as ActixResult
-};
+use actix_web::web::Json;
 
 use actix_identity::Identity;
 
@@ -13,21 +10,21 @@ use crate::{
 
 /// Login request object
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct LoginRequest {
+pub struct LoginRequest {
     email: String,
     password: String
 }
 
 /// Login response object
 #[derive(Clone, Serialize, Debug, Deserialize)]
-enum LoginResponse {
+pub enum LoginResponse {
     Ok,
     EmailNotFound,
     WrongPassword
 }
 
 #[post("/api/rest/login")]
-pub async fn login(ctx: RequestContext, data: Json<LoginRequest>) -> ActixResult<Json<LoginResponse>> {
+pub async fn login(ctx: RequestContext, data: Json<LoginRequest>) -> Json<LoginResponse> {
     let identity: &Identity = ctx.identity();
     let LoginRequest { email, password} = data.into_inner();
     let target_user = Email::get_user_from_db_by_email(
@@ -36,8 +33,19 @@ pub async fn login(ctx: RequestContext, data: Json<LoginRequest>) -> ActixResult
     ).await;
 
     if let Some(target) = target_user {
-        unimplemented!()
+        let pass = password.as_bytes();
+        let verified = argon2::verify_encoded(target.hashed_pwd.as_str(), pass)
+            .map_err(|e| {
+                error!("Argon2 Verification Error: {}", e);
+            })
+            .unwrap_or(false);
+        if verified {
+            identity.remember(target.id_str());
+            Json(LoginResponse::Ok)
+        } else {
+            Json(LoginResponse::WrongPassword)
+        }
     } else {
-        Ok(Json(LoginResponse::EmailNotFound))
+        Json(LoginResponse::EmailNotFound)
     }
 }

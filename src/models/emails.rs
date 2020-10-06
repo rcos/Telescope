@@ -101,6 +101,6 @@ impl Email {
                 .first(&conn)
         }).await
             .ok()
-            .map(|(e, u)| u)
+            .map(|(_, u)| u)
     }
 }

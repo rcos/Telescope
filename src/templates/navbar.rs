@@ -1,44 +1,53 @@
 use crate::{
-    templates::navbar::login_modal::LoginModal,
     web::{RequestContext, Template},
 };
 
 use uuid::Uuid;
 
-mod login_modal;
-mod sign_up_modal;
+/// A button that just links to a another part of the site (or another site entirely.)
+/// This is good for most items on the header bar.
+#[derive(Clone, Debug, Serialize)]
+pub struct NavbarLink {
+    is_root: bool,
+    is_active: bool,
+    /// The location to redirect to.
+    location: String,
+    /// The text of the item. This may not get rendered
+    /// (if using google material design font, for example, this ligatures into a single symbol)
+    text: String,
+    /// CSS classes associated with this link.
+    class: String,
 
-mod items;
-use crate::templates::navbar::sign_up_modal::SignUpModal;
-use items::*;
-
-/// An adapter type for items in the navbar.
-#[derive(Clone, Debug, Serialize, Default)]
-pub struct NavbarItem {
-    /// The code placed in the navbar.
-    navbar_inner: String,
-    /// The code (if any) that needs to be placed in the page body.
-    body_inner: String,
-    /// Whether this item is active.
-    active: bool,
 }
 
-impl NavbarItem {
-    /// Constructor
-    fn new(navbar_inner: String, body_inner: impl Into<String>, active: bool) -> Self {
+impl NavbarLink {
+    /// Create a new navbar link button (with default styling).
+    pub fn new(ctx: &RequestContext, location: impl Into<String>, text: impl Into<String>) -> Self {
+        let loc = location.into();
         Self {
-            navbar_inner,
-            body_inner: body_inner.into(),
-            active,
+            is_active: ctx.request().path() == &loc,
+            location: loc.clone(),
+            text: text.into(),
+            is_root: loc == "/",
+            class: "nav-link".to_string(),
         }
+    }
+
+    /// Change the CSS classes of this item.
+    /// Follows the builder pattern.
+    ///
+    /// Default value is 'nav-link'.
+    pub fn class(mut self, new_class: impl Into<String>) -> Self {
+        self.class = new_class.into();
+        self
     }
 }
 
 /// A navbar definition.
 #[derive(Clone, Debug, Serialize)]
 pub struct Navbar {
-    left_items: Vec<NavbarItem>,
-    right_items: Vec<NavbarItem>,
+    left_items: Vec<NavbarLink>,
+    right_items: Vec<NavbarLink>,
 }
 
 impl Navbar {
@@ -50,45 +59,32 @@ impl Navbar {
         }
     }
 
-    fn add_left(&mut self, ctx: &RequestContext, item: impl MakeNavItem) -> &mut Self {
-        self.left_items.push(item.make(ctx));
+    fn add_left(mut self, item: NavbarLink) -> Self {
+        self.left_items.push(item);
         self
     }
 
-    fn add_right(&mut self, ctx: &RequestContext, item: impl MakeNavItem) -> &mut Self {
-        self.right_items.push(item.make(ctx));
+    fn add_right(mut self, item: NavbarLink) -> Self {
+        self.right_items.push(item);
         self
     }
 
     /// Navbar with homepage, achievement page, projects, developers and sponsors
     fn with_defaults(ctx: &RequestContext) -> Self {
-        let mut r = Self::empty();
-        r.add_left(ctx, NavbarLink::new("/", "Home"))
-            .add_left(ctx, NavbarLink::new("/projects", "Projects"))
-            .add_left(ctx, NavbarLink::new("/developers", "Developers"))
-            .add_left(ctx, NavbarLink::new("/sponsors", "Sponsors"))
-            .add_left(ctx, NavbarLink::new("/blog", "Blog"));
-        return r;
+        Self::empty()
+            .add_left(NavbarLink::new(ctx,"/", "Home"))
+            .add_left(NavbarLink::new(ctx,"/projects", "Projects"))
+            .add_left(NavbarLink::new(ctx,"/developers", "Developers"))
+            .add_left(NavbarLink::new(ctx,"/sponsors", "Sponsors"))
+            .add_left(NavbarLink::new(ctx,"/blog", "Blog"))
     }
 
     /// Get a navbar without a user logged in.
     fn without_user(ctx: &RequestContext) -> Self {
-        let mut n = Self::with_defaults(ctx);
-        n.add_right(
-            ctx,
-            NavbarModal::new("login", "Login", "btn-secondary", ctx.render(&LoginModal)),
-        )
-        .add_right(
-            ctx,
-            NavbarModal::new(
-                "register",
-                "Sign Up",
-                "btn-secondary",
-                ctx.render(&SignUpModal),
-            ),
-        );
-
-        n
+        let class = "btn btn-secondary mr-2 mb-2";
+        Self::with_defaults(ctx)
+            .add_right(NavbarLink::new(ctx,"/login", "Login",).class(class))
+            .add_right(NavbarLink::new(ctx,"/register", "Sign Up").class(class))
     }
 
     /// Create a navbar based on the page context.
@@ -96,22 +92,18 @@ impl Navbar {
         ctx.identity()
             .identity()
             .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
-            .map_or(Self::without_user(ctx), |uuid| {
-                let mut navbar = Self::with_defaults(ctx);
-                navbar
-                    .add_right(
-                        ctx,
-                        NavbarLink::new(format!("/profile/{}", uuid.to_hyphenated()), "Profile")
-                            .class("mr-2 mb-2 btn btn-primary"),
-                    )
-                    .add_right(
-                        ctx,
-                        NavbarLink::new("/logout", "Logout").class("mr-2 mb-2 btn btn-secondary"),
-                    )
-                    // Add API access for users.
-                    .add_left(ctx, NavbarLink::new("/playground", "API"));
-                navbar
-            })
+            .map_or(Self::without_user(ctx), |uuid| Self::with_defaults(ctx)
+                .add_right(NavbarLink::new(ctx,
+                        format!("/profile/{}", uuid.to_hyphenated()),
+                        "Profile"
+                    ).class("mr-2 mb-2 btn btn-primary"),
+                )
+                .add_right(NavbarLink::new(ctx,"/logout", "Logout")
+                               .class("mr-2 mb-2 btn btn-secondary"),
+                )
+                // Add API access for users.
+                .add_left(NavbarLink::new(ctx,"/playground", "API Playground"))
+            )
     }
 }
 
