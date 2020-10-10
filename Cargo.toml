@@ -14,13 +14,13 @@ edition = "2018"
 structopt = "0.3"
 # environment variable reading through dotenv (.env files)
 dotenv = "0.15.0"
-# actix web server
-actix-web = {version = "3", features = ["openssl"]}
+# actix web server (use exact version)
+actix-web = {version = "3.1.0", features = ["openssl"]}
 # static file serving
-actix-files = "0.3"
+actix-files = "0.4.0"
 # identity service -- cookie authentication
-actix-identity = "0.3"
-# ratelimiting
+actix-identity = "0.3.1"
+# ratelimiting (not compatible with actix 3)
 #actix-ratelimit = "0.2"
 # html templating.
 handlebars = {version = "3.1.0", features = ["dir_source"]}
@@ -52,6 +52,8 @@ pulldown-cmark = "0.8"
 lettre = {version = "0.9", features = ["serde-impls"]}
 # MD5 hashing to use to talk to Gravatar.
 md5 = "0.7"
+# URL Parsing
+url = "2.1.1"
 
 # Date and time utilities
 [dependencies.chrono]
