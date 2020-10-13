@@ -11,7 +11,7 @@ use crate::{
 /// The service to display a user profile. The user is specified by the id in the
 /// request path.
 #[get("/profile/{uid}")]
-pub async fn profile_service(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
+pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
     let t_uid: Uuid = user_id.into_inner();
     let target = User::get_from_db_by_id(ctx.get_db_connection().await, t_uid).await;
 

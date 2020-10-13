@@ -1,6 +1,5 @@
 // reexport all services
-mod services;
-pub use services::*;
+pub mod services;
 
 pub mod api;
 

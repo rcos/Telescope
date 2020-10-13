@@ -1,23 +1,51 @@
-<form method="post" action="/login">
+<form method="post">
     <div class="form-group">
-        <label for="login-modal-email-input">Email Address</label>
+        <label for="email-input">Email Address</label>
         <input
+                id="email-input"
                 type="email"
-                class="form-control"
-                placeholder="example@email.org"
-                id="login-modal-email-input"
                 name="email"
+                {{#if email}}
+                    value="{{email}}"
+                {{else}}
+                    placeholder="example@email.org"
+                {{/if}}
+                {{#if (eq error "EmailNotFound")}}
+                    class="form-control is-invalid"
+                    aria-labelledby="email-invalid"
+                {{else}}
+                    class="form-control"
+                {{/if}}
                 required>
+        {{#if (eq error "EmailNotFound")}}
+            <div id="email-invalid" class="invalid-feedback">
+                Email not found. Would you like to
+                <a href="/register">Sign Up?</a>
+            </div>
+        {{/if}}
     </div>
     <div class="form-group">
-        <label for="login-modal-pass-input">Password</label>
+        <label for="password-input">Password</label>
         <input
                 type="password"
-                class="form-control"
-                id="login-modal-pass-input"
-                name="pass"
+                id="password-input"
+                name="password"
+                {{#if (eq error "WrongPassword")}}
+                    class="form-control is-invalid"
+                    aria-labelledby="password-invalid"
+                {{else}}
+                    class="form-control"
+                {{/if}}
                 required>
+        {{#if (eq error "WrongPassword")}}
+            <div id="password-invalid" class="invalid-feedback">
+                Password incorrect. Did you
+                <a href="/forgot">forget your password?</a>
+            </div>
+        {{/if}}
     </div>
-    <button class="btn btn-primary" type="submit">Login</button>
-    <a class="btn btn-secondary" role="button" href="/forgot">Forgot Password</a>
+    <div class="d-flex flex-row-reverse form-group">
+        <button class="btn btn-primary" type="submit">Login</button>
+        <a class="btn btn-secondary mx-2" role="button" href="/forgot">Forgot Password</a>
+    </div>
 </form>

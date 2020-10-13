@@ -18,13 +18,18 @@ pub struct Page {
 
 impl Page {
     /// Create a new web page.
-    pub fn new(title: impl Into<String>, body: impl Into<String>, pc: &RequestContext) -> Self {
+    pub fn new(title: impl Into<String>, body: impl Into<String>, ctx: &RequestContext) -> Self {
         Self {
             page_title: title.into(),
             page_body: body.into(),
-            navbar: pc.render(&Navbar::from_context(pc)),
+            navbar: ctx.render(&Navbar::from_context(ctx)),
             version: env!("CARGO_PKG_VERSION"),
         }
+    }
+
+    /// Creates a page with a template rendered as the body.
+    pub fn of<T: Template>(title: impl Into<String>, template: &T, ctx: &RequestContext) -> Self {
+        Self::new(title, ctx.render(template), ctx)
     }
 }
 

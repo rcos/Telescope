@@ -32,7 +32,9 @@ use crate::{
     },
     templates::{
         static_pages::{
-            developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
+            developers::DevelopersPage,
+            index::LandingPage,
+            projects::ProjectsPage,
             sponsors::SponsorsPage,
         },
         StaticPage,
@@ -48,7 +50,7 @@ use actix_identity::{CookieIdentityPolicy, IdentityService};
 
 use actix_web::{
     middleware, web as aweb,
-    web::{get, post},
+    web::get,
     App, HttpServer,
 };
 
@@ -190,6 +192,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
+            // Identity and authentication middleware.
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&cookie_key)
                     .name(cookies::AUTH_TOKEN)
@@ -205,20 +208,24 @@ async fn main() -> std::io::Result<()> {
                     .with_max_requests(100),
             )
              */
+            // logger middleware
             .wrap(middleware::Logger::default())
+            // register API and Services
             .configure(web::api::register_apis)
+            .configure(web::services::register)
+            // static files service
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(LandingPage::handle))
             .route("/projects", get().to(ProjectsPage::handle))
             .route("/developers", get().to(DevelopersPage::handle))
-            .service(profile::profile_service)
             .route("/sponsors", get().to(SponsorsPage::handle))
+            /*
             .route("/blog", get().to(blog::blog_service))
-            .route("/login", post().to(login::login_service))
             .route("/logout", get().to(logout::logout_service))
             .route("/forgot", get().to(forgot::recovery_service))
             .route("/register", post().to(register::registration_service))
-            .default_service(aweb::route().to(p404::not_found))
+            */
+            .default_service(aweb::route().to(services::p404::not_found))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)
     .map_err(|e| {

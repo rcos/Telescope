@@ -1,5 +1,6 @@
 use crate::{
     web::{RequestContext, Template},
+    templates::login::LoginForm,
 };
 
 use uuid::Uuid;
@@ -81,8 +82,15 @@ impl Navbar {
     /// Get a navbar without a user logged in.
     fn without_user(ctx: &RequestContext) -> Self {
         let class = "btn btn-secondary mr-2 mb-2";
+        // use url encoder to do any necessary escaping.
+        let login_query = url::form_urlencoded::Serializer::new(String::new())
+            .append_pair(
+                LoginForm::REDIRECT_QUERY_VAR,
+                ctx.request().uri().to_string().as_str())
+            .finish();
+        let login_location= format!("/login?{}", login_query);
         Self::with_defaults(ctx)
-            .add_right(NavbarLink::new(ctx,"/login", "Login",).class(class))
+            .add_right(NavbarLink::new(ctx, login_location, "Login",).class(class))
             .add_right(NavbarLink::new(ctx,"/register", "Sign Up").class(class))
     }
 
