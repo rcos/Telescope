@@ -15,14 +15,11 @@ lazy_static! {
 
 /// Requirements for a valid password.
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, juniper::GraphQLObject, Default)]
-#[graphql(description = "Requirements for a valid password.")]
 pub struct PasswordRequirements {
     /// Password is minimum required length.
-    #[graphql(description = "Passwords must satisfy a minimum length or longer.")]
     pub is_min_len: bool,
 
     /// Password is not one of the commonly used insecure passwords.
-    #[graphql(description = "Passwords must not be one of a set of common passwords.")]
     pub not_common_password: bool,
 }
 

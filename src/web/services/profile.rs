@@ -47,7 +47,7 @@ pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
             bio: md_render(user.bio.as_str()),
         };
 
-        let page = Page::new(format!("RCOS - {}", user.name), ctx.render(&profile), &ctx).await;
+        let page = Page::of(format!("RCOS - {}", user.name), &profile, &ctx).await;
 
         HttpResponse::Ok().body(ctx.render(&page))
     }
