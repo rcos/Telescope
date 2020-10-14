@@ -32,12 +32,12 @@ use crate::{
     },
     templates::{
         static_pages::{
+            Static,
             developers::DevelopersPage,
             index::LandingPage,
             projects::ProjectsPage,
             sponsors::SponsorsPage,
         },
-        StaticPage,
     },
     web::app_data::AppData,
 };
@@ -215,10 +215,10 @@ async fn main() -> std::io::Result<()> {
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
-            .route("/", get().to(LandingPage::handle))
-            .route("/projects", get().to(ProjectsPage::handle))
-            .route("/developers", get().to(DevelopersPage::handle))
-            .route("/sponsors", get().to(SponsorsPage::handle))
+            .route("/", get().to(Static::<LandingPage>::handle))
+            .route("/projects", get().to(Static::<ProjectsPage>::handle))
+            .route("/developers", get().to(Static::<DevelopersPage>::handle))
+            .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             /*
             .route("/blog", get().to(blog::blog_service))
             .route("/logout", get().to(logout::logout_service))

@@ -9,5 +9,5 @@ pub async fn not_found(ctx: RequestContext) -> HttpResponse {
         "RCOS - 404",
         "404",
         "The page you're looking for does not seem to exist.",
-    ))
+    ).await)
 }

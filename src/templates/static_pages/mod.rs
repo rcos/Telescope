@@ -8,6 +8,26 @@ pub mod index;
 pub mod projects;
 pub mod sponsors;
 
+/// An intermediate workaround structure to deal with the lack of support
+/// for async functions in traits.
+pub struct Static<T: StaticPage> {
+    page_content: T,
+}
+
+impl<T: StaticPage> Static<T> {
+    /// Create a page containing the static content.
+    async fn in_page(&self, ctx: &RequestContext) -> Page {
+        Page::of(T::PAGE_TITLE, &self.page_content, ctx).await
+    }
+
+    /// Actix handler that can be used to generate responses.
+    pub async fn handle(ctx: RequestContext) -> HttpResponse {
+        let body = T::normalized_default().in_page(&ctx).await;
+        HttpResponse::Ok().body(ctx.render(&body))
+    }
+}
+
+
 /// A piece of static content that can be rendered in a Page object.
 pub trait StaticPage: Serialize + Sized + Default {
     /// The path to the handlebars file.
@@ -16,17 +36,14 @@ pub trait StaticPage: Serialize + Sized + Default {
     /// The title put at the top of the page.
     const PAGE_TITLE: &'static str;
 
-    /// Render the default struct into a page, unwrapping all errors.
-    fn render(ctx: &RequestContext) -> String {
-        let s: Self = Self::default();
-        let hbs = ctx.handlebars();
-        let inner = hbs.render(Self::TEMPLATE_NAME, &s).unwrap();
-        Page::new(Self::PAGE_TITLE, inner, ctx).render(hbs).unwrap()
+    fn normalized(self) -> Static<Self> {
+        Static {
+            page_content: self
+        }
     }
 
-    /// Actix handler that can be used to generate responses.
-    fn handle(ctx: RequestContext) -> HttpResponse {
-        HttpResponse::Ok().body(Self::render(&ctx))
+    fn normalized_default() -> Static<Self> {
+        Self::default().normalized()
     }
 }
 

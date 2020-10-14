@@ -20,7 +20,7 @@ impl Jumbotron {
     }
 
     /// Get a page with a jumbotron in it.
-    pub fn jumbotron_page(
+    pub async fn jumbotron_page(
         ctx: &RequestContext,
         page_title: impl Into<String>,
         heading: impl Into<String>,
@@ -30,7 +30,7 @@ impl Jumbotron {
             page_title.into(),
             ctx.render(&Jumbotron::new(heading, message)),
             ctx,
-        ))
+        ).await)
     }
 }
 

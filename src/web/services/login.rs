@@ -54,7 +54,8 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
     let login_page = Page::new(
         "RCOS Login",
         req_ctx.render(&form),
-        &req_ctx);
+        &req_ctx)
+        .await;
 
     HttpResponse::Ok().body(req_ctx.render(&login_page))
 }
@@ -65,18 +66,21 @@ pub async fn login_post(req_ctx: RequestContext, form: Form<LoginRequest>) -> Ht
     let identity = req_ctx.identity();
     let email = form.email.clone();
     let target_page = LoginForm::target_page(&req_ctx);
-    login(&req_ctx, form.into_inner())
+    let res = login(&req_ctx, form.into_inner())
         .await
         .map(|u| {
             // if user logged in successfully, modify the identity
             identity.remember(u.id_str());
             HttpResponse::Found().header(header::LOCATION, target_page).finish()
-        })
-        .unwrap_or_else(|e| {
+        });
+    match res {
+        Ok(r) => r,
+        Err(e) => {
             let login_form = LoginForm::from_context(&req_ctx)
                 .with_err(e)
                 .with_email(email);
-            let page = Page::of("RCOS Login", &login_form, &req_ctx);
+            let page = Page::of("RCOS Login", &login_form, &req_ctx).await;
             HttpResponse::Unauthorized().body(req_ctx.render(&page))
-        })
+        }
+    }
 }

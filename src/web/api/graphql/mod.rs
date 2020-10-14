@@ -50,7 +50,7 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
                 "RCOS - Unauthorized",
                 "Unauthorized",
                 "You must login to access the API playground.",
-            ))
+            ).await)
     } else {
         let playground_page = GraphQlPlaygroundPage::for_endpoint("/api/graphql");
         HttpResponse::Ok()

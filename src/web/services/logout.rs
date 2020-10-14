@@ -1,5 +1,3 @@
-use crate::templates::static_pages::index::LandingPage;
-use crate::templates::StaticPage;
 use crate::web::RequestContext;
 use actix_web::HttpResponse;
 

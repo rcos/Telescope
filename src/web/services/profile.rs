@@ -21,7 +21,7 @@ pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
             "User Not Found",
             "404",
             "User not found.",
-        ));
+        ).await);
     } else {
         let user = target.unwrap();
 
@@ -50,7 +50,7 @@ pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
             bio: md_render(user.bio.as_str()),
         };
 
-        let page = Page::new(format!("RCOS - {}", user.name), ctx.render(&profile), &ctx);
+        let page = Page::new(format!("RCOS - {}", user.name), ctx.render(&profile), &ctx).await;
 
         HttpResponse::Ok().body(ctx.render(&page))
     }

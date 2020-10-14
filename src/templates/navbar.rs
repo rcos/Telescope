@@ -103,22 +103,28 @@ impl Navbar {
     }
 
     /// Create a navbar based on the page context.
-    pub fn from_context(ctx: &RequestContext) -> Self {
-        ctx.identity()
-            .identity()
-            .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
-            .map_or(Self::without_user(ctx), |uuid| Self::with_defaults(ctx)
-                .add_right(NavbarLink::new(ctx,
+    pub async fn from_context(ctx: &RequestContext) -> Self {
+        if ctx.logged_in().await {
+            Self::without_user(ctx)
+        } else {
+            ctx.identity()
+                .identity()
+                .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
+                .map_or(Self::without_user(ctx), |uuid| Self::with_defaults(ctx)
+                    .add_right(
+                        NavbarLink::new(
+                        ctx,
                         format!("/profile/{}", uuid.to_hyphenated()),
                         "Profile"
-                    ).class("mr-2 mb-2 btn btn-primary"),
+                        ).class("mr-2 mb-2 btn btn-primary"),
+                    )
+                    .add_right(NavbarLink::new(ctx,"/logout", "Logout")
+                                   .class("mr-2 mb-2 btn btn-secondary"),
+                    )
+                    // Add API access for users.
+                    .add_left(NavbarLink::new(ctx,"/playground", "API Playground"))
                 )
-                .add_right(NavbarLink::new(ctx,"/logout", "Logout")
-                               .class("mr-2 mb-2 btn btn-secondary"),
-                )
-                // Add API access for users.
-                .add_left(NavbarLink::new(ctx,"/playground", "API Playground"))
-            )
+        }
     }
 }
 
