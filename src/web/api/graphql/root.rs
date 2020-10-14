@@ -18,7 +18,6 @@ use crate::{
     },
 };
 use uuid::Uuid;
-use actix_web::web::block;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;

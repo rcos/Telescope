@@ -4,6 +4,7 @@ use crate::web::{
     api::rest::login::LoginError
 };
 
+/// The Login Page.
 #[derive(Clone, Debug, Serialize)]
 pub struct LoginForm {
     redirect: String,
