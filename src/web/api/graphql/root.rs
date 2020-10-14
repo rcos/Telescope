@@ -41,8 +41,7 @@ impl ApiContext {
         parent
             .identity()
             .identity()
-            .map(|id| Uuid::parse_str(&id).ok())
-            .flatten()
+            .and_then(|id| Uuid::parse_str(&id).ok())
             .map(|uuid| Self {
                 connection_pool,
                 schema: Self::make_schema(),

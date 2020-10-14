@@ -1,15 +1,17 @@
 mod root;
 pub use root::ApiContext;
 
-pub use crate::models::password_requirements::PasswordRequirements;
-
 use actix_web::{web, Error, HttpResponse};
 
-use juniper::http::{playground::playground_source, GraphQLRequest};
+use juniper::http::GraphQLRequest;
 
-use crate::templates::jumbotron::Jumbotron;
-use crate::web::RequestContext;
-
+use crate::{
+    templates::{
+        jumbotron::Jumbotron,
+        graphql_playground::GraphQlPlaygroundPage
+    },
+    web::RequestContext,
+};
 
 /// Handler for GraphQL API requests.
 #[post("/api/graphql")]
@@ -30,16 +32,17 @@ pub async fn graphql_api(
             .content_type("application/json")
             .body(res))
     } else {
-        Ok(HttpResponse::Unauthorized().body("You must be logged in to make API requests."))
+        Ok(HttpResponse::Unauthorized()
+            .body(r#"You must be logged in to make API requests."#))
     }
 }
 
 /// Service for interactive GraphQL playground.
 ///
-/// Only available to signed in users.
+/// Only available to signed in users. (currently)
 #[get("/playground")]
 pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
-    if !req_ctx.logged_in() {
+    if !req_ctx.logged_in().await {
         HttpResponse::Unauthorized()
             .content_type("text/html; charset=utf-8")
             .body(Jumbotron::jumbotron_page(
@@ -49,9 +52,10 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
                 "You must login to access the API playground.",
             ))
     } else {
+        let playground_page = GraphQlPlaygroundPage::for_endpoint("/api/graphql");
         HttpResponse::Ok()
             .content_type("text/html; charset=utf-8")
-            .body(playground_source("/api/graphql"))
+            .body(req_ctx.render(&playground_page))
     }
 }
 

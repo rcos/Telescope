@@ -1,7 +1,6 @@
 
 use crate::{
     templates::{
-        static_pages::StaticPage,
         login::LoginForm,
         page::Page,
     },
