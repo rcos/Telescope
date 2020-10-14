@@ -539,30 +539,25 @@ It was also liscenced under an MIT Open Source liscence.
 
         GraphQLPlayground.init(root, {
             'endpoint': "{{endpoint}}",
-            /*
-            'editor': {
-                cursorShape: 'line', // possible values: 'line', 'block', 'underline'
-                fontFamily: `'Source Code Pro', 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace`,
-                fontSize: 14,
-                reuseHeaders: true,
-                theme: 'dark',
-            },
-             */
-            'request.credentials': 'include',
-            /*
-            request: {
-                credentials: "include"
-            },
-            schema: {
-                polling: {
-                    enable: true,
-                    endpointFilter: "*localhost*",
-                    interval: 2000,
-                },
-                disableComments: true
+            //'version': '1.7.26',
+            "settings": {
+                "editor.cursorShape": "line",
+                "editor.fontFamily": "'Source Code Pro', 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace",
+                "editor.fontSize": 14,
+                "editor.reuseHeaders": true,
+                "editor.theme": "dark",
+                "general.betaUpdates": false,
+                "prettier.printWidth": 80,
+                "prettier.tabWidth": 2,
+                "prettier.useTabs": false,
+                "request.credentials": "include",
+                "schema.disableComments": true,
+                "schema.polling.enable": true,
+                "schema.polling.endpointFilter": "*localhost*",
+                "schema.polling.interval": 2000,
+                "tracing.hideTracingResponse": true,
+                "tracing.tracingSupported": true
             }
-            
-             */
          })
     })
 </script>
