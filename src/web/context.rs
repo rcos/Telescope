@@ -116,8 +116,8 @@ impl RequestContext {
 
     /// Get an API context object (a partial sub-context of this context) to execute
     /// GraphQL API requests in.
-    pub fn get_api_context(&self) -> Option<ApiContext> {
-        ApiContext::new(self.clone_connection_pool(), self)
+    pub async fn get_api_context(&self) -> Option<ApiContext> {
+        ApiContext::new(self.clone_connection_pool(), self).await
     }
 
     /// Asynchronously get the logged in user if there is one.

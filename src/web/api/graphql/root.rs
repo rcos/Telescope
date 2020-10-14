@@ -18,6 +18,7 @@ use crate::{
     },
 };
 use uuid::Uuid;
+use actix_web::web::block;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -34,19 +35,27 @@ pub struct ApiContext {
 
 impl ApiContext {
     /// Try to make a new API context. Return none if not logged in.
-    pub fn new(
+    pub async fn new(
         connection_pool: Pool<ConnectionManager<PgConnection>>,
         parent: &RequestContext,
     ) -> Option<Self> {
-        parent
+        let id = parent
             .identity()
             .identity()
-            .and_then(|id| Uuid::parse_str(&id).ok())
-            .map(|uuid| Self {
-                connection_pool,
-                schema: Self::make_schema(),
-                identity: uuid,
-            })
+            .and_then(|id| Uuid::parse_str(&id).ok());
+
+        if let Some(uuid) = id {
+            let conn = parent.get_db_connection().await;
+            User::get_from_db_by_id(conn, uuid)
+                .await
+                .map(|user| Self {
+                    connection_pool,
+                    schema: Self::make_schema(),
+                    identity: user.id,
+                })
+        } else {
+            None
+        }
     }
 
     /// Get the GraphQL schema object.
