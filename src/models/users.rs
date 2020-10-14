@@ -1,13 +1,7 @@
 use crate::{
-    models::{
-        Email,
-        PasswordRequirements
-    },
+    models::{Email, PasswordRequirements},
     schema::users,
-    web::{
-        api::graphql::ApiContext,
-        DbConnection,
-    },
+    web::{api::graphql::ApiContext, DbConnection},
 };
 
 use actix_web::web::block;

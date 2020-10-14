@@ -1,15 +1,11 @@
-use crate::web::{
-    Template,
-    RequestContext,
-    api::rest::login::LoginError
-};
+use crate::web::{api::rest::login::LoginError, RequestContext, Template};
 
 /// The Login Page.
 #[derive(Clone, Debug, Serialize)]
 pub struct LoginForm {
     redirect: String,
     email: Option<String>,
-    error: Option<LoginError>
+    error: Option<LoginError>,
 }
 
 impl LoginForm {
@@ -31,7 +27,7 @@ impl LoginForm {
         Self {
             redirect: Self::target_page(ctx),
             email: None,
-            error: None
+            error: None,
         }
     }
 

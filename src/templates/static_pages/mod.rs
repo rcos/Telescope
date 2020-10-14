@@ -27,7 +27,6 @@ impl<T: StaticPage> Static<T> {
     }
 }
 
-
 /// A piece of static content that can be rendered in a Page object.
 pub trait StaticPage: Serialize + Sized + Default {
     /// The path to the handlebars file.
@@ -37,9 +36,7 @@ pub trait StaticPage: Serialize + Sized + Default {
     const PAGE_TITLE: &'static str;
 
     fn normalized(self) -> Static<Self> {
-        Static {
-            page_content: self
-        }
+        Static { page_content: self }
     }
 
     fn normalized_default() -> Static<Self> {

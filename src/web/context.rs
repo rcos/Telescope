@@ -1,9 +1,6 @@
 use crate::{
     models::User,
-    web::{
-        api::graphql::ApiContext,
-        app_data::AppData
-    },
+    web::{api::graphql::ApiContext, app_data::AppData},
 };
 
 use actix_web::{
@@ -67,7 +64,9 @@ impl RequestContext {
 
     /// Check if a user is logged in. Calls the database to check user valididty.
     pub async fn logged_in(&self) -> bool {
-        let id = self.identity.identity()
+        let id = self
+            .identity
+            .identity()
             .and_then(|s| Uuid::parse_str(&s).ok());
         if let Some(uid) = id {
             User::get_from_db_by_id(self.get_db_connection().await, uid)

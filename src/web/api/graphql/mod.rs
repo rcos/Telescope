@@ -6,10 +6,7 @@ use actix_web::{web, Error, HttpResponse};
 use juniper::http::GraphQLRequest;
 
 use crate::{
-    templates::{
-        jumbotron::Jumbotron,
-        graphql_playground::GraphQlPlaygroundPage
-    },
+    templates::{graphql_playground::GraphQlPlaygroundPage, jumbotron::Jumbotron},
     web::RequestContext,
 };
 
@@ -25,15 +22,14 @@ pub async fn graphql_api(
             let res = data.execute(&api_ctx.schema, &api_ctx);
             Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
         })
-            .await
-            .map_err(Error::from)?;
+        .await
+        .map_err(Error::from)?;
 
         Ok(HttpResponse::Ok()
             .content_type("application/json")
             .body(res))
     } else {
-        Ok(HttpResponse::Unauthorized()
-            .body(r#"You must be logged in to make API requests."#))
+        Ok(HttpResponse::Unauthorized().body(r#"You must be logged in to make API requests."#))
     }
 }
 
@@ -45,12 +41,15 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
     if !req_ctx.logged_in().await {
         HttpResponse::Unauthorized()
             .content_type("text/html; charset=utf-8")
-            .body(Jumbotron::jumbotron_page(
-                &req_ctx,
-                "RCOS - Unauthorized",
-                "Unauthorized",
-                "You must login to access the API playground.",
-            ).await)
+            .body(
+                Jumbotron::jumbotron_page(
+                    &req_ctx,
+                    "RCOS - Unauthorized",
+                    "Unauthorized",
+                    "You must login to access the API playground.",
+                )
+                .await,
+            )
     } else {
         let playground_page = GraphQlPlaygroundPage::for_endpoint("/api/graphql");
         HttpResponse::Ok()
@@ -61,7 +60,5 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
 
 /// Function to register the GraphQl API and playground with actix-web.
 pub fn register(config: &mut web::ServiceConfig) {
-    config
-        .service(graphql_api)
-        .service(graphql_playground);
+    config.service(graphql_api).service(graphql_playground);
 }

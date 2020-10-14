@@ -16,12 +16,9 @@ pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
     let target = User::get_from_db_by_id(ctx.get_db_connection().await, t_uid).await;
 
     if target.is_none() {
-        return HttpResponse::NotFound().body(Jumbotron::jumbotron_page(
-            &ctx,
-            "User Not Found",
-            "404",
-            "User not found.",
-        ).await);
+        return HttpResponse::NotFound().body(
+            Jumbotron::jumbotron_page(&ctx, "User Not Found", "404", "User not found.").await,
+        );
     } else {
         let user = target.unwrap();
 

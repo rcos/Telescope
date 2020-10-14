@@ -1,26 +1,15 @@
-
 use crate::{
-    templates::{
-        login::LoginForm,
-        page::Page,
-    },
-    web::{
-        RequestContext,
-        api::rest::login::{
-            LoginRequest,
-            login
-        },
-    },
     models::User,
+    templates::{login::LoginForm, page::Page},
+    web::{
+        api::rest::login::{login, LoginRequest},
+        RequestContext,
+    },
 };
 
 use actix_identity::Identity;
 
-use actix_web::{
-    web::Form,
-    http::header,
-    HttpResponse,
-};
+use actix_web::{http::header, web::Form, HttpResponse};
 
 use uuid::Uuid;
 
@@ -33,12 +22,13 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
 
     // check the identity.
     // if someone is already logged in then just redirect to the target page.
-    let uid = identity.identity()
+    let uid = identity
+        .identity()
         .and_then(|s| Uuid::parse_str(s.as_str()).ok());
 
     if let Some(id) = uid {
         let conn = req_ctx.get_db_connection().await;
-        let user = User::get_from_db_by_id(conn,id).await;
+        let user = User::get_from_db_by_id(conn, id).await;
         // logged into to a valid user using the get request.
         if user.is_some() {
             return HttpResponse::Found()
@@ -51,11 +41,7 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
     identity.forget();
 
     let form = LoginForm::from_context(&req_ctx);
-    let login_page = Page::new(
-        "RCOS Login",
-        req_ctx.render(&form),
-        &req_ctx)
-        .await;
+    let login_page = Page::new("RCOS Login", req_ctx.render(&form), &req_ctx).await;
 
     HttpResponse::Ok().body(req_ctx.render(&login_page))
 }
@@ -66,13 +52,13 @@ pub async fn login_post(req_ctx: RequestContext, form: Form<LoginRequest>) -> Ht
     let identity = req_ctx.identity();
     let email = form.email.clone();
     let target_page = LoginForm::target_page(&req_ctx);
-    let res = login(&req_ctx, form.into_inner())
-        .await
-        .map(|u| {
-            // if user logged in successfully, modify the identity
-            identity.remember(u.id_str());
-            HttpResponse::Found().header(header::LOCATION, target_page).finish()
-        });
+    let res = login(&req_ctx, form.into_inner()).await.map(|u| {
+        // if user logged in successfully, modify the identity
+        identity.remember(u.id_str());
+        HttpResponse::Found()
+            .header(header::LOCATION, target_page)
+            .finish()
+    });
     match res {
         Ok(r) => r,
         Err(e) => {

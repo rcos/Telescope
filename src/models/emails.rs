@@ -1,20 +1,16 @@
 use crate::{
     models::User,
     schema::emails,
-    web::{
-        DbConnection,
-        api::graphql::ApiContext
-    }
+    web::{api::graphql::ApiContext, DbConnection},
 };
+use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};
 use regex::Regex;
 use uuid::Uuid;
-use actix_web::web::block;
 
 lazy_static! {
-    static ref EMAIL_REGEX: Regex = Regex::new(
-        r#"^[[:alpha:]]+@[[:alpha:]]+(\.[[:alpha:]]+)+$"#
-    ).unwrap();
+    static ref EMAIL_REGEX: Regex =
+        Regex::new(r#"^[[:alpha:]]+@[[:alpha:]]+(\.[[:alpha:]]+)+$"#).unwrap();
 }
 
 /// Field structure must match that in the SQL migration.
@@ -91,16 +87,15 @@ impl Email {
     /// Try to get a user based on an email from the database.
     pub async fn get_user_from_db_by_email(conn: DbConnection, email_: String) -> Option<User> {
         block::<_, (Email, User), _>(move || {
-            use crate::schema::{
-                users::dsl::*,
-                emails::dsl::*
-            };
+            use crate::schema::{emails::dsl::*, users::dsl::*};
             use diesel::prelude::*;
-            emails.inner_join(users)
+            emails
+                .inner_join(users)
                 .filter(email.eq(email_))
                 .first(&conn)
-        }).await
-            .ok()
-            .map(|(_, u)| u)
+        })
+        .await
+        .ok()
+        .map(|(_, u)| u)
     }
 }

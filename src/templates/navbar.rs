@@ -1,6 +1,6 @@
 use crate::{
-    web::{RequestContext, Template},
     templates::login::LoginForm,
+    web::{RequestContext, Template},
 };
 
 use uuid::Uuid;
@@ -18,7 +18,6 @@ pub struct NavbarLink {
     text: String,
     /// CSS classes associated with this link.
     class: String,
-
 }
 
 impl NavbarLink {
@@ -72,11 +71,11 @@ impl Navbar {
     /// Navbar with homepage, achievement page, projects, developers and sponsors
     fn with_defaults(ctx: &RequestContext) -> Self {
         Self::empty()
-            .add_left(NavbarLink::new(ctx,"/", "Home"))
-            .add_left(NavbarLink::new(ctx,"/projects", "Projects"))
-            .add_left(NavbarLink::new(ctx,"/developers", "Developers"))
-            .add_left(NavbarLink::new(ctx,"/sponsors", "Sponsors"))
-            .add_left(NavbarLink::new(ctx,"/blog", "Blog"))
+            .add_left(NavbarLink::new(ctx, "/", "Home"))
+            .add_left(NavbarLink::new(ctx, "/projects", "Projects"))
+            .add_left(NavbarLink::new(ctx, "/developers", "Developers"))
+            .add_left(NavbarLink::new(ctx, "/sponsors", "Sponsors"))
+            .add_left(NavbarLink::new(ctx, "/blog", "Blog"))
     }
 
     /// Get a navbar without a user logged in.
@@ -84,12 +83,11 @@ impl Navbar {
         let class = "btn btn-secondary mr-2 mb-2";
 
         // if we are on the login page dont add another layer of redirect
-        let target =
-            if ctx.request().path() == "/login" {
-                LoginForm::target_page(ctx)
-            } else {
-                ctx.request().uri().to_string()
-            };
+        let target = if ctx.request().path() == "/login" {
+            LoginForm::target_page(ctx)
+        } else {
+            ctx.request().uri().to_string()
+        };
 
         let login_query = url::form_urlencoded::Serializer::new(String::new())
             .append_pair(LoginForm::REDIRECT_QUERY_VAR, target.as_str())
@@ -98,8 +96,8 @@ impl Navbar {
         let login_location = format!("/login?{}", login_query);
 
         Self::with_defaults(ctx)
-            .add_right(NavbarLink::new(ctx, login_location, "Login",).class(class))
-            .add_right(NavbarLink::new(ctx,"/register", "Sign Up").class(class))
+            .add_right(NavbarLink::new(ctx, login_location, "Login").class(class))
+            .add_right(NavbarLink::new(ctx, "/register", "Sign Up").class(class))
     }
 
     /// Create a navbar based on the page context.
@@ -110,20 +108,23 @@ impl Navbar {
             ctx.identity()
                 .identity()
                 .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
-                .map_or(Self::without_user(ctx), |uuid| Self::with_defaults(ctx)
-                    .add_right(
-                        NavbarLink::new(
-                        ctx,
-                        format!("/profile/{}", uuid.to_hyphenated()),
-                        "Profile"
-                        ).class("mr-2 mb-2 btn btn-primary"),
-                    )
-                    .add_right(NavbarLink::new(ctx,"/logout", "Logout")
-                                   .class("mr-2 mb-2 btn btn-secondary"),
-                    )
-                    // Add API access for users.
-                    .add_left(NavbarLink::new(ctx,"/playground", "API Playground"))
-                )
+                .map_or(Self::without_user(ctx), |uuid| {
+                    Self::with_defaults(ctx)
+                        .add_right(
+                            NavbarLink::new(
+                                ctx,
+                                format!("/profile/{}", uuid.to_hyphenated()),
+                                "Profile",
+                            )
+                            .class("mr-2 mb-2 btn btn-primary"),
+                        )
+                        .add_right(
+                            NavbarLink::new(ctx, "/logout", "Logout")
+                                .class("mr-2 mb-2 btn btn-secondary"),
+                        )
+                        // Add API access for users.
+                        .add_left(NavbarLink::new(ctx, "/playground", "API Playground"))
+                })
         }
     }
 }

@@ -26,18 +26,10 @@ mod schema;
 mod models;
 
 use crate::{
-    models::{
-        PasswordRequirements,
-        Email, User,
-    },
-    templates::{
-        static_pages::{
-            Static,
-            developers::DevelopersPage,
-            index::LandingPage,
-            projects::ProjectsPage,
-            sponsors::SponsorsPage,
-        },
+    models::{Email, PasswordRequirements, User},
+    templates::static_pages::{
+        developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
+        sponsors::SponsorsPage, Static,
     },
     web::app_data::AppData,
 };
@@ -48,11 +40,7 @@ use actix_identity::{CookieIdentityPolicy, IdentityService};
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
-use actix_web::{
-    middleware, web as aweb,
-    web::get,
-    App, HttpServer,
-};
+use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
 
 use diesel::{r2d2::ConnectionManager, Connection, PgConnection, RunQueryDsl};
 
@@ -146,7 +134,8 @@ async fn main() -> std::io::Result<()> {
                     error!(
                         "Admin password {} is too short. \
                         Please choose a password more than {} characters.",
-                        admin_password, PasswordRequirements::MIN_PASSWORD_LENGTH
+                        admin_password,
+                        PasswordRequirements::MIN_PASSWORD_LENGTH
                     )
                 }
                 exit(exitcode::DATAERR)

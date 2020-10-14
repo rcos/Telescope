@@ -26,11 +26,14 @@ impl Jumbotron {
         heading: impl Into<String>,
         message: impl Into<String>,
     ) -> String {
-        ctx.render(&Page::new(
-            page_title.into(),
-            ctx.render(&Jumbotron::new(heading, message)),
-            ctx,
-        ).await)
+        ctx.render(
+            &Page::new(
+                page_title.into(),
+                ctx.render(&Jumbotron::new(heading, message)),
+                ctx,
+            )
+            .await,
+        )
     }
 }
 
