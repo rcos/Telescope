@@ -102,13 +102,13 @@ impl Navbar {
 
     /// Create a navbar based on the page context.
     pub async fn from_context(ctx: &RequestContext) -> Self {
-        if ctx.logged_in().await {
+        if !(ctx.logged_in().await) {
             Self::without_user(ctx)
         } else {
             ctx.identity()
                 .identity()
                 .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
-                .map_or(Self::without_user(ctx), |uuid| {
+                .map(|uuid| {
                     let logout_redir = url::form_urlencoded::Serializer::new(String::new())
                         .append_pair(LoginForm::REDIRECT_QUERY_VAR, ctx.request().uri().path())
                         .finish();
@@ -129,6 +129,7 @@ impl Navbar {
                         // Add API access for users.
                         .add_left(NavbarLink::new(ctx, "/playground", "API Playground"))
                 })
+                .unwrap()
         }
     }
 }
