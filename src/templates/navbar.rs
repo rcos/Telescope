@@ -43,7 +43,7 @@ impl NavbarLink {
     }
 }
 
-/// A navbar definition.
+/// Template for the navigation bar at the top of the page.
 #[derive(Clone, Debug, Serialize)]
 pub struct Navbar {
     left_items: Vec<NavbarLink>,

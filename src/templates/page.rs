@@ -3,12 +3,12 @@ use crate::web::context::Template;
 use crate::web::RequestContext;
 
 /// A page on the RCOS website.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Page {
     /// The page title.
     page_title: String,
     /// The navbar at the top of the page.
-    navbar: String,
+    navbar: Navbar,
     /// The inner html for this webpage. This is rendered unescaped. Do not let the user get stuff
     /// Ensure that no user input gets rendered into this unescaped (as it will create an XSS vulnerability).
     page_body: String,
@@ -22,7 +22,7 @@ impl Page {
         Self {
             page_title: title.into(),
             page_body: body.into(),
-            navbar: ctx.render(&Navbar::from_context(ctx)),
+            navbar: Navbar::from_context(ctx),
             version: env!("CARGO_PKG_VERSION"),
         }
     }
