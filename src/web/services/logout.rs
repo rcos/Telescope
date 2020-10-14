@@ -1,16 +1,17 @@
-use crate::web::RequestContext;
-use actix_web::HttpResponse;
+use crate::{templates::login::LoginForm, web::RequestContext};
+
+use actix_web::{http::header, HttpResponse};
 
 /// Log a user out.
+///
+/// Logout is GET only. Query variables (identical to those used in the login
+/// format) may be used to indicate where to go after logout. If no query
+/// variables are used, the default is the home page.
+#[get("/logout")]
 pub async fn logout_service(req_ctx: RequestContext) -> HttpResponse {
-    let identity = req_ctx.identity();
-    identity.forget();
-    unimplemented!()
-    // HttpResponse::Ok().body(WithAlert::render_into_page(
-    //     &req_ctx,
-    //     LandingPage::PAGE_TITLE,
-    //     "success",
-    //     "You are logged out",
-    //     &LandingPage,
-    // ))
+    req_ctx.identity().forget();
+    let target = LoginForm::target_page(&req_ctx);
+    HttpResponse::Found()
+        .header(header::LOCATION, target)
+        .finish()
 }

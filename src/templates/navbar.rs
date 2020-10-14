@@ -109,6 +109,10 @@ impl Navbar {
                 .identity()
                 .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
                 .map_or(Self::without_user(ctx), |uuid| {
+                    let logout_redir = url::form_urlencoded::Serializer::new(String::new())
+                        .append_pair(LoginForm::REDIRECT_QUERY_VAR, ctx.request().uri().path())
+                        .finish();
+
                     Self::with_defaults(ctx)
                         .add_right(
                             NavbarLink::new(
@@ -119,7 +123,7 @@ impl Navbar {
                             .class("mr-2 mb-2 btn btn-primary"),
                         )
                         .add_right(
-                            NavbarLink::new(ctx, "/logout", "Logout")
+                            NavbarLink::new(ctx, format!("/logout?{}", logout_redir), "Logout")
                                 .class("mr-2 mb-2 btn btn-secondary"),
                         )
                         // Add API access for users.
