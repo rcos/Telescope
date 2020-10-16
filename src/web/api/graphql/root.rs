@@ -7,9 +7,19 @@ use diesel::{
 };
 
 use crate::{
-    models::{Email, PasswordRequirements, User},
+    models::{
+        Email,
+        PasswordRequirements,
+        User,
+        pagination::{
+            PaginationInput,
+            PaginatedResults,
+            Paginate
+        }
+    },
     web::{DbConnection, RequestContext},
 };
+
 use uuid::Uuid;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.

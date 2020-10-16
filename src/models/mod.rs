@@ -19,3 +19,5 @@ pub mod password_requirements;
 pub use password_requirements::PasswordRequirements;
 
 pub mod markdown;
+
+pub mod pagination;
