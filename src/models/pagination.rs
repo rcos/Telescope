@@ -30,6 +30,7 @@ use actix_web::{
 };
 
 use crate::web::api::graphql::ApiContext;
+use std::any;
 
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
@@ -141,7 +142,7 @@ impl<N, T> PaginatedData<N, T> {
 }
 
 /// Pagination struct for use with graphql queries.
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, juniper::GraphQLObject)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, juniper::GraphQLInputObject)]
 pub struct PaginationInput {
     offset: i32,
     count: i32,
@@ -205,7 +206,7 @@ where
         context: &Self::Context,
         _: &()
     ) -> String {
-        unimplemented!()
+        format!("Paginated{}",)
     }
 
     fn resolve(

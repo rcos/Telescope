@@ -21,6 +21,7 @@ use crate::{
 };
 
 use uuid::Uuid;
+use crate::models::pagination::Paginated;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -103,7 +104,7 @@ impl QueryRoot {
     }
 
     /// Get a list of all users.
-    fn users(ctx: &ApiContext) -> FieldResult<Vec<User>> {
+    fn users(ctx: &ApiContext, pagination: Option<PaginationInput>) -> FieldResult<PaginatedData<i32, User>> {
         use crate::schema::users::dsl::*;
         let mut conn = ctx.get_db_conn()?;
         users.load(&conn).map_err(|e| {
