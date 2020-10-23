@@ -35,7 +35,7 @@ pub struct User {
     pub hashed_pwd: String,
 }
 
-/// GraphQL API operations on users.
+/// An RCOS member.
 #[juniper::object(
     Context = ApiContext,
 )]

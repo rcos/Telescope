@@ -30,7 +30,7 @@ use actix_web::{
 };
 
 use crate::web::api::graphql::ApiContext;
-use std::any;
+use crate::models::User;
 
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
@@ -148,73 +148,34 @@ pub struct PaginationInput {
     count: i32,
 }
 
-/// Implementation of Juniper GraphQL type on paginated data.
-impl<T> GraphQLType for PaginatedData<i32, T>
-where
-    T: GraphQLType<Context = ApiContext, TypeInfo = ()>,
-{
-    type Context = ApiContext;
-    type TypeInfo = ();
+macro_rules! impl_juniper_pagination {
+    ($t:ty, $n:literal) => {
+        #[juniper::object(
+            Context = ApiContext,
+            name = $n
+        )]
+        impl PaginatedData<i32, $t> {
+            /// The offset into the dataset.
+            fn offset(&self) -> i32 {
+                self.offset
+            }
 
-    fn name(_: &Self::TypeInfo) -> Option<&str> {
-        None
-    }
+            /// The number of items retrieved.
+            fn count(&self) -> i32 {
+                self.count
+            }
 
-    fn meta<'r>(_: &(), registry: &mut Registry<'r>) -> MetaType<'r, DefaultScalarValue>
-    where DefaultScalarValue: 'r,
-    {
-        let fields = &[
-            registry.field::<&i32>("offset", &()),
-            registry.field::<&i32>("count", &()),
-            registry.field::<&i32>("total", &()),
-            registry.field::<&Vec<T>>("data", &())
-        ];
+            /// The total number of items in the dataset.
+            fn total(&self) -> i32 {
+                self.total
+            }
 
-        registry
-            .build_object_type::<PaginatedData<i32, T>>(&(), fields)
-            .into_meta()
-    }
-
-    fn resolve_field(
-        &self,
-        info: &(),
-        field_name: &str,
-        arguments: &Arguments<DefaultScalarValue>,
-        executor: &Executor<Self::Context, DefaultScalarValue>
-    ) -> ExecutionResult<DefaultScalarValue> {
-        match field_name {
-            "offset"    => executor.resolve_with_ctx(info, &self.offset),
-            "count"     => executor.resolve_with_ctx(info, &self.count),
-            "total"     => executor.resolve_with_ctx(info, &self.total),
-            "data"      => executor.resolve_with_ctx(info, &self.data),
-            other => panic!("No field named {} found on PaginationData.", other)
+            /// The data retrieved.
+            fn data(&self) -> &Vec<$t> {
+                &self.data
+            }
         }
-    }
-
-    fn resolve_into_type(
-        &self,
-        _: &(),
-        type_name: &str,
-        selection_set: Option<&[Selection<DefaultScalarValue>]>,
-        executor: &Executor<Self::Context, DefaultScalarValue>
-    ) -> ExecutionResult<DefaultScalarValue> {
-        unimplemented!()
-    }
-
-    fn concrete_type_name(
-        &self,
-        context: &Self::Context,
-        _: &()
-    ) -> String {
-        format!("Paginated{}",)
-    }
-
-    fn resolve(
-        &self,
-        _: &(),
-        selection_set: Option<&[Selection<DefaultScalarValue>]>,
-        executor: &Executor<Self::Context, DefaultScalarValue>
-    ) -> Value<DefaultScalarValue> {
-        unimplemented!()
-    }
+    };
 }
+
+impl_juniper_pagination!(User, "PaginatedUsers");
