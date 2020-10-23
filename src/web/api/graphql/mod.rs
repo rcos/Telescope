@@ -3,10 +3,7 @@ pub use root::ApiContext;
 
 use actix_web::{web, Error, HttpResponse};
 
-use juniper::http::{
-    GraphQLRequest,
-    graphiql::graphiql_source,
-};
+use juniper::http::{graphiql::graphiql_source, GraphQLRequest};
 
 use crate::{
     templates::{graphql_playground::GraphQlPlaygroundPage, jumbotron::Jumbotron},
@@ -60,7 +57,7 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
         HttpResponse::Ok()
             .content_type("text/html; charset=utf-8")
             .body(req_ctx.render(&playground_page))
-         /*
+        /*
         HttpResponse::Ok()
             .content_type("text/html; charset=utf-8")
             .body(graphiql_source(endpoint))

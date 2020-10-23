@@ -8,20 +8,14 @@ use diesel::{
 
 use crate::{
     models::{
-        Email,
-        PasswordRequirements,
-        User,
-        pagination::{
-            PaginationInput,
-            PaginatedData,
-            Paginate
-        }
+        pagination::{Paginate, PaginatedData, PaginationInput},
+        Email, PasswordRequirements, User,
     },
     web::{DbConnection, RequestContext},
 };
 
-use uuid::Uuid;
 use crate::models::pagination::Paginated;
+use uuid::Uuid;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
@@ -49,13 +43,11 @@ impl ApiContext {
 
         if let Some(uuid) = id {
             let conn = parent.get_db_connection().await;
-            User::get_from_db_by_id(conn, uuid)
-                .await
-                .map(|user| Self {
-                    connection_pool,
-                    schema: Self::make_schema(),
-                    identity: user.id,
-                })
+            User::get_from_db_by_id(conn, uuid).await.map(|user| Self {
+                connection_pool,
+                schema: Self::make_schema(),
+                identity: user.id,
+            })
         } else {
             None
         }
@@ -110,11 +102,10 @@ impl QueryRoot {
 
         let pagination = pagination.unwrap_or_default();
 
-        users.load(&conn)
-            .map_err(|e| {
-                error!("Could not load users from database.");
-                FieldError::new(e, Value::null())
-            })
+        users.load(&conn).map_err(|e| {
+            error!("Could not load users from database.");
+            FieldError::new(e, Value::null())
+        })
     }
 
     /// Get a list of all emails

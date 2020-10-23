@@ -1,36 +1,25 @@
-
 // Pagination system inspired by
 // https://github.com/diesel-rs/diesel/blob/master/examples/postgres/advanced-blog-cli/src/pagination.rs
 
 use diesel::{
-    query_builder::{
-        AstPass,
-        Query,
-        QueryFragment,
-        QueryId,
-    },
-    r2d2::{
-        Pool,
-        ConnectionManager
-    },
+    pg::Pg,
+    query_builder::{AstPass, Query, QueryFragment, QueryId},
     query_dsl::LoadQuery,
+    r2d2::{ConnectionManager, Pool},
     result::Error as DieselErr,
     sql_types::BigInt,
-    PgConnection,
-    RunQueryDsl,
-    QueryResult,
-    pg::Pg,
+    PgConnection, QueryResult, RunQueryDsl,
 };
 
-use juniper::{GraphQLType, ScalarValue, ScalarRefValue, Executor, Selection, Value, Arguments, ExecutionResult, Registry, meta::MetaType, FieldError, DefaultScalarValue};
-
-use actix_web::{
-    web::block,
-    rt::blocking::BlockingError
+use juniper::{
+    meta::MetaType, Arguments, DefaultScalarValue, ExecutionResult, Executor, FieldError,
+    GraphQLType, Registry, ScalarRefValue, ScalarValue, Selection, Value,
 };
 
-use crate::web::api::graphql::ApiContext;
+use actix_web::{rt::blocking::BlockingError, web::block};
+
 use crate::models::User;
+use crate::web::api::graphql::ApiContext;
 
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
@@ -38,12 +27,12 @@ pub trait Paginate: Sized + QueryId {
     fn offset(self, offset: i64) -> Paginated<Self>;
 }
 
-impl <T: QueryId> Paginate for T {
+impl<T: QueryId> Paginate for T {
     fn paginate(self, offset: i64, count: i64) -> Paginated<T> {
         Paginated {
             query: self,
             offset,
-            count: Some(count)
+            count: Some(count),
         }
     }
 
@@ -51,7 +40,7 @@ impl <T: QueryId> Paginate for T {
         Paginated {
             query: self,
             offset,
-            count: None
+            count: None,
         }
     }
 }
@@ -74,36 +63,38 @@ pub struct PaginatedData<N, T> {
     offset: N,
     count: N,
     total: N,
-    data: Vec<T>
+    data: Vec<T>,
 }
 
 /// Return type from pagination database calls.
 pub type PaginatedResult<N, T, E> = Result<PaginatedData<N, T>, E>;
 
-impl <T> Paginated<T> {
+impl<T> Paginated<T> {
     /// Load and count the data from a query.
     pub fn load_and_count<U>(self, conn: &PgConnection) -> PaginatedResult<i64, U, DieselErr>
-    where Self: LoadQuery<PgConnection, (U, i64)> {
+    where
+        Self: LoadQuery<PgConnection, (U, i64)>,
+    {
         let offset = self.offset;
         let results = self.load::<(U, i64)>(conn)?;
-        let total = results.first()
-            .map(|(_, c)| *c)
-            .unwrap_or(0);
+        let total = results.first().map(|(_, c)| *c).unwrap_or(0);
         Ok(PaginatedData {
             total,
             count: results.len() as i64,
             offset,
-            data: results.into_iter().map(|(d, _)| d).collect()
+            data: results.into_iter().map(|(d, _)| d).collect(),
         })
     }
 
     /// Async version of previous function.
-    pub async fn async_load_and_count<U>(self, pooled_conn: &Pool<ConnectionManager<PgConnection>>)
-        -> PaginatedResult<i64, U, BlockingError<DieselErr>>
+    pub async fn async_load_and_count<U>(
+        self,
+        pooled_conn: &Pool<ConnectionManager<PgConnection>>,
+    ) -> PaginatedResult<i64, U, BlockingError<DieselErr>>
     where
         Self: LoadQuery<PgConnection, (U, i64)>,
         U: Send + 'static,
-        T: Send + 'static
+        T: Send + 'static,
     {
         let pool = pooled_conn.clone();
         block(move || {
@@ -114,7 +105,8 @@ impl <T> Paginated<T> {
                 })
                 .unwrap();
             self.load_and_count(&conn)
-        }).await
+        })
+        .await
     }
 }
 
@@ -125,7 +117,8 @@ impl<T: Query> Query for Paginated<T> {
 impl<T: QueryId> RunQueryDsl<PgConnection> for Paginated<T> {}
 
 impl<T: QueryId> QueryFragment<Pg> for Paginated<T>
-    where T: QueryFragment<Pg>,
+where
+    T: QueryFragment<Pg>,
 {
     fn walk_ast(&self, mut out: AstPass<Pg>) -> QueryResult<()> {
         out.push_sql("SELECT *, COUNT(*) OVER () FROM (");
@@ -149,7 +142,7 @@ impl<N, T> PaginatedData<N, T> {
             offset: self.offset.into(),
             count: self.count.into(),
             total: self.total.into(),
-            data: self.data
+            data: self.data,
         }
     }
 }
@@ -169,9 +162,9 @@ pub struct PaginationInput {
 macro_rules! impl_juniper_pagination {
     ($t:ty, $n:literal) => {
         #[juniper::object(
-            Context = ApiContext,
-            name = $n
-        )]
+                    Context = ApiContext,
+                    name = $n
+                )]
         impl PaginatedData<i32, $t> {
             /// The offset into the dataset.
             fn offset(&self) -> i32 {
