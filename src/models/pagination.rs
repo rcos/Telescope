@@ -35,13 +35,23 @@ use crate::models::User;
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
     fn paginate(self, offset: i64, count: i64) -> Paginated<Self>;
+    fn offset(self, offset: i64) -> Paginated<Self>;
 }
 
 impl <T: QueryId> Paginate for T {
     fn paginate(self, offset: i64, count: i64) -> Paginated<T> {
         Paginated {
             query: self,
-            offset, count
+            offset,
+            count: Some(count)
+        }
+    }
+
+    fn offset(self, offset: i64) -> Paginated<T> {
+        Paginated {
+            query: self,
+            offset,
+            count: None
         }
     }
 }
@@ -51,7 +61,8 @@ impl <T: QueryId> Paginate for T {
 pub struct Paginated<T> {
     query: T,
     offset: i64,
-    count: i64,
+    /// If none, get all remaining.
+    count: Option<i64>,
 }
 
 /// GraphQL Pagination result.
@@ -73,7 +84,6 @@ impl <T> Paginated<T> {
     /// Load and count the data from a query.
     pub fn load_and_count<U>(self, conn: &PgConnection) -> PaginatedResult<i64, U, DieselErr>
     where Self: LoadQuery<PgConnection, (U, i64)> {
-        let count = self.count;
         let offset = self.offset;
         let results = self.load::<(U, i64)>(conn)?;
         let total = results.first()
@@ -81,7 +91,7 @@ impl <T> Paginated<T> {
             .unwrap_or(0);
         Ok(PaginatedData {
             total,
-            count,
+            count: results.len() as i64,
             offset,
             data: results.into_iter().map(|(d, _)| d).collect()
         })
@@ -120,8 +130,11 @@ impl<T: QueryId> QueryFragment<Pg> for Paginated<T>
     fn walk_ast(&self, mut out: AstPass<Pg>) -> QueryResult<()> {
         out.push_sql("SELECT *, COUNT(*) OVER () FROM (");
         self.query.walk_ast(out.reborrow())?;
-        out.push_sql(") t LIMIT ");
-        out.push_bind_param::<BigInt, _>(&self.count)?;
+        out.push_sql(") t");
+        if let Some(limit) = self.count {
+            out.push_sql(" LIMIT ");
+            out.push_bind_param::<BigInt, _>(&limit)?;
+        }
         out.push_sql(" OFFSET ");
         out.push_bind_param::<BigInt, _>(&self.offset)?;
         Ok(())
@@ -141,11 +154,16 @@ impl<N, T> PaginatedData<N, T> {
     }
 }
 
-/// Pagination struct for use with graphql queries.
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, juniper::GraphQLInputObject)]
+/// Pagination input represented by the offset into the dataset and the maximum
+/// number of entries to fetch.
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, juniper::GraphQLInputObject, Default)]
 pub struct PaginationInput {
+    /// The offset into the dataset.
     offset: i32,
-    count: i32,
+    /// The maximum number of entries to fetch.
+    /// If this is null then the number of fetched entries will be the total
+    /// number of entries minus the offset.
+    count: Option<i32>,
 }
 
 macro_rules! impl_juniper_pagination {

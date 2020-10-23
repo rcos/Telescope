@@ -104,13 +104,18 @@ impl QueryRoot {
     }
 
     /// Get a list of all users.
-    fn users(ctx: &ApiContext, pagination: Option<PaginationInput>) -> FieldResult<PaginatedData<i32, User>> {
+    fn users(ctx: &ApiContext, pagination: Option<PaginationInput>) -> FieldResult<Vec<User>> {
         use crate::schema::users::dsl::*;
         let mut conn = ctx.get_db_conn()?;
-        users.load(&conn).map_err(|e| {
-            error!("Could not load users from database.");
-            FieldError::new(e, Value::null())
-        })
+
+        let pagination = pagination.unwrap_or_default();
+
+
+        users.load(&conn)
+            .map_err(|e| {
+                error!("Could not load users from database.");
+                FieldError::new(e, Value::null())
+            })
     }
 
     /// Get a list of all emails
