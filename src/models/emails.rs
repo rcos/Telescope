@@ -85,17 +85,43 @@ impl Email {
     }
 
     /// Try to get a user based on an email from the database.
+    ///
+    /// Returns None if the user was not found or if there was an issues accessing the database.
     pub async fn get_user_from_db_by_email(conn: DbConnection, email_: String) -> Option<User> {
-        block::<_, (Email, User), _>(move || {
+        block::<_, Option<(Email, User)>, _>(move || {
             use crate::schema::{emails::dsl::*, users::dsl::*};
             use diesel::prelude::*;
             emails
                 .inner_join(users)
                 .filter(email.eq(email_))
                 .first(&conn)
+                .optional()
         })
         .await
-        .ok()
+        .unwrap_or_else(|e| {
+            error!("Could not query database: {}", e);
+            None
+        })
         .map(|(_, u)| u)
+    }
+
+    /// Check if an email exists in the telescope database.
+    /// Will return false if the email doesn't exist or if there is an issue
+    /// accessing the database.
+    pub async fn email_registered(conn: DbConnection, email_: String) -> bool {
+        block::<_, Option<Email>, _>(move || {
+            use crate::schema::emails::dsl::*;
+            use diesel::prelude::*;
+            emails
+                .find(email_)
+                .first(&conn)
+                .optional()
+        })
+            .await
+            .unwrap_or_else(|e| {
+                error!("Could not access emails in database: {}", e);
+                None
+            })
+            .is_some()
     }
 }

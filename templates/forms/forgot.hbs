@@ -21,21 +21,25 @@
                         {{#if error}}
                             class="form-control is-invalid"
                             aria-labelledby="email-invalid"
-                        {{else if success}}
-                            class="form-control is-valid"
-                            aria-labelledby="email-success"
                         {{else}}
-                            class="form-control"
+                            {{#if success}}
+                                class="form-control is-valid"
+                                aria-labelledby="email-success"
+                            {{else}}
+                                class="form-control"
+                            {{/if}}
                         {{/if}}
                             required>
                     {{#if error}}
                         <div id="email-invalid" class="invalid-feedback">
                             {{error}}
                         </div>
-                    {{else if success}}
-                        <div id="email-success" class="valid-feedback">
-                            {{successs}}
-                        </div>
+                    {{else}}
+                        {{#if success}}
+                            <div id="email-success" class="valid-feedback">
+                                {{successs}}
+                            </div>
+                        {{/if}}
                     {{/if}}
                 </div>
             </div>

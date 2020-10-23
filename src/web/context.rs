@@ -22,6 +22,7 @@ use diesel::{
 
 use actix_identity::Identity;
 use uuid::Uuid;
+use crate::templates::page::Page;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -133,6 +134,12 @@ impl RequestContext {
         self.identity
             .identity()
             .and_then(|s| Uuid::parse_str(s.as_str()).ok())
+    }
+
+    /// Render a page with the specified template as the page content and the title as specified.
+    pub async fn render_in_page<T: Template>(&self, template: &T, page_title: impl Into<String>) -> String {
+        let page = Page::of(page_title, template, self).await;
+        self.render(&page)
     }
 }
 
