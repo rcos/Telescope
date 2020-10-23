@@ -8,13 +8,12 @@ use diesel::{
 
 use crate::{
     models::{
-        pagination::{Paginate, PaginatedData, PaginationInput},
+        //pagination::{Paginate, PaginatedData, PaginationInput},
         Email, PasswordRequirements, User,
     },
     web::{DbConnection, RequestContext},
 };
 
-use crate::models::pagination::Paginated;
 use uuid::Uuid;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
@@ -96,11 +95,11 @@ impl QueryRoot {
     }
 
     /// Get a list of all users.
-    fn users(ctx: &ApiContext, pagination: Option<PaginationInput>) -> FieldResult<Vec<User>> {
+    fn users(ctx: &ApiContext, /*pagination: Option<PaginationInput>*/) -> FieldResult<Vec<User>> {
         use crate::schema::users::dsl::*;
         let mut conn = ctx.get_db_conn()?;
 
-        let pagination = pagination.unwrap_or_default();
+        //let pagination = pagination.unwrap_or_default();
 
         users.load(&conn).map_err(|e| {
             error!("Could not load users from database.");

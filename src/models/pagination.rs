@@ -11,15 +11,12 @@ use diesel::{
     PgConnection, QueryResult, RunQueryDsl,
 };
 
-use juniper::{
-    meta::MetaType, Arguments, DefaultScalarValue, ExecutionResult, Executor, FieldError,
-    GraphQLType, Registry, ScalarRefValue, ScalarValue, Selection, Value,
-};
-
 use actix_web::{rt::blocking::BlockingError, web::block};
 
-use crate::models::User;
-use crate::web::api::graphql::ApiContext;
+use crate::{
+    models::User,
+    web::api::graphql::ApiContext,
+};
 
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
