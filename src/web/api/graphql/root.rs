@@ -110,7 +110,6 @@ impl QueryRoot {
 
         let pagination = pagination.unwrap_or_default();
 
-
         users.load(&conn)
             .map_err(|e| {
                 error!("Could not load users from database.");
