@@ -13,7 +13,7 @@ use crate::{
         User,
         pagination::{
             PaginationInput,
-            PaginatedResults,
+            PaginatedData,
             Paginate
         }
     },
@@ -48,11 +48,13 @@ impl ApiContext {
 
         if let Some(uuid) = id {
             let conn = parent.get_db_connection().await;
-            User::get_from_db_by_id(conn, uuid).await.map(|user| Self {
-                connection_pool,
-                schema: Self::make_schema(),
-                identity: user.id,
-            })
+            User::get_from_db_by_id(conn, uuid)
+                .await
+                .map(|user| Self {
+                    connection_pool,
+                    schema: Self::make_schema(),
+                    identity: user.id,
+                })
         } else {
             None
         }
