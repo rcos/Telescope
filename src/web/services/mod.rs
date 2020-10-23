@@ -13,5 +13,7 @@ pub fn register(config: &mut ServiceConfig) {
         .service(login::login_get)
         .service(login::login_post)
         .service(logout::logout_service)
+        .service(forgot::forgot_page)
+        .service(forgot::recovery_service)
         .service(profile::profile);
 }
