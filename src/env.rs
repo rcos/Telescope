@@ -2,6 +2,7 @@ use std::env;
 use std::path::PathBuf;
 use structopt::clap::ArgGroup;
 use structopt::StructOpt;
+use lettre::SmtpClient;
 
 // The name, about, version, and authors are given by cargo.
 /// Stores the configuration of the telescope server. An instance of this is created and stored in
@@ -46,7 +47,11 @@ pub struct Config {
     /// This is used to redirect callbacks to after going offsite for
     /// authentication. This is also used to generate confirmation links
     /// that get emailed to users.
-    #[structopt(long = "domain", env)]
+    #[structopt(
+        long = "domain",
+        env,
+        default_value_if("DEVELOPMENT", None, "https://localhost:8443"),
+    )]
     pub domain: String,
 
     /// The URL the Postgres Database is running at.
@@ -98,7 +103,7 @@ pub struct Config {
             ("file", "EMAIL_FILE_OPTION"),
         ])
     )]
-    pub email_senders: Vec<String>,
+    email_senders: Vec<String>,
 
     /// Display name of the sender of system emails.
     #[structopt(
@@ -106,7 +111,7 @@ pub struct Config {
         env = "EMAIL_SENDER",
         default_value_if("DEVELOPMENT", None, "RCOS Telescope")
     )]
-    pub email_sender_name: Option<String>,
+    email_sender_name: Option<String>,
 
     /// The username in the server email address
     /// (the part before the @ symbol).
@@ -115,7 +120,7 @@ pub struct Config {
         env,
         default_value_if("DEVELOPMENT", None, "telescope")
     )]
-    pub email_user: Option<String>,
+    email_user: Option<String>,
 
     // email_file_dir and email_use_temp_dir are grouped together manually using
     // clap in the cli function. This just makes specifying the requirement rules
@@ -123,11 +128,11 @@ pub struct Config {
     /// The directory to save emails to when saving emails to the
     /// filesystem.
     #[structopt(long = "email-file-dir", env)]
-    pub email_file_dir: Option<PathBuf>,
+    email_file_dir: Option<PathBuf>,
 
     /// Default the email save directory to the system temp directory.
     /// The location of this will be operating system dependent.
-    #[structopt(long = "email-sys-temp")]
+    #[structopt(long = "email-sys-temp", env)]
     email_use_temp_dir: bool,
 
     /// The host in the server email address.
@@ -137,19 +142,20 @@ pub struct Config {
         env,
         default_value_if("DEVELOPMENT", None, "rcos.io")
     )]
-    pub email_host: Option<String>,
+    email_host: Option<String>,
 
     /// The host to log into via SMTP to send emails to users.
     #[structopt(long = "smtp-password", env)]
-    pub smtp_password: Option<String>,
+    smtp_password: Option<String>,
 
     /// The port of the SMTP server that this server uses to send mail.
     #[structopt(long = "smtp-port", env)]
-    pub smtp_port: Option<u16>,
+    smtp_port: Option<u16>,
 
     /// Use Development profile. This sets the following defaults:
     ///
     /// BIND_TO: localhost:8443
+    /// DOMAIN: https://localhost:8443
     /// LOG_LEVEL: info,telescope=trace
     /// EMAIL_SENDER: RCOS Telescope
     /// EMAIL: stub
@@ -163,6 +169,31 @@ pub struct Config {
     /// BIND_TO: localhost:443
     #[structopt(short = "p", long = "production", conflicts_with("DEVELOPMENT"))]
     production: bool,
+}
+
+impl Config {
+    /// Should the Stub email sender be used.
+    pub fn use_stub_mailer(&self) -> bool {
+        let stub_string = "stub".to_string();
+        self.email_senders.contains(&stub_string)
+    }
+
+    /// Check if the user wants to use the file email transport
+    /// and if so, check the specified path.
+    pub fn get_file_mailer(&self) -> Option<PathBuf> {
+        let sender_string = "file".to_string();
+        if self.email_senders.contains(&sender_string) {
+           self.email_file_dir.clone()
+        } else {
+            None
+        }
+    }
+
+    /// Make an SMTP client if that mailer is to be used.
+    pub fn make_smtp_mailer(&self) -> Option<SmtpClient> {
+        // TODO: implement SMTP sender creation.
+        unimplemented!()
+    }
 }
 
 lazy_static! {

@@ -111,7 +111,7 @@ impl RequestContext {
     /// as this Context is not threadsafe (since HTTPRequest isn't) but Connection
     /// pools are.
     pub fn clone_connection_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
-        self.app_data.db_connection_pool.clone()
+        self.app_data.clone_db_conn_pool()
     }
 
     /// Get an API context object (a partial sub-context of this context) to execute

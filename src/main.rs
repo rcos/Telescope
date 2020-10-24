@@ -14,7 +14,6 @@ extern crate serde;
 extern crate diesel;
 
 mod env;
-use crate::env::{Config, CONFIG};
 
 mod web;
 use web::*;
@@ -26,6 +25,10 @@ mod schema;
 mod models;
 
 use crate::{
+    env::{
+        Config,
+        CONFIG
+    },
     models::{Email, PasswordRequirements, User},
     templates::static_pages::{
         developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
@@ -34,19 +37,13 @@ use crate::{
     web::app_data::AppData,
 };
 
-use actix_files as afs;
-
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
+use actix_files as afs;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
-
-use diesel::{r2d2::ConnectionManager, Connection, PgConnection, RunQueryDsl};
-
+use diesel::{Connection, RunQueryDsl};
 use rand::{rngs::OsRng, Rng};
-
-use handlebars::Handlebars;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::process::exit;
 
@@ -55,6 +52,12 @@ async fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
     let config: &Config = &*CONFIG;
+
+    // Create appdata object.
+    //
+    // Database pool creation and registration of handlebars templates occurs
+    // here.
+    let app_data = AppData::new(config);
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use
@@ -85,35 +88,6 @@ async fn main() -> std::io::Result<()> {
             exit(exitcode::NOINPUT)
         })
         .unwrap();
-
-    // register handlebars templates
-    let mut template_registry = Handlebars::new();
-    template_registry
-        .register_templates_directory(".hbs", "templates")
-        .map_err(|e| {
-            error!("Failed to properly register handlebars templates: {}", e);
-            exit(1)
-        })
-        .unwrap();
-    // Use handlebars strict mode so that we get an error when we try to render a
-    // non-existent field
-    template_registry.set_strict_mode(true);
-    info!("Handlebars templates registered.");
-
-    // Set up database connection pool.
-    let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
-    let pool = diesel::r2d2::Pool::builder()
-        // max 12 connections at once
-        .max_size(12)
-        // if a connection cannot be pulled from the pool in 20 seconds, timeout
-        .connection_timeout(std::time::Duration::from_secs(20))
-        .build(manager)
-        .map_err(|e| {
-            error!("Could not create database connection pool {}", e);
-            exit(1);
-        })
-        .unwrap();
-    info!("Created database connection pool.");
 
     if config.create_sysadmin {
         let admin_password = config.sysadmin_password.as_ref().unwrap();
@@ -148,6 +122,7 @@ async fn main() -> std::io::Result<()> {
 
         user.sysadmin = true;
 
+        let pool = app_data.clone_db_conn_pool();
         let conn = pool.get().unwrap();
         conn.transaction::<(), diesel::result::Error, _>(|| {
             use crate::schema::emails::dsl::emails;
@@ -162,13 +137,10 @@ async fn main() -> std::io::Result<()> {
         })
         .map_err(|e| {
             error!("Could not add admin user to database: {}", e);
-            exit(1)
+            e
         })
         .unwrap();
     }
-
-    // Create appdata object.
-    let app_data = AppData::new(template_registry, pool);
 
     // generate a random key to encrypt cookies.
     let cookie_key = OsRng::default().gen::<[u8; 32]>();

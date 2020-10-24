@@ -49,7 +49,7 @@ regex = "1"
 # Markdown - HTML rendering
 pulldown-cmark = "0.8"
 # Sending emails.
-lettre = {version = "0.9", features = ["serde-impls"]}
+lettre = {version = "0.9.3", features = ["serde-impls"]}
 # MD5 hashing to use to talk to Gravatar.
 md5 = "0.7"
 # URL Parsing
