@@ -75,6 +75,8 @@ pub struct Config {
     #[structopt(long = "sysadmin-pass", env = "ADMIN_PASSWORD")]
     pub sysadmin_password: Option<String>,
 
+    // TODO: Cannot specify lists using .env - perhaps
+    //  use YML or TOML going forward.
     /// Set how sending emails to users is handled.
     /// There are three options here:
     /// - Stub: Print generated emails to the standard output
