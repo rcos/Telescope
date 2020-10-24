@@ -4,3 +4,6 @@ tls-ssl/*.pem
 
 # .env is to store development env variables.
 .env
+
+# user config
+config.toml

@@ -10,7 +10,10 @@ use std::{
 use lettre::{
     SmtpClient,
 };
-use crate::env::Config;
+use crate::env::{
+    CONFIG,
+    ConcreteConfig
+};
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
@@ -28,8 +31,9 @@ pub struct AppData {
 }
 
 impl AppData {
-    /// Create new App Data object.
-    pub fn new(config: &Config)-> Self {
+    /// Create new App Data object using the global static config.
+    pub fn new()-> Self {
+        let config: &ConcreteConfig = &*CONFIG;
         // register handlebars templates
         let mut template_registry = Handlebars::new();
         template_registry
@@ -62,9 +66,12 @@ impl AppData {
         Self {
             template_registry: Arc::new(template_registry),
             db_connection_pool: pool,
-            use_stub_mailer: config.use_stub_mailer(),
-            file_mailer_path: config.get_file_mailer(),
-            smtp_client: config.make_smtp_mailer()
+            use_stub_mailer: config.email_config.stub,
+            file_mailer_path: config.email_config.file.clone(),
+            smtp_client: config.email_config.smtp.clone().map(|c| {
+                // FIXME: Create SMTP client here
+                unimplemented!()
+            })
         }
     }
 

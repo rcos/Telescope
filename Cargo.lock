@@ -2432,6 +2432,7 @@ dependencies = [
  "serde_json",
  "structopt",
  "time 0.2.20",
+ "toml",
  "url",
  "uuid",
 ]
@@ -2619,6 +2620,15 @@ dependencies = [
  "log",
  "pin-project-lite",
  "tokio",
+]
+
+[[package]]
+name = "toml"
+version = "0.5.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75cf45bb0bef80604d001caaec0d09da99611b3c0fd39d3080468875cdb65645"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
