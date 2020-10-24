@@ -195,6 +195,12 @@ lazy_static! {
 /// After the global configuration is initialized, log it as info.
 pub fn init() {
     let cfg: &ConcreteConfig = &*CONFIG;
+
+    // initialize logger.
+    env_logger::builder()
+        .parse_filters(&cfg.log_level)
+        .init();
+
     info!("Starting up...");
     info!("telescope {}", env!("CARGO_PKG_VERSION"));
     trace!("Config: \n{}", serde_json::to_string_pretty(cfg).unwrap());
@@ -234,9 +240,5 @@ fn cli() -> ConcreteConfig {
         .map(|s| s.split(".").map(|p| p.to_string()).collect())
         .unwrap_or(Vec::new());
 
-    let concrete = parsed.make_concrete(profile_path);
-    env_logger::builder()
-        .parse_filters(&concrete.log_level)
-        .init();
-    concrete
+    parsed.make_concrete(profile_path)
 }
