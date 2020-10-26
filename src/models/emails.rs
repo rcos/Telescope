@@ -7,6 +7,7 @@ use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};
 use regex::Regex;
 use uuid::Uuid;
+use lettre::EmailAddress;
 
 lazy_static! {
     static ref EMAIL_REGEX: Regex =
@@ -81,6 +82,16 @@ impl Email {
             })
         } else {
             None
+        }
+    }
+
+    /// Create a new email object. This will not fail since the syntactic
+    /// validity of the email is checked by the EmailAddress type.
+    pub fn new_prechecked(user_id: Uuid, email: EmailAddress) -> Self {
+        Self {
+            user_id,
+            email: email.to_string(),
+            is_visible: false
         }
     }
 

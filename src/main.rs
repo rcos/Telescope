@@ -69,7 +69,7 @@ async fn main() -> std::io::Result<()> {
     if config.sysadmin_config.as_ref().map(|c| c.create).unwrap_or(false) {
         let config = config.sysadmin_config.clone().unwrap();
         let admin_password = config.password.as_str();
-        let admin_email = config.email.as_str();
+        let admin_email = config.email;
         let mut user: User = User::new("Telescope admin", admin_password)
             .map_err(|e: PasswordRequirements| {
                 error!(
@@ -93,10 +93,7 @@ async fn main() -> std::io::Result<()> {
                 exit(exitcode::DATAERR)
             })
             .unwrap();
-        let email = Email::new(user.id, admin_email).unwrap_or_else(|| {
-            error!("Admin email {} is not a valid email.", admin_email);
-            exit(exitcode::DATAERR);
-        });
+        let email = Email::new_prechecked(user.id, admin_email);
 
         user.sysadmin = true;
 

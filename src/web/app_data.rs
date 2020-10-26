@@ -8,12 +8,15 @@ use std::{
     path::PathBuf
 };
 use lettre::{
-    SmtpClient,
+    SmtpClient, SendableEmail, Transport, FileTransport, Envelope, EmailAddress,
+    stub::StubTransport
 };
 use crate::env::{
     CONFIG,
     ConcreteConfig
 };
+use actix_web::web::block;
+use uuid::Uuid;
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
@@ -28,6 +31,8 @@ pub struct AppData {
     file_mailer_path: Option<PathBuf>,
     /// Should mail stubs be created?
     use_stub_mailer: bool,
+    /// The email sender address.
+    pub mail_sender_address: Option<Arc<EmailAddress>>,
 }
 
 impl AppData {
@@ -68,10 +73,8 @@ impl AppData {
             db_connection_pool: pool,
             use_stub_mailer: config.email_config.stub,
             file_mailer_path: config.email_config.file.clone(),
-            smtp_client: config.email_config.smtp.clone().map(|c| {
-                // FIXME: Create SMTP client here
-                unimplemented!()
-            })
+            smtp_client: config.email_config.make_smtp_client(),
+            mail_sender_address: config.email_config.address.as_ref().map(|s| Arc::new(s.clone()))
         }
     }
 
@@ -79,5 +82,67 @@ impl AppData {
     /// so this is just a reference copy).
     pub fn clone_db_conn_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
         self.db_connection_pool.clone()
+    }
+
+    /// Send an email over the available mail transporters.
+    pub async fn send_mail(&self, to: Vec<EmailAddress>, body: impl Into<String>) -> Result<(), ()> {
+        let body = body.into();
+        let envelope =
+            Envelope::new(
+                self.mail_sender_address.as_ref().map(|a| a.as_ref().clone()),
+                to
+            ).map_err(|e| {
+                error!("Envelope Error: {}", e);
+                ()
+            })?;
+
+        // randomly generate a new email id uuid
+        let email_id = Uuid::new_v4()
+            .to_hyphenated()
+            .to_string()
+            .to_lowercase();
+
+        if self.use_stub_mailer {
+            let email = SendableEmail::new(
+                envelope.clone(),
+                email_id.clone(),
+                body.clone().into_bytes()
+            );
+            let mut transport = StubTransport::new_positive();
+            transport.send(email).unwrap();
+        }
+
+        if let Some(dir) = self.file_mailer_path.as_ref() {
+            let email = SendableEmail::new(
+                envelope.clone(),
+                email_id.clone(),
+                body.clone().into_bytes()
+            );
+            let mut transport = FileTransport::new(dir);
+            transport.send(email)
+                .map_err(|e| {
+                    error!("File Mailer Error: {}", e);
+                    ()
+                })?;
+        }
+
+        if let Some(smtp_client) = self.smtp_client.as_ref() {
+            let mut transport = smtp_client.clone().transport();
+            block(move || {
+                let email = SendableEmail::new(
+                    envelope,
+                    email_id,
+                    body.into_bytes()
+                );
+                transport.send(email)
+            })
+                .await
+                .map_err(|e| {
+                    error!("Could not send mail over SMTP: {}", e);
+                    ()
+                })?;
+        }
+
+        Ok(())
     }
 }
