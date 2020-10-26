@@ -63,7 +63,7 @@ pub struct SmtpConfig {
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 struct TelescopeConfig {
     /// Set the log level.
-    /// See https://docs.rs/env_logger/0.7.1/env_logger/ for reference.
+    /// See https://docs.rs/env_logger/0.8.1/env_logger/ for reference.
     log_level: Option<String>,
     /// Set the URL to bind the running server to.
     bind_to: Option<String>,
@@ -72,7 +72,7 @@ struct TelescopeConfig {
     /// This is used to redirect callbacks to after going offsite for
     /// authentication. This is also used to generate confirmation links
     /// that get emailed to users.
-    domain: Option<String>,
+    //domain: Option<String>,
 
     /// The URL the Postgres Database is running at.
     /// This is passed directly to diesel.
@@ -102,7 +102,7 @@ pub struct ConcreteConfig {
     pub tls_config: TlsConfig,
     log_level: String,
     pub bind_to: String,
-    pub domain: String,
+    //pub domain: String,
     pub database_url: String,
     pub email_config: EmailSenderConfig,
     /// Sysadmin creation is not necessary to run the server.
@@ -141,8 +141,8 @@ impl TelescopeConfig {
                 .expect("Could not resolve log level."),
             bind_to: self.reverse_lookup(profile_slice, |c| c.bind_to.clone())
                 .expect("Could not resolve binding URL."),
-            domain: self.reverse_lookup(profile_slice, |c| c.domain.clone())
-                .expect("Could not resolve domain configuration."),
+            //domain: self.reverse_lookup(profile_slice, |c| c.domain.clone())
+            //    .expect("Could not resolve domain configuration."),
             database_url: self.reverse_lookup(profile_slice, |c| c.database_url.clone())
                 .expect("Could not resolve database URL."),
             email_config: self.reverse_lookup(profile_slice, |c| c.email_config.clone())

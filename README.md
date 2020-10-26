@@ -43,19 +43,29 @@ as the RCOS website.
    a certificate signed by a trusted certificate authority. See 
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
-5. Create a `.env` file to store your database config and other environment 
-    variables to be used at runtime.  Enter the following lines into the `.env` file:
+5. Copy the configuration template at `config_example.toml` to `config.toml`. 
+    Modify your configuration to your needs using the documentation in the 
+    example file. You may also create a `.env` file to store any commandline 
+    variables (currently just the location of the config file if not `config.toml` 
+    and the profile to load from the config file). You may also feel free to store
+    your database url in the `.env` file using the variable `DATABASE_URL` i.e.:
     ```shell script
-    DATABASE_URL="postgres://<username>:<password>@localhost/telescope"
-    SMTP_USERNAME="USER"
-    SMTP_PASSWORD="PASS"
-    LOG_LEVEL="info,telescope=trace"
+    DATABASE_URL=postgres://username:password@localhost/telescope
     ```
+   This will not be used by telescope but will be read and used by diesel (the 
+   database management tool). If you do not do this, then you may store it in an
+   environment variable manually or it in the commandline arguments to diesel.
 6. Run the database setup and migrations. This will create a database and then 
-    run all of the necessary migrations.
+    run all of the necessary migrations. If you have stored the database url in 
+    an environment variable or in your `.env` file the commands are as such:
     ```shell script
     $ diesel setup
     $ diesel migration run
+    ```
+   otherwise use:
+    ```shell script
+    $ diesel setup --database-url postgres://username:password@localhost/telescope
+    $ diesel migration run --database-url postgres://username:password@localhost/telescope
     ```
 
 ### Running:
@@ -63,11 +73,11 @@ as the RCOS website.
 $ # Usage:
 $ cargo run -- -h
 
-$ # Development profile (for testing on local machine).
-$ cargo run -- --development
+$ # Development profile (if specified in config.toml).
+$ cargo run -- -p dev
 
-$ # Production profile (used for deploying in production environments).
-$ cargo run --release -- --production
+$ # Production profile (if specified in config.toml).
+$ cargo run --release -- -p production
 ```
 
 ### Installation Debugging:
