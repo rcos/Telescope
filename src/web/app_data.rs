@@ -86,7 +86,7 @@ impl AppData {
 
     /// Send an email over the available mail transporters.
     pub async fn send_mail(&self, to: Vec<EmailAddress>, body: impl Into<String>) -> Result<(), ()> {
-        let body = body.into();
+        let body = body.into().into_bytes();
         let envelope =
             Envelope::new(
                 self.mail_sender_address.as_ref().map(|a| a.as_ref().clone()),
@@ -106,7 +106,7 @@ impl AppData {
             let email = SendableEmail::new(
                 envelope.clone(),
                 email_id.clone(),
-                body.clone().into_bytes()
+                body.clone()
             );
             let mut transport = StubTransport::new_positive();
             transport.send(email).unwrap();
@@ -116,7 +116,7 @@ impl AppData {
             let email = SendableEmail::new(
                 envelope.clone(),
                 email_id.clone(),
-                body.clone().into_bytes()
+                body.clone()
             );
             let mut transport = FileTransport::new(dir);
             transport.send(email)
@@ -132,7 +132,7 @@ impl AppData {
                 let email = SendableEmail::new(
                     envelope,
                     email_id,
-                    body.into_bytes()
+                    body
                 );
                 transport.send(email)
             })
