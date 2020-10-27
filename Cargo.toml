@@ -16,6 +16,8 @@ structopt = "0.3"
 dotenv = "0.15.0"
 # config file reading
 toml = "0.5.7"
+# actix actor framework -- system for running server and other tasks.
+actix = "0.10.0"
 # actix web server (use exact version)
 actix-web = {version = "3.1.0", features = ["openssl"]}
 # static file serving
@@ -59,7 +61,7 @@ url = "2.1.1"
 
 # Date and time utilities
 [dependencies.chrono]
-version = "0.4.15"
+version = "0.4.19"
 default-features = false
 features = ["serde"]
 

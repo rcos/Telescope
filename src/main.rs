@@ -13,16 +13,14 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
-mod env;
-
 mod web;
 use web::*;
 
+mod env;
 mod templates;
-
 mod schema;
-
 mod models;
+mod db_janitor;
 
 use crate::{
     env::{
@@ -35,6 +33,7 @@ use crate::{
         sponsors::SponsorsPage, Static,
     },
     web::app_data::AppData,
+    db_janitor::DbJanitor,
 };
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
@@ -46,12 +45,15 @@ use diesel::{Connection, RunQueryDsl};
 use rand::{rngs::OsRng, Rng};
 use openssl::ssl::{SslAcceptor, SslMethod};
 use std::process::exit;
+use actix::prelude::*;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
     let config: &ConcreteConfig = &*CONFIG;
+
+    // Create the actix runtime.
+    let sys = System::new("telescope");
 
     // Create appdata object.
     //
@@ -125,6 +127,11 @@ async fn main() -> std::io::Result<()> {
     let ratelimit_memstore = MemoryStore::new();
      */
 
+    // Database janitor -- This actor runs a few database operations once every
+    // 24 hours to clear out expired database records.
+    let db_pool = app_data.clone_db_conn_pool();
+    let janitor = DbJanitor::new(db_pool).start();
+
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
@@ -157,12 +164,13 @@ async fn main() -> std::io::Result<()> {
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             .default_service(aweb::route().to(services::p404::not_found))
     })
-    .bind_openssl(config.bind_to.clone(), tls_builder)
-    .map_err(|e| {
-        error!("Could not bind to {}: {}", config.bind_to, e);
-        e
-    })
-    .unwrap()
-    .run()
-    .await
+        .bind_openssl(config.bind_to.clone(), tls_builder)
+        .map_err(|e| {
+            error!("Could not bind to {}: {}", config.bind_to, e);
+            e
+        })?
+        .run();
+
+    // Start the actix runtime.
+    sys.run()
 }
