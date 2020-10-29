@@ -1,17 +1,54 @@
-<form method="post">
-    <div class="modal-body">
-        <div class="form-group">
-            <label for="register-modal-email-input">Email Address</label>
-            <input
-                    type="email"
-                    class="form-control"
-                    placeholder="example@email.org"
-                    id="register-modal-email-input"
-                    name="email"
-                    required>
+{{#if success}}
+    <div class="card bg-success text-light">
+        <h1 class="card-header">
+            Confirmation email sent!
+        </h1>
+        <div class="card-body">
+            Confirmation email sent to <em>{{email}}</em> with link to complete
+            registration. Be sure to check your spam filter if you don't see it.
         </div>
     </div>
-    <div class="modal-footer">
-        <button class="btn btn-primary" type="submit">Sign Up</button>
+{{else}}
+
+    <div class="card text-dark">
+        <h1 class="card-header">
+            Sign Up
+        </h1>
+        <div class="card-body">
+            <form method="post">
+                <div class="form-group row">
+                    <label for="email-input" class="col-md-2 col-form-label">
+                        Email Address
+                    </label>
+                    <div class="col-md-10">
+                        <input
+                                id="email-input"
+                                type="email"
+                                name="email"
+                            {{#if email}}
+                                value="{{email}}"
+                            {{else}}
+                                placeholder="example@email.org"
+                            {{/if}}
+                            {{#if error}}
+                                class="form-control is-invalid"
+                                aria-labelledby="email-invalid"
+                            {{else}}
+                                class="form-control"
+                            {{/if}}
+                                required>
+                        {{#if error}}
+                            <div id="email-invalid" class="invalid-feedback">
+                                Email already in use. Would you like to
+                                <a href="/login">Login?</a>
+                            </div>
+                        {{/if}}
+                    </div>
+                </div>
+                <div class="form-group d-block float-right">
+                    <button class="btn btn-primary" type="submit">Sign Up</button>
+                </div>
+            </form>
+        </div>
     </div>
-</form>
+{{/if}}

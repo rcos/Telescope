@@ -70,9 +70,18 @@ impl RequestContext {
             .identity()
             .and_then(|s| Uuid::parse_str(&s).ok());
         if let Some(uid) = id {
-            User::get_from_db_by_id(self.get_db_connection().await, uid)
-                .await
-                .is_some()
+            let db_res: Option<User> = User::get_from_db_by_id(
+                self.get_db_connection().await,
+                uid
+            ).await;
+
+            if db_res.is_some() {
+                true
+            } else {
+                // bad uuid in identity
+                self.identity.forget();
+                false
+            }
         } else {
             false
         }
