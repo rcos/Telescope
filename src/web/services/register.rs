@@ -19,7 +19,7 @@ struct RegistrationForm {
 /// Service to show the signup page. All registration requests use POST.
 #[get("/register")]
 pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
-    // if a user is logged in
+    // if a user is logged in they cannot register for a new account.
     if ctx.logged_in().await {
         let jumbotron = Jumbotron::jumbotron_page(
             &ctx,
@@ -37,5 +37,5 @@ pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
 /// Service to register a new user. Respond only to POST requests.
 #[post("/register")]
 pub async fn registration_service(ctx: RequestContext, form: Form<RegistrationForm>) -> HttpResponse {
-    unimplemented!()
+
 }

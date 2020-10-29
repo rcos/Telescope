@@ -17,6 +17,7 @@ use crate::env::{
 };
 use actix_web::web::block;
 use uuid::Uuid;
+use lettre_email::{Email, Mailbox};
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
@@ -32,7 +33,7 @@ pub struct AppData {
     /// Should mail stubs be created?
     use_stub_mailer: bool,
     /// The email sender address.
-    pub mail_sender_address: Option<Arc<EmailAddress>>,
+    pub mail_sender: Mailbox,
 }
 
 impl AppData {
@@ -74,7 +75,10 @@ impl AppData {
             use_stub_mailer: config.email_config.stub,
             file_mailer_path: config.email_config.file.clone(),
             smtp_client: config.email_config.make_smtp_client(),
-            mail_sender_address: config.email_config.address.as_ref().map(|s| Arc::new(s.clone()))
+            mail_sender: Mailbox {
+                name: config.email_config.name.clone(),
+                address: config.email_config.address.to_string()
+            }
         }
     }
 
@@ -85,17 +89,7 @@ impl AppData {
     }
 
     /// Send an email over the available mail transporters.
-    pub async fn send_mail(&self, to: Vec<EmailAddress>, body: impl Into<String>) -> Result<(), ()> {
-        let body = body.into().into_bytes();
-        let envelope =
-            Envelope::new(
-                self.mail_sender_address.as_ref().map(|a| a.as_ref().clone()),
-                to
-            ).map_err(|e| {
-                error!("Envelope Error: {}", e);
-                ()
-            })?;
-
+    pub async fn send_mail(&self, email: Email) -> Result<(), ()> {
         // randomly generate a new email id uuid
         let email_id = Uuid::new_v4()
             .to_hyphenated()

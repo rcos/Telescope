@@ -23,6 +23,7 @@ use diesel::{
 use actix_identity::Identity;
 use uuid::Uuid;
 use crate::templates::page::Page;
+use lettre::EmailAddress;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {

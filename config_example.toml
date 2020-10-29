@@ -67,7 +67,7 @@ create = false
 # [OPTIONAL]
 # The name used to sign emails sent by the server.
 name = "RCOS Telescope"
-# [OPTIONAL]
+# [REQUIRED]
 # The email address that emails are sent from.
 address = "telescope@rcos.io"
 # [REQUIRED]
