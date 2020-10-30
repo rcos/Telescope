@@ -37,5 +37,5 @@ pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
 /// Service to register a new user. Respond only to POST requests.
 #[post("/register")]
 pub async fn registration_service(ctx: RequestContext, form: Form<RegistrationForm>) -> HttpResponse {
-
+    unimplemented!()
 }

@@ -130,7 +130,7 @@ fn main() -> std::io::Result<()> {
     // Database janitor -- This actor runs a few database operations once every
     // 24 hours to clear out expired database records.
     let db_pool = app_data.clone_db_conn_pool();
-    let janitor = DbJanitor::new(db_pool).start();
+    DbJanitor::new(db_pool).start();
 
     HttpServer::new(move || {
         App::new()

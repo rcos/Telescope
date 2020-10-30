@@ -7,17 +7,13 @@ use std::{
     sync::Arc,
     path::PathBuf
 };
-use lettre::{
-    SmtpClient, SendableEmail, Transport, FileTransport, Envelope, EmailAddress,
-    stub::StubTransport
-};
+use lettre::{SmtpClient, SendableEmail, Transport, FileTransport, stub::StubTransport, SmtpTransport};
 use crate::env::{
     CONFIG,
     ConcreteConfig
 };
 use actix_web::web::block;
-use uuid::Uuid;
-use lettre_email::{Email, Mailbox};
+use lettre_email::Mailbox;
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
@@ -88,53 +84,62 @@ impl AppData {
         self.db_connection_pool.clone()
     }
 
-    /// Send an email over the available mail transporters.
-    pub async fn send_mail(&self, email: Email) -> Result<(), ()> {
-        // randomly generate a new email id uuid
-        let email_id = Uuid::new_v4()
-            .to_hyphenated()
-            .to_string()
-            .to_lowercase();
+    /// Get an SMTP transport if available.
+    fn get_smtp_transport(&self) -> Option<SmtpTransport> {
+        self.smtp_client.clone().map(|client| client.transport())
+    }
 
+    /// Get a file based mail transport if available.
+    fn get_file_mail_transport(&self) -> Option<FileTransport> {
+        self.file_mailer_path.as_ref().map(|pb| FileTransport::new(pb.as_path()))
+    }
+
+    /// Get a stub based mail transporter if available.
+    fn get_stub_transport(&self) -> Option<StubTransport> {
         if self.use_stub_mailer {
-            let email = SendableEmail::new(
-                envelope.clone(),
-                email_id.clone(),
-                body.clone()
-            );
-            let mut transport = StubTransport::new_positive();
-            transport.send(email).unwrap();
+            Some(StubTransport::new_positive())
+        } else {
+            None
+        }
+    }
+
+    /// Send an email over all available mailer interfaces.
+    /// Any errors caught while mailing will be logged and then an `Err`
+    /// will be returned.
+    pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
+    where M: Into<SendableEmail> + Clone + Send + Sync + 'static {
+        if let Some(mut t) = self.get_stub_transport() {
+            t.send(mail.clone().into())?;
         }
 
-        if let Some(dir) = self.file_mailer_path.as_ref() {
-            let email = SendableEmail::new(
-                envelope.clone(),
-                email_id.clone(),
-                body.clone()
-            );
-            let mut transport = FileTransport::new(dir);
-            transport.send(email)
-                .map_err(|e| {
-                    error!("File Mailer Error: {}", e);
-                    ()
-                })?;
+        if let Some(mut t) = self.get_file_mail_transport() {
+            t.send(mail.clone().into()).map_err(|e| {
+                error!("Error while mailing to local file system: {}", e);
+                ()
+            })?;
         }
 
-        if let Some(smtp_client) = self.smtp_client.as_ref() {
-            let mut transport = smtp_client.clone().transport();
-            block(move || {
-                let email = SendableEmail::new(
-                    envelope,
-                    email_id,
-                    body
-                );
-                transport.send(email)
-            })
-                .await
-                .map_err(|e| {
-                    error!("Could not send mail over SMTP: {}", e);
-                    ()
-                })?;
+        if let Some(mut t) = self.get_smtp_transport() {
+            // Use blocking call because I am honestly not sure if this call
+            // will or won't block, but it seems to establish a connection to the
+            // SMTP server so I'm assuming it does.
+
+            let result = block(move || {
+                let res = t.send(mail.into());
+                t.close();
+                res
+            }).await;
+
+            if let Err(e) = result {
+                error!("Could not send mail over SMTP: {}", e);
+                return Err(());
+            } else {
+                let response = result.unwrap();
+                info!("Received SMTP Response code {}: {:?}", response.code, response.message);
+                if !response.is_positive() {
+                    return Err(());
+                }
+            }
         }
 
         Ok(())
