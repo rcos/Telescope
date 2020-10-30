@@ -27,7 +27,7 @@ pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
             "Signed In",
             "You are already signed in. Sign out before creating a new account."
         ).await;
-        HttpResponse::Ok().body(jumbotron)
+        HttpResponse::BadRequest().body(jumbotron)
     } else {
         let registration_page = RegistrationPage::default();
         HttpResponse::Ok().body(ctx.render_in_page(&registration_page, "Sign Up").await)
@@ -37,5 +37,16 @@ pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
 /// Service to register a new user. Respond only to POST requests.
 #[post("/register")]
 pub async fn registration_service(ctx: RequestContext, form: Form<RegistrationForm>) -> HttpResponse {
-    unimplemented!()
+    if ctx.logged_in().await {
+        let jumbotron = Jumbotron::jumbotron_page(
+            &ctx,
+            "Registration Error",
+            "Signed In",
+            "You are already signed in. Sign out before creating a new account."
+        ).await;
+        HttpResponse::BadRequest().body(jumbotron)
+    } else {
+        let email = form.email.to_string();
+
+    }
 }

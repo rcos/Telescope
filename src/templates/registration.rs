@@ -17,7 +17,26 @@ pub struct RegistrationPage {
 }
 
 impl RegistrationPage {
+    /// Show the success message.
+    pub fn success(email: impl Into<String>) -> Self {
+        Self {
+            success: true,
+            email: Some(email.into()),
+            error: None
+        }
+    }
 
+    /// Construct an error version of the form.
+    ///
+    /// This is a version that displays the email tried and an error message
+    /// regarding the requested registration.
+    pub fn error(email: impl Into<String>, error: impl Into<String>) -> Self {
+        Self {
+            email: Some(email.into()),
+            error: Some(error.into()),
+            success: false
+        }
+    }
 }
 
 impl Template for RegistrationPage {
