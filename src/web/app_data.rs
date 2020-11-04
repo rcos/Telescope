@@ -135,7 +135,6 @@ impl AppData {
                 return Err(());
             } else {
                 let response = result.unwrap();
-                info!("Received SMTP Response code {}: {:?}", response.code, response.message);
                 if !response.is_positive() {
                     return Err(());
                 }

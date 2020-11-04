@@ -122,6 +122,8 @@ impl Confirmation {
             .from(ctx.email_sender())
             .to(stored_invite.email.as_str())
             .subject("RCOS Telescope Email Confirmation")
+            // FIXME: Write actual emails here.
+            // FIXME: Also we need a place to verify the responses. (/confirm/{invite_id})
             .alternative("Html invite", "Plaintext Invite")
             .build()
             .map_err(|e| {
