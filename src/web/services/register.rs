@@ -47,6 +47,6 @@ pub async fn registration_service(ctx: RequestContext, form: Form<RegistrationFo
         HttpResponse::BadRequest().body(jumbotron)
     } else {
         let email = form.email.to_string();
-
+        unimplemented!()
     }
 }

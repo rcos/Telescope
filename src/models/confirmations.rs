@@ -1,8 +1,9 @@
 use crate::schema::confirmations;
 use chrono::{DateTime, Duration, Local};
 use uuid::Uuid;
-use crate::web::RequestContext;
+use crate::web::{RequestContext, DbConnection};
 use crate::models::Email;
+use actix_web::web::block;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -41,10 +42,25 @@ impl Confirmation {
         }
     }
 
+    /// Check if an email has been invited already.
+    async fn invited(conn: DbConnection, email: String) -> bool {
+        unimplemented!();
+        /*
+        block(move || {
+            unimplemented!()
+        })
+
+         */
+    }
+
     /// Create an invite for a new user and store it in the database.
     /// Send an email using the context's mailers to the invited user.
-    pub async fn invite_new(ctx: &RequestContext, email: String) -> Result<(), String> {
+    ///
+    /// On success, returns the uuid of the invite. Otherwise returns a string
+    /// summarizing the error encountered.
+    pub async fn invite_new(ctx: &RequestContext, email: String) -> Result<Uuid, String> {
         let invite = Self::new(email);
+        let invite_id = invite.invite_id;
 
         // check that the email is not already registered.
         let conn = ctx.get_db_connection().await;
@@ -53,11 +69,11 @@ impl Confirmation {
                 .await
                 .is_some();
         if user_exists_for_email {
-            return Err(format!("User already exists for email {}", invite.email));
+            return Err(format!("The email {} is already in use.", invite.email));
         }
 
-        
+        unimplemented!();
 
-        Ok(())
+        Ok(invite_id)
     }
 }
