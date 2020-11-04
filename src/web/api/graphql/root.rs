@@ -41,7 +41,7 @@ impl ApiContext {
             .and_then(|id| Uuid::parse_str(&id).ok());
 
         if let Some(uuid) = id {
-            let conn = parent.get_db_connection().await;
+            let conn = parent.get_db_conn().await;
             User::get_from_db_by_id(conn, uuid).await.map(|user| Self {
                 connection_pool,
                 schema: Self::make_schema(),

@@ -32,10 +32,11 @@ pub async fn forgot_page(ctx: RequestContext) -> HttpResponse {
 #[post("/forgot")]
 pub async fn recovery_service(ctx: RequestContext, form: Form<PasswordRecoveryForm>) -> HttpResponse {
     let email: &str = &form.email;
-    let db_conn = ctx.get_db_connection().await;
+    let db_conn = ctx.get_db_conn().await;
     let mut form_page = PasswordRecoveryPage::default()
         .email(email);
-    let database_result = Email::get_user_from_db_by_email(db_conn, email.to_string()).await;
+    let database_result = Email::get_user_from_db_by_email(db_conn, email.to_string())
+        .await;
     if let Some(target_user) = database_result {
         unimplemented!()
     } else {

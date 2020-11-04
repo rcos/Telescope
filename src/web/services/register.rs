@@ -8,6 +8,7 @@ use crate::{
     },
     web::RequestContext
 };
+use crate::models::Confirmation;
 
 /// The form used by users to sign up for an RCOS account.
 #[derive(Deserialize, Debug, Clone)]
@@ -47,6 +48,15 @@ pub async fn registration_service(ctx: RequestContext, form: Form<RegistrationFo
         HttpResponse::BadRequest().body(jumbotron)
     } else {
         let email = form.email.to_string();
-        unimplemented!()
+        let invite = Confirmation::invite_new(&ctx, email.clone()).await;
+        if let Err(msg) = invite {
+            let page = RegistrationPage::error(email, msg);
+            HttpResponse::InternalServerError()
+                .body(ctx.render_in_page(&page, "Sign Up").await)
+        } else {
+            let page = RegistrationPage::success(email);
+            HttpResponse::Ok().body(ctx.render_in_page(&page, "Email Sent!").await)
+        }
+
     }
 }

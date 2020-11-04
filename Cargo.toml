@@ -19,7 +19,7 @@ toml = "0.5.7"
 # actix actor framework -- system for running server and other tasks.
 actix = "0.10.0"
 # actix web server (use exact version)
-actix-web = {version = "3.1.0", features = ["openssl"]}
+actix-web = {version = "3.2.0", features = ["openssl"]}
 # static file serving
 actix-files = "0.4.0"
 # identity service -- cookie authentication
@@ -45,7 +45,7 @@ rand = "0.7"
 # lazily evaluated statics.
 lazy_static = "1.4.0"
 # utilities for dealing with async futures
-futures = "0.3"
+futures = "0.3.7"
 # Pasword hashing and verification
 rust-argon2 = "0.8"
 # Regular expressions

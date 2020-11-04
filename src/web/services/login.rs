@@ -27,7 +27,7 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
         .and_then(|s| Uuid::parse_str(s.as_str()).ok());
 
     if let Some(id) = uid {
-        let conn = req_ctx.get_db_connection().await;
+        let conn = req_ctx.get_db_conn().await;
         let user = User::get_from_db_by_id(conn, id).await;
         // logged into to a valid user using the get request.
         if user.is_some() {

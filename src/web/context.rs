@@ -24,6 +24,7 @@ use actix_identity::Identity;
 use uuid::Uuid;
 use crate::templates::page::Page;
 use lettre::SendableEmail;
+use lettre_email::Mailbox;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -72,7 +73,7 @@ impl RequestContext {
             .and_then(|s| Uuid::parse_str(&s).ok());
         if let Some(uid) = id {
             let db_res: Option<User> = User::get_from_db_by_id(
-                self.get_db_connection().await,
+                self.get_db_conn().await,
                 uid
             ).await;
 
@@ -105,7 +106,7 @@ impl RequestContext {
     }
 
     /// Asynchronously get a database connection.
-    pub async fn get_db_connection(&self) -> DbConnection {
+    pub async fn get_db_conn(&self) -> DbConnection {
         let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_connection_pool();
         block(move || {
             db_conn_pool.get().map_err(|e| {
@@ -133,7 +134,7 @@ impl RequestContext {
     /// Asynchronously get the logged in user if there is one.
     pub async fn user_identity(&self) -> Option<User> {
         match self.user_id_identity() {
-            Some(uid) => User::get_from_db_by_id(self.get_db_connection().await, uid).await,
+            Some(uid) => User::get_from_db_by_id(self.get_db_conn().await, uid).await,
             None => None,
         }
     }
@@ -157,6 +158,11 @@ impl RequestContext {
     pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
     where M: Into<SendableEmail> + Clone + Send + Sync + 'static {
         self.app_data.send_mail(mail).await
+    }
+
+    /// Get the mail sender from the app data config.
+    pub fn email_sender(&self) -> Mailbox {
+        self.app_data.mail_sender.clone()
     }
 }
 

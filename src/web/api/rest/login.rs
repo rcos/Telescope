@@ -25,7 +25,7 @@ pub enum LoginError {
 /// Does not modify identity.
 pub async fn login(ctx: &RequestContext, request: LoginRequest) -> Result<User, LoginError> {
     let LoginRequest { email, password } = request;
-    let target_user = Email::get_user_from_db_by_email(ctx.get_db_connection().await, email).await;
+    let target_user = Email::get_user_from_db_by_email(ctx.get_db_conn().await, email).await;
 
     if let Some(target) = target_user {
         let pass = password.as_bytes();

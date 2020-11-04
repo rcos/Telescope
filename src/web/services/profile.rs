@@ -13,7 +13,7 @@ use crate::{
 #[get("/profile/{uid}")]
 pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
     let t_uid: Uuid = user_id.into_inner();
-    let target = User::get_from_db_by_id(ctx.get_db_connection().await, t_uid).await;
+    let target = User::get_from_db_by_id(ctx.get_db_conn().await, t_uid).await;
 
     if target.is_none() {
         return HttpResponse::NotFound().body(
@@ -27,7 +27,7 @@ pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
         // generate gravatar url
 
         // emails should always be non-empty on existing user.
-        let emails = user.get_emails_from_db(ctx.get_db_connection().await).await;
+        let emails = user.get_emails_from_db(ctx.get_db_conn().await).await;
         let gravatar_email: &str = emails.first().unwrap().email.as_str();
         let gravatar_hash = md5::compute(gravatar_email.trim().to_lowercase());
         let gravatar_base_url = "https://www.gravatar.com/avatar/";
