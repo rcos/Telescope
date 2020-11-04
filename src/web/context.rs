@@ -20,11 +20,11 @@ use diesel::{
     PgConnection,
 };
 
-use actix_identity::Identity;
-use uuid::Uuid;
 use crate::templates::page::Page;
+use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
+use uuid::Uuid;
 
 /// Trait for renderable templates.
 pub trait Template: Serialize + Sized {
@@ -72,10 +72,7 @@ impl RequestContext {
             .identity()
             .and_then(|s| Uuid::parse_str(&s).ok());
         if let Some(uid) = id {
-            let db_res: Option<User> = User::get_from_db_by_id(
-                self.get_db_conn().await,
-                uid
-            ).await;
+            let db_res: Option<User> = User::get_from_db_by_id(self.get_db_conn().await, uid).await;
 
             if db_res.is_some() {
                 true
@@ -148,7 +145,11 @@ impl RequestContext {
     }
 
     /// Render a page with the specified template as the page content and the title as specified.
-    pub async fn render_in_page<T: Template>(&self, template: &T, page_title: impl Into<String>) -> String {
+    pub async fn render_in_page<T: Template>(
+        &self,
+        template: &T,
+        page_title: impl Into<String>,
+    ) -> String {
         let page = Page::of(page_title, template, self).await;
         self.render(&page)
     }
@@ -156,7 +157,9 @@ impl RequestContext {
     /// Send an email using the internal app data mailers derived from the
     /// server config.
     pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
-    where M: Into<SendableEmail> + Clone + Send + Sync + 'static {
+    where
+        M: Into<SendableEmail> + Clone + Send + Sync + 'static,
+    {
         self.app_data.send_mail(mail).await
     }
 

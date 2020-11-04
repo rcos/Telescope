@@ -3,10 +3,7 @@ pub use root::ApiContext;
 
 use actix_web::{web, Error, HttpResponse};
 
-use juniper::http::{
-    //graphiql::graphiql_source,
-    GraphQLRequest,
-};
+use juniper::http::GraphQLRequest;
 
 use crate::{
     templates::{graphql_playground::GraphQlPlaygroundPage, jumbotron::Jumbotron},

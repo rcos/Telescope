@@ -1,17 +1,10 @@
+use actix_web::{web::Form, HttpResponse};
 
-use actix_web::{
-    HttpResponse,
-    web::Form
-};
-
-use crate::{
-    templates::{
-        recovery::PasswordRecoveryPage,
-        page::Page
-    },
-    web::RequestContext
-};
 use crate::models::Email;
+use crate::{
+    templates::{page::Page, recovery::PasswordRecoveryPage},
+    web::RequestContext,
+};
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -30,13 +23,14 @@ pub async fn forgot_page(ctx: RequestContext) -> HttpResponse {
 }
 
 #[post("/forgot")]
-pub async fn recovery_service(ctx: RequestContext, form: Form<PasswordRecoveryForm>) -> HttpResponse {
+pub async fn recovery_service(
+    ctx: RequestContext,
+    form: Form<PasswordRecoveryForm>,
+) -> HttpResponse {
     let email: &str = &form.email;
     let db_conn = ctx.get_db_conn().await;
-    let mut form_page = PasswordRecoveryPage::default()
-        .email(email);
-    let database_result = Email::get_user_from_db_by_email(db_conn, email.to_string())
-        .await;
+    let mut form_page = PasswordRecoveryPage::default().email(email);
+    let database_result = Email::get_user_from_db_by_email(db_conn, email.to_string()).await;
     if let Some(target_user) = database_result {
         unimplemented!()
     } else {

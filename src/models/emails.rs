@@ -5,9 +5,9 @@ use crate::{
 };
 use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};
+use lettre::EmailAddress;
 use regex::Regex;
 use uuid::Uuid;
-use lettre::EmailAddress;
 
 lazy_static! {
     static ref EMAIL_REGEX: Regex =
@@ -91,7 +91,7 @@ impl Email {
         Self {
             user_id,
             email: email.to_string(),
-            is_visible: false
+            is_visible: false,
         }
     }
 
@@ -123,16 +123,13 @@ impl Email {
         block::<_, Option<Email>, _>(move || {
             use crate::schema::emails::dsl::*;
             use diesel::prelude::*;
-            emails
-                .find(email_)
-                .first(&conn)
-                .optional()
+            emails.find(email_).first(&conn).optional()
         })
-            .await
-            .unwrap_or_else(|e| {
-                error!("Could not access emails in database: {}", e);
-                None
-            })
-            .is_some()
+        .await
+        .unwrap_or_else(|e| {
+            error!("Could not access emails in database: {}", e);
+            None
+        })
+        .is_some()
     }
 }

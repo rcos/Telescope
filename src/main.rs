@@ -16,36 +16,33 @@ extern crate diesel;
 mod web;
 use web::*;
 
-mod env;
-mod templates;
-mod schema;
-mod models;
 mod db_janitor;
+mod env;
+mod models;
+mod schema;
+mod templates;
 
 use crate::{
-    env::{
-        ConcreteConfig,
-        CONFIG
-    },
+    db_janitor::DbJanitor,
+    env::{ConcreteConfig, CONFIG},
     models::{Email, PasswordRequirements, User},
     templates::static_pages::{
         developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
         sponsors::SponsorsPage, Static,
     },
     web::app_data::AppData,
-    db_janitor::DbJanitor,
 };
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
+use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
 use diesel::{Connection, RunQueryDsl};
-use rand::{rngs::OsRng, Rng};
 use openssl::ssl::{SslAcceptor, SslMethod};
+use rand::{rngs::OsRng, Rng};
 use std::process::exit;
-use actix::prelude::*;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -68,7 +65,12 @@ fn main() -> std::io::Result<()> {
         .expect("Could not create SSL Acceptor.");
     config.tls_config.init_tls_acceptor(&mut tls_builder);
 
-    if config.sysadmin_config.as_ref().map(|c| c.create).unwrap_or(false) {
+    if config
+        .sysadmin_config
+        .as_ref()
+        .map(|c| c.create)
+        .unwrap_or(false)
+    {
         let config = config.sysadmin_config.clone().unwrap();
         let admin_password = config.password.as_str();
         let admin_email = config.email;
@@ -164,12 +166,12 @@ fn main() -> std::io::Result<()> {
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             .default_service(aweb::route().to(services::p404::not_found))
     })
-        .bind_openssl(config.bind_to.clone(), tls_builder)
-        .map_err(|e| {
-            error!("Could not bind to {}: {}", config.bind_to, e);
-            e
-        })?
-        .run();
+    .bind_openssl(config.bind_to.clone(), tls_builder)
+    .map_err(|e| {
+        error!("Could not bind to {}: {}", config.bind_to, e);
+        e
+    })?
+    .run();
 
     // Start the actix runtime.
     sys.run()

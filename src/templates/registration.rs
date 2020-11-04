@@ -22,7 +22,7 @@ impl RegistrationPage {
         Self {
             success: true,
             email: Some(email.into()),
-            error: None
+            error: None,
         }
     }
 
@@ -34,7 +34,7 @@ impl RegistrationPage {
         Self {
             email: Some(email.into()),
             error: Some(error.into()),
-            success: false
+            success: false,
         }
     }
 }

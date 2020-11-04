@@ -10,7 +10,7 @@ pub struct PasswordRecoveryPage {
     /// An error message, if the email was not found.
     error: Option<String>,
     /// A success message to indicate that the email was sent.
-    success: Option<String>
+    success: Option<String>,
 }
 
 impl PasswordRecoveryPage {

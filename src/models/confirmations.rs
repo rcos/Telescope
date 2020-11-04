@@ -1,13 +1,13 @@
-use chrono::{DateTime, Duration, Utc};
-use uuid::Uuid;
 use crate::{
-    web::{RequestContext, DbConnection},
     models::Email,
-    schema::confirmations
+    schema::confirmations,
+    web::{DbConnection, RequestContext},
 };
 use actix_web::web::block;
+use chrono::{DateTime, Duration, Utc};
 use diesel::RunQueryDsl;
 use futures::prelude::*;
+use uuid::Uuid;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -42,7 +42,7 @@ impl Confirmation {
             invite_id,
             email,
             user_id: None,
-            expiration: Self::get_expiration_time_from_now()
+            expiration: Self::get_expiration_time_from_now(),
         }
     }
 
@@ -54,7 +54,10 @@ impl Confirmation {
     /// Check if an email has been invited already.
     /// This does not check if an email has been registered.
     /// The found invite may be expired.
-    async fn check_invite_for(conn: DbConnection, email_: String) -> Result<Option<Confirmation>, String> {
+    async fn check_invite_for(
+        conn: DbConnection,
+        email_: String,
+    ) -> Result<Option<Confirmation>, String> {
         block(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
@@ -62,11 +65,12 @@ impl Confirmation {
                 .find(email_)
                 .first::<Confirmation>(&conn)
                 .optional()
-        }).await
-            .map_err(|err| {
-                error!("Error checking for invite: {}", err);
-                "Could not access invite database".to_string()
-            })
+        })
+        .await
+        .map_err(|err| {
+            error!("Error checking for invite: {}", err);
+            "Could not access invite database".to_string()
+        })
     }
 
     /// Create an invite for a new user and store it in the database.
@@ -80,9 +84,7 @@ impl Confirmation {
         // check that the email is not already registered.
         Email::get_user_from_db_by_email(ctx.get_db_conn().await, invite.email.clone())
             .await
-            .map(|u| {
-                Err(format!("The email {} is already in use.", invite.email))
-            })
+            .map(|u| Err(format!("The email {} is already in use.", invite.email)))
             .unwrap_or(Ok(()))?;
 
         // check if this user was previously invited.
@@ -90,7 +92,10 @@ impl Confirmation {
             .await?
             .filter(|c| !c.is_expired()) // ignore if expired - we will replace.
             .map(|c| {
-                Err(format!("An invite has already been sent to {}. (invite id: {})", c.email, c.invite_id))
+                Err(format!(
+                    "An invite has already been sent to {}. (invite id: {})",
+                    c.email, c.invite_id
+                ))
             })
             .unwrap_or(Ok(()))?;
 
@@ -105,17 +110,14 @@ impl Confirmation {
                 .values(&invite)
                 .on_conflict(email)
                 .do_update()
-                .set((
-                    expiration.eq(Utc::now()),
-                    user_id.eq(invite.user_id),
-                ))
+                .set((expiration.eq(Utc::now()), user_id.eq(invite.user_id)))
                 .get_result(&conn)
         })
-            .map_err(|e| {
-                error!("Error creating invite in database: {}", e);
-                "Could not access invite database.".to_string()
-            })
-            .await?;
+        .map_err(|e| {
+            error!("Error creating invite in database: {}", e);
+            "Could not access invite database.".to_string()
+        })
+        .await?;
 
         // create invite email.
         let email = lettre_email::Email::builder()
@@ -133,9 +135,7 @@ impl Confirmation {
 
         ctx.send_mail(email)
             .await
-            .map_err(|_| {
-                "Could not send email.".to_string()
-            })?;
+            .map_err(|_| "Could not send email.".to_string())?;
 
         Ok(stored_invite)
     }

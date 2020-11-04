@@ -1,21 +1,12 @@
-use std::{
-    env,
-    path::PathBuf,
-    collections::HashMap
-};
-use structopt::StructOpt;
-use openssl::ssl::{SslAcceptorBuilder, SslFiletype};
-use std::{
-    fs::File,
-    io::Read,
-    process::exit
-};
 use lettre::smtp::{
     authentication::{Credentials, Mechanism},
-    ConnectionReuseParameters,
-    SmtpClient
+    ConnectionReuseParameters, SmtpClient,
 };
 use lettre::EmailAddress;
+use openssl::ssl::{SslAcceptorBuilder, SslFiletype};
+use std::{collections::HashMap, env, path::PathBuf};
+use std::{fs::File, io::Read, process::exit};
+use structopt::StructOpt;
 
 /// The Tls credentials of a given configuration.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -36,7 +27,7 @@ pub struct SysadminCreationConfig {
     /// The email to create the sysadmin account with.
     pub email: EmailAddress,
     /// The password to create the sysadmin account with.
-    pub password: String
+    pub password: String,
 }
 
 /// Configuration of email senders for the telescope webapp.
@@ -153,44 +144,73 @@ impl TelescopeConfig {
         // check profile exists.
         let mut scope = self;
         for part in &profile {
-            if scope.profile.as_ref().map(|map| map.contains_key(part)).unwrap_or(false) {
+            if scope
+                .profile
+                .as_ref()
+                .map(|map| map.contains_key(part))
+                .unwrap_or(false)
+            {
                 scope = scope.profile.as_ref().unwrap().get(part).unwrap();
             } else {
-                eprintln!("Profile path {:?} not found in config. missing part {}.", profile, part);
+                eprintln!(
+                    "Profile path {:?} not found in config. missing part {}.",
+                    profile, part
+                );
                 exit(1)
             }
         }
 
         let profile_slice = &profile[..];
         ConcreteConfig {
-            tls_config: self.reverse_lookup(profile_slice, |c| c.tls_config.clone())
+            tls_config: self
+                .reverse_lookup(profile_slice, |c| c.tls_config.clone())
                 .expect("Could not resolve TLS config."),
-            log_level: self.reverse_lookup(profile_slice, |c| c.log_level.clone())
+            log_level: self
+                .reverse_lookup(profile_slice, |c| c.log_level.clone())
                 .expect("Could not resolve log level."),
-            bind_to: self.reverse_lookup(profile_slice, |c| c.bind_to.clone())
+            bind_to: self
+                .reverse_lookup(profile_slice, |c| c.bind_to.clone())
                 .expect("Could not resolve binding URL."),
             //domain: self.reverse_lookup(profile_slice, |c| c.domain.clone())
             //    .expect("Could not resolve domain configuration."),
-            database_url: self.reverse_lookup(profile_slice, |c| c.database_url.clone())
+            database_url: self
+                .reverse_lookup(profile_slice, |c| c.database_url.clone())
                 .expect("Could not resolve database URL."),
-            email_config: self.reverse_lookup(profile_slice, |c| c.email_config.clone())
+            email_config: self
+                .reverse_lookup(profile_slice, |c| c.email_config.clone())
                 .expect("Could not resolve email config."),
-            sysadmin_config: self.reverse_lookup(profile_slice, |c| c.sysadmin_config.clone())
+            sysadmin_config: self.reverse_lookup(profile_slice, |c| c.sysadmin_config.clone()),
         }
     }
 
     /// Reverse lookup a property using an extractor.
     ///
     /// Assume profile is valid and exists.
-    fn reverse_lookup<T: Clone>(&self, profile_slice: &[String], extractor: impl Fn(&Self) -> Option<T> + Copy) -> Option<T> {
+    fn reverse_lookup<T: Clone>(
+        &self,
+        profile_slice: &[String],
+        extractor: impl Fn(&Self) -> Option<T> + Copy,
+    ) -> Option<T> {
         if profile_slice.len() >= 2 {
             let child_path = &profile_slice[1..];
-            let child = self.profile.as_ref().unwrap().get(&profile_slice[0]).unwrap();
-            child.reverse_lookup(child_path, extractor).or(extractor(self))
-        }
-        else if profile_slice.len() == 1 {
-            extractor(self.profile.as_ref().unwrap().get(&profile_slice[0]).unwrap())
+            let child = self
+                .profile
+                .as_ref()
+                .unwrap()
+                .get(&profile_slice[0])
+                .unwrap();
+            child
+                .reverse_lookup(child_path, extractor)
                 .or(extractor(self))
+        } else if profile_slice.len() == 1 {
+            extractor(
+                self.profile
+                    .as_ref()
+                    .unwrap()
+                    .get(&profile_slice[0])
+                    .unwrap(),
+            )
+            .or(extractor(self))
         } else {
             extractor(self)
         }
@@ -212,7 +232,7 @@ struct CommandLine {
     /// Subprofiles can be specified using a '.' delimiter, e.g.
     /// 'dev.create_sysadmin'
     #[structopt(short = "p", long = "profile", env)]
-    profile: Option<String>
+    profile: Option<String>,
 }
 
 lazy_static! {
@@ -225,9 +245,7 @@ pub fn init() {
     let cfg: &ConcreteConfig = &*CONFIG;
 
     // initialize logger.
-    env_logger::builder()
-        .parse_filters(&cfg.log_level)
-        .init();
+    env_logger::builder().parse_filters(&cfg.log_level).init();
 
     info!("Starting up...");
     info!("telescope {}", env!("CARGO_PKG_VERSION"));
@@ -247,13 +265,21 @@ fn cli() -> ConcreteConfig {
 
     File::open(&commandline.config_file)
         .map_err(|e| {
-            eprintln!("Could not open config file at {}: {}", commandline.config_file.display(), e);
+            eprintln!(
+                "Could not open config file at {}: {}",
+                commandline.config_file.display(),
+                e
+            );
             e
         })
         .unwrap()
         .read_to_string(&mut confing_file_string)
         .map_err(|e| {
-            eprintln!("Could not read config file at {}: {}", commandline.config_file.display(), e);
+            eprintln!(
+                "Could not read config file at {}: {}",
+                commandline.config_file.display(),
+                e
+            );
             e
         })
         .unwrap();
@@ -264,7 +290,8 @@ fn cli() -> ConcreteConfig {
         })
         .unwrap();
 
-    let profile_path = commandline.profile
+    let profile_path = commandline
+        .profile
         .map(|s| s.split(".").map(|p| p.to_string()).collect())
         .unwrap_or(Vec::new());
 

@@ -1,19 +1,15 @@
+use crate::env::{ConcreteConfig, CONFIG};
+use actix_web::web::block;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
-    PgConnection
+    PgConnection,
 };
 use handlebars::Handlebars;
-use std::{
-    sync::Arc,
-    path::PathBuf
+use lettre::{
+    stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
 };
-use lettre::{SmtpClient, SendableEmail, Transport, FileTransport, stub::StubTransport, SmtpTransport};
-use crate::env::{
-    CONFIG,
-    ConcreteConfig
-};
-use actix_web::web::block;
 use lettre_email::Mailbox;
+use std::{path::PathBuf, sync::Arc};
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
@@ -34,7 +30,7 @@ pub struct AppData {
 
 impl AppData {
     /// Create new App Data object using the global static config.
-    pub fn new()-> Self {
+    pub fn new() -> Self {
         let config: &ConcreteConfig = &*CONFIG;
         // register handlebars templates
         let mut template_registry = Handlebars::new();
@@ -73,8 +69,8 @@ impl AppData {
             smtp_client: config.email_config.make_smtp_client(),
             mail_sender: Mailbox {
                 name: config.email_config.name.clone(),
-                address: config.email_config.address.to_string()
-            }
+                address: config.email_config.address.to_string(),
+            },
         }
     }
 
@@ -91,7 +87,9 @@ impl AppData {
 
     /// Get a file based mail transport if available.
     fn get_file_mail_transport(&self) -> Option<FileTransport> {
-        self.file_mailer_path.as_ref().map(|pb| FileTransport::new(pb.as_path()))
+        self.file_mailer_path
+            .as_ref()
+            .map(|pb| FileTransport::new(pb.as_path()))
     }
 
     /// Get a stub based mail transporter if available.
@@ -107,7 +105,9 @@ impl AppData {
     /// Any errors caught while mailing will be logged and then an `Err`
     /// will be returned.
     pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
-    where M: Into<SendableEmail> + Clone + Send + Sync + 'static {
+    where
+        M: Into<SendableEmail> + Clone + Send + Sync + 'static,
+    {
         if let Some(mut t) = self.get_stub_transport() {
             t.send(mail.clone().into())?;
         }
@@ -128,7 +128,8 @@ impl AppData {
                 let res = t.send(mail.into());
                 t.close();
                 res
-            }).await;
+            })
+            .await;
 
             if let Err(e) = result {
                 error!("Could not send mail over SMTP: {}", e);

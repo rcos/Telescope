@@ -13,10 +13,7 @@ use diesel::{
 
 use actix_web::{rt::blocking::BlockingError, web::block};
 
-use crate::{
-    models::User,
-    web::api::graphql::ApiContext,
-};
+use crate::{models::User, web::api::graphql::ApiContext};
 
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
@@ -159,9 +156,9 @@ pub struct PaginationInput {
 macro_rules! impl_juniper_pagination {
     ($t:ty, $n:literal) => {
         #[juniper::object(
-                    Context = ApiContext,
-                    name = $n
-                )]
+                            Context = ApiContext,
+                            name = $n
+                        )]
         impl PaginatedData<i32, $t> {
             /// The offset into the dataset.
             fn offset(&self) -> i32 {
