@@ -33,7 +33,13 @@ as the RCOS website.
     ```shell script
     $ psql -U <username> -W
     ```
-3. Clone this repository.
+3. Clone this repository:
+    ```shell script
+    $ git clone --recurse-submodules https://github.com/rcos/Telescope.git
+    ```
+   You need to make sure you get all of the submodules here using 
+   `--recurse-submodules` otherwise you won't have any of the RCOS branding
+   logos or icons. 
 4. Generate self-signed TLS/SSL certificate and keys for testing: 
     ```shell script
     $ mkdir tls-ssl

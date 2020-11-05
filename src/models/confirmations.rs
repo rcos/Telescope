@@ -119,11 +119,25 @@ impl Confirmation {
         })
         .await?;
 
+        // Get the domain string of the request to use in the email sent to
+        // the user.
+        let domain = ctx.request()
+            .uri()
+            .authority()
+            .map(|a| format!("https://{}", a.as_str()))
+            .ok_or("Could not get domain string.".to_string())
+            .map_err(|e| {
+                error!("{}", e);
+                e
+            })?;
+
         // create invite email.
-        let email = lettre_email::Email::builder()
+        let email_builder = lettre_email::Email::builder()
             .from(ctx.email_sender())
             .to(stored_invite.email.as_str())
-            .subject("RCOS Telescope Email Confirmation")
+            .subject("RCOS Email Confirmation");
+
+        let email =
             // FIXME: Write actual emails here.
             // FIXME: Also we need a place to verify the responses. (/confirm/{invite_id})
             .alternative("Html invite", "Plaintext Invite")
