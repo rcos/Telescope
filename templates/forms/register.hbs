@@ -39,8 +39,7 @@
                                 required>
                         {{#if error}}
                             <div id="email-invalid" class="invalid-feedback">
-                                Email already in use. Would you like to
-                                <a href="/login">Login?</a>
+                                {{error}}
                             </div>
                         {{/if}}
                     </div>

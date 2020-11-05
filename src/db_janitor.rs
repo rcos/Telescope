@@ -63,7 +63,7 @@ impl Actor for DbJanitor {
         self.call();
         // call the janitor on interval for remainder of uptime.
         let interval = time::Duration::from_secs(60 * 60 * 24); // 24 hours
-        ctx.run_interval(interval, |act, ctx| {
+        ctx.run_interval(interval, |act, _| {
             info!("Database Janitor awoken.");
             act.call();
             info!("Database Janitor sleeping.");

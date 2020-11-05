@@ -9,7 +9,7 @@ use lettre::EmailAddress;
 
 /// The form used by users to sign up for an RCOS account.
 #[derive(Deserialize, Debug, Clone)]
-struct RegistrationForm {
+pub struct RegistrationForm {
     /// The email of the user registering for an account.
     email: EmailAddress,
 }

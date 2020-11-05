@@ -8,7 +8,7 @@ use actix_web::web::Form;
 
 /// The form sent by users to confirm an email.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-struct ConfirmationForm {
+pub struct ConfirmationForm {
     name: Option<String>,
     new_pass: String,
     confirm_pass: String,

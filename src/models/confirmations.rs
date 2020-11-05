@@ -84,7 +84,7 @@ impl Confirmation {
         // check that the email is not already registered.
         Email::get_user_from_db_by_email(ctx.get_db_conn().await, invite.email.clone())
             .await
-            .map(|u| Err(format!("The email {} is already in use.", invite.email)))
+            .map(|_| Err(format!("The email {} is already in use.", invite.email)))
             .unwrap_or(Ok(()))?;
 
         // check if this user was previously invited.
