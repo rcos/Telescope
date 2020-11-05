@@ -1,5 +1,6 @@
 use uuid::Uuid;
-use crate::web::Template;
+use crate::web::{Template, RequestContext};
+use lettre_email::EmailBuilder;
 
 /// The HTML version of the email sent to new users asking them
 /// to go to the telescope website and set their name and create a password.
@@ -53,5 +54,46 @@ impl ConfirmationEmail {
             domain,
             invite_id
         }
+    }
+
+    /// Make a plaintext clone.
+    fn make_plaintext(&self) -> ConfirmationEmailText {
+        ConfirmationEmailText {
+            parent: self.clone()
+        }
+    }
+
+    /// Make HTML clone.
+    fn make_html(&self) -> ConfirmationEmailHtml {
+        ConfirmationEmailHtml {
+            parent: self.clone()
+        }
+    }
+
+    /// Render the plaintext and HTML versions of this email and store them
+    /// in the body of the email builder object.
+    ///
+    /// Panics if there are issues rendering either variant of the email.
+    pub fn write_email(
+        &self,
+        ctx: &RequestContext,
+        email: EmailBuilder
+    ) -> Result<EmailBuilder, String> {
+        let registry = ctx.handlebars();
+        let plaintext = self.make_plaintext()
+            .render(registry)
+            .map_err(|e| {
+                error!("Could not render plaintext confirmation email: {}", e);
+                "Plaintext email rendering error".to_string()
+            })?;
+
+        let html = self.make_html()
+            .render(registry)
+            .map_err(|e| {
+                error!("Could not render HTML confirmation email: {}", e);
+                "HTML email rendering error".to_string()
+            })?;
+
+        Ok(email.alternative(html, plaintext))
     }
 }

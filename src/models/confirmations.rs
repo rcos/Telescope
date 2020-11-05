@@ -2,10 +2,10 @@ use crate::{
     models::Email,
     schema::confirmations,
     web::{DbConnection, RequestContext},
+    templates::emails::confirmation_email::ConfirmationEmail
 };
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
-use diesel::RunQueryDsl;
 use futures::prelude::*;
 use uuid::Uuid;
 
@@ -137,10 +137,8 @@ impl Confirmation {
             .to(stored_invite.email.as_str())
             .subject("RCOS Email Confirmation");
 
-        let email =
-            // FIXME: Write actual emails here.
-            // FIXME: Also we need a place to verify the responses. (/confirm/{invite_id})
-            .alternative("Html invite", "Plaintext Invite")
+        let email = ConfirmationEmail::new(domain, stored_invite.invite_id)
+            .write_email(ctx, email_builder)?
             .build()
             .map_err(|e| {
                 error!("Could not build email: {}", e);
