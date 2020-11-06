@@ -20,20 +20,6 @@ pub struct Confirmation {
     expiration: DateTime<Utc>,
 }
 
-/// Error type used to pull issues out of the email confirmation process.
-enum InviteError {
-    /// Error in sending email.
-    EmailError,
-    /// Diesel database error.
-    DieselError(DieselError),
-}
-
-impl From<DieselError> for InviteError {
-    fn from(e: DieselError) -> Self {
-        InviteError::DieselError(e)
-    }
-}
-
 impl Confirmation {
     /// Currently invites expire after 30 minutes.
     fn get_expiration_duration() -> Duration {
