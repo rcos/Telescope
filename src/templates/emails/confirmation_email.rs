@@ -1,6 +1,7 @@
 use uuid::Uuid;
 use crate::web::{Template, RequestContext};
 use lettre_email::EmailBuilder;
+use crate::models::Confirmation;
 
 /// The HTML version of the email sent to new users asking them
 /// to go to the telescope website and set their name and create a password.
@@ -39,20 +40,29 @@ pub struct ConfirmationEmail {
     /// The link the user should go to set their name and password.
     confirm_link: String,
     /// The invite id.
-    invite_id: Uuid
+    invite_id: Uuid,
+    /// When the invite expires (UTC)
+    utc_expires: String,
+    /// When the invite expires (EST)
+    est_expires: String,
 }
 
 impl ConfirmationEmail {
     /// Construct a new user invite email. The domain may be pulled from the
     /// request uri. It should not have a `/` at the end of it.
-    pub fn new(domain: impl Into<String>, invite_id: Uuid) -> Self {
+    pub fn new(domain: impl Into<String>, invite: &Confirmation) -> Self {
         let domain = domain.into();
+        let invite_id = invite.invite_id
+            .to_hyphenated()
+            .to_string()
+            .to_lowercase();
         Self {
-            confirm_link: format!("{}/confirm/{}",
-                                  domain.as_str(),
-                                  invite_id.to_hyphenated().to_string().to_lowercase()),
+            confirm_link: format!("{}/confirm/{}", domain.as_str(), invite_id),
             domain,
-            invite_id
+            invite_id: invite.invite_id,
+            // FIXME: DATE FORMATTING
+            utc_expires: invite.expiration,
+
         }
     }
 

@@ -14,10 +14,14 @@ use actix_web::rt::blocking::BlockingError;
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
 #[table_name = "confirmations"]
 pub struct Confirmation {
-    invite_id: Uuid,
+    /// The invitation id
+    pub invite_id: Uuid,
+    /// The email to confirm.
     email: String,
+    /// The user id to associate the email with (if there is one).
     user_id: Option<Uuid>,
-    expiration: DateTime<Utc>,
+    /// When the invite expires.
+    pub expiration: DateTime<Utc>,
 }
 
 impl Confirmation {
