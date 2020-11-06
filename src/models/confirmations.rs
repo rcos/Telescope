@@ -6,8 +6,9 @@ use crate::{
 };
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
-use futures::prelude::*;
 use uuid::Uuid;
+use diesel::result::Error as DieselError;
+use actix_web::rt::blocking::BlockingError;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -17,6 +18,20 @@ pub struct Confirmation {
     email: String,
     user_id: Option<Uuid>,
     expiration: DateTime<Utc>,
+}
+
+/// Error type used to pull issues out of the email confirmation process.
+enum InviteError {
+    /// Error in sending email.
+    EmailError,
+    /// Diesel database error.
+    DieselError(DieselError),
+}
+
+impl From<DieselError> for InviteError {
+    fn from(e: DieselError) -> Self {
+        InviteError::DieselError(e)
+    }
 }
 
 impl Confirmation {
@@ -93,31 +108,11 @@ impl Confirmation {
             .filter(|c| !c.is_expired()) // ignore if expired - we will replace.
             .map(|c| {
                 Err(format!(
-                    "An invite has already been sent to {}. (invite id: {})",
-                    c.email, c.invite_id
+                    "An invite has already been sent to {}. (invite id: {}, exp: {})",
+                    c.email, c.invite_id, c.expiration.naive_local()
                 ))
             })
             .unwrap_or(Ok(()))?;
-
-        // if the email is not already invited or in use (or the invite has expired)
-        // we can create an invite in the database and send the invite email.
-        let conn = ctx.get_db_conn().await;
-        let stored_invite: Confirmation = block::<_, Confirmation, _>(move || {
-            use crate::schema::confirmations::dsl::*;
-            use diesel::prelude::*;
-
-            diesel::insert_into(confirmations)
-                .values(&invite)
-                .on_conflict(email)
-                .do_update()
-                .set((expiration.eq(Utc::now()), user_id.eq(invite.user_id)))
-                .get_result(&conn)
-        })
-        .map_err(|e| {
-            error!("Error creating invite in database: {}", e);
-            "Could not access invite database.".to_string()
-        })
-        .await?;
 
         // Get the domain string of the request to use in the email sent to
         // the user.
@@ -131,13 +126,14 @@ impl Confirmation {
                 e
             })?;
 
-        // create invite email.
+        // create invite email. Don't send it yet. Just make sure it can be created
+        // without issues.
         let email_builder = lettre_email::Email::builder()
             .from(ctx.email_sender())
-            .to(stored_invite.email.as_str())
+            .to(invite.email.as_str())
             .subject("RCOS Email Confirmation");
 
-        let email = ConfirmationEmail::new(domain, stored_invite.invite_id)
+        let email = ConfirmationEmail::new(domain, invite.invite_id)
             .write_email(ctx, email_builder)?
             .build()
             .map_err(|e| {
@@ -145,10 +141,61 @@ impl Confirmation {
                 "Could not create email".to_string()
             })?;
 
-        ctx.send_mail(email)
-            .await
-            .map_err(|_| "Could not send email.".to_string())?;
+        // if the email is not already invited or in use (or the invite has expired)
+        // we can create an invite in the database and send the invite email.
+        let conn: DbConnection = ctx.get_db_conn().await;
 
-        Ok(stored_invite)
+        // block on database code.
+        let saved_confirmation = block::<_, Confirmation, DieselError>(move || {
+            use crate::schema::confirmations::dsl::*;
+            use diesel::prelude::*;
+            diesel::insert_into(confirmations)
+                .values(&invite)
+                .on_conflict(email)
+                .do_update()
+                .set((
+                    expiration.eq(Utc::now()),
+                    user_id.eq(invite.user_id),
+                    invite_id.eq(invite.invite_id)
+                ))
+                .get_result(&conn)
+        })
+            .await
+            // if unsuccessful convert error to string.
+            .map_err(move |e| {
+                match e {
+                    BlockingError::Canceled => error!("Confirmation save canceled"),
+                    BlockingError::Error(e) => error!("Could not create confirmation: {}", e),
+                }
+                "Could not access database.".to_string()
+            })?;
+
+        // try to send email.
+        let mail_result = ctx.send_mail(email).await;
+
+        // if email failed to send, remove database invite record
+        if mail_result.is_err() {
+            // more blocking on sync diesel code.
+            let conn: DbConnection = ctx.get_db_conn().await;
+            let email_ = saved_confirmation.email.clone();
+            block::<_, _, DieselError>(move || {
+                use crate::schema::confirmations::dsl::*;
+                use diesel::prelude::*;
+                diesel::delete(confirmations)
+                    .filter(email.eq(email_))
+                    .execute(&conn)
+            })
+                .await
+                .map_err(|e| {
+                    match e {
+                        BlockingError::Canceled => error!("Database call canceled"),
+                        BlockingError::Error(e) => error!("Could not delete confirmation record: {}", e),
+                    }
+                    "Could not send email or delete invite. Please notify a sysadmin.".to_string()
+                })?;
+            return Err(format!("Could not send email to {}", saved_confirmation.email));
+        } else {
+            Ok(saved_confirmation)
+        }
     }
 }
