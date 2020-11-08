@@ -5,7 +5,7 @@ use crate::{
     templates::emails::confirmation_email::ConfirmationEmail
 };
 use actix_web::web::block;
-use chrono::{DateTime, Duration, Utc, FixedOffset};
+use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;
 use diesel::result::Error as DieselError;
 use actix_web::rt::blocking::BlockingError;
@@ -84,8 +84,6 @@ impl Confirmation {
     /// On success, returns the invite. Otherwise returns a string
     /// summarizing the error encountered.
     pub async fn invite_new(ctx: &RequestContext, email: String) -> Result<Confirmation, String> {
-        let local_offset =
-            FixedOffset::east(time::UtcOffset::current_local_offset().as_seconds());
         let invite = Self::new(email);
 
         // check that the email is not already registered.
@@ -99,11 +97,7 @@ impl Confirmation {
             .await?
             .filter(|c| !c.is_expired()) // ignore if expired - we will replace.
             .map(|c| {
-                Err(format!(
-                    "An invite has already been sent to {}. (invite id: {}, exp: {})",
-                    c.email, c.invite_id,
-                    c.expiration.with_timezone(&local_offset).to_rfc2822()
-                ))
+                Err(format!("An invite has already been sent to {}.", c.email))
             })
             .unwrap_or(Ok(()))?;
 
