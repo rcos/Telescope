@@ -5,7 +5,7 @@ use crate::{
     templates::emails::confirmation_email::ConfirmationEmail
 };
 use actix_web::web::block;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, Utc, FixedOffset};
 use uuid::Uuid;
 use diesel::result::Error as DieselError;
 use actix_web::rt::blocking::BlockingError;
@@ -25,9 +25,9 @@ pub struct Confirmation {
 }
 
 impl Confirmation {
-    /// Currently invites expire after 30 minutes.
+    /// Currently invites expire after 10 minutes.
     fn get_expiration_duration() -> Duration {
-        Duration::minutes(30)
+        Duration::minutes(5)
     }
 
     /// Get the current datetime and add tge expiration time.
@@ -84,6 +84,8 @@ impl Confirmation {
     /// On success, returns the invite. Otherwise returns a string
     /// summarizing the error encountered.
     pub async fn invite_new(ctx: &RequestContext, email: String) -> Result<Confirmation, String> {
+        let local_offset =
+            FixedOffset::east(time::UtcOffset::current_local_offset().as_seconds());
         let invite = Self::new(email);
 
         // check that the email is not already registered.
@@ -99,7 +101,8 @@ impl Confirmation {
             .map(|c| {
                 Err(format!(
                     "An invite has already been sent to {}. (invite id: {}, exp: {})",
-                    c.email, c.invite_id, c.expiration.naive_local()
+                    c.email, c.invite_id,
+                    c.expiration.with_timezone(&local_offset).to_rfc2822()
                 ))
             })
             .unwrap_or(Ok(()))?;
@@ -123,7 +126,7 @@ impl Confirmation {
             .to(invite.email.as_str())
             .subject("RCOS Email Confirmation");
 
-        let email = ConfirmationEmail::new(domain, invite.invite_id)
+        let email = ConfirmationEmail::new(domain, &invite)
             .write_email(ctx, email_builder)?
             .build()
             .map_err(|e| {
