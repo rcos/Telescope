@@ -1,5 +1,5 @@
 use crate::{
-    templates::login::LoginForm,
+    templates::forms::login::LoginForm,
     web::{RequestContext, Template},
 };
 
