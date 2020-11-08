@@ -1,10 +1,10 @@
 pub mod developers;
+pub mod emails;
 pub mod graphql_playground;
 pub mod jumbotron;
 pub mod navbar;
 pub mod page;
 pub mod profile;
-pub mod emails;
 
 pub mod forms;
 

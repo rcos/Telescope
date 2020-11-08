@@ -1,14 +1,14 @@
 use crate::{
     models::Email,
     schema::confirmations,
+    templates::emails::confirmation_email::ConfirmationEmail,
     web::{DbConnection, RequestContext},
-    templates::emails::confirmation_email::ConfirmationEmail
 };
+use actix_web::rt::blocking::BlockingError;
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
-use uuid::Uuid;
 use diesel::result::Error as DieselError;
-use actix_web::rt::blocking::BlockingError;
+use uuid::Uuid;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -96,14 +96,13 @@ impl Confirmation {
         Self::check_invite_for(ctx.get_db_conn().await, invite.email.clone())
             .await?
             .filter(|c| !c.is_expired()) // ignore if expired - we will replace.
-            .map(|c| {
-                Err(format!("An invite has already been sent to {}.", c.email))
-            })
+            .map(|c| Err(format!("An invite has already been sent to {}.", c.email)))
             .unwrap_or(Ok(()))?;
 
         // Get the domain string of the request to use in the email sent to
         // the user.
-        let domain = ctx.request()
+        let domain = ctx
+            .request()
             .uri()
             .authority()
             .map(|a| format!("https://{}", a.as_str()))
@@ -143,19 +142,19 @@ impl Confirmation {
                 .set((
                     expiration.eq(Utc::now()),
                     user_id.eq(invite.user_id),
-                    invite_id.eq(invite.invite_id)
+                    invite_id.eq(invite.invite_id),
                 ))
                 .get_result(&conn)
         })
-            .await
-            // if unsuccessful convert error to string.
-            .map_err(move |e| {
-                match e {
-                    BlockingError::Canceled => error!("Confirmation save canceled"),
-                    BlockingError::Error(e) => error!("Could not create confirmation: {}", e),
-                }
-                "Could not access database.".to_string()
-            })?;
+        .await
+        // if unsuccessful convert error to string.
+        .map_err(move |e| {
+            match e {
+                BlockingError::Canceled => error!("Confirmation save canceled"),
+                BlockingError::Error(e) => error!("Could not create confirmation: {}", e),
+            }
+            "Could not access database.".to_string()
+        })?;
 
         // try to send email.
         let mail_result = ctx.send_mail(email).await;
@@ -172,15 +171,20 @@ impl Confirmation {
                     .filter(email.eq(email_))
                     .execute(&conn)
             })
-                .await
-                .map_err(|e| {
-                    match e {
-                        BlockingError::Canceled => error!("Database call canceled"),
-                        BlockingError::Error(e) => error!("Could not delete confirmation record: {}", e),
+            .await
+            .map_err(|e| {
+                match e {
+                    BlockingError::Canceled => error!("Database call canceled"),
+                    BlockingError::Error(e) => {
+                        error!("Could not delete confirmation record: {}", e)
                     }
-                    "Could not send email or delete invite. Please notify a sysadmin.".to_string()
-                })?;
-            return Err(format!("Could not send email to {}", saved_confirmation.email));
+                }
+                "Could not send email or delete invite. Please notify a sysadmin.".to_string()
+            })?;
+            return Err(format!(
+                "Could not send email to {}",
+                saved_confirmation.email
+            ));
         } else {
             Ok(saved_confirmation)
         }

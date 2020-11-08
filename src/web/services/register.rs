@@ -1,6 +1,6 @@
 use crate::models::Confirmation;
 use crate::{
-    templates::{jumbotron::Jumbotron, forms::registration::RegistrationPage},
+    templates::{forms::registration::RegistrationPage, jumbotron::Jumbotron},
     web::RequestContext,
 };
 use actix_web::web::Form;

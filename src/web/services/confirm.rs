@@ -1,10 +1,7 @@
 use crate::web::RequestContext;
-use actix_web::{
-    HttpResponse,
-    web::Path
-};
-use uuid::Uuid;
 use actix_web::web::Form;
+use actix_web::{web::Path, HttpResponse};
+use uuid::Uuid;
 
 /// The form sent by users to confirm an email.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -23,7 +20,7 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
 pub async fn confirm(
     ctx: RequestContext,
     Path(invite_id): Path<Uuid>,
-    Form(form): Form<ConfirmationForm>
+    Form(form): Form<ConfirmationForm>,
 ) -> HttpResponse {
     unimplemented!()
 }
