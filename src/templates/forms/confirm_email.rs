@@ -56,7 +56,17 @@ impl EmailConfirmation {
         }
     }
 
-    pub fn new_account_error()
+    /// Create a form to show a new user where a confirmation failed.
+    pub fn new_account_error(conf: Confirmation, error: impl Into<String>, name: String) -> Self {
+        Self {
+            existing_success: false,
+            existing_fail: false,
+            invite: conf,
+            name: Some(name),
+            error_message: Some(error.into())
+        }
+    }
+
 
 }
 
