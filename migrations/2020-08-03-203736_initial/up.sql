@@ -59,7 +59,13 @@ CREATE TABLE "groups" (
     -- The Unique Id of the group
     id UUID PRIMARY KEY,
     -- group name (may be null in case of internal groups)
-    name VARCHAR
+    name VARCHAR,
+    -- does the group have admin privileges (professors and faculty)
+    admin BOOLEAN NOT NULL DEFAULT FALSE,
+    -- does the group have coordinator privileges
+    coordinator BOOLEAN NOT NULL DEFAULT FALSE,
+    -- does the group have mentor privileges
+    mentor BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Members of a group

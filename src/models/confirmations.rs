@@ -3,12 +3,13 @@ use crate::{
     schema::confirmations,
     templates::emails::confirmation_email::ConfirmationEmail,
     web::{DbConnection, RequestContext},
+    util::handle_blocking_err
 };
-use actix_web::rt::blocking::BlockingError;
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use diesel::result::Error as DieselError;
 use uuid::Uuid;
+use crate::models::User;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -148,13 +149,8 @@ impl Confirmation {
         })
         .await
         // if unsuccessful convert error to string.
-        .map_err(move |e| {
-            match e {
-                BlockingError::Canceled => error!("Confirmation save canceled"),
-                BlockingError::Error(e) => error!("Could not create confirmation: {}", e),
-            }
-            "Could not access database.".to_string()
-        })?;
+        .map_err(|e|
+            handle_blocking_err(e, "Could not access confirmations database."))?;
 
         // try to send email.
         let mail_result = ctx.send_mail(email).await;
@@ -172,21 +168,46 @@ impl Confirmation {
                     .execute(&conn)
             })
             .await
-            .map_err(|e| {
-                match e {
-                    BlockingError::Canceled => error!("Database call canceled"),
-                    BlockingError::Error(e) => {
-                        error!("Could not delete confirmation record: {}", e)
-                    }
-                }
-                "Could not send email or delete invite. Please notify a sysadmin.".to_string()
-            })?;
-            return Err(format!(
-                "Could not send email to {}",
-                saved_confirmation.email
-            ));
+            .map_err(|e| handle_blocking_err(
+                e,
+                "Could not send email or delete invite. Please notify a sysadmin."
+            ))?;
+            return Err(format!("Could not send email to {}", saved_confirmation.email));
         } else {
             Ok(saved_confirmation)
         }
+    }
+
+    /// Get a confirmation by id. If there is an error, it will be logged and a string describing
+    /// it will be returned.
+    pub async fn get_by_id(db_conn: DbConnection, inv_id: Uuid) -> Result<Option<Self>, String> {
+        block::<_, Option<Confirmation>, _>(move || {
+            use crate::schema::confirmations::dsl::*;
+            use diesel::prelude::*;
+            confirmations.filter(invite_id.eq(inv_id))
+                .first::<Confirmation>(&db_conn)
+                .optional()
+        })
+            .await
+            .map_err(|e| {
+                handle_blocking_err(e, "Could not query database.")
+            })
+    }
+
+    /// Try to confirm a new user invite and move the confirmations table to the emails
+    /// table. Return the created user or a string describing the error.
+    pub async fn confirm_new(ctx: &RequestContext, inv_id: Uuid, name: String, pass: String)
+        -> Result<User, String> {
+        // check that the invite exists in the database and creates a new user
+        let invite = Self::get_by_id(ctx.get_db_conn().await, inv_id)
+            .await?
+            .ok_or("Invite not found.".to_string())?;
+
+        if !invite.creates_user() {
+            return Err("Invite is for existing email".to_string());
+        }
+
+        unimplemented!()
+
     }
 }

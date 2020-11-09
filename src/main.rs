@@ -13,6 +13,8 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
+pub mod util;
+
 mod web;
 use web::*;
 

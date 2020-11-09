@@ -3,11 +3,11 @@ use actix_web::web::Form;
 use actix_web::{web::Path, HttpResponse};
 use uuid::Uuid;
 
-/// The form sent by users to confirm an email.
+/// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ConfirmationForm {
-    name: Option<String>,
-    new_pass: String,
+    name: String,
+    pass: String,
     confirm_pass: String,
 }
 
