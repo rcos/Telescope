@@ -8,6 +8,7 @@ use actix_web::web::block;
 use argon2::{self, Config};
 use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +34,8 @@ pub struct User {
     pub sysadmin: bool,
     /// The hashed user password.
     pub hashed_pwd: String,
+    /// The moment that the account was created.
+    pub account_created: DateTime<Utc>,
 }
 
 /// An RCOS member.
@@ -63,6 +66,11 @@ impl User {
     /// Is this user a sysadmin.
     fn is_sysadmin(&self) -> bool {
         self.sysadmin
+    }
+
+    /// When the account was created.
+    fn account_created(&self) -> DateTime<Utc> {
+        self.account_created
     }
 
     // Github links and chat handles are not public as they are not stable API
@@ -143,6 +151,7 @@ impl User {
             chat_handle: None,
             sysadmin: false,
             hashed_pwd,
+            account_created: Utc::now()
         })
     }
 

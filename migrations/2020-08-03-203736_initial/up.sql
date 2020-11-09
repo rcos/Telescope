@@ -16,7 +16,9 @@ CREATE TABLE "users" (
     -- argon2 hashed password of the user.
     -- Theoretically does not need to be 100 but there are not performance
     -- differences.
-    hashed_pwd VARCHAR(100) NOT NULL
+    hashed_pwd VARCHAR(100) NOT NULL,
+    -- when the account was created
+    account_created TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 -- Email table.

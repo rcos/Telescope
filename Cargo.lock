@@ -1451,6 +1451,7 @@ version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f662ba51e2fbc3d6dd1ca66be70b44963606a34473156abddcb0351fc6caa668"
 dependencies = [
+ "chrono",
  "fnv",
  "indexmap",
  "juniper_codegen",

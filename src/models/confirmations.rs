@@ -208,6 +208,5 @@ impl Confirmation {
         }
 
         unimplemented!()
-
     }
 }
