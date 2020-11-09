@@ -13,7 +13,7 @@ pub struct ConfirmationForm {
 
 #[get("/confirm/{invite_id}")]
 pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>) -> HttpResponse {
-    unimplemented!()
+
 }
 
 #[post("/confirm/{invite_id}")]

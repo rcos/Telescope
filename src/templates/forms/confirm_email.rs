@@ -21,6 +21,42 @@ pub struct EmailConfirmation {
 }
 
 impl EmailConfirmation {
+    /// Construct a confirmation page representing an email successfully confirmed for an existing
+    /// account.
+    pub fn existing_success(conf: Confirmation) -> Self {
+        Self {
+            existing_success: true,
+            existing_fail: false,
+            invite: conf,
+            name: None,
+            error_message: None,
+        }
+    }
+
+    /// Construct an page reporting an error confirming an email for an existing account.
+    pub fn existing_failure(conf: Confirmation, error: impl Into<String>) -> Self {
+        Self {
+            existing_success: false,
+            existing_fail: true,
+            invite: conf,
+            name: None,
+            error_message: Some(error.into())
+        }
+    }
+
+    /// Construct the form to show to a user accepting an invite to create a
+    /// new account.
+    pub fn new_account(conf: Confirmation) -> Self {
+        Self {
+            existing_success: false,
+            existing_fail: false,
+            invite: conf,
+            name: None,
+            error_message: None
+        }
+    }
+
+    pub fn new_account_error()
 
 }
 
