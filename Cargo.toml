@@ -45,7 +45,7 @@ rand = "0.7"
 # lazily evaluated statics.
 lazy_static = "1.4.0"
 # utilities for dealing with async futures
-futures = "0.3.7"
+futures = "0.3.8"
 # Pasword hashing and verification
 rust-argon2 = "0.8"
 # Regular expressions
