@@ -192,6 +192,8 @@ impl Confirmation {
             .map_err(|e| {
                 handle_blocking_err(e, "Could not query database.")
             })
+            // filter out expired invite
+            .map(|opt| opt.filter(|c| !c.is_expired()))
     }
 
     /// Try to confirm a new user invite and move the confirmations table to the emails
