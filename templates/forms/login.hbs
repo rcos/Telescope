@@ -4,59 +4,8 @@
     </h1>
     <div class="card-body">
         <form method="post">
-            <div class="form-group row">
-                <label for="email-input" class="col-md-2 col-form-label">
-                    Email Address
-                </label>
-                <div class="col-md-10">
-                    <input
-                            id="email-input"
-                            type="email"
-                            name="email"
-                        {{#if email}}
-                            value="{{email}}"
-                        {{else}}
-                            placeholder="example@email.org"
-                        {{/if}}
-                        {{#if (eq error "EmailNotFound")}}
-                            class="form-control is-invalid"
-                            aria-labelledby="email-invalid"
-                        {{else}}
-                            class="form-control"
-                        {{/if}}
-                            required>
-                    {{#if (eq error "EmailNotFound")}}
-                        <div id="email-invalid" class="invalid-feedback">
-                            Email not found. Would you like to
-                            <a href="/register">Sign Up?</a>
-                        </div>
-                    {{/if}}
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="password-input" class="col-md-2 col-form-label">
-                    Password
-                </label>
-                <div class="col-md-10">
-                    <input
-                            type="password"
-                            id="password-input"
-                            name="password"
-                        {{#if (eq error "WrongPassword")}}
-                            class="form-control is-invalid"
-                            aria-labelledby="password-invalid"
-                        {{else}}
-                            class="form-control"
-                        {{/if}}
-                            required>
-                    {{#if (eq error "WrongPassword")}}
-                        <div id="password-invalid" class="invalid-feedback">
-                            Password incorrect. Did you
-                            <a href="/forgot">forget your password?</a>
-                        </div>
-                    {{/if}}
-                </div>
-            </div>
+            {{> forms/common/email email}}
+            {{> forms/common/password password}}
             <div class="form-group d-block float-right">
                 <a class="btn btn-secondary mx-2" role="button" href="/forgot">Forgot Password</a>
                 <button class="btn btn-primary" type="submit">Login</button>

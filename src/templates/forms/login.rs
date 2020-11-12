@@ -1,11 +1,16 @@
 use crate::web::{api::rest::login::LoginError, RequestContext, Template};
+use crate::templates::forms::common::email::EmailField;
+use crate::templates::forms::common::password::PasswordField;
 
 /// The Login Page.
 #[derive(Clone, Debug, Serialize)]
 pub struct LoginForm {
+    /// The page to redirect to.
     redirect: String,
-    email: Option<String>,
-    error: Option<LoginError>,
+    /// The email field in this form
+    email: EmailField,
+    /// The password field in this form.
+    password: PasswordField,
 }
 
 impl LoginForm {
@@ -26,20 +31,27 @@ impl LoginForm {
     pub fn from_context(ctx: &RequestContext) -> Self {
         Self {
             redirect: Self::target_page(ctx),
-            email: None,
-            error: None,
+            email: EmailField::new("email"),
+            password: PasswordField::new("password"),
         }
     }
 
     /// Add an error to the form.
     pub fn with_err(mut self, err: LoginError) -> Self {
-        self.error = Some(err);
+        match err {
+            LoginError::EmailNotFound => {
+                self.email = self.email.error("Email not found.");
+            },
+            LoginError::WrongPassword => {
+                self.password = self.password.error("Incorrect password.");
+            }
+        }
         self
     }
 
-    /// Add a prefileld email to the form.
+    /// Add a prefilled email to the form.
     pub fn with_email(mut self, email: impl Into<String>) -> Self {
-        self.email = Some(email.into());
+        self.email = self.email.prefill(email);
         self
     }
 }
