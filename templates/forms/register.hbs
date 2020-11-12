@@ -9,13 +9,12 @@
         </div>
     </div>
 {{else}}
-
     <div class="card text-dark">
         <h1 class="card-header">
             Sign Up
         </h1>
         <div class="card-body">
-            <form method="post">
+            <form method="post" id="registration-form">
                 <div class="form-group row">
                     <label for="email-input" class="col-md-2 col-form-label">
                         Email Address
@@ -45,7 +44,23 @@
                     </div>
                 </div>
                 <div class="form-group d-block float-right">
-                    <button class="btn btn-primary" type="submit">Sign Up</button>
+                    <button id="submit-button" class="btn btn-primary" type="submit">
+                        Sign Up
+                    </button>
+                    {{!-- Use a spinner to indicate loading --}}
+                    <script>
+                        $(document).ready(function() {
+                            $('#registration-form').submit(function() {
+                                const btn = $('#submit-button');
+                                // disable button
+                                btn.prop("disabled", true);
+                                // add spinner to button
+                                btn.html(
+                                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
+                                );
+                            })
+                        });
+                    </script>
                 </div>
             </form>
         </div>
