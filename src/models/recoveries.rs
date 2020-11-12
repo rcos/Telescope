@@ -1,9 +1,13 @@
-use crate::schema::lost_passwords;
+use crate::{
+    models::User,
+    schema::lost_passwords
+};
 
 use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Queryable, Insertable, Serialize, Deserialize)]
+#[derive(Clone, Debug, Queryable, Insertable, Serialize, Deserialize, Associations)]
+#[belongs_to(User, foreign_key = "user_id")]
 #[table_name = "lost_passwords"]
 pub struct Recovery {
     /// The recovery ID

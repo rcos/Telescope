@@ -11,7 +11,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
 /// A telescope user.
-#[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize)]
+#[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize, Associations)]
 #[table_name = "users"]
 pub struct User {
     /// User's universally unique identifier

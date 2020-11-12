@@ -16,7 +16,8 @@ lazy_static! {
 
 /// Field structure must match that in the SQL migration.
 /// (for diesel reasons it seems)
-#[derive(Clone, Serialize, Deserialize, Insertable, Queryable, Debug)]
+#[derive(Clone, Serialize, Deserialize, Insertable, Queryable, Debug, Associations)]
+#[belongs_to(User, foreign_key = "user_id")]
 #[table_name = "emails"]
 pub struct Email {
     /// The email
