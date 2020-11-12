@@ -18,6 +18,21 @@ pub struct NewUserConfirmation {
     confirm_password: PasswordField,
 }
 
+impl NewUserConfirmation {
+    /// Create a new user confirmation template.
+    pub fn new(conf: Confirmation) -> Self {
+        Self {
+            invite: conf,
+            name: None,
+            // these last two need to match the format of the form structure in
+            // web/services/confirm.rs
+            password: PasswordField::new("password"),
+            confirm_password: PasswordField::new("confirm-password")
+                .map_common(|c| c.name("confirm"))
+        }
+    }
+}
+
 impl Template for NewUserConfirmation {
     const TEMPLATE_NAME: &'static str = "forms/confirm/new_user";
 }
