@@ -1,5 +1,8 @@
 use crate::{
-    models::Email,
+    models::{
+        User,
+        Email
+    },
     schema::confirmations,
     templates::emails::confirmation_email::ConfirmationEmail,
     web::{DbConnection, RequestContext},
@@ -9,7 +12,6 @@ use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use diesel::result::Error as DieselError;
 use uuid::Uuid;
-use crate::models::User;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -196,19 +198,47 @@ impl Confirmation {
             .map(|opt| opt.filter(|c| !c.is_expired()))
     }
 
-    /// Try to confirm a new user invite and move the confirmations table to the emails
-    /// table. Return the created user or a string describing the error.
-    pub async fn confirm_new(ctx: &RequestContext, inv_id: Uuid, name: String, pass: String)
+    /// Try to confirm a new user invite.
+    /// Assume that `self` is a valid invite in the confirmations table.
+    /// Return the created user or a string describing the error.
+    pub async fn confirm_new(&self, ctx: &RequestContext, name: String, pass: String)
         -> Result<User, String> {
-        // check that the invite exists in the database and creates a new user
-        let invite = Self::get_by_id(ctx.get_db_conn().await, inv_id)
-            .await?
-            .ok_or("Invite not found.".to_string())?;
-
-        if !invite.creates_user() {
-            return Err("Invite is for existing email".to_string());
+        if !self.creates_user() {
+            return Err("Invite is for existing user".to_string());
+        } else {
+            unimplemented!()
         }
+    }
 
-        unimplemented!()
+    /// Confirm an invite for an existing user.
+    /// Return a string describing the error if one occurs.
+    pub async fn confirm_existing(self, ctx: &RequestContext) -> Result<(), String> {
+        if self.creates_user() {
+            return Err("Invite is not associated with existing user".to_string());
+        } else {
+            let email = Email::new(self.user_id.unwrap(), self.email.clone())
+                .expect("Could not make email instance.");
+
+            let conn = ctx.get_db_conn().await;
+
+            // remove confirmation from database
+            block::<_, usize, _>(move || {
+                use diesel::prelude::*;
+                use crate::schema::confirmations::dsl::*;
+                diesel::delete(confirmations)
+                    .filter(invite_id.eq(self.invite_id))
+                    .execute(&conn)
+            })
+                .await
+                .map_err(|e|
+                    handle_blocking_err(e, "Could not delete invite"))
+                .map(|removed| {
+                    trace!("Removed {} record from confirmations database.", removed);
+                })?;
+
+            // add email to emails table
+            let conn = ctx.get_db_conn().await;
+            unimplemented!()
+        }
     }
 }

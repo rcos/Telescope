@@ -31,13 +31,14 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
             unimplemented!()
         }
     } else {
+        let page = Jumbotron::jumbotron_page(
+            &ctx,
+            "Not Found",
+            "Invite Not Found",
+            format!("Could not find confirmation {}. It may have expired.", invite_id)
+        ).await;
         HttpResponse::NotFound()
-            .body(Jumbotron::jumbotron_page(
-                &ctx,
-                "Not Found",
-                "Invite Not Found",
-                format!("Could not find confirmation {}. It may have expired.", invite_id)
-            ))
+            .body(page)
     }
 }
 

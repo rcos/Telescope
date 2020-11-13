@@ -8,6 +8,9 @@ use juniper::{FieldError, FieldResult, Value};
 use lettre::EmailAddress;
 use regex::Regex;
 use uuid::Uuid;
+use diesel::RunQueryDsl;
+use crate::util::handle_blocking_err;
+use crate::web::RequestContext;
 
 lazy_static! {
     static ref EMAIL_REGEX: Regex =
@@ -132,5 +135,21 @@ impl Email {
             None
         })
         .is_some()
+    }
+
+    /// Store an email in the database.
+    pub async fn store(self, conn: DbConnection) -> Result<(), String> {
+        block::<_, Self, _>(move || {
+            use diesel::prelude::*;
+            use crate::schema::emails::dsl::*;
+            diesel::insert_into(emails)
+                .values(&self)
+                .get_result(&conn)
+        }).await
+            .map_err(|e|
+                handle_blocking_err(e, "Could not store email to database."))
+            .map(|stored| {
+                trace!("Saved email to database: {:?}", stored);
+            })
     }
 }
