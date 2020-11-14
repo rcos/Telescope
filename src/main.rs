@@ -103,6 +103,8 @@ fn main() -> std::io::Result<()> {
 
         user.sysadmin = true;
 
+        // I'm pretty sure this has to be written out manually in synchronous
+        // diesel code here, since this is not an async context.
         let pool = app_data.clone_db_conn_pool();
         let conn = pool.get().unwrap();
         conn.transaction::<(), diesel::result::Error, _>(|| {

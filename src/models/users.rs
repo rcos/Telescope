@@ -9,6 +9,8 @@ use argon2::{self, Config};
 use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use diesel::RunQueryDsl;
+use crate::util::handle_blocking_err;
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize, Associations)]
@@ -208,5 +210,20 @@ impl User {
     /// See the get_emails_from_db_by_id
     pub async fn get_emails_from_db(&self, conn: DbConnection) -> Vec<Email> {
         User::get_emails_from_db_by_id(conn, self.id).await
+    }
+
+    /// Store the user in the database. On conflict, return error.
+    pub async fn store(self, conn: DbConnection) -> Result<(), String> {
+        block::<_, usize, _>(move || {
+            use diesel::prelude::*;
+            use crate::schema::users::dsl::*;
+            diesel::insert_into(users)
+                .values(&self)
+                .execute(&conn)
+        })
+            .await
+            .map_err(|e|
+                handle_blocking_err(e, "Could not add user to database."))
+            .map(|n| trace!("Added {} user(s) to database.", n))
     }
 }

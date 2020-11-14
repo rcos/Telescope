@@ -12,6 +12,7 @@ use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use diesel::result::Error as DieselError;
 use uuid::Uuid;
+use crate::models::PasswordRequirements;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -25,6 +26,30 @@ pub struct Confirmation {
     user_id: Option<Uuid>,
     /// When the invite expires.
     pub expiration: DateTime<Utc>,
+}
+
+/// An error that can be caught in trying to confirm a new user.
+///
+/// There shouldn't be any email related errors as the confirmation needs to
+/// be for a new email to exist.
+#[derive(Clone, Debug)]
+pub enum ConfirmNewUserError {
+    /// User had bad password.
+    BadPassword(PasswordRequirements),
+    /// Other error occurred.
+    Other(String)
+}
+
+impl From<String> for ConfirmNewUserError {
+    fn from(s: String) -> Self {
+        Self::Other(s)
+    }
+}
+
+impl From<PasswordRequirements> for ConfirmNewUserError {
+    fn from(e: PasswordRequirements) -> Self {
+        Self::BadPassword(e)
+    }
 }
 
 impl Confirmation {
@@ -198,15 +223,46 @@ impl Confirmation {
             .map(|opt| opt.filter(|c| !c.is_expired()))
     }
 
+    /// Private function to remove a confirmation from the database.
+    async fn remove_from_db(self, conn: DbConnection) -> Result<(), String> {
+        trace!("Removing {:?} from database.", &self);
+        block::<_, usize, _>(move || {
+            use diesel::prelude::*;
+            use crate::schema::confirmations::dsl::*;
+            diesel::delete(confirmations)
+                .filter(invite_id.eq(self.invite_id))
+                .execute(&conn)
+        })
+            .await
+            .map_err(|e|
+                handle_blocking_err(e, "Could not delete confirmation"))
+            .map(|removed| {
+                trace!("Removed {} record from confirmations database.", removed);
+            })
+    }
+
+
     /// Try to confirm a new user invite.
     /// Assume that `self` is a valid invite in the confirmations table.
     /// Return the created user or a string describing the error.
-    pub async fn confirm_new(&self, ctx: &RequestContext, name: String, pass: String)
-        -> Result<User, String> {
+    pub async fn confirm_new(self, ctx: &RequestContext, name: String, pass: String)
+        -> Result<User, ConfirmNewUserError> {
         if !self.creates_user() {
-            return Err("Invite is for existing user".to_string());
+            return Err("Invite is for existing user".to_string().into());
         } else {
-            unimplemented!()
+            // create user and email here to avoid use after move.
+            let user = User::new(name, pass.as_str())
+                .map_err::<ConfirmNewUserError, _>(|e| e.into())?;
+            let email = Email::new(user.id, self.email.clone())
+                .expect("Could not create email for new user.");
+
+            // remove confirmation from database.
+            self.remove_from_db(ctx.get_db_conn().await).await?;
+
+            // save email and user records.
+            user.clone().store(ctx.get_db_conn().await).await?;
+            email.store(ctx.get_db_conn().await).await?;
+            Ok(user)
         }
     }
 
@@ -216,29 +272,15 @@ impl Confirmation {
         if self.creates_user() {
             return Err("Invite is not associated with existing user".to_string());
         } else {
+            // Construct the email instance here to avoid use after move.
             let email = Email::new(self.user_id.unwrap(), self.email.clone())
                 .expect("Could not make email instance.");
 
-            let conn = ctx.get_db_conn().await;
-
             // remove confirmation from database
-            block::<_, usize, _>(move || {
-                use diesel::prelude::*;
-                use crate::schema::confirmations::dsl::*;
-                diesel::delete(confirmations)
-                    .filter(invite_id.eq(self.invite_id))
-                    .execute(&conn)
-            })
-                .await
-                .map_err(|e|
-                    handle_blocking_err(e, "Could not delete invite"))
-                .map(|removed| {
-                    trace!("Removed {} record from confirmations database.", removed);
-                })?;
+            self.remove_from_db(ctx.get_db_conn().await).await?;
 
             // add email to emails table
-            let conn = ctx.get_db_conn().await;
-            unimplemented!()
+            email.store(ctx.get_db_conn().await).await
         }
     }
 }
