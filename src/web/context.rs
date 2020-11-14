@@ -1,6 +1,7 @@
 use crate::{
-    models::User,
+    models::users::User,
     web::{api::graphql::ApiContext, app_data::AppData},
+    templates::page::Page,
 };
 
 use actix_web::{
@@ -20,7 +21,6 @@ use diesel::{
     PgConnection,
 };
 
-use crate::templates::page::Page;
 use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;

@@ -1,7 +1,7 @@
 use actix_web::{web::Form, HttpResponse};
 
-use crate::models::Email;
 use crate::{
+    models::emails::Email,
     templates::{forms::recovery::PasswordRecoveryPage, page::Page},
     web::RequestContext,
 };

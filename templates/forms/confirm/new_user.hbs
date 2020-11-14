@@ -1,0 +1,42 @@
+<div class="card text-dark">
+    <h1 class="card-header">
+        Create Account
+    </h1>
+    <div class="card-body">
+        <form method="post">
+            <div class="row">
+                <label for="email" class="col-md-2 col-form-label">
+                    Email
+                </label>
+                <div class="col-md-10">
+                    {{invite.email}}
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="name-input" class="col-md-2 col-form-label">
+                    Name
+                </label>
+                <div class="col-md-10">
+                    <input
+                            id="name-input"
+                            type="text"
+                            name="name"
+                        {{#if name}}
+                            value="{{name}}"
+                        {{else}}
+                            placeholder="Your Name"
+                        {{/if}}
+                            class="form-control"
+                            required>
+                </div>
+            </div>
+            {{> forms/common/password password}}
+            {{> forms/common/password confirm_password}}
+            <div class="form-group d-block float-right">
+                <button class="btn btn-success" type="submit">
+                    Create account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

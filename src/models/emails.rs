@@ -1,5 +1,5 @@
 use crate::{
-    models::User,
+    models::users::User,
     schema::emails,
     web::{api::graphql::ApiContext, DbConnection},
     util::handle_blocking_err
@@ -9,7 +9,6 @@ use juniper::{FieldError, FieldResult, Value};
 use lettre::EmailAddress;
 use regex::Regex;
 use uuid::Uuid;
-use diesel::RunQueryDsl;
 
 lazy_static! {
     static ref EMAIL_REGEX: Regex =

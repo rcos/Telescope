@@ -9,9 +9,9 @@ use diesel::{
 use crate::{
     models::{
         //pagination::{Paginate, PaginatedData, PaginationInput},
-        Email,
-        PasswordRequirements,
-        User,
+        emails::Email,
+        password_requirements::PasswordRequirements,
+        users::User,
     },
     web::{DbConnection, RequestContext},
 };

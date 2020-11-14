@@ -3,7 +3,7 @@ use actix_web::web::Json;
 use actix_identity::Identity;
 
 use crate::{
-    models::{Email, User},
+    models::{emails::Email, users::User},
     web::RequestContext,
 };
 

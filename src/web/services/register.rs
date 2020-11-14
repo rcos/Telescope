@@ -1,5 +1,5 @@
-use crate::models::Confirmation;
 use crate::{
+    models::confirmations::Confirmation,
     templates::{forms::registration::RegistrationPage, jumbotron::Jumbotron},
     web::RequestContext,
 };

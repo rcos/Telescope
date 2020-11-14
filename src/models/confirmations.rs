@@ -1,7 +1,8 @@
 use crate::{
     models::{
-        User,
-        Email
+        users::User,
+        emails::Email,
+        password_requirements::PasswordRequirements
     },
     schema::confirmations,
     templates::emails::confirmation_email::ConfirmationEmail,
@@ -12,7 +13,6 @@ use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use diesel::result::Error as DieselError;
 use uuid::Uuid;
-use crate::models::PasswordRequirements;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]

@@ -1,7 +1,8 @@
 use crate::{
-    models::{Email, PasswordRequirements},
+    models::{emails::Email, password_requirements::PasswordRequirements},
     schema::users,
     web::{api::graphql::ApiContext, DbConnection},
+    util::handle_blocking_err
 };
 
 use actix_web::web::block;
@@ -9,8 +10,6 @@ use argon2::{self, Config};
 use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
-use diesel::RunQueryDsl;
-use crate::util::handle_blocking_err;
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize, Associations)]

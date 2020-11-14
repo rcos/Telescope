@@ -3,7 +3,7 @@ use actix_web::{web::Path, HttpResponse};
 use uuid::Uuid;
 
 use crate::{
-    models::{markdown::render as md_render, User},
+    models::{markdown::render as md_render, users::User},
     templates::{jumbotron::Jumbotron, page::Page, profile::Profile},
     web::RequestContext,
 };
@@ -31,10 +31,10 @@ pub async fn profile(ctx: RequestContext, user_id: Path<Uuid>) -> HttpResponse {
         let gravatar_email: &str = emails.first().unwrap().email.as_str();
         let gravatar_hash = md5::compute(gravatar_email.trim().to_lowercase());
         let gravatar_base_url = "https://www.gravatar.com/avatar/";
-        let gravatar_default_extention = "?d=identicon";
+        let gravatar_query_extention = "?d=identicon&s=600";
         let gravatar_url = format!(
             "{}{:x}{}",
-            gravatar_base_url, gravatar_hash, gravatar_default_extention
+            gravatar_base_url, gravatar_hash, gravatar_query_extention
         );
 
         let profile = Profile {

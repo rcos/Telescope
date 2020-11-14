@@ -1,5 +1,5 @@
 use crate::{
-    models::User,
+    models::users::User,
     schema::lost_passwords
 };
 

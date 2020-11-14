@@ -27,7 +27,7 @@ mod templates;
 use crate::{
     db_janitor::DbJanitor,
     env::{ConcreteConfig, CONFIG},
-    models::{Email, PasswordRequirements, User},
+    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
         developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
         sponsors::SponsorsPage, Static,

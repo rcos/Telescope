@@ -1,22 +1,18 @@
-mod users;
-pub use users::User;
+pub mod users;
 
-mod emails;
-pub use emails::Email;
+pub mod emails;
+
 #[cfg(test)]
 mod email_tests;
 
-mod confirmations;
-pub use confirmations::Confirmation;
+pub mod confirmations;
 
-mod recoveries;
-pub use recoveries::Recovery;
+pub mod recoveries;
 
 #[cfg(test)]
 mod password_requirement_tests;
 
 pub mod password_requirements;
-pub use password_requirements::PasswordRequirements;
 
 pub mod markdown;
 

@@ -1,5 +1,5 @@
 use crate::{
-    models::User,
+    models::users::User,
     templates::{forms::login::LoginForm, page::Page},
     web::{
         api::rest::login::{login, LoginRequest},

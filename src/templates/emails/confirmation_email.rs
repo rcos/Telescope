@@ -1,5 +1,7 @@
-use crate::models::Confirmation;
-use crate::web::{RequestContext, Template};
+use crate::{
+    models::confirmations::Confirmation,
+    web::{RequestContext, Template},
+};
 use chrono::FixedOffset;
 use lettre_email::EmailBuilder;
 use uuid::Uuid;
