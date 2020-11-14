@@ -1,7 +1,4 @@
-use crate::{
-    models::users::User,
-    schema::lost_passwords
-};
+use crate::{models::users::User, schema::lost_passwords};
 
 use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;

@@ -156,9 +156,9 @@ pub struct PaginationInput {
 macro_rules! impl_juniper_pagination {
     ($t:ty, $n:literal) => {
         #[juniper::object(
-                                    Context = ApiContext,
-                                    name = $n
-                                )]
+                                            Context = ApiContext,
+                                            name = $n
+                                        )]
         impl PaginatedData<i32, $t> {
             /// The offset into the dataset.
             fn offset(&self) -> i32 {

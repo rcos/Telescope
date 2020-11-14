@@ -1,5 +1,5 @@
-use crate::web::Template;
 use crate::templates::forms::common::FormFieldCommon;
+use crate::web::Template;
 
 /// A password field in an html form.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -8,21 +8,18 @@ pub struct PasswordField {
     #[serde(flatten)]
     common: FormFieldCommon,
     /// An optional error message if this field is invalid.
-    error: Option<String>
+    error: Option<String>,
 }
 
 impl PasswordField {
     /// Construct a new password field with the given id.
     /// Name defaults to "password".
     pub fn new(id: impl Into<String>) -> Self {
-        let common = FormFieldCommon::new(
-            id.into(),
-            "password".to_string(),
-            "Password".to_string()
-        );
+        let common =
+            FormFieldCommon::new(id.into(), "password".to_string(), "Password".to_string());
         Self {
             common,
-            error: None
+            error: None,
         }
     }
 

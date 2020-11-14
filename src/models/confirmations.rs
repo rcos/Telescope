@@ -1,13 +1,9 @@
 use crate::{
-    models::{
-        users::User,
-        emails::Email,
-        password_requirements::PasswordRequirements
-    },
+    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     schema::confirmations,
     templates::emails::confirmation_email::ConfirmationEmail,
+    util::handle_blocking_err,
     web::{DbConnection, RequestContext},
-    util::handle_blocking_err
 };
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
@@ -37,7 +33,7 @@ pub enum ConfirmNewUserError {
     /// User had bad password.
     BadPassword(PasswordRequirements),
     /// Other error occurred.
-    Other(String)
+    Other(String),
 }
 
 impl From<String> for ConfirmNewUserError {
@@ -176,8 +172,7 @@ impl Confirmation {
         })
         .await
         // if unsuccessful convert error to string.
-        .map_err(|e|
-            handle_blocking_err(e, "Could not access confirmations database."))?;
+        .map_err(|e| handle_blocking_err(e, "Could not access confirmations database."))?;
 
         // try to send email.
         let mail_result = ctx.send_mail(email).await;
@@ -195,11 +190,16 @@ impl Confirmation {
                     .execute(&conn)
             })
             .await
-            .map_err(|e| handle_blocking_err(
-                e,
-                "Could not send email or delete invite. Please notify a sysadmin."
-            ))?;
-            return Err(format!("Could not send email to {}", saved_confirmation.email));
+            .map_err(|e| {
+                handle_blocking_err(
+                    e,
+                    "Could not send email or delete invite. Please notify a sysadmin.",
+                )
+            })?;
+            return Err(format!(
+                "Could not send email to {}",
+                saved_confirmation.email
+            ));
         } else {
             Ok(saved_confirmation)
         }
@@ -211,48 +211,49 @@ impl Confirmation {
         block::<_, Option<Confirmation>, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
-            confirmations.filter(invite_id.eq(inv_id))
+            confirmations
+                .filter(invite_id.eq(inv_id))
                 .first::<Confirmation>(&db_conn)
                 .optional()
         })
-            .await
-            .map_err(|e| {
-                handle_blocking_err(e, "Could not query database.")
-            })
-            // filter out expired invite
-            .map(|opt| opt.filter(|c| !c.is_expired()))
+        .await
+        .map_err(|e| handle_blocking_err(e, "Could not query database."))
+        // filter out expired invite
+        .map(|opt| opt.filter(|c| !c.is_expired()))
     }
 
     /// Private function to remove a confirmation from the database.
     async fn remove_from_db(self, conn: DbConnection) -> Result<(), String> {
         trace!("Removing {:?} from database.", &self);
         block::<_, usize, _>(move || {
-            use diesel::prelude::*;
             use crate::schema::confirmations::dsl::*;
+            use diesel::prelude::*;
             diesel::delete(confirmations)
                 .filter(invite_id.eq(self.invite_id))
                 .execute(&conn)
         })
-            .await
-            .map_err(|e|
-                handle_blocking_err(e, "Could not delete confirmation"))
-            .map(|removed| {
-                trace!("Removed {} record from confirmations database.", removed);
-            })
+        .await
+        .map_err(|e| handle_blocking_err(e, "Could not delete confirmation"))
+        .map(|removed| {
+            trace!("Removed {} record from confirmations database.", removed);
+        })
     }
-
 
     /// Try to confirm a new user invite.
     /// Assume that `self` is a valid invite in the confirmations table.
     /// Return the created user or a string describing the error.
-    pub async fn confirm_new(self, ctx: &RequestContext, name: String, pass: String)
-        -> Result<User, ConfirmNewUserError> {
+    pub async fn confirm_new(
+        self,
+        ctx: &RequestContext,
+        name: String,
+        pass: String,
+    ) -> Result<User, ConfirmNewUserError> {
         if !self.creates_user() {
             return Err("Invite is for existing user".to_string().into());
         } else {
             // create user and email here to avoid use after move.
-            let user = User::new(name, pass.as_str())
-                .map_err::<ConfirmNewUserError, _>(|e| e.into())?;
+            let user =
+                User::new(name, pass.as_str()).map_err::<ConfirmNewUserError, _>(|e| e.into())?;
             let email = Email::new(user.id, self.email.clone())
                 .expect("Could not create email for new user.");
 

@@ -1,7 +1,7 @@
 use crate::{
     models::users::User,
-    web::{api::graphql::ApiContext, app_data::AppData},
     templates::page::Page,
+    web::{api::graphql::ApiContext, app_data::AppData},
 };
 
 use actix_web::{

@@ -1,6 +1,6 @@
-use crate::web::{api::rest::login::LoginError, RequestContext, Template};
 use crate::templates::forms::common::email::EmailField;
 use crate::templates::forms::common::password::PasswordField;
+use crate::web::{api::rest::login::LoginError, RequestContext, Template};
 
 /// The Login Page.
 #[derive(Clone, Debug, Serialize)]
@@ -41,7 +41,7 @@ impl LoginForm {
         match err {
             LoginError::EmailNotFound => {
                 self.email = self.email.error("Email not found.");
-            },
+            }
             LoginError::WrongPassword => {
                 self.password = self.password.error("Incorrect password.");
             }

@@ -6,9 +6,7 @@ use std::error::Error;
 pub fn handle_blocking_err<E: Error>(err: BlockingError<E>, msg: impl Into<String>) -> String {
     match err {
         BlockingError::Canceled => error!("Blocking call canceled"),
-        BlockingError::Error(e) => {
-            error!("Blocking call failed: {}", e)
-        }
+        BlockingError::Error(e) => error!("Blocking call failed: {}", e),
     }
     msg.into()
 }

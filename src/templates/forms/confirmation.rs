@@ -1,8 +1,5 @@
-use crate::{
-    models::confirmations::Confirmation,
-    web::Template
-};
 use crate::templates::forms::common::password::PasswordField;
+use crate::{models::confirmations::Confirmation, web::Template};
 
 /// The template for new account confirmations.
 /// The user is prompted to input a name and password to seed their account.
@@ -28,7 +25,7 @@ impl NewUserConf {
             // web/services/confirm.rs
             password: PasswordField::new("password"),
             confirm_password: PasswordField::new("confirm-password")
-                .map_common(|c| c.name("confirm"))
+                .map_common(|c| c.name("confirm")),
         }
     }
 
@@ -38,8 +35,6 @@ impl NewUserConf {
         self
     }
 }
-
-
 
 impl Template for NewUserConf {
     const TEMPLATE_NAME: &'static str = "forms/confirm/new_user";
@@ -64,7 +59,7 @@ impl ExistingUserConf {
         }
         Self {
             invite: conf,
-            error_message: err
+            error_message: err,
         }
     }
 }

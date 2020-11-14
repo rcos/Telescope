@@ -1,5 +1,5 @@
-use crate::web::Template;
 use crate::templates::forms::common::FormFieldCommon;
+use crate::web::Template;
 
 /// Email field in a form. Supports a prefill and error message.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -10,7 +10,7 @@ pub struct EmailField {
     /// Email prefill. If present, placed in the form instead of the placeholder.
     prefill: Option<String>,
     /// An optional error message to appear in a tooltip.
-    error: Option<String>
+    error: Option<String>,
 }
 
 impl EmailField {
@@ -18,15 +18,11 @@ impl EmailField {
     /// Label defaults to "Email Address".
     /// Name defaults to "email".
     pub fn new(id: impl Into<String>) -> Self {
-        let common = FormFieldCommon::new(
-            id.into(),
-            "email".into(),
-            "Email Address".into()
-        );
+        let common = FormFieldCommon::new(id.into(), "email".into(), "Email Address".into());
         Self {
             prefill: None,
             error: None,
-            common
+            common,
         }
     }
 
@@ -35,7 +31,6 @@ impl EmailField {
         self.prefill = Some(prefill.into());
         self
     }
-
 
     /// Builder method to set the error message on an email field.
     pub fn error(mut self, error: impl Into<String>) -> Self {

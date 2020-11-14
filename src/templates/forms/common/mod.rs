@@ -17,7 +17,7 @@ pub struct FormFieldCommon {
 impl FormFieldCommon {
     /// Construct a new set of common form field attributes.
     fn new(id: String, name: String, label: String) -> Self {
-        Self {id, name, label}
+        Self { id, name, label }
     }
 
     /// Override the name of the parent form field.

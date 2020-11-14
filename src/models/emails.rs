@@ -1,8 +1,8 @@
 use crate::{
     models::users::User,
     schema::emails,
+    util::handle_blocking_err,
     web::{api::graphql::ApiContext, DbConnection},
-    util::handle_blocking_err
 };
 use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};
@@ -138,16 +138,14 @@ impl Email {
     /// Store an email in the database.
     pub async fn store(self, conn: DbConnection) -> Result<(), String> {
         block::<_, Self, _>(move || {
-            use diesel::prelude::*;
             use crate::schema::emails::dsl::*;
-            diesel::insert_into(emails)
-                .values(&self)
-                .get_result(&conn)
-        }).await
-            .map_err(|e|
-                handle_blocking_err(e, "Could not store email to database."))
-            .map(|stored| {
-                trace!("Saved email to database: {:?}", stored);
-            })
+            use diesel::prelude::*;
+            diesel::insert_into(emails).values(&self).get_result(&conn)
+        })
+        .await
+        .map_err(|e| handle_blocking_err(e, "Could not store email to database."))
+        .map(|stored| {
+            trace!("Saved email to database: {:?}", stored);
+        })
     }
 }

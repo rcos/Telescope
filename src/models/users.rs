@@ -1,15 +1,15 @@
 use crate::{
     models::{emails::Email, password_requirements::PasswordRequirements},
     schema::users,
+    util::handle_blocking_err,
     web::{api::graphql::ApiContext, DbConnection},
-    util::handle_blocking_err
 };
 
 use actix_web::web::block;
 use argon2::{self, Config};
+use chrono::{DateTime, Utc};
 use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize, Associations)]
@@ -152,7 +152,7 @@ impl User {
             chat_handle: None,
             sysadmin: false,
             hashed_pwd,
-            account_created: Utc::now()
+            account_created: Utc::now(),
         })
     }
 
@@ -214,15 +214,12 @@ impl User {
     /// Store the user in the database. On conflict, return error.
     pub async fn store(self, conn: DbConnection) -> Result<(), String> {
         block::<_, usize, _>(move || {
-            use diesel::prelude::*;
             use crate::schema::users::dsl::*;
-            diesel::insert_into(users)
-                .values(&self)
-                .execute(&conn)
+            use diesel::prelude::*;
+            diesel::insert_into(users).values(&self).execute(&conn)
         })
-            .await
-            .map_err(|e|
-                handle_blocking_err(e, "Could not add user to database."))
-            .map(|n| trace!("Added {} user(s) to database.", n))
+        .await
+        .map_err(|e| handle_blocking_err(e, "Could not add user to database."))
+        .map(|n| trace!("Added {} user(s) to database.", n))
     }
 }

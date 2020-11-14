@@ -53,9 +53,11 @@ impl PasswordRequirements {
     /// Return a string describing any issues with this password.
     pub fn get_error_string(&self) -> Option<String> {
         if !self.is_min_len {
-            Some(format!("Password is too short. Minimum length: {}", Self::MIN_PASSWORD_LENGTH))
-        }
-        else if !self.not_common_password {
+            Some(format!(
+                "Password is too short. Minimum length: {}",
+                Self::MIN_PASSWORD_LENGTH
+            ))
+        } else if !self.not_common_password {
             Some("Password too common. Please pick a more complicated password.".to_string())
         } else {
             None
