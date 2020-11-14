@@ -1,58 +1,55 @@
-<div class="container-md" role="main">
-    <div class="card text-dark">
-        <div class="row no-gutters">
-            <div class="col-md-2 pr-2">
-                <img src="{{{picture}}}" alt="Profile Picture" class="card-img">
+<div class="container row row-cols-md-2 px-0" role="main">
+    <div class="col-md-3 container px-0 pb-2">
+        <div class="card text-dark">
+            <img src="{{picture}}" alt="Profile Picture" class="card-img">
+            <div class="card-body">
+                <span class="h2" id="profile-name"> {{user.name}} </span>
+                <span class="text-muted">Account created {{created_at}}</span>
             </div>
-            <div class="col-md-10 mt-1">
-                <div class="card-header">
-                    <span class="font-italic h2" id="profile-name"> {{name}} </span>
-                    {{#if editable}}
-                        <!-- Button to trigger modal -->
-                        <button type="button" class="btn btn-primary float-right">
-                            Change Name
-                        </button>
-                        <!-- Modal -->
-                        <div
-                                class="modal fade"
-                                aria-hidden="true"
-                                id="profile-name-change-modal"
-                                tabindex="-1"
-                                aria-labelledby="profile-name-change-modal-title"
-                        >
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="profile-name-change-modal-title">
-                                            Change Name
-                                        </h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form>
-                                            <div class="form-group">
-                                                <label for="message-text" class="col-form-label">Message:</label>
-                                                <textarea class="form-control" id="message-text"></textarea>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary">Send message</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {{/if}}
+            {{#if editable}}
+                <!-- Button to take us to form -->
+                <a href="/profile/{{user.id}}/settings" class="w-auto btn btn-primary">
+                    Edit Profile
+                </a>
+            {{/if}}
+        </div>
+        <div class="card text-dark mt-1">
+            <span class="h4 card-header text-muted">
+                Contact
+            </span>
+
+            {{!-- Show emails --}}
+            {{#each public_emails}}
+                <div class="p-1">
+                    <i data-feather="mail"></i>
+                    <a href="mailto:{{email}}">{{email}}</a>
                 </div>
-                <div class="card-body">
-                    <h5 class="text-muted">Bio</h5>
-                    <div class="card-text">
-                        {{{bio}}}
-                    </div>
+            {{else}}
+                <div class="p-1">
+                    <i data-feather="mail"></i>
+                    No public emails.
                 </div>
+            {{/each}}
+
+            {{!-- Show GitHub link --}}
+            {{#if user.github_link}}
+                <div class="p-1">
+                    <i data-feather="github"></i>
+                    <a href="{{user.github_link}}">{{user.github_link}}</a>
+                </div>
+            {{else}}
+                <div class="p-1">
+                    <i data-feather="github"></i>
+                    GitHub not linked.
+                </div>
+            {{/if}}
+        </div>
+    </div>
+    <div class="col-md-9 container">
+        <div class="card text-dark">
+            <span class="h4 card-header text-muted">Bio</span>
+            <div class="card-body">
+                {{{bio}}}
             </div>
         </div>
     </div>
