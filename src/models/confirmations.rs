@@ -130,6 +130,15 @@ impl Confirmation {
             .uri()
             .authority()
             .map(|a| format!("https://{}", a.as_str()))
+            // since the lettre crate file transport serializes as JSON
+            // and not .eml, it is hard to determine the generated address.
+            // Until this changes, we log it in a trace message so that it's
+            // easier to test on development without a full SMTP backend.
+            // See https://github.com/lettre/lettre/pull/505.
+            .map(|url| {
+                trace!("Generated Invite URL: {}", url);
+                url
+            })
             .ok_or("Could not get domain string.".to_string())
             .map_err(|e| {
                 error!("{}", e);
