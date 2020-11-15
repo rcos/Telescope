@@ -44,23 +44,9 @@
                     </div>
                 </div>
                 <div class="form-group d-block float-right">
-                    <button id="submit-button" class="btn btn-primary" type="submit">
+                    <button id="submit-button" class="btn btn-primary btn-spinner" type="submit">
                         Sign Up
                     </button>
-                    {{!-- Use a spinner to indicate loading --}}
-                    <script>
-                        $(document).ready(function() {
-                            $('#registration-form').submit(function() {
-                                const btn = $('#submit-button');
-                                // disable button
-                                btn.prop("disabled", true);
-                                // add spinner to button
-                                btn.html(
-                                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
-                                );
-                            })
-                        });
-                    </script>
                 </div>
             </form>
         </div>

@@ -32,3 +32,10 @@ html {
     width: 100%;
     top: 0;
 }
+
+/*
+A special type of button which displays a loading spinner (and disables)
+on click. This doesn't have much style to it. It is just modified via jQuery
+at the moment.
+*/
+.btn-spinner {}
