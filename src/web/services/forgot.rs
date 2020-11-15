@@ -5,6 +5,7 @@ use crate::{
     templates::{forms::recovery::PasswordRecoveryPage, page::Page},
     web::RequestContext,
 };
+use crate::models::recoveries::Recovery;
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -35,8 +36,12 @@ pub async fn recovery_service(
     ).await;
     if let Some(target_user) = database_result {
         // get the user's emails.
-        let emails = target_user.get_emails_from_db(ctx.get_db_conn().await).await;
+        //let emails = target_user.get_emails_from_db(ctx.get_db_conn().await).await;
 
+        // make a recovery record
+        let recovery = Recovery::for_user(&target_user);
+
+        unimplemented!()
     } else {
         form_page = form_page.error("Email Not Found");
         let page = ctx.render_in_page(&form_page, "Forgot Password").await;
