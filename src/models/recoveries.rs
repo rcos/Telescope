@@ -25,4 +25,14 @@ impl Recovery {
     fn get_expiration_from_now() -> DateTime<Utc> {
         Utc::now() + Self::get_expiration_duration()
     }
+
+    /// Create a new password recovery.
+    pub fn for_user(user: &User) -> Self {
+        Self {
+            recovery_id: Uuid::new_v4(),
+            user_id: user.id,
+            expiration: Self::get_expiration_from_now()
+        }
+    }
+
 }

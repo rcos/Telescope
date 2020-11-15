@@ -1,19 +1,26 @@
 use crate::web::Template;
+use crate::templates::forms::common::email::EmailField;
 
 /// The password recovery form. This has a single field to indicate
 /// the email to send the recovery link to. All fields of this struct are
 /// therefore optional, as described below.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PasswordRecoveryPage {
-    /// The email previously used to submit this form.
-    email: Option<String>,
-    /// An error message, if the email was not found.
-    error: Option<String>,
     /// A success message to indicate that the email was sent.
     success: Option<String>,
+    /// The email form field.
+    email_field: EmailField
 }
 
 impl PasswordRecoveryPage {
+    /// Make a new recovery page.
+    pub fn new() -> Self {
+        Self {
+            success: None,
+            email_field: EmailField::new("email-input")
+        }
+    }
+
     /// Set the email field of this form.
     pub fn email(mut self, email: impl Into<String>) -> Self {
         self.email = Some(email.into());

@@ -15,11 +15,11 @@ pub struct PasswordRecoveryForm {
 /// The password recovery page.
 #[get("/forgot")]
 pub async fn forgot_page(ctx: RequestContext) -> HttpResponse {
-    let form = PasswordRecoveryPage::default();
-    let page = Page::of("Forgot Password", &form, &ctx).await;
+    let form = PasswordRecoveryPage::new();
+    let rendered = ctx.render_in_page(&form, "Forgot Password").await;
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(ctx.render(&page))
+        .body(rendered)
 }
 
 #[post("/forgot")]
@@ -28,11 +28,15 @@ pub async fn recovery_service(
     form: Form<PasswordRecoveryForm>,
 ) -> HttpResponse {
     let email: &str = &form.email;
-    let db_conn = ctx.get_db_conn().await;
-    let mut form_page = PasswordRecoveryPage::default().email(email);
-    let database_result = Email::get_user_from_db_by_email(db_conn, email.to_string()).await;
+    let mut form_page = PasswordRecoveryPage::new().email(email);
+    let database_result = Email::get_user_from_db_by_email(
+        ctx.get_db_conn().await,
+        email.to_string()
+    ).await;
     if let Some(target_user) = database_result {
-        unimplemented!()
+        // get the user's emails.
+        let emails = target_user.get_emails_from_db(ctx.get_db_conn().await).await;
+
     } else {
         form_page = form_page.error("Email Not Found");
         let page = ctx.render_in_page(&form_page, "Forgot Password").await;
