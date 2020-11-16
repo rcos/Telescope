@@ -6,6 +6,7 @@ use crate::{
     web::RequestContext,
 };
 use crate::models::recoveries::Recovery;
+use crate::templates::emails::recovery_email::PasswordRecoveryEmail;
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -36,10 +37,41 @@ pub async fn recovery_service(
     ).await;
     if let Some(target_user) = database_result {
         // get the user's emails.
-        //let emails = target_user.get_emails_from_db(ctx.get_db_conn().await).await;
+        let emails: Vec<String> = target_user
+            .get_emails_from_db(ctx.get_db_conn().await)
+            .map(|e: Email| e.email)
+            .await;
 
         // make a recovery record
         let recovery = Recovery::for_user(&target_user);
+
+        // make recovery link
+        let link = ctx
+            .request()
+            .uri()
+            .authority()
+            .map(|a| format!("https://{}", a.as_str()))
+            // since lettre doesn't currently store the messages in a human readable
+            // format in stub or file transport, we log the generated address here.
+            .map(|url| {
+                trace!("Generated recovery URL: {}", url);
+                url
+            })
+            .expect("Could not make recovery URL.");
+
+        // make the recovery email
+        let recovery_email =
+            PasswordRecoveryEmail::new(recovery.clone(), link);
+
+        let email = lettre_email::Email::builder()
+            .subject("RCOS Password Reset")
+            .to(&emails)
+            .from(ctx.email_sender())
+            .alternative(recovery_email.html(), recovery_email.plaintext())
+            .build()
+            .expect("Could not build email");
+
+
 
         unimplemented!()
     } else {

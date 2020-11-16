@@ -12,7 +12,7 @@ pub struct Recovery {
     /// The user ID
     user_id: Uuid,
     /// When this recovery expires.
-    expiration: DateTime<Utc>,
+    pub expiration: DateTime<Utc>,
 }
 
 impl Recovery {
@@ -34,5 +34,6 @@ impl Recovery {
             expiration: Self::get_expiration_from_now()
         }
     }
+
 
 }

@@ -23,14 +23,14 @@ impl PasswordRecoveryPage {
 
     /// Set the email field of this form.
     pub fn email(mut self, email: impl Into<String>) -> Self {
-        self.email = Some(email.into());
+        self.email_field = self.email_field.prefill(email);
         self
     }
 
     /// Set the error field of this struct. This conflicts with the success
     /// field.
     pub fn error(mut self, err: impl Into<String>) -> Self {
-        self.error = Some(err.into());
+        self.email_field = self.email_field.error(err);
         self
     }
 
