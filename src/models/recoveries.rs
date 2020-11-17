@@ -38,6 +38,8 @@ impl Recovery {
         }
     }
 
+    // FIXME: better collision handling
+
     /// Store a recovery in the database.
     pub async fn store(self, db_conn: DbConnection) -> Result<(), String> {
         block::<_, usize, _>(move || {
