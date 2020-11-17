@@ -56,7 +56,7 @@ pub async fn recovery_service(
             .request()
             .uri()
             .authority()
-            .map(|a| format!("https://{}", a.as_str()))
+            .map(|a| format!("https://{}/{}", a.as_str(), recovery.recovery_id))
             // since lettre doesn't currently store the messages in a human readable
             // format in stub or file transport, we log the generated address here.
             .map(|url| {

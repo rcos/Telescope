@@ -1,9 +1,6 @@
 use actix::{Actor, AsyncContext, Context};
-use chrono::Local;
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    PgConnection,
-};
+use chrono::Utc;
+use diesel::{r2d2::{ConnectionManager, Pool}, PgConnection};
 use std::time;
 
 /// The database janitor actor.
@@ -26,7 +23,6 @@ impl DbJanitor {
     ///
     /// This contains diesel calls that may block, so use carefully.
     fn call(&self) {
-        use crate::schema::confirmations::dsl::*;
         use diesel::prelude::*;
 
         let conn = self
@@ -38,19 +34,33 @@ impl DbJanitor {
             })
             .unwrap();
 
-        diesel::delete(confirmations.filter(expiration.le(Local::now())))
-            .execute(&conn)
-            .map_err(|e| {
-                error!(
-                    "Could not delete expired confirmations from database: {}",
+        // remove expired confirmations.
+        {
+            use crate::schema::confirmations::dsl::*;
+            diesel::delete(confirmations.filter(expiration.le(Utc::now())))
+                .execute(&conn)
+                .map_err(|e| {
+                    error!("Could not delete expired confirmations from database: {}", e);
                     e
-                );
-                e
-            })
-            .map(|num| {
-                info!("Janitor deleted {} expired email confirmations.", num);
-            })
-            .unwrap();
+                })
+                .map(|num| {
+                    info!("Janitor deleted {} expired email confirmations.", num);
+                })
+                .unwrap();
+        }
+
+        // delete expired recovery requests
+        {
+            use crate::schema::lost_passwords::dsl::*;
+            diesel::delete(lost_passwords.filter(expiration.le(Utc::now())))
+                .execute(&conn)
+                .map_err(|e| {
+                    error!("Could not delete expired password recoveries from database: {}", e);
+                    e
+                })
+                .map(|n| info!("Janitor deleted {} expired password recoveries.", n))
+                .unwrap();
+        }
     }
 }
 

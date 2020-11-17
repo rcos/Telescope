@@ -4,7 +4,6 @@ use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;
 use crate::web::DbConnection;
 use actix_web::web::block;
-use diesel::RunQueryDsl;
 use crate::util::handle_blocking_err;
 
 #[derive(Clone, Debug, Queryable, Insertable, Serialize, Deserialize, Associations)]
@@ -12,7 +11,7 @@ use crate::util::handle_blocking_err;
 #[table_name = "lost_passwords"]
 pub struct Recovery {
     /// The recovery ID
-    recovery_id: Uuid,
+    pub recovery_id: Uuid,
     /// The user ID
     user_id: Uuid,
     /// When this recovery expires.
@@ -39,20 +38,27 @@ impl Recovery {
         }
     }
 
-    /// Store a recovery in the database. On success, return the saved recovery.
-    pub async fn store(self, db_conn: DbConnection) -> Result<Self, String> {
-        block::<_, Self, _>(move || {
+    /// Store a recovery in the database.
+    pub async fn store(self, db_conn: DbConnection) -> Result<(), String> {
+        block::<_, usize, _>(move || {
             use diesel::prelude::*;
             use crate::schema::lost_passwords::dsl::*;
             diesel::insert_into(lost_passwords)
                 .values(&self)
-                .get_result(&db_conn)
+                // do nothing on conflict. just return 0. catch this later.
+                .on_conflict(user_id).do_nothing()
+                .execute(&db_conn)
         })
             .await
-            .map(|r| {
-                trace!("Saved 1 password recovery to database: {:?}", r);
-                r
+            .map_err(|e|
+                handle_blocking_err(e, "Could not store password recovery in database."))
+            .and_then(|n| {
+                if n != 1 {
+                    Err(format!("A password reset request for this user was made less than {} minutes ago. \
+                    Please wait and try again.", Self::get_expiration_duration().num_minutes()))
+                } else {
+                    Ok(())
+                }
             })
-            .map_err(|e| handle_blocking_err(e, "Could not access database."))
     }
 }
