@@ -1,12 +1,18 @@
 use actix_web::{web::Form, HttpResponse};
 
 use crate::{
-    models::emails::Email,
-    templates::{forms::recovery::PasswordRecoveryPage, page::Page},
+    models::{
+        emails::Email,
+        recoveries::Recovery,
+    },
+    templates::{
+        forms::recovery::PasswordRecoveryPage,
+        emails::recovery_email::PasswordRecoveryEmail
+    },
     web::RequestContext,
 };
-use crate::models::recoveries::Recovery;
-use crate::templates::emails::recovery_email::PasswordRecoveryEmail;
+
+use futures::prelude::*;
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -39,7 +45,7 @@ pub async fn recovery_service(
         // get the user's emails.
         let emails: Vec<String> = target_user
             .get_emails_from_db(ctx.get_db_conn().await)
-            .map(|e: Email| e.email)
+            .map(|emails: Vec<Email>| emails.into_iter().map(|e| e.email).collect())
             .await;
 
         // make a recovery record
@@ -63,17 +69,42 @@ pub async fn recovery_service(
         let recovery_email =
             PasswordRecoveryEmail::new(recovery.clone(), link);
 
-        let email = lettre_email::Email::builder()
-            .subject("RCOS Password Reset")
-            .to(&emails)
+        let mut email_builder = lettre_email::Email::builder()
+            .subject("RCOS Password Reset");
+
+        // add all recipient emails.
+        for e in emails {
+            email_builder = email_builder.to(e);
+        }
+
+        let email = email_builder
             .from(ctx.email_sender())
-            .alternative(recovery_email.html(), recovery_email.plaintext())
+            .alternative(
+                ctx.render(&recovery_email.html()),
+                ctx.render(&recovery_email.plaintext()))
             .build()
             .expect("Could not build email");
 
+        // send the email
+        let email_result = ctx.send_mail(email).await;
+        if email_result.is_err() {
+            form_page = form_page.error("Could not send email. Please contact a server administrator.");
+            return HttpResponse::InternalServerError()
+                .body(ctx.render_in_page(&form_page, "Error").await);
+        }
 
+        // store the recovery to the database.
+        let db_res = recovery.store(ctx.get_db_conn().await).await;
 
-        unimplemented!()
+        if let Err(err_msg) = db_res {
+            form_page = form_page.error(err_msg);
+            HttpResponse::InternalServerError()
+                .body(ctx.render_in_page(&form_page, "Error").await)
+        } else {
+            form_page.success = true;
+            HttpResponse::Ok()
+                .body(ctx.render_in_page(&form_page, "Email Sent").await)
+        }
     } else {
         form_page = form_page.error("Email Not Found");
         let page = ctx.render_in_page(&form_page, "Forgot Password").await;

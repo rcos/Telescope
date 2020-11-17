@@ -1,7 +1,6 @@
 use crate::web::Template;
 use crate::models::recoveries::Recovery;
 use chrono::FixedOffset;
-use crate::models::emails::Email;
 
 /// The email sent to users to recover their password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -50,7 +49,7 @@ impl PasswordRecoveryEmail {
 
 /// The HTML formatted email sent to users trying to recover their password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct PasswordRecoveryEmailHtml {
+pub struct PasswordRecoveryEmailHtml {
     #[serde(flatten)]
     parent: PasswordRecoveryEmail
 }
@@ -61,7 +60,7 @@ impl Template for PasswordRecoveryEmailHtml {
 
 /// The plaintext version of the email sent to users to recover their password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct PasswordRecoveryEmailText {
+pub struct PasswordRecoveryEmailText {
     #[serde(flatten)]
     parent: PasswordRecoveryEmail,
 }

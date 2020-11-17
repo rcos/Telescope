@@ -7,7 +7,7 @@ use crate::templates::forms::common::email::EmailField;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PasswordRecoveryPage {
     /// A success message to indicate that the email was sent.
-    success: Option<String>,
+    pub success: bool,
     /// The email form field.
     email_field: EmailField
 }
@@ -16,7 +16,7 @@ impl PasswordRecoveryPage {
     /// Make a new recovery page.
     pub fn new() -> Self {
         Self {
-            success: None,
+            success: false,
             email_field: EmailField::new("email-input")
         }
     }
@@ -31,13 +31,6 @@ impl PasswordRecoveryPage {
     /// field.
     pub fn error(mut self, err: impl Into<String>) -> Self {
         self.email_field = self.email_field.error(err);
-        self
-    }
-
-    /// Set the success field of this struct. This conflicts with the error
-    /// field.
-    pub fn success(mut self, msg: impl Into<String>) -> Self {
-        self.success = Some(msg.into());
         self
     }
 }

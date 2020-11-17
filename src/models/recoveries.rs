@@ -2,6 +2,10 @@ use crate::{models::users::User, schema::lost_passwords};
 
 use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;
+use crate::web::DbConnection;
+use actix_web::web::block;
+use diesel::RunQueryDsl;
+use crate::util::handle_blocking_err;
 
 #[derive(Clone, Debug, Queryable, Insertable, Serialize, Deserialize, Associations)]
 #[belongs_to(User, foreign_key = "user_id")]
@@ -35,5 +39,20 @@ impl Recovery {
         }
     }
 
-
+    /// Store a recovery in the database. On success, return the saved recovery.
+    pub async fn store(self, db_conn: DbConnection) -> Result<Self, String> {
+        block::<_, Self, _>(move || {
+            use diesel::prelude::*;
+            use crate::schema::lost_passwords::dsl::*;
+            diesel::insert_into(lost_passwords)
+                .values(&self)
+                .get_result(&db_conn)
+        })
+            .await
+            .map(|r| {
+                trace!("Saved 1 password recovery to database: {:?}", r);
+                r
+            })
+            .map_err(|e| handle_blocking_err(e, "Could not access database."))
+    }
 }
