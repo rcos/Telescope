@@ -4,10 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     models::users::User,
-    templates::{
-        jumbotron::Jumbotron,
-        profile::Profile
-    },
+    templates::{jumbotron::Jumbotron, profile::Profile},
     web::RequestContext,
 };
 

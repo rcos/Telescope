@@ -1,10 +1,10 @@
 use crate::{models::users::User, schema::lost_passwords};
 
-use chrono::{DateTime, Duration, Utc};
-use uuid::Uuid;
+use crate::util::handle_blocking_err;
 use crate::web::DbConnection;
 use actix_web::web::block;
-use crate::util::handle_blocking_err;
+use chrono::{DateTime, Duration, Utc};
+use uuid::Uuid;
 
 #[derive(Clone, Debug, Queryable, Insertable, Serialize, Deserialize, Associations)]
 #[belongs_to(User, foreign_key = "user_id")]
@@ -34,7 +34,7 @@ impl Recovery {
         Self {
             recovery_id: Uuid::new_v4(),
             user_id: user.id,
-            expiration: Self::get_expiration_from_now()
+            expiration: Self::get_expiration_from_now(),
         }
     }
 
@@ -43,24 +43,27 @@ impl Recovery {
     /// Store a recovery in the database.
     pub async fn store(self, db_conn: DbConnection) -> Result<(), String> {
         block::<_, usize, _>(move || {
-            use diesel::prelude::*;
             use crate::schema::lost_passwords::dsl::*;
+            use diesel::prelude::*;
             diesel::insert_into(lost_passwords)
                 .values(&self)
                 // do nothing on conflict. just return 0. catch this later.
-                .on_conflict(user_id).do_nothing()
+                .on_conflict(user_id)
+                .do_nothing()
                 .execute(&db_conn)
         })
-            .await
-            .map_err(|e|
-                handle_blocking_err(e, "Could not store password recovery in database."))
-            .and_then(|n| {
-                if n != 1 {
-                    Err(format!("A password reset request for this user was made less than {} minutes ago. \
-                    Please wait and try again.", Self::get_expiration_duration().num_minutes()))
-                } else {
-                    Ok(())
-                }
-            })
+        .await
+        .map_err(|e| handle_blocking_err(e, "Could not store password recovery in database."))
+        .and_then(|n| {
+            if n != 1 {
+                Err(format!(
+                    "A password reset request for this user was made less than {} minutes ago. \
+                    Please wait and try again.",
+                    Self::get_expiration_duration().num_minutes()
+                ))
+            } else {
+                Ok(())
+            }
+        })
     }
 }

@@ -1,9 +1,6 @@
 use crate::{
-    web::{Template, RequestContext},
-    models::{
-        users::User,
-        markdown::render as md_render
-    },
+    models::{markdown::render as md_render, users::User},
+    web::{RequestContext, Template},
 };
 use chrono::FixedOffset;
 use time::UtcOffset;
@@ -48,34 +45,42 @@ impl Profile {
             .collect::<Vec<String>>();
 
         // determine whether or not to make the profile editable.
-        let editable = ctx.user_identity()
+        let editable = ctx
+            .user_identity()
             .await
             .map(|viewer| Profile::can_edit(&viewer, &user))
             .unwrap_or(false);
 
         // determine the profile picture to show.
-        let picture = user.avi_location.as_ref()
+        let picture = user
+            .avi_location
+            .as_ref()
             .map(|s| s.to_string())
             // if no user specified one is available,
             // make a gravatar url from the first email
             // (there must be at least one).
-            .unwrap_or_else(|| emails
-                .first()
-                .map(|e| {
-                    let email_str = e.email.as_str().trim().to_lowercase();
-                    // make md5 hash of the email and build gravitar url
-                    let gravatar_hash = md5::compute(email_str);
-                    format!("https://www.gravatar.com/avatar/{:x}?d=identicon&s=600", gravatar_hash)
-                })
-                .expect("Could not get gravitar email."));
+            .unwrap_or_else(|| {
+                emails
+                    .first()
+                    .map(|e| {
+                        let email_str = e.email.as_str().trim().to_lowercase();
+                        // make md5 hash of the email and build gravitar url
+                        let gravatar_hash = md5::compute(email_str);
+                        format!(
+                            "https://www.gravatar.com/avatar/{:x}?d=identicon&s=600",
+                            gravatar_hash
+                        )
+                    })
+                    .expect("Could not get gravitar email.")
+            });
 
         // render the user's bio
         let rendered_bio = md_render(user.bio.as_str());
 
         // make a string of the account creation time after converting to EST.
-        let local_offset =
-            FixedOffset::east(UtcOffset::current_local_offset().as_seconds());
-        let localized_time = user.account_created
+        let local_offset = FixedOffset::east(UtcOffset::current_local_offset().as_seconds());
+        let localized_time = user
+            .account_created
             .with_timezone(&local_offset)
             .format("%B %Y")
             .to_string();
@@ -86,7 +91,7 @@ impl Profile {
             picture,
             bio: rendered_bio,
             public_emails,
-            created_at: localized_time
+            created_at: localized_time,
         }
     }
 }

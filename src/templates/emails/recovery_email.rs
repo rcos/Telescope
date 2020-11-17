@@ -1,5 +1,5 @@
-use crate::web::Template;
 use crate::models::recoveries::Recovery;
+use crate::web::Template;
 use chrono::FixedOffset;
 
 /// The email sent to users to recover their password.
@@ -20,29 +20,27 @@ impl PasswordRecoveryEmail {
     pub fn new(recovery: Recovery, link: String) -> Self {
         let local_offset = time::UtcOffset::current_local_offset().as_seconds();
         let time_zone = FixedOffset::east(local_offset);
-        let local_time = recovery.expiration
-            .with_timezone(&time_zone)
-            .to_rfc2822();
+        let local_time = recovery.expiration.with_timezone(&time_zone).to_rfc2822();
         let utc_time = recovery.expiration.to_rfc2822();
         Self {
             recovery,
             link,
             expires_local: local_time,
-            expires_utc: utc_time
+            expires_utc: utc_time,
         }
     }
 
     /// Make a plaintext message from this.
     pub fn plaintext(&self) -> PasswordRecoveryEmailText {
         PasswordRecoveryEmailText {
-            parent: self.clone()
+            parent: self.clone(),
         }
     }
 
     /// Make an html message from this.
     pub fn html(&self) -> PasswordRecoveryEmailHtml {
         PasswordRecoveryEmailHtml {
-            parent: self.clone()
+            parent: self.clone(),
         }
     }
 }
@@ -51,7 +49,7 @@ impl PasswordRecoveryEmail {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PasswordRecoveryEmailHtml {
     #[serde(flatten)]
-    parent: PasswordRecoveryEmail
+    parent: PasswordRecoveryEmail,
 }
 
 impl Template for PasswordRecoveryEmailHtml {

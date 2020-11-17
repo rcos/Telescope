@@ -1,5 +1,5 @@
-use crate::web::Template;
 use crate::templates::forms::common::email::EmailField;
+use crate::web::Template;
 
 /// The password recovery form. This has a single field to indicate
 /// the email to send the recovery link to. All fields of this struct are
@@ -9,7 +9,7 @@ pub struct PasswordRecoveryPage {
     /// A success message to indicate that the email was sent.
     pub success: bool,
     /// The email form field.
-    email_field: EmailField
+    email_field: EmailField,
 }
 
 impl PasswordRecoveryPage {
@@ -17,7 +17,7 @@ impl PasswordRecoveryPage {
     pub fn new() -> Self {
         Self {
             success: false,
-            email_field: EmailField::new("email-input")
+            email_field: EmailField::new("email-input"),
         }
     }
 

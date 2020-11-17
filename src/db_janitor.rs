@@ -1,6 +1,9 @@
 use actix::{Actor, AsyncContext, Context};
 use chrono::Utc;
-use diesel::{r2d2::{ConnectionManager, Pool}, PgConnection};
+use diesel::{
+    r2d2::{ConnectionManager, Pool},
+    PgConnection,
+};
 use std::time;
 
 /// The database janitor actor.
@@ -40,7 +43,10 @@ impl DbJanitor {
             diesel::delete(confirmations.filter(expiration.le(Utc::now())))
                 .execute(&conn)
                 .map_err(|e| {
-                    error!("Could not delete expired confirmations from database: {}", e);
+                    error!(
+                        "Could not delete expired confirmations from database: {}",
+                        e
+                    );
                     e
                 })
                 .map(|num| {
@@ -55,7 +61,10 @@ impl DbJanitor {
             diesel::delete(lost_passwords.filter(expiration.le(Utc::now())))
                 .execute(&conn)
                 .map_err(|e| {
-                    error!("Could not delete expired password recoveries from database: {}", e);
+                    error!(
+                        "Could not delete expired password recoveries from database: {}",
+                        e
+                    );
                     e
                 })
                 .map(|n| info!("Janitor deleted {} expired password recoveries.", n))

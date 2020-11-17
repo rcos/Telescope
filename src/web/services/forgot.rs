@@ -1,13 +1,9 @@
 use actix_web::{web::Form, HttpResponse};
 
 use crate::{
-    models::{
-        emails::Email,
-        recoveries::Recovery,
-    },
+    models::{emails::Email, recoveries::Recovery},
     templates::{
-        forms::recovery::PasswordRecoveryPage,
-        emails::recovery_email::PasswordRecoveryEmail
+        emails::recovery_email::PasswordRecoveryEmail, forms::recovery::PasswordRecoveryPage,
     },
     web::RequestContext,
 };
@@ -37,10 +33,8 @@ pub async fn recovery_service(
 ) -> HttpResponse {
     let email: &str = &form.email;
     let mut form_page = PasswordRecoveryPage::new().email(email);
-    let database_result = Email::get_user_from_db_by_email(
-        ctx.get_db_conn().await,
-        email.to_string()
-    ).await;
+    let database_result =
+        Email::get_user_from_db_by_email(ctx.get_db_conn().await, email.to_string()).await;
     if let Some(target_user) = database_result {
         // get the user's emails.
         let emails: Vec<String> = target_user
@@ -66,11 +60,9 @@ pub async fn recovery_service(
             .expect("Could not make recovery URL.");
 
         // make the recovery email
-        let recovery_email =
-            PasswordRecoveryEmail::new(recovery.clone(), link);
+        let recovery_email = PasswordRecoveryEmail::new(recovery.clone(), link);
 
-        let mut email_builder = lettre_email::Email::builder()
-            .subject("RCOS Password Reset");
+        let mut email_builder = lettre_email::Email::builder().subject("RCOS Password Reset");
 
         // add all recipient emails.
         for e in emails {
@@ -81,14 +73,16 @@ pub async fn recovery_service(
             .from(ctx.email_sender())
             .alternative(
                 ctx.render(&recovery_email.html()),
-                ctx.render(&recovery_email.plaintext()))
+                ctx.render(&recovery_email.plaintext()),
+            )
             .build()
             .expect("Could not build email");
 
         // send the email
         let email_result = ctx.send_mail(email).await;
         if email_result.is_err() {
-            form_page = form_page.error("Could not send email. Please contact a server administrator.");
+            form_page =
+                form_page.error("Could not send email. Please contact a server administrator.");
             return HttpResponse::InternalServerError()
                 .body(ctx.render_in_page(&form_page, "Error").await);
         }
@@ -98,12 +92,10 @@ pub async fn recovery_service(
 
         if let Err(err_msg) = db_res {
             form_page = form_page.error(err_msg);
-            HttpResponse::InternalServerError()
-                .body(ctx.render_in_page(&form_page, "Error").await)
+            HttpResponse::InternalServerError().body(ctx.render_in_page(&form_page, "Error").await)
         } else {
             form_page.success = true;
-            HttpResponse::Ok()
-                .body(ctx.render_in_page(&form_page, "Email Sent").await)
+            HttpResponse::Ok().body(ctx.render_in_page(&form_page, "Email Sent").await)
         }
     } else {
         form_page = form_page.error("Email Not Found");
