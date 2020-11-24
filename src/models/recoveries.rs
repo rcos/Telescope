@@ -55,14 +55,16 @@ impl Recovery {
         .await
         .map_err(|e| handle_blocking_err(e, "Could not store password recovery in database."))
         .and_then(|n| {
-            if n != 1 {
+            if n == 0 {
                 Err(format!(
                     "A password reset request for this user was made less than {} minutes ago. \
                     Please wait and try again.",
                     Self::get_expiration_duration().num_minutes()
                 ))
-            } else {
+            } else if n == 1 {
                 Ok(())
+            } else {
+                panic!("This diesel call should only return 0 or 1.")
             }
         })
     }
