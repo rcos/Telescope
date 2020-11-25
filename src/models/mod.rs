@@ -2,9 +2,6 @@ pub mod users;
 
 pub mod emails;
 
-#[cfg(test)]
-mod email_tests;
-
 pub mod confirmations;
 
 pub mod recoveries;

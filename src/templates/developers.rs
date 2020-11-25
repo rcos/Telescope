@@ -9,3 +9,4 @@ pub struct UserThumbnail {}
 pub struct DevelopersPage {
     users: Vec<UserThumbnail>,
 }
+
