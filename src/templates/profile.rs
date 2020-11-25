@@ -97,5 +97,5 @@ impl Profile {
 }
 
 impl Template for Profile {
-    const TEMPLATE_NAME: &'static str = "profile";
+    const TEMPLATE_NAME: &'static str = "user/profile";
 }
