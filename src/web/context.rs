@@ -25,15 +25,7 @@ use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use uuid::Uuid;
-
-/// Trait for renderable templates.
-pub trait Template: Serialize + Sized {
-    const TEMPLATE_NAME: &'static str;
-
-    fn render(&self, handlebars: &Handlebars) -> Result<String, RenderError> {
-        handlebars.render(Self::TEMPLATE_NAME, self)
-    }
-}
+use crate::templates::Template;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
@@ -92,14 +84,8 @@ impl RequestContext {
     }
 
     /// Render a template using the handlebars templates in this context.
-    pub fn render<T: Template>(&self, template: &T) -> String {
-        template
-            .render(self.app_data.template_registry.as_ref())
-            .map_err(|e| {
-                error!("Handlebars rendering error: {}", e);
-                e
-            })
-            .unwrap_or("Handlebars rendering error".into())
+    pub fn render(&self, template: &Template) -> String {
+        template.render(self.app_data.template_registry.as_ref())
     }
 
     /// Asynchronously get a database connection.

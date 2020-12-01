@@ -1,6 +1,7 @@
 use crate::{
     models::confirmations::Confirmation,
-    web::{RequestContext, Template},
+    web::RequestContext,
+    templates::Template
 };
 use chrono::FixedOffset;
 use lettre_email::EmailBuilder;
