@@ -6,13 +6,17 @@ use actix_web::{web, Error, HttpResponse};
 use juniper::http::GraphQLRequest;
 
 use crate::{
-    templates::{graphql_playground::GraphQlPlaygroundPage, jumbotron::Jumbotron},
+    templates::{
+        jumbotron::Jumbotron,
+        graphql_playground,
+        Template
+    },
     web::RequestContext,
 };
 
 /// Handler for GraphQL API requests.
 #[post("/api/graphql")]
-pub async fn graphql_api(
+pub async fn api(
     ctx: RequestContext,
     data: web::Json<GraphQLRequest>,
 ) -> Result<HttpResponse, Error> {
@@ -37,7 +41,7 @@ pub async fn graphql_api(
 ///
 /// Only available to signed in users. (currently)
 #[get("/playground")]
-pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
+pub async fn playground(req_ctx: RequestContext) -> HttpResponse {
     if !req_ctx.logged_in().await {
         HttpResponse::Unauthorized()
             .content_type("text/html; charset=utf-8")
@@ -53,20 +57,14 @@ pub async fn graphql_playground(req_ctx: RequestContext) -> HttpResponse {
     } else {
         let endpoint = "/api/graphql";
 
-        let playground_page = GraphQlPlaygroundPage::for_endpoint(endpoint);
+        let playground_page: Template = graphql_playground::for_endpoint(endpoint);
         HttpResponse::Ok()
             .content_type("text/html; charset=utf-8")
             .body(req_ctx.render(&playground_page))
-        /*
-        HttpResponse::Ok()
-            .content_type("text/html; charset=utf-8")
-            .body(graphiql_source(endpoint))
-
-          */
     }
 }
 
 /// Function to register the GraphQl API and playground with actix-web.
 pub fn register(config: &mut web::ServiceConfig) {
-    config.service(graphql_api).service(graphql_playground);
+    config.service(api).service(playground);
 }

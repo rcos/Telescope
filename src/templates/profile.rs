@@ -1,9 +1,9 @@
 use crate::{
     models::{markdown::render as md_render, users::User},
-    web::{RequestContext, Template},
+    web::RequestContext,
+    templates::Template
 };
-use chrono::FixedOffset;
-use time::UtcOffset;
+use chrono::Local;
 
 /// User profile template.
 #[derive(Clone, Serialize, Deserialize)]
@@ -23,6 +23,9 @@ pub struct Profile {
 }
 
 impl Profile {
+    /// The path to the handlebars template from the templates directory.
+    const TEMPLATE_NAME: &'static str = "user/profile";
+
     /// Determine if user `a` should be able to edit the profile of user `b`.
     /// Currently this is only true if `a` is a sysadmin or is the same user as
     /// b.
@@ -78,10 +81,9 @@ impl Profile {
         let rendered_bio = md_render(user.bio.as_str());
 
         // make a string of the account creation time after converting to EST.
-        let local_offset = FixedOffset::east(UtcOffset::current_local_offset().as_seconds());
         let localized_time = user
             .account_created
-            .with_timezone(&local_offset)
+            .with_timezone(&Local)
             .format("%B %Y")
             .to_string();
 
@@ -97,5 +99,4 @@ impl Profile {
 }
 
 impl Template for Profile {
-    const TEMPLATE_NAME: &'static str = "user/profile";
 }

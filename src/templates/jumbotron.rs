@@ -1,5 +1,5 @@
 use crate::templates::page::Page;
-use crate::web::{RequestContext, Template};
+use crate::web::{RequestContext};
 
 /// A template for a jumbotron.
 #[derive(Clone, Deserialize, Debug, Serialize)]

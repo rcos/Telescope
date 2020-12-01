@@ -1,5 +1,5 @@
 use crate::models::recoveries::Recovery;
-use chrono::FixedOffset;
+use chrono::{FixedOffset, Local};
 
 /// The email sent to users to recover their password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -17,9 +17,7 @@ pub struct PasswordRecoveryEmail {
 impl PasswordRecoveryEmail {
     /// Construct a new password recovery email.
     pub fn new(recovery: Recovery, link: String) -> Self {
-        let local_offset = time::UtcOffset::current_local_offset().as_seconds();
-        let time_zone = FixedOffset::east(local_offset);
-        let local_time = recovery.expiration.with_timezone(&time_zone).to_rfc2822();
+        let local_time = recovery.expiration.with_timezone(&Local).to_rfc2822();
         let utc_time = recovery.expiration.to_rfc2822();
         Self {
             recovery,

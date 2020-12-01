@@ -3,7 +3,7 @@ use crate::{
     web::RequestContext,
     templates::Template
 };
-use chrono::FixedOffset;
+use chrono::{FixedOffset, Local};
 use lettre_email::EmailBuilder;
 use uuid::Uuid;
 
@@ -52,14 +52,13 @@ impl ConfirmationEmail {
     /// Construct a new user invite email. The domain may be pulled from the
     /// request uri. It should not have a `/` at the end of it.
     pub fn new(domain: impl Into<String>, invite: &Confirmation) -> Self {
-        let local_offset = FixedOffset::east(time::UtcOffset::current_local_offset().as_seconds());
         let domain = domain.into();
         let invite_id = invite.invite_id.to_hyphenated().to_string().to_lowercase();
         Self {
             confirm_link: format!("{}/confirm/{}", domain.as_str(), invite_id),
             invite_id: invite.invite_id,
             utc_expires: invite.expiration.to_rfc2822(),
-            local_expires: invite.expiration.with_timezone(&local_offset).to_rfc2822(),
+            local_expires: invite.expiration.with_timezone(&Local).to_rfc2822(),
         }
     }
 

@@ -19,12 +19,14 @@ use serde::Serialize;
 use handlebars::Handlebars;
 
 /// A template that can be rendered using the handlebars template registry.
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Template {
     /// The file to use to render this template.
+    #[serde(skip)]
     pub handlebars_file: &'static str,
 
     /// The fields to render.
+    #[serde(flatten)]
     fields: Map<String, Value>,
 }
 
@@ -71,7 +73,7 @@ impl Template {
 
     /// Render this template using a reference to the handlebars registry.
     pub fn render(&self, handlebars: &Handlebars) -> String {
-        handlebars.render(self.handlebars_file, &self.fields)
+        handlebars.render(self.handlebars_file, &self)
             .expect("Could not render template.")
     }
 }

@@ -1,5 +1,4 @@
 use crate::templates::forms::common::FormFieldCommon;
-use crate::web::Template;
 
 /// A password field in an html form.
 #[derive(Clone, Debug, Serialize, Deserialize)]

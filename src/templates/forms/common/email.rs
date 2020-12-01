@@ -1,5 +1,7 @@
-use crate::templates::forms::common::FormFieldCommon;
-use crate::web::Template;
+use crate::templates::{
+    forms::common::FormFieldCommon,
+    Template
+};
 
 /// Email field in a form. Supports a prefill and error message.
 #[derive(Serialize, Deserialize, Debug, Clone)]

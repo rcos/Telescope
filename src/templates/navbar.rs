@@ -1,10 +1,12 @@
 use crate::{
-    templates::forms::login::LoginForm,
-    web::{RequestContext, Template},
+    templates::{
+        forms::login::LoginForm,
+        Template
+    },
+    web::RequestContext,
 };
 
 use uuid::Uuid;
-use crate::templates::Template;
 use serde_json::Value;
 
 /// A button that just links to a another part of the site (or another site entirely.)
@@ -137,9 +139,10 @@ impl Navbar {
                 .unwrap()
         }
     }
+}
 
-    /// Convert this structure into a dynamic template.
-    pub fn into_template(self) -> Template {
+impl Into<Template> for Navbar {
+    fn into(self) -> Template {
         let mut t: Template = Template::new(Self::TEMPLATE_NAME);
         t.append_fields(self);
         t
