@@ -1,5 +1,4 @@
 use crate::models::recoveries::Recovery;
-use crate::web::Template;
 use chrono::FixedOffset;
 
 /// The email sent to users to recover their password.

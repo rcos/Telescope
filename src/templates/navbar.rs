@@ -4,6 +4,8 @@ use crate::{
 };
 
 use uuid::Uuid;
+use crate::templates::Template;
+use serde_json::Value;
 
 /// A button that just links to a another part of the site (or another site entirely.)
 /// This is good for most items on the header bar.
@@ -50,6 +52,9 @@ pub struct Navbar {
 }
 
 impl Navbar {
+    /// The path to the template from the templates directory.
+    const TEMPLATE_NAME: &'static str = "navbar";
+
     /// Get an empty navbar object.
     const fn empty() -> Self {
         Self {
@@ -132,8 +137,11 @@ impl Navbar {
                 .unwrap()
         }
     }
-}
 
-impl Template for Navbar {
-    const TEMPLATE_NAME: &'static str = "navbar";
+    /// Convert this structure into a dynamic template.
+    pub fn into_template(self) -> Template {
+        let mut t: Template = Template::new(Self::TEMPLATE_NAME);
+        t.append_fields(self);
+        t
+    }
 }

@@ -14,7 +14,7 @@ pub mod static_pages;
 pub use static_pages::*;
 
 use std::collections::HashMap;
-use serde_json::Value;
+use serde_json::{Value, Map};
 use serde::Serialize;
 use handlebars::Handlebars;
 
@@ -25,7 +25,7 @@ pub struct Template {
     pub handlebars_file: &'static str,
 
     /// The fields to render.
-    fields: HashMap<String, Value>,
+    fields: Map<String, Value>,
 }
 
 impl Template {
@@ -34,20 +34,39 @@ impl Template {
     pub fn new(path: &'static str) -> Self {
         Self {
             handlebars_file: path,
-            fields: HashMap::new(),
+            fields: Map::new(),
         }
     }
 
     /// Builder style method to add a field to this template instance.
+    /// This will panic if there is a serialization failure.
     pub fn field(mut self, key: impl AsRef<String>, val: impl Serialize) -> Self {
         self.set_field(key, val);
         self
     }
 
     /// Setter method for fields on this template instance.
+    /// This will panic if there is a serialization failure.
     pub fn set_field(&mut self, key: impl AsRef<String>, val: impl Serialize) {
         self.fields[key.as_ref()] = serde_json::to_value(val)
             .expect("Failed to serialize value.");
+    }
+
+    /// Append fields from another object.
+    /// This will panic if there is an error converting the
+    /// other object into a JSON value or if the JSON value
+    /// is not a JSON Object.
+    pub fn append_fields(&mut self, other: impl Serialize) {
+        // Convert the other object to JSON values.
+        let converted: Value = serde_json::to_value(other)
+            .expect("Could not convert object to JSON value");
+
+        // Get the internal JSON object.
+        if let Value::Object(mut obj) = converted {
+            self.fields.append(&mut obj);
+        } else {
+            panic!("The other object did not convert to a JSON object.");
+        }
     }
 
     /// Render this template using a reference to the handlebars registry.
