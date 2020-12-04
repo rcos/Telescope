@@ -1,6 +1,16 @@
-use crate::templates::forms::common::email::EmailField;
-use crate::templates::forms::common::password::PasswordField;
-use crate::web::{api::rest::login::LoginError, RequestContext, Template};
+use crate::{
+    templates::{
+        forms::common::{
+            email::EmailField,
+            password::PasswordField
+        },
+        Template,
+    },
+    web::{
+        api::rest::login::LoginError,
+        RequestContext
+    }
+};
 
 /// The Login Page.
 #[derive(Clone, Debug, Serialize)]

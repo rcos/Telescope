@@ -1,5 +1,10 @@
-use crate::templates::forms::common::password::PasswordField;
-use crate::{models::confirmations::Confirmation, web::Template};
+use crate::{
+    templates::{
+        forms::common::password::PasswordField,
+        Template
+    },
+    models::confirmations::Confirmation
+};
 
 /// The template for new account confirmations.
 /// The user is prompted to input a name and password to seed their account.

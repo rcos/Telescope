@@ -17,6 +17,7 @@ use std::collections::HashMap;
 use serde_json::{Value, Map};
 use serde::Serialize;
 use handlebars::Handlebars;
+use std::ops::{Index, IndexMut};
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]
@@ -75,5 +76,21 @@ impl Template {
     pub fn render(&self, handlebars: &Handlebars) -> String {
         handlebars.render(self.handlebars_file, &self)
             .expect("Could not render template.")
+    }
+}
+
+impl<T: AsRef<String>> Index<T> for Template {
+    type Output = Value;
+
+    fn index(&self, index: T) -> &Self::Output {
+        // Immutable indexing for fields.
+        self.fields[index]
+    }
+}
+
+impl<T: AsRef<String>> IndexMut<T> for Template {
+    fn index_mut(&mut self, index: T) -> &mut Self::Output {
+        // Mutable indexing for fields.
+        self.fields[index]
     }
 }
