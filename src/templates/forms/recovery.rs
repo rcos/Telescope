@@ -1,5 +1,7 @@
-use crate::templates::forms::common::email::EmailField;
-use crate::web::Template;
+use crate::templates::{
+    forms::common::email::EmailField,
+    Template
+};
 
 /// The password recovery form. This has a single field to indicate
 /// the email to send the recovery link to. All fields of this struct are
@@ -13,6 +15,9 @@ pub struct PasswordRecoveryPage {
 }
 
 impl PasswordRecoveryPage {
+    /// The template path from the template root.
+    const TEMPLATE_NAME: &'static str = "forms/forgot";
+
     /// Make a new recovery page.
     pub fn new() -> Self {
         Self {
@@ -35,6 +40,10 @@ impl PasswordRecoveryPage {
     }
 }
 
-impl Template for PasswordRecoveryPage {
-    const TEMPLATE_NAME: &'static str = "forms/forgot";
+impl Into<Template> for PasswordRecoveryPage {
+    fn into(self) -> Template {
+        let mut t = Template::new(Self::TEMPLATE_NAME);
+        t.append_fields(self);
+        t
+    }
 }

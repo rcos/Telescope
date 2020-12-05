@@ -7,7 +7,6 @@ use crate::{
 };
 
 use uuid::Uuid;
-use serde_json::Value;
 
 /// A button that just links to a another part of the site (or another site entirely.)
 /// This is good for most items on the header bar.

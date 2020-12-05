@@ -21,6 +21,9 @@ pub struct NewUserConf {
 }
 
 impl NewUserConf {
+    /// Template path from the templates directory.
+    const TEMPLATE_NAME: &'static str = "forms/confirm/new_user";
+
     /// Create a new user confirmation template.
     pub fn new(conf: Confirmation) -> Self {
         Self {
@@ -41,8 +44,12 @@ impl NewUserConf {
     }
 }
 
-impl Template for NewUserConf {
-    const TEMPLATE_NAME: &'static str = "forms/confirm/new_user";
+impl Into<Template> for NewUserConf {
+    fn into(self) -> Template {
+        let mut t = Template::new(Self::TEMPLATE_NAME);
+        t.append_fields(self);
+        t
+    }
 }
 
 /// An email confirmed for an existing user.
@@ -55,6 +62,9 @@ pub struct ExistingUserConf {
 }
 
 impl ExistingUserConf {
+    /// Template path from template root.
+    const TEMPLATE_NAME: &'static str = "forms/confirm/existing_user";
+
     /// Create a new existing user confirmation page.
     ///
     /// Panics if conf is not for an existing user.
@@ -69,6 +79,10 @@ impl ExistingUserConf {
     }
 }
 
-impl Template for ExistingUserConf {
-    const TEMPLATE_NAME: &'static str = "forms/confirm/existing_user";
+impl Into<Template> for ExistingUserConf {
+    fn into(self) -> Template {
+        let mut t = Template::new(Self::TEMPLATE_NAME);
+        t.append_fields(self);
+        t
+    }
 }

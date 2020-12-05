@@ -12,9 +12,7 @@ use actix_web::{
 
 use futures::future::{ok, Ready};
 
-use handlebars::{Handlebars, RenderError};
-
-use serde::Serialize;
+use handlebars::Handlebars;
 
 use diesel::{
     r2d2::{ConnectionManager, Pool, PooledConnection},
@@ -131,12 +129,14 @@ impl RequestContext {
     }
 
     /// Render a page with the specified template as the page content and the title as specified.
-    pub async fn render_in_page<T: Template>(
+    pub async fn render_in_page(
         &self,
-        template: &T,
+        template: &Template,
         page_title: impl Into<String>,
     ) -> String {
-        let page = Page::of(page_title, template, self).await;
+        let page: Template = Page::of(page_title, template, self)
+            .await
+            .into();
         self.render(&page)
     }
 

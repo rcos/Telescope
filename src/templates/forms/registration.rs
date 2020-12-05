@@ -1,4 +1,4 @@
-use crate::web::Template;
+use crate::templates::Template;
 
 /// The registration page. This is a form that accepts a user's email,
 /// checks if it's in the database already, and if not, emails the user a

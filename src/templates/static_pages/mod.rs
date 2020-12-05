@@ -1,5 +1,10 @@
-use crate::templates::page::Page;
-use crate::web::{RequestContext, Template};
+use crate::{
+    templates::{
+        page::Page,
+        Template
+    },
+    RequestContext
+};
 use actix_web::HttpResponse;
 use serde::Serialize;
 
@@ -10,19 +15,22 @@ pub mod sponsors;
 
 /// An intermediate workaround structure to deal with the lack of support
 /// for async functions in traits.
-pub struct Static<T: StaticPage> {
+struct Static<T: StaticPage> {
     page_content: T,
 }
 
 impl<T: StaticPage> Static<T> {
     /// Create a page containing the static content.
     async fn in_page(&self, ctx: &RequestContext) -> Page {
-        Page::of(T::PAGE_TITLE, &self.page_content, ctx).await
+        Page::of(T::PAGE_TITLE, &self.page_content.into(), ctx).await
     }
 
     /// Actix handler that can be used to generate responses.
     pub async fn handle(ctx: RequestContext) -> HttpResponse {
-        let body = T::normalized_default().in_page(&ctx).await;
+        let body = T::normalized_default()
+            .in_page(&ctx)
+            .await
+            .into();
         HttpResponse::Ok().body(ctx.render(&body))
     }
 }
@@ -44,9 +52,12 @@ pub trait StaticPage: Serialize + Sized + Default {
     }
 }
 
-impl<T> Template for T
+impl<T> Into<Template> for T
 where
     T: StaticPage,
 {
-    const TEMPLATE_NAME: &'static str = Self::TEMPLATE_NAME;
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

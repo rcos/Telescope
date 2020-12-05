@@ -1,5 +1,8 @@
-use crate::models::recoveries::Recovery;
-use chrono::{FixedOffset, Local};
+use crate::{
+    models::recoveries::Recovery,
+    templates::Template
+};
+use chrono::Local;
 
 /// The email sent to users to recover their password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -15,6 +18,12 @@ pub struct PasswordRecoveryEmail {
 }
 
 impl PasswordRecoveryEmail {
+    /// Template path for HTML template from template directory.
+    const HTML_TEMPLATE: &'static str = "emails/recoveries/html";
+
+    /// Template path for plaintext template from template directory.
+    const TEXT_TEMPLATE: &'static str = "emails/recoveries/text";
+
     /// Construct a new password recovery email.
     pub fn new(recovery: Recovery, link: String) -> Self {
         let local_time = recovery.expiration.with_timezone(&Local).to_rfc2822();
@@ -28,38 +37,14 @@ impl PasswordRecoveryEmail {
     }
 
     /// Make a plaintext message from this.
-    pub fn plaintext(&self) -> PasswordRecoveryEmailText {
-        PasswordRecoveryEmailText {
-            parent: self.clone(),
-        }
+    pub fn plaintext(&self) -> Template {
+        Template::new(Self::TEXT_TEMPLATE)
+            .with_fields(self)
     }
 
     /// Make an html message from this.
-    pub fn html(&self) -> PasswordRecoveryEmailHtml {
-        PasswordRecoveryEmailHtml {
-            parent: self.clone(),
-        }
+    pub fn html(&self) -> Template {
+        Template::new(Self::HTML_TEMPLATE)
+            .with_fields(self)
     }
-}
-
-/// The HTML formatted email sent to users trying to recover their password.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PasswordRecoveryEmailHtml {
-    #[serde(flatten)]
-    parent: PasswordRecoveryEmail,
-}
-
-impl Template for PasswordRecoveryEmailHtml {
-    const TEMPLATE_NAME: &'static str = "emails/recoveries/html";
-}
-
-/// The plaintext version of the email sent to users to recover their password.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PasswordRecoveryEmailText {
-    #[serde(flatten)]
-    parent: PasswordRecoveryEmail,
-}
-
-impl Template for PasswordRecoveryEmailText {
-    const TEMPLATE_NAME: &'static str = "emails/recoveries/text";
 }

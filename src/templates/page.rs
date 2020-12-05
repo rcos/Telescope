@@ -1,6 +1,7 @@
 use crate::templates::navbar::Navbar;
 use crate::web::context::Template;
 use crate::web::RequestContext;
+use crate::templates::Template;
 
 /// A page on the RCOS website.
 #[derive(Clone, Debug, Serialize)]
@@ -17,6 +18,9 @@ pub struct Page {
 }
 
 impl Page {
+    /// The template path from the templates directory.
+    const TEMPLATE_NAME: &'static str = "page";
+
     /// Create a new web page.
     pub async fn new(
         title: impl Into<String>,
@@ -32,15 +36,19 @@ impl Page {
     }
 
     /// Creates a page with a template rendered as the body.
-    pub async fn of<T: Template>(
+    pub async fn of(
         title: impl Into<String>,
-        template: &T,
+        template: &Template,
         ctx: &RequestContext,
     ) -> Self {
         Self::new(title, ctx.render(template), ctx).await
     }
 }
 
-impl Template for Page {
-    const TEMPLATE_NAME: &'static str = "page";
+
+impl Into<Template> for Page {
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

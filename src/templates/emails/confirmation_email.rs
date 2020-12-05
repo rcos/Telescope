@@ -3,34 +3,10 @@ use crate::{
     web::RequestContext,
     templates::Template
 };
-use chrono::{FixedOffset, Local};
+use chrono::Local;
 use lettre_email::EmailBuilder;
 use uuid::Uuid;
-
-/// The HTML version of the email sent to new users asking them
-/// to go to the telescope website and set their name and create a password.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct ConfirmationEmailHtml {
-    /// The parent template.
-    #[serde(flatten)]
-    parent: ConfirmationEmail,
-}
-
-/// The plaintext version for email systems that do not support HTML.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct ConfirmationEmailText {
-    /// The parent template.
-    #[serde(flatten)]
-    parent: ConfirmationEmail,
-}
-
-impl Template for ConfirmationEmailHtml {
-    const TEMPLATE_NAME: &'static str = "emails/invites/html";
-}
-
-impl Template for ConfirmationEmailText {
-    const TEMPLATE_NAME: &'static str = "emails/invites/text";
-}
+use handlebars::Handlebars;
 
 /// Structure to hold the template data passed to each template
 /// that renders new user emails.
@@ -49,6 +25,12 @@ pub struct ConfirmationEmail {
 }
 
 impl ConfirmationEmail {
+    /// Plaintext template path from template root.
+    const PLAINTEXT_TEMPLATE: &'static str = "emails/invites/text";
+
+    /// HTML template path from template root.
+    const HTML_TEMPLATE: &'static str = "emails/invites/html";
+
     /// Construct a new user invite email. The domain may be pulled from the
     /// request uri. It should not have a `/` at the end of it.
     pub fn new(domain: impl Into<String>, invite: &Confirmation) -> Self {
@@ -63,17 +45,15 @@ impl ConfirmationEmail {
     }
 
     /// Make a plaintext clone.
-    fn make_plaintext(&self) -> ConfirmationEmailText {
-        ConfirmationEmailText {
-            parent: self.clone(),
-        }
+    fn make_plaintext(&self) -> Template {
+        Template::new(Self::PLAINTEXT_TEMPLATE)
+            .with_fields(self)
     }
 
     /// Make HTML clone.
-    fn make_html(&self) -> ConfirmationEmailHtml {
-        ConfirmationEmailHtml {
-            parent: self.clone(),
-        }
+    fn make_html(&self) -> Template {
+        Template::new(Self::HTML_TEMPLATE)
+            .with_fields(self)
     }
 
     /// Render the plaintext and HTML versions of this email and store them
@@ -85,17 +65,9 @@ impl ConfirmationEmail {
         ctx: &RequestContext,
         email: EmailBuilder,
     ) -> Result<EmailBuilder, String> {
-        let registry = ctx.handlebars();
-        let plaintext = self.make_plaintext().render(registry).map_err(|e| {
-            error!("Could not render plaintext confirmation email: {}", e);
-            "Plaintext email rendering error".to_string()
-        })?;
-
-        let html = self.make_html().render(registry).map_err(|e| {
-            error!("Could not render HTML confirmation email: {}", e);
-            "HTML email rendering error".to_string()
-        })?;
-
+        let registry: &Handlebars = ctx.handlebars();
+        let plaintext: String = self.make_plaintext().render(registry);
+        let html: String = self.make_html().render(registry);
         Ok(email.alternative(html, plaintext))
     }
 }

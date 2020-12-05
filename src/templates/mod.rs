@@ -13,7 +13,6 @@ pub mod static_pages;
 
 pub use static_pages::*;
 
-use std::collections::HashMap;
 use serde_json::{Value, Map};
 use serde::Serialize;
 use handlebars::Handlebars;
@@ -70,6 +69,12 @@ impl Template {
         } else {
             panic!("The other object did not convert to a JSON object.");
         }
+    }
+
+    /// Builder pattern version of [Self::append_fields].
+    pub fn with_fields(mut self, from: impl Serialize) -> Self {
+        self.append_fields(from);
+        self
     }
 
     /// Render this template using a reference to the handlebars registry.
