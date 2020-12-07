@@ -9,6 +9,23 @@ use crate::{
     }
 };
 
+/// The path to the template file from the template directory.
+const TEMPLATE_PATH: &'static str = "forms/login";
+
+/// Handlebars field for the location to redirect to after a successful login.
+pub const REDIRECT: &'static str = "redirect";
+
+/// The query variable that indicates what page the user is logging into.
+pub const REDIRECT_QUERY_VAR: &'static str = "to";
+
+/// Handlebars field for the email form component.
+pub const EMAIL: &'static str = "email";
+
+/// Handlebars field for the password form component.
+pub const PASSWORD: &'static str = "password";
+
+pub fn new()
+
 /// The Login Page.
 #[derive(Clone, Debug, Serialize)]
 pub struct LoginForm {
@@ -24,8 +41,6 @@ impl LoginForm {
     /// The path to the template file from the templates directory.
     const TEMPLATE_NAME: &'static str = "forms/login";
 
-    /// The query variable that indicates what page the user is logging into.
-    pub const REDIRECT_QUERY_VAR: &'static str = "to";
 
     /// Get the URL of the page the user is attempting to access.
     pub fn target_page(ctx: &RequestContext) -> String {
