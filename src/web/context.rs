@@ -136,7 +136,7 @@ impl RequestContext {
         template: Template,
         page_title: &str,
     ) -> String {
-        let page: Template = page::new(&self, page_title, Template).await;
+        let page: Template = page::new(&self, page_title, template).await;
         self.render(&page)
     }
 

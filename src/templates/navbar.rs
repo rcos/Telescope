@@ -1,6 +1,6 @@
 use crate::{
     templates::{
-        forms::login::LoginForm,
+        forms::login,
         Template
     },
     web::RequestContext,
@@ -92,13 +92,13 @@ impl Navbar {
 
         // if we are on the login page dont add another layer of redirect
         let target = if ctx.request().path() == "/login" {
-            LoginForm::target_page(ctx)
+            login::target_page(ctx)
         } else {
             ctx.request().uri().to_string()
         };
 
         let login_query = url::form_urlencoded::Serializer::new(String::new())
-            .append_pair(LoginForm::REDIRECT_QUERY_VAR, target.as_str())
+            .append_pair(login::REDIRECT_QUERY_VAR, target.as_str())
             .finish();
 
         let login_location = format!("/login?{}", login_query);
@@ -118,7 +118,7 @@ impl Navbar {
                 .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
                 .map(|uuid| {
                     let logout_redir = url::form_urlencoded::Serializer::new(String::new())
-                        .append_pair(LoginForm::REDIRECT_QUERY_VAR, ctx.request().uri().path())
+                        .append_pair(login::REDIRECT_QUERY_VAR, ctx.request().uri().path())
                         .finish();
 
                     Self::with_defaults(ctx)
