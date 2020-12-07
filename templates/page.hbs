@@ -25,10 +25,10 @@
     </head>
     <body class="bg-dark text-light">
         <header>
-            {{> navbar.handlebars_file navbar}}
+            {{> (lookup navbar 'handlebars_file') navbar}}
         </header>
         <div class="container px-0 align-items-center">
-            {{page_body}}
+            {{> (lookup content 'handlebars_file') content}}
         </div>
     </body>
 

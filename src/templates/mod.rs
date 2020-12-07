@@ -41,15 +41,15 @@ impl Template {
 
     /// Builder style method to add a field to this template instance.
     /// This will panic if there is a serialization failure.
-    pub fn field(mut self, key: impl AsRef<String>, val: impl Serialize) -> Self {
+    pub fn field(mut self, key: impl Into<String>, val: impl Serialize) -> Self {
         self.set_field(key, val);
         self
     }
 
     /// Setter method for fields on this template instance.
     /// This will panic if there is a serialization failure.
-    pub fn set_field(&mut self, key: impl AsRef<String>, val: impl Serialize) {
-        self.fields[key.as_ref()] = serde_json::to_value(val)
+    pub fn set_field(&mut self, key: impl Into<String>, val: impl Serialize) {
+        self.fields[&key.into()] = serde_json::to_value(val)
             .expect("Failed to serialize value.");
     }
 
@@ -83,18 +83,18 @@ impl Template {
     }
 }
 
-impl<T: AsRef<String>> Index<T> for Template {
+impl<T: Into<String>> Index<T> for Template {
     type Output = Value;
 
     fn index(&self, index: T) -> &Self::Output {
         // Immutable indexing for fields.
-        &self.fields[&index]
+        &self.fields[&index.into()]
     }
 }
 
-impl<T: AsRef<String>> IndexMut<T> for Template {
+impl<T: Into<String>> IndexMut<T> for Template {
     fn index_mut(&mut self, index: T) -> &mut Self::Output {
         // Mutable indexing for fields.
-        &mut self.fields[&index]
+        &mut self.fields[&index.into()]
     }
 }
