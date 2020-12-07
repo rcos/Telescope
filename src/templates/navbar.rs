@@ -128,7 +128,7 @@ impl Navbar {
                                 format!("/profile/{}", uuid.to_hyphenated()),
                                 "Profile",
                             )
-                            .class("mr-2 mb-2 btn btn-primary"),
+                                .class("mr-2 mb-2 btn btn-primary"),
                         )
                         .add_right(
                             NavbarLink::new(ctx, format!("/logout?{}", logout_redir), "Logout")
@@ -140,12 +140,10 @@ impl Navbar {
                 .unwrap()
         }
     }
-}
 
-impl Into<Template> for Navbar {
-    fn into(self) -> Template {
-        let mut t: Template = Template::new(Self::TEMPLATE_NAME);
-        t.append_fields(self);
-        t
+    /// Convert this navbar to a template.
+    pub fn template(&self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
     }
 }

@@ -25,7 +25,7 @@ impl<T: StaticPage> Static<T> {
     }
     /// Create a page containing the static content.
     async fn page(ctx: &RequestContext) -> Template {
-        page::new(ctx, T::PAGE_TITLE, Self::template())
+        page::new(ctx, T::PAGE_TITLE, Self::template()).await
     }
 
     /// Actix handler that can be used to generate responses.

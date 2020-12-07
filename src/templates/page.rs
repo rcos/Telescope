@@ -26,7 +26,7 @@ pub const VERSION: &'static str = "version";
 pub async fn new(ctx: &RequestContext, title: &str, content: Template) -> Template {
     Template::new(TEMPLATE_PATH)
         .field(TITLE, title)
-        .field(NAVBAR, Navbar::from_context(ctx).await.into())
+        .field(NAVBAR, Navbar::from_context(ctx).await.template())
         .field(CONTENT, content)
         .field(VERSION, env!("CARGO_PKG_VERSION"))
 }

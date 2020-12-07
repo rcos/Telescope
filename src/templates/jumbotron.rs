@@ -27,12 +27,12 @@ impl Jumbotron {
     /// Get a page with a jumbotron in it.
     pub async fn jumbotron_page(
         ctx: &RequestContext,
-        page_title: impl Into<String>,
+        page_title: &str,
         heading: impl Into<String>,
         message: impl Into<String>,
     ) -> String {
         let jumbotron: Template = Jumbotron::new(heading, message).into();
-        ctx.render_in_page(&jumbotron, page_title).await
+        ctx.render_in_page(jumbotron, page_title).await
     }
 }
 
