@@ -1,5 +1,8 @@
 use crate::{
-    templates::page::Page,
+    templates::{
+        Template,
+        page
+    },
     RequestContext
 };
 use actix_web::HttpResponse;
@@ -17,34 +20,27 @@ pub struct Static<T: StaticPage> {
 }
 
 impl<T: StaticPage> Static<T> {
+    fn template() -> Template {
+        Template::new(T::TEMPLATE_NAME)
+    }
     /// Create a page containing the static content.
-    async fn in_page(&self, ctx: &RequestContext) -> Page {
-        Page::new(T::PAGE_TITLE, &self.page_content, ctx).await
+    async fn page(ctx: &RequestContext) -> Template {
+        page::new(ctx, T::PAGE_TITLE, Self::template())
     }
 
     /// Actix handler that can be used to generate responses.
     pub async fn handle(ctx: RequestContext) -> HttpResponse {
-        let body = T::normalized_default()
-            .in_page(&ctx)
-            .await
-            .into();
+        let body = Self::page(&ctx).await;
         HttpResponse::Ok().body(ctx.render(&body))
     }
 }
 
-/// A piece of static content that can be rendered in a Page object.
-pub trait StaticPage: Serialize + Sized + Default {
+/// A piece of static content. This currently is just a reference to a
+/// handlebars file and some metadata for rendering the page.
+pub trait StaticPage {
     /// The path to the handlebars file.
     const TEMPLATE_NAME: &'static str;
 
-    /// The title put at the top of the page.
+    /// The title of this page.
     const PAGE_TITLE: &'static str;
-
-    fn normalized(self) -> Static<Self> {
-        Static { page_content: self }
-    }
-
-    fn normalized_default() -> Static<Self> {
-        Self::default().normalized()
-    }
 }

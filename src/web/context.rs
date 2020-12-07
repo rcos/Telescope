@@ -1,7 +1,10 @@
 use crate::{
     models::users::User,
-    templates::page::Page,
     web::{api::graphql::ApiContext, app_data::AppData},
+    templates::{
+        page,
+        Template
+    }
 };
 
 use actix_web::{
@@ -23,7 +26,6 @@ use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use uuid::Uuid;
-use crate::templates::Template;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
@@ -131,12 +133,10 @@ impl RequestContext {
     /// Render a page with the specified template as the page content and the title as specified.
     pub async fn render_in_page(
         &self,
-        template: &Template,
-        page_title: impl Into<String>,
+        template: Template,
+        page_title: &str,
     ) -> String {
-        let page: Template = Page::of(page_title, template, self)
-            .await
-            .into();
+        let page: Template = page::new(&self, page_title, Template).await;
         self.render(&page)
     }
 
