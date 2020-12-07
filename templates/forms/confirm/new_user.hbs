@@ -12,28 +12,11 @@
                     {{invite.email}}
                 </div>
             </div>
-            <div class="form-group row">
-                <label for="name-input" class="col-md-2 col-form-label">
-                    Name
-                </label>
-                <div class="col-md-10">
-                    <input
-                            id="name-input"
-                            type="text"
-                            name="name"
-                        {{#if name}}
-                            value="{{name}}"
-                        {{else}}
-                            placeholder="Your Name"
-                        {{/if}}
-                            class="form-control"
-                            required>
-                </div>
-            </div>
-            {{> forms/common/password password}}
-            {{> forms/common/password confirm_password}}
+            {{> name.handlebars_file name}}
+            {{> forms/common/text_field password}}
+            {{> forms/common/text_field confirm_password}}
             <div class="form-group d-block float-right">
-                <button class="btn btn-success" type="submit">
+                <button class="btn btn-success btn-spinner" type="submit">
                     Create account
                 </button>
             </div>

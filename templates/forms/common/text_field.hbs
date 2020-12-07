@@ -1,0 +1,44 @@
+<div class="form-group row">
+    <label for="{{id}}" class="col-md-2 col-form-label">
+        {{label}}
+    </label>
+    <div class="col-md-10">
+        <input
+            id="{{id}}"
+            type="{{type}}"
+            name="{{name}}"
+            {{#if prefill}}
+                value="{{prefill}}"
+            {{else}}
+                {{#if placeholder}}
+                    placeholder="{{placeholder}}"
+                {{/if}}
+            {{/if}}
+            {{#if error}}
+                class="form-control is-invalid"
+                aria-labelledby="{{id}}-invalid"
+            {{else}}
+                {{#if success}}
+                    class="form-control is-valid"
+                    aria-labelledby="{{id}}-valid"
+                {{else}}
+                    class="form-control"
+                {{/if}}
+            {{/if}}
+                required> {{!--
+                This makes the field required - assume all small fields are
+                required.
+                --}}
+        {{#if error}}
+            <div id="{{id}}-invalid" class="invalid-feedback">
+                {{error}}
+            </div>
+        {{else}}
+            {{#if success}}
+                <div id="{{id}}-valid" class="valid-feedback">
+                    {{success}}
+                </div>
+            {{/if}}
+        {{/if}}
+    </div>
+</div>

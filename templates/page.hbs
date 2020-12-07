@@ -25,10 +25,10 @@
     </head>
     <body class="bg-dark text-light">
         <header>
-            {{>navbar this.navbar}}
+            {{> navbar.handlebars_file navbar}}
         </header>
         <div class="container px-0 align-items-center">
-            {{{page_body}}}
+            {{page_body}}
         </div>
     </body>
 

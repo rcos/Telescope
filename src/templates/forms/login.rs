@@ -1,9 +1,6 @@
 use crate::{
     templates::{
-        forms::common::{
-            email::EmailField,
-            password::PasswordField
-        },
+        forms::common::text_field,
         Template,
     },
     web::{

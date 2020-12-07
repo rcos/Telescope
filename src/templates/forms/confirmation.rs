@@ -1,10 +1,12 @@
 use crate::{
     templates::{
-        forms::common::password::PasswordField,
+        forms::common::text_field,
         Template
     },
     models::confirmations::Confirmation
 };
+
+
 
 /// The template for new account confirmations.
 /// The user is prompted to input a name and password to seed their account.
@@ -13,11 +15,11 @@ pub struct NewUserConf {
     /// The confirmation that spawned this form.
     invite: Confirmation,
     /// The name previously entered into this form if there was one.
-    name: Option<String>,
+    pub name: Template,
     /// The user's new password.
-    pub password: PasswordField,
+    pub password: Template,
     /// The password again. Should match the other password field.
-    pub confirm_password: PasswordField,
+    pub confirm_password: Template,
 }
 
 impl NewUserConf {
@@ -28,27 +30,20 @@ impl NewUserConf {
     pub fn new(conf: Confirmation) -> Self {
         Self {
             invite: conf,
-            name: None,
-            // these last two need to match the format of the form structure in
-            // web/services/confirm.rs
-            password: PasswordField::new("password"),
-            confirm_password: PasswordField::new("confirm-password")
-                .map_common(|c| c.name("confirm")),
+            // Need to match the format of the form structure in
+            // web/services/confirm.rs.
+            name: text_field::plaintext_field("name", "Name")
+                .field(text_field::PLACEHOLDER_FIELD, "Your Name"),
+            password: text_field::password_field("password", "Password"),
+            confirm_password: text_field::password_field("confirm", "Confirm Password"),
         }
-    }
-
-    /// Builder style function to set the name on this form.
-    pub fn name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
-        self
     }
 }
 
 impl Into<Template> for NewUserConf {
     fn into(self) -> Template {
-        let mut t = Template::new(Self::TEMPLATE_NAME);
-        t.append_fields(self);
-        t
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
     }
 }
 

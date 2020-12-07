@@ -22,7 +22,6 @@ use std::ops::{Index, IndexMut};
 #[derive(Serialize, Debug, Clone)]
 pub struct Template {
     /// The file to use to render this template.
-    #[serde(skip)]
     pub handlebars_file: &'static str,
 
     /// The fields to render.
@@ -89,13 +88,13 @@ impl<T: AsRef<String>> Index<T> for Template {
 
     fn index(&self, index: T) -> &Self::Output {
         // Immutable indexing for fields.
-        self.fields[index]
+        &self.fields[&index]
     }
 }
 
 impl<T: AsRef<String>> IndexMut<T> for Template {
     fn index_mut(&mut self, index: T) -> &mut Self::Output {
         // Mutable indexing for fields.
-        self.fields[index]
+        &mut self.fields[&index]
     }
 }
