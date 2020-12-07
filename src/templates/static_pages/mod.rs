@@ -1,8 +1,5 @@
 use crate::{
-    templates::{
-        page::Page,
-        Template
-    },
+    templates::page::Page,
     RequestContext
 };
 use actix_web::HttpResponse;
@@ -15,14 +12,14 @@ pub mod sponsors;
 
 /// An intermediate workaround structure to deal with the lack of support
 /// for async functions in traits.
-struct Static<T: StaticPage> {
+pub struct Static<T: StaticPage> {
     page_content: T,
 }
 
 impl<T: StaticPage> Static<T> {
     /// Create a page containing the static content.
     async fn in_page(&self, ctx: &RequestContext) -> Page {
-        Page::of(T::PAGE_TITLE, &self.page_content.into(), ctx).await
+        Page::new(T::PAGE_TITLE, &self.page_content, ctx).await
     }
 
     /// Actix handler that can be used to generate responses.
@@ -49,15 +46,5 @@ pub trait StaticPage: Serialize + Sized + Default {
 
     fn normalized_default() -> Static<Self> {
         Self::default().normalized()
-    }
-}
-
-impl<T> Into<Template> for T
-where
-    T: StaticPage,
-{
-    fn into(self) -> Template {
-        Template::new(Self::TEMPLATE_NAME)
-            .with_fields(self)
     }
 }

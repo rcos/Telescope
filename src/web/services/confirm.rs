@@ -34,8 +34,10 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
     // handle missing or expired confirmation.
     if let Some(confirmation) = confirmation {
         if confirmation.creates_user() {
-            let form = NewUserConf::new(confirmation);
-            let page = Page::of("Create account", &form, &ctx).await;
+            let form = NewUserConf::new(confirmation).into();
+            let page = Page::of("Create account", &form, &ctx)
+                .await
+                .into();
             HttpResponse::Ok().body(ctx.render(&page))
         } else {
             let error_message = confirmation.clone().confirm_existing(&ctx).await.err();
@@ -45,7 +47,7 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
             let page_title = if errored { "Error" } else { "RCOS" };
 
             // make confirmation page
-            let conf = ExistingUserConf::new(confirmation, error_message);
+            let conf = ExistingUserConf::new(confirmation, error_message).into();
             let rendered = ctx.render_in_page(&conf, page_title).await;
 
             return if errored {

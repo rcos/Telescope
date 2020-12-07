@@ -1,6 +1,7 @@
-use crate::templates::page::Page;
-use crate::web::{RequestContext};
-use crate::templates::Template;
+use crate::{
+    web::RequestContext,
+    templates::Template
+};
 
 /// A template for a jumbotron.
 #[derive(Clone, Deserialize, Debug, Serialize)]
@@ -30,14 +31,8 @@ impl Jumbotron {
         heading: impl Into<String>,
         message: impl Into<String>,
     ) -> String {
-        ctx.render(
-            &Page::new(
-                page_title.into(),
-                ctx.render(&Jumbotron::new(heading, message).into()),
-                ctx,
-            ).into()
-            .await,
-        )
+        let jumbotron: Template = Jumbotron::new(heading, message).into();
+        ctx.render_in_page(&jumbotron, page_title).await
     }
 }
 
