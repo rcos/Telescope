@@ -98,5 +98,9 @@ impl Profile {
     }
 }
 
-impl Template for Profile {
+impl Into<Template> for User {
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

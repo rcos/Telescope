@@ -24,6 +24,9 @@ pub struct LoginForm {
 }
 
 impl LoginForm {
+    /// The path to the template file from the templates directory.
+    const TEMPLATE_NAME: &'static str = "forms/login";
+
     /// The query variable that indicates what page the user is logging into.
     pub const REDIRECT_QUERY_VAR: &'static str = "to";
 
@@ -66,6 +69,9 @@ impl LoginForm {
     }
 }
 
-impl Template for LoginForm {
-    const TEMPLATE_NAME: &'static str = "forms/login";
+impl Into<Template> for LoginForm {
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

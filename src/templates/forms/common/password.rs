@@ -1,4 +1,7 @@
-use crate::templates::forms::common::FormFieldCommon;
+use crate::templates::{
+    forms::common::FormFieldCommon,
+    Template
+};
 
 /// A password field in an html form.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -11,6 +14,9 @@ pub struct PasswordField {
 }
 
 impl PasswordField {
+    /// The path to the template file from the templates directory.
+    const TEMPLATE_NAME: &'static str = "forms/common/password";
+
     /// Construct a new password field with the given id.
     /// Name defaults to "password".
     pub fn new(id: impl Into<String>) -> Self {
@@ -35,6 +41,9 @@ impl PasswordField {
     }
 }
 
-impl Template for PasswordField {
-    const TEMPLATE_NAME: &'static str = "forms/common/password";
+impl Into<Template> for PasswordField {
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

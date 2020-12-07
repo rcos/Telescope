@@ -16,6 +16,9 @@ pub struct EmailField {
 }
 
 impl EmailField {
+    /// The path to the template file from the template directory.
+    const TEMPLATE_NAME: &'static str = "forms/common/email";
+
     /// Create a new email field identified by a document id.
     /// Label defaults to "Email Address".
     /// Name defaults to "email".
@@ -47,6 +50,9 @@ impl EmailField {
     }
 }
 
-impl Template for EmailField {
-    const TEMPLATE_NAME: &'static str = "forms/common/email";
+impl Into<Template> for EmailField {
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

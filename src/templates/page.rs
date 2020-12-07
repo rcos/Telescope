@@ -1,7 +1,10 @@
-use crate::templates::navbar::Navbar;
-use crate::web::context::Template;
-use crate::web::RequestContext;
-use crate::templates::Template;
+use crate::{
+    templates::{
+        navbar::Navbar,
+        Template
+    },
+    web::RequestContext
+};
 
 /// A page on the RCOS website.
 #[derive(Clone, Debug, Serialize)]

@@ -17,6 +17,9 @@ pub struct RegistrationPage {
 }
 
 impl RegistrationPage {
+    /// The path to the template file from the templates directory.
+    const TEMPLATE_NAME: &'static str = "forms/register";
+
     /// Show the success message.
     pub fn success(email: impl Into<String>) -> Self {
         Self {
@@ -39,6 +42,9 @@ impl RegistrationPage {
     }
 }
 
-impl Template for RegistrationPage {
-    const TEMPLATE_NAME: &'static str = "forms/register";
+impl Into<Template> for RegistrationPage {
+    fn into(self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }
