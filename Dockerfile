@@ -2,22 +2,25 @@
 FROM rust:1-buster AS build
 RUN cargo install diesel_cli --no-default-features --features postgres
 
-COPY ./migrations/ /build/migrations
 COPY ./Cargo.* /build/
-COPY ./diesel.toml /build/
-COPY ./.env /build/
-COPY ./src/ /build/src
 WORKDIR /build/
+RUN mkdir .cargo
+RUN cargo build --release
+RUN cargo vendor > .cargo/config
 
+COPY ./src/ /build/src
 RUN cargo build --release
 
-EXPOSE 8080
-EXPOSE 8443
-
+COPY ./diesel.toml /build/
+COPY ./.env /build/
+COPY ./migrations/ /build/migrations
 COPY ./templates/ /build/templates
 COPY ./static/ /build/static
 COPY ./config.toml /build/config.toml
 COPY ./tls-ssl/ /build/tls-ssl
 COPY ./docker-run.sh /build/docker-run.sh
+
+EXPOSE 8080
+EXPOSE 8443
 
 CMD ["/bin/sh", "/build/docker-run.sh"]

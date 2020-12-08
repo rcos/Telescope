@@ -169,8 +169,6 @@ fn main() -> std::io::Result<()> {
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
-            // Special handler for lets-encrypt certificate challenges
-            .service(afs::Files::new("/.well-known", "static/.well-known"))
             .route("/", get().to(Static::<LandingPage>::handle))
             .route("/projects", get().to(Static::<ProjectsPage>::handle))
             .route("/developers", get().to(Static::<DevelopersPage>::handle))
