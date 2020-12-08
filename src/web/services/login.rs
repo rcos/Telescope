@@ -2,7 +2,8 @@ use crate::{
     models::users::User,
     templates::{
         forms::login,
-        page
+        page,
+        Template
     },
     web::{
         api::rest::login::{login, LoginRequest},
@@ -20,7 +21,7 @@ use uuid::Uuid;
 /// is not accepted when using GET.
 #[get("/login")]
 pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
-    let target_page = LoginForm::target_page(&req_ctx);
+    let target_page: String = login::target_page(&req_ctx);
     let identity: &Identity = req_ctx.identity();
 
     // check the identity.
@@ -43,8 +44,8 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
     // forget it and return the login form.
     identity.forget();
 
-    let form = LoginForm::from_context(&req_ctx);
-    let login_page = Page::new("RCOS Login", req_ctx.render(&form), &req_ctx).await;
+    let form: Template = login::new(&req_ctx);
+    let login_page: Template = page::of(&req_ctx,"RCOS Login", &form).await;
 
     HttpResponse::Ok().body(req_ctx.render(&login_page))
 }
