@@ -8,12 +8,13 @@ COPY ./diesel.toml /build/
 COPY ./.env /build/
 COPY ./src/ /build/src
 WORKDIR /build/
-RUN diesel setup
-RUN diesel migrations run
+
 RUN cargo build --release
 
 COPY ./templates/ /build/templates
 COPY ./static/ /build/static
+COPY ./docker-run.sh /build/run.sh
+
 EXPOSE 8080
 EXPOSE 8443
-ENTRYPOINT [ "/build/target/release/telescope" ]
+CMD ["run.sh", "/build/target/release/telescope"]
