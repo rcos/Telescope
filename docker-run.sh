@@ -1,7 +1,7 @@
 # Wait for the database to come online
 set -e
 
-until PGPASSWORD=$POSTGRES_PASSWORD psql -h "db" -U "$POSTGRES_USER" -c '\q'; do
+until nc -z db 5432; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done
