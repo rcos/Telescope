@@ -232,13 +232,14 @@ impl Confirmation {
     }
 
     /// Private function to remove a confirmation from the database.
-    async fn remove_from_db(self, conn: DbConnection) -> Result<(), String> {
+    async fn remove_from_db(&self, conn: DbConnection) -> Result<(), String> {
         trace!("Removing {:?} from database.", &self);
+        let self_id: Uuid = self.invite_id;
         block::<_, usize, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
             diesel::delete(confirmations)
-                .filter(invite_id.eq(self.invite_id))
+                .filter(invite_id.eq(self_id))
                 .execute(&conn)
         })
         .await

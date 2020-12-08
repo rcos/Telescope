@@ -96,10 +96,9 @@ impl Profile {
             created_at: localized_time,
         }
     }
-}
 
-impl Into<Template> for Profile {
-    fn into(self) -> Template {
+    /// Convert this profile page to a template.
+    pub fn as_template(&self) -> Template {
         Template::new(Self::TEMPLATE_NAME)
             .with_fields(self)
     }

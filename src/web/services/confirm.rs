@@ -12,7 +12,7 @@ use crate::{
             confirmation,
             common::text_field
         },
-        jumbotron::Jumbotron,
+        jumbotron,
         page,
         Template,
     },

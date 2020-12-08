@@ -22,7 +22,7 @@ impl PasswordRecoveryPage {
     pub fn new() -> Self {
         Self {
             success: false,
-            email_field: EmailField::new("email-input"),
+            email_field: text_field::email_field("email", "Email"),
         }
     }
 
