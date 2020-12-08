@@ -2,22 +2,24 @@
 FROM rust:1-buster AS build
 RUN cargo install diesel_cli --no-default-features --features postgres
 
-COPY ./Cargo.* /build/
-WORKDIR /build/
-RUN cargo init
+COPY ./Cargo.* /build/telescope/
+WORKDIR /build/telescope/
+RUN mkdir src
+RUN echo "fn main() {println!(\"BUILD ARTIFACT\")}" > src/main.rs
+RUN cargo build --release
+RUN rm -rfv target/release/deps/telescope*
+
+COPY ./src ./src
 RUN cargo build --release
 
-COPY ./src /build/src
-RUN cargo build --release
-
-COPY ./diesel.toml /build/
-COPY ./.env /build/
-COPY ./migrations/ /build/migrations
-COPY ./templates/ /build/templates
-COPY ./static/ /build/static
-COPY ./config.toml /build/config.toml
-COPY ./tls-ssl/ /build/tls-ssl
-COPY ./docker-run.sh /build/docker-run.sh
+COPY ./diesel.toml .
+COPY ./.env .
+COPY ./migrations/ /build/telescope/migrations
+COPY ./templates/ /build/telescope/templates
+COPY ./static/ /build/telescope/static
+COPY ./config.toml .
+COPY ./tls-ssl/ /build/telescope/tls-ssl
+COPY ./docker-run.sh .
 
 EXPOSE 8080
 EXPOSE 8443
