@@ -13,6 +13,7 @@ use actix_web::{
     HttpResponse,
 };
 use uuid::Uuid;
+use crate::templates::Template;
 
 /// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -34,8 +35,8 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
     // handle missing or expired confirmation.
     if let Some(confirmation) = confirmation {
         if confirmation.creates_user() {
-            let form = NewUserConf::new(confirmation).into();
-            let page = Page::of("Create account", &form, &ctx)
+            let form: Template = NewUserConf::new(confirmation).into();
+            let page: Template = page::of(&ctx, "Create account", &form)
                 .await
                 .into();
             HttpResponse::Ok().body(ctx.render(&page))

@@ -6,78 +6,47 @@ use crate::{
     models::confirmations::Confirmation
 };
 
+/// Path to new user confirmation from templates directory. This form completes
+/// the signup process after verifying an email.
+const NEW_USER_CONF_FORM_TEMPLATE: &'static str = "forms/confirm/new_user";
 
+/// Path to the form to display success (or error) message for existing user
+/// who is confirming a new (additional) email.
+const EXISTING_USER_CONF_TEMPLATE: &'static str = "forms/confirm/existing_user";
 
-/// The template for new account confirmations.
-/// The user is prompted to input a name and password to seed their account.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct NewUserConf {
-    /// The confirmation that spawned this form.
-    invite: Confirmation,
-    /// The name previously entered into this form if there was one.
-    pub name: Template,
-    /// The user's new password.
-    pub password: Template,
-    /// The password again. Should match the other password field.
-    pub confirm_password: Template,
-}
+/// The serialized invite that spawned this confirmation page
+/// (new users and existing users).
+pub const INVITE: &'static str = "invite";
 
-impl NewUserConf {
-    /// Template path from the templates directory.
-    const TEMPLATE_NAME: &'static str = "forms/confirm/new_user";
+/// For new users, the handlebars field associated with the text field for
+/// their name.
+pub const NAME: &'static str = "name";
 
-    /// Create a new user confirmation template.
-    pub fn new(conf: Confirmation) -> Self {
-        Self {
-            invite: conf,
-            // Need to match the format of the form structure in
-            // web/services/confirm.rs.
-            name: text_field::plaintext_field("name", "Name")
-                .field(text_field::PLACEHOLDER_FIELD, "Your Name"),
-            password: text_field::password_field("password", "Password"),
-            confirm_password: text_field::password_field("confirm", "Confirm Password"),
-        }
-    }
-}
+/// For new users, the handlebars field that is associated with the
+/// password field.
+pub const PASSWORD: &'static str = "password";
 
-impl Into<Template> for NewUserConf {
-    fn into(self) -> Template {
-        Template::new(Self::TEMPLATE_NAME)
-            .with_fields(self)
-    }
-}
+/// For new users, the handlebars field that is associated with the
+/// confirm password field.
+pub const CONFIRM: &'static str = "confirm";
 
-/// An email confirmed for an existing user.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ExistingUserConf {
-    /// The invite that spawned this page.
-    invite: Confirmation,
-    /// An error message if an error occurred.
-    error_message: Option<String>,
-}
+/// For existing users, if there is an error confirming their email,
+/// the handlebars field associated with that error message.
+pub const ERROR: &'static str = "error";
 
-impl ExistingUserConf {
-    /// Template path from template root.
-    const TEMPLATE_NAME: &'static str = "forms/confirm/existing_user";
-
-    /// Create a new existing user confirmation page.
-    ///
-    /// Panics if conf is not for an existing user.
-    pub fn new(conf: Confirmation, err: Option<String>) -> Self {
-        if conf.creates_user() {
-            panic!("Cannot make ExistingUserConfirmation template for new user.")
-        }
-        Self {
-            invite: conf,
-            error_message: err,
-        }
-    }
-}
-
-impl Into<Template> for ExistingUserConf {
-    fn into(self) -> Template {
-        let mut t = Template::new(Self::TEMPLATE_NAME);
-        t.append_fields(self);
-        t
+/// Create the template for the confirmation page for a confirmation/invite
+/// object.
+pub fn for_conf(conf: &Confirmation) -> Template {
+    if conf.creates_user() {
+        // New User.
+        Template::new(NEW_USER_CONF_FORM_TEMPLATE)
+            .field(INVITE, conf)
+            .field(NAME,text_field::plaintext_field(NAME, "Name"))
+            .field(PASSWORD, text_field::password_field(PASSWORD, "Password"))
+            .field(CONFIRM, text_field::password_field(CONFIRM, "Confirm Password"))
+    } else {
+        // Existing user.
+        Template::new(EXISTING_USER_CONF_TEMPLATE)
+            .field(INVITE, conf)
     }
 }
