@@ -8,6 +8,7 @@ RUN mkdir .cargo
 RUN mkdir src
 RUN echo "fn main() {}" > /build/src/main.rs
 RUN cargo vendor > .cargo/config
+RUN cargo build --release
 
 COPY ./src/ /build/src
 RUN cargo build --release
