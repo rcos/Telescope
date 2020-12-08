@@ -1,7 +1,7 @@
 # Wait for the database to come online
 set -e
 
-until nc -z db 5432; do
+until ping db -c 1 -w 5; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done
