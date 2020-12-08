@@ -7,8 +7,6 @@ services:
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-    expose:
-      - "5432"
   telescope:
     restart: "no"
     depends_on:
