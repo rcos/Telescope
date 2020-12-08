@@ -24,4 +24,4 @@ COPY ./docker-run.sh .
 EXPOSE 8080
 EXPOSE 8443
 
-CMD ["/bin/sh", "/build/docker-run.sh"]
+CMD ["/bin/sh", "/build/telescope/docker-run.sh"]
