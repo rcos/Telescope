@@ -7,7 +7,9 @@ services:
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-    network_mode: host
+    ports:
+    - "5432:5432"
+    - "5432:5432/udp"
   telescope:
     restart: "no"
     network_mode: host
