@@ -9,10 +9,11 @@ services:
       - POSTGRES_PASSWORD
     ports:
     - "5432:5432"
-    - "5432:5432/udp"
   telescope:
     restart: "no"
-    network_mode: host
     depends_on:
       - db
     build: .
+    ports:
+    - "80:8080"
+    - "443:8443"
