@@ -66,14 +66,12 @@ struct TelescopeConfig {
     /// Set the log level.
     /// See https://docs.rs/env_logger/0.8.1/env_logger/ for reference.
     log_level: Option<String>,
-    /// Set the URL to bind the running server to.
-    bind_to: Option<String>,
 
-    /// The domain that telescope is running at.
-    /// This is used to redirect callbacks to after going offsite for
-    /// authentication. This is also used to generate confirmation links
-    /// that get emailed to users.
-    //domain: Option<String>,
+    /// Set the URL to bind the running server to under HTTP/2.
+    bind_https: Option<String>,
+
+    /// Set the URL to bind the running server to under HTTP/1.
+    bind_http: Option<String>,
 
     /// The URL the Postgres Database is running at.
     /// This is passed directly to diesel.
@@ -102,7 +100,10 @@ struct TelescopeConfig {
 pub struct ConcreteConfig {
     pub tls_config: TlsConfig,
     log_level: String,
-    pub bind_to: String,
+    /// The location to bind services under HTTP/2 (HTTPS).
+    pub bind_https: String,
+    /// The location to bind services under HTTP/1 (HTTP).
+    pub bind_http: String,
     //pub domain: String,
     pub database_url: String,
     pub email_config: EmailSenderConfig,
@@ -168,11 +169,12 @@ impl TelescopeConfig {
             log_level: self
                 .reverse_lookup(profile_slice, |c| c.log_level.clone())
                 .expect("Could not resolve log level."),
-            bind_to: self
-                .reverse_lookup(profile_slice, |c| c.bind_to.clone())
-                .expect("Could not resolve binding URL."),
-            //domain: self.reverse_lookup(profile_slice, |c| c.domain.clone())
-            //    .expect("Could not resolve domain configuration."),
+            bind_https: self
+                .reverse_lookup(profile_slice, |c| c.bind_https.clone())
+                .expect("Could not resolve binding URL (HTTP/2, HTTPS)."),
+            bind_http: self
+                .reverse_lookup(profile_slice, |c| c.bind_http.clone())
+                .expect("Could not resolve binding URL (HTTP/1)."),
             database_url: self
                 .reverse_lookup(profile_slice, |c| c.database_url.clone())
                 .expect("Could not resolve database URL."),

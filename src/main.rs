@@ -175,12 +175,11 @@ fn main() -> std::io::Result<()> {
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             .default_service(aweb::route().to(services::p404::not_found))
     })
-    .bind_openssl(config.bind_to.clone(), tls_builder)
-    .map_err(|e| {
-        error!("Could not bind to {}: {}", config.bind_to, e);
-        e
-    })?
-    .run();
+        .bind_openssl(config.bind_https.clone(), tls_builder)
+        .expect("Could not bind HTTP/2 (HTTPS)")
+        .bind(config.bind_http.clone())
+        .expect("Could not bind HTTP/1 (HTTP)")
+        .run();
 
     // Start the actix runtime.
     sys.run()
