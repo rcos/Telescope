@@ -7,6 +7,7 @@ use crate::{
 };
 use actix_web::HttpResponse;
 use serde::Serialize;
+use std::marker::PhantomData;
 
 pub mod developers;
 pub mod index;
@@ -14,9 +15,10 @@ pub mod projects;
 pub mod sponsors;
 
 /// An intermediate workaround structure to deal with the lack of support
-/// for async functions in traits.
+/// for async functions in traits. This is a zero-sized structure that holds
+/// a phantom for the type parameter.
 pub struct Static<T: StaticPage> {
-    page_content: T,
+    phantom: PhantomData<T>,
 }
 
 impl<T: StaticPage> Static<T> {
@@ -25,7 +27,7 @@ impl<T: StaticPage> Static<T> {
     }
     /// Create a page containing the static content.
     async fn page(ctx: &RequestContext) -> Template {
-        page::new(ctx, T::PAGE_TITLE, Self::template()).await
+        page::of(ctx, T::PAGE_TITLE, &Self::template()).await
     }
 
     /// Actix handler that can be used to generate responses.

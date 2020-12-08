@@ -49,8 +49,9 @@ impl Template {
     /// Setter method for fields on this template instance.
     /// This will panic if there is a serialization failure.
     pub fn set_field(&mut self, key: impl Into<String>, val: impl Serialize) {
-        self.fields[&key.into()] = serde_json::to_value(val)
-            .expect("Failed to serialize value.");
+        let serialized_val = serde_json::to_value(val)
+            .expect("Failed to serialize value");
+        self.fields.insert(key.into(), serialized_val);
     }
 
     /// Append fields from another object.

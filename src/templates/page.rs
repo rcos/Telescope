@@ -5,6 +5,7 @@ use crate::{
     },
     web::RequestContext
 };
+use serde::Serialize;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";
@@ -23,10 +24,11 @@ pub const CONTENT: &'static str = "content";
 pub const VERSION: &'static str = "version";
 
 /// Create a new template object to hold the page.
-pub async fn new(ctx: &RequestContext, title: &str, content: Template) -> Template {
+/// The content of the page is rendered here and must be re-rendered if updated.
+pub async fn of(ctx: &RequestContext, title: &str, content: &Template) -> Template {
     Template::new(TEMPLATE_PATH)
         .field(TITLE, title)
         .field(NAVBAR, Navbar::from_context(ctx).await.template())
-        .field(CONTENT, content)
+        .field(CONTENT, ctx.render(content))
         .field(VERSION, env!("CARGO_PKG_VERSION"))
 }
