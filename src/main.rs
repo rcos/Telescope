@@ -13,6 +13,10 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
+#[macro_use]
+extern crate diesel_migrations;
+embed_migrations!();
+
 pub mod util;
 
 mod web;
@@ -64,6 +68,13 @@ fn main() -> std::io::Result<()> {
     // Database pool creation and registration of handlebars templates occurs
     // here.
     let app_data = AppData::new();
+
+    // Run embedded database migrations.
+    let conn = app_data
+        .clone_db_conn_pool()
+        .get()
+        .expect("Could not get database connection.");
+    embedded_migrations::run_with_output(&conn, &mut std::io::stdout());
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use

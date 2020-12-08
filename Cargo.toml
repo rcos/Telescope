@@ -59,6 +59,8 @@ lettre_email = "0.9.4"
 md5 = "0.7"
 # URL Parsing
 url = "2.2.0"
+# Embdedded database migrations
+diesel_migrations = "1.4.0"
 
 # Date and time utilities
 [dependencies.chrono]
@@ -76,6 +78,8 @@ features = ["serde", "std"]
 version = "1.4.5"
 default-features = false
 features = ["uuidv07", "r2d2", "postgres", "chrono"]
+
+
 
 # GraphQL queries and API system.
 [dependencies.juniper]
