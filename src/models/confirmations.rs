@@ -135,8 +135,8 @@ impl Confirmation {
             // Until this changes, we log it in a trace message so that it's
             // easier to test on development without a full SMTP backend.
             // See https://github.com/lettre/lettre/pull/505.
-            .map(|url| {
-                trace!("Generated Invite URL: {}", url);
+            .map(|url: String| {
+                trace!("Generated Invite URL: {}/confirm/{}", url, invite.invite_id);
                 url
             })
             .ok_or("Could not get domain string.".to_string())
