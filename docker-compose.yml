@@ -10,17 +10,11 @@ services:
     ports:
     - "5432:5432"
     - "5432:5432/udp"
-    healthcheck:
-      test: ["CMD", "curl", "postgres://db"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      
+
   telescope:
     restart: "no"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     build: .
     ports:
     - "80:8080"
