@@ -13,8 +13,8 @@ RUN cargo build --release
 
 COPY ./templates/ /build/templates
 COPY ./static/ /build/static
-COPY ./docker-run.sh /build/run.sh
+COPY ./docker-run.sh /build/
 
 EXPOSE 8080
 EXPOSE 8443
-ENTRYPOINT ["/build/run.sh"]
+ENTRYPOINT ["/build/docker_run.sh"]
