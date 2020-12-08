@@ -125,8 +125,7 @@ pub async fn confirm(
     form_err[confirmation::NAME][text_field::PREFILL_FIELD] = name.as_str().into();
 
     // Check that the password and the confirm password are the same.
-    // (Limit to the max password length to avoid huge input attacks).
-    if &password[..=PasswordRequirements::MAX_PASSWORD_LENGTH] != &confirm[..=PasswordRequirements::MAX_PASSWORD_LENGTH] {
+    if password != confirm {
         form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] = "Password does not match confirm password.".into();
         return HttpResponse::BadRequest()
             .body(ctx.render_in_page(&form_err, "Error").await);
