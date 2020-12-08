@@ -1,46 +1,34 @@
-use crate::templates::navbar::Navbar;
-use crate::web::context::Template;
-use crate::web::RequestContext;
+use crate::{
+    templates::{
+        navbar::Navbar,
+        Template
+    },
+    web::RequestContext
+};
+use serde_json::Value;
 
-/// A page on the RCOS website.
-#[derive(Clone, Debug, Serialize)]
-pub struct Page {
-    /// The page title.
-    page_title: String,
-    /// The navbar at the top of the page.
-    navbar: Navbar,
-    /// The inner html for this webpage. This is rendered unescaped. Do not let the user get stuff
-    /// Ensure that no user input gets rendered into this unescaped (as it will create an XSS vulnerability).
-    page_body: String,
-    /// The version of this project.
-    version: &'static str,
-}
+/// The path to the page template from the templates directory.
+const TEMPLATE_PATH: &'static str = "page";
 
-impl Page {
-    /// Create a new web page.
-    pub async fn new(
-        title: impl Into<String>,
-        body: impl Into<String>,
-        ctx: &RequestContext,
-    ) -> Self {
-        Self {
-            page_title: title.into(),
-            page_body: body.into(),
-            navbar: Navbar::from_context(ctx).await,
-            version: env!("CARGO_PKG_VERSION"),
-        }
-    }
+/// The handlebars field to store the title.
+pub const TITLE: &'static str = "title";
 
-    /// Creates a page with a template rendered as the body.
-    pub async fn of<T: Template>(
-        title: impl Into<String>,
-        template: &T,
-        ctx: &RequestContext,
-    ) -> Self {
-        Self::new(title, ctx.render(template), ctx).await
-    }
-}
+/// The handlebars field to store the navbar object.
+pub const NAVBAR: &'static str = "navbar";
 
-impl Template for Page {
-    const TEMPLATE_NAME: &'static str = "page";
+/// The handlebars field to store the content of the page.
+pub const CONTENT: &'static str = "content";
+
+/// The handlebars field to store the version that telescope
+/// is currently running.
+pub const VERSION: &'static str = "version";
+
+/// Create a new template object to hold the page.
+/// The content of the page is rendered here and must be re-rendered if updated.
+pub async fn of(ctx: &RequestContext, title: impl Into<Value>, content: &Template) -> Template {
+    Template::new(TEMPLATE_PATH)
+        .field(TITLE, title.into())
+        .field(NAVBAR, Navbar::from_context(ctx).await.template())
+        .field(CONTENT, ctx.render(content))
+        .field(VERSION, env!("CARGO_PKG_VERSION"))
 }

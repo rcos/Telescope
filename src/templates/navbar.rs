@@ -1,6 +1,12 @@
+//! Navbar and navbar links. This file was mostly unchanged in the December 2020
+//! template refactor and it is mostly fine as is at the moment.
+
 use crate::{
-    templates::forms::login::LoginForm,
-    web::{RequestContext, Template},
+    templates::{
+        forms::login,
+        Template
+    },
+    web::RequestContext,
 };
 
 use uuid::Uuid;
@@ -50,6 +56,9 @@ pub struct Navbar {
 }
 
 impl Navbar {
+    /// The path to the template from the templates directory.
+    const TEMPLATE_NAME: &'static str = "navbar";
+
     /// Get an empty navbar object.
     const fn empty() -> Self {
         Self {
@@ -84,13 +93,13 @@ impl Navbar {
 
         // if we are on the login page dont add another layer of redirect
         let target = if ctx.request().path() == "/login" {
-            LoginForm::target_page(ctx)
+            login::target_page(ctx)
         } else {
             ctx.request().uri().to_string()
         };
 
         let login_query = url::form_urlencoded::Serializer::new(String::new())
-            .append_pair(LoginForm::REDIRECT_QUERY_VAR, target.as_str())
+            .append_pair(login::REDIRECT_QUERY_VAR, target.as_str())
             .finish();
 
         let login_location = format!("/login?{}", login_query);
@@ -110,7 +119,7 @@ impl Navbar {
                 .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
                 .map(|uuid| {
                     let logout_redir = url::form_urlencoded::Serializer::new(String::new())
-                        .append_pair(LoginForm::REDIRECT_QUERY_VAR, ctx.request().uri().path())
+                        .append_pair(login::REDIRECT_QUERY_VAR, ctx.request().uri().path())
                         .finish();
 
                     Self::with_defaults(ctx)
@@ -120,7 +129,7 @@ impl Navbar {
                                 format!("/profile/{}", uuid.to_hyphenated()),
                                 "Profile",
                             )
-                            .class("mr-2 mb-2 btn btn-primary"),
+                                .class("mr-2 mb-2 btn btn-primary"),
                         )
                         .add_right(
                             NavbarLink::new(ctx, format!("/logout?{}", logout_redir), "Logout")
@@ -132,8 +141,10 @@ impl Navbar {
                 .unwrap()
         }
     }
-}
 
-impl Template for Navbar {
-    const TEMPLATE_NAME: &'static str = "navbar";
+    /// Convert this navbar to a template.
+    pub fn template(&self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
+    }
 }

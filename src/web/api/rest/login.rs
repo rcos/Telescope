@@ -21,15 +21,16 @@ pub enum LoginError {
     WrongPassword,
 }
 
-/// Login logic. Uses ctx only for database connections.
+/// Login logic. Uses `ctx` only for database connections.
 /// Does not modify identity.
 pub async fn login(ctx: &RequestContext, request: LoginRequest) -> Result<User, LoginError> {
     let LoginRequest { email, password } = request;
-    let target_user = Email::get_user_from_db_by_email(ctx.get_db_conn().await, email).await;
+    let target_user: Option<User> =
+        Email::get_user_from_db_by_email(ctx.get_db_conn().await, email).await;
 
     if let Some(target) = target_user {
-        let pass = password.as_bytes();
-        let verified = argon2::verify_encoded(target.hashed_pwd.as_str(), pass)
+        let pass: &[u8] = password.as_bytes();
+        let verified: bool = argon2::verify_encoded(target.hashed_pwd.as_str(), pass)
             .map_err(|e| {
                 error!("Argon2 Verification Error: {}", e);
             })
@@ -52,9 +53,12 @@ pub async fn login_rest(
     data: Json<LoginRequest>,
 ) -> Json<Result<User, LoginError>> {
     let identity: &Identity = ctx.identity();
-    let result = login(&ctx, data.into_inner()).await.map(|t| {
-        identity.remember(t.id_str());
-        t
-    });
+    let result: Result<User, LoginError> = login(&ctx, data.into_inner())
+        .await
+        .map(|t| {
+            identity.remember(t.id_str());
+            t
+        });
+
     Json(result)
 }

@@ -16,7 +16,6 @@ extern crate diesel;
 pub mod util;
 
 mod web;
-use web::*;
 
 mod db_janitor;
 mod env;
@@ -30,9 +29,15 @@ use crate::{
     models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
         developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
-        sponsors::SponsorsPage, Static,
+        sponsors::SponsorsPage,
+        Static,
     },
-    web::app_data::AppData,
+    web::{
+        app_data::AppData,
+        RequestContext,
+        cookies,
+        services
+    },
 };
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};

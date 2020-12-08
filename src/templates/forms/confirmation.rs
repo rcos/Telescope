@@ -1,69 +1,54 @@
-use crate::templates::forms::common::password::PasswordField;
-use crate::{models::confirmations::Confirmation, web::Template};
+use crate::{
+    templates::{
+        forms::common::text_field,
+        Template
+    },
+    models::confirmations::Confirmation
+};
 
-/// The template for new account confirmations.
-/// The user is prompted to input a name and password to seed their account.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct NewUserConf {
-    /// The confirmation that spawned this form.
-    invite: Confirmation,
-    /// The name previously entered into this form if there was one.
-    name: Option<String>,
-    /// The user's new password.
-    pub password: PasswordField,
-    /// The password again. Should match the other password field.
-    pub confirm_password: PasswordField,
-}
+/// Path to new user confirmation from templates directory. This form completes
+/// the signup process after verifying an email.
+const NEW_USER_CONF_FORM_TEMPLATE: &'static str = "forms/confirm/new_user";
 
-impl NewUserConf {
-    /// Create a new user confirmation template.
-    pub fn new(conf: Confirmation) -> Self {
-        Self {
-            invite: conf,
-            name: None,
-            // these last two need to match the format of the form structure in
-            // web/services/confirm.rs
-            password: PasswordField::new("password"),
-            confirm_password: PasswordField::new("confirm-password")
-                .map_common(|c| c.name("confirm")),
-        }
+/// Path to the form to display success (or error) message for existing user
+/// who is confirming a new (additional) email.
+const EXISTING_USER_CONF_TEMPLATE: &'static str = "forms/confirm/existing_user";
+
+/// The serialized invite that spawned this confirmation page
+/// (new users and existing users).
+pub const INVITE: &'static str = "invite";
+
+/// For new users, the handlebars field associated with the text field for
+/// their name.
+pub const NAME: &'static str = "name";
+
+/// For new users, the handlebars field that is associated with the
+/// password field.
+/// This must match the structure of ['crate::web::services::NewUserConfInput'].
+pub const PASSWORD: &'static str = "password";
+
+/// For new users, the handlebars field that is associated with the
+/// confirm password field.
+/// This must match the structure of ['crate::web::services::NewUserConfInput'].
+pub const CONFIRM: &'static str = "confirm";
+
+/// For existing users, if there is an error confirming their email,
+/// the handlebars field associated with that error message.
+pub const ERROR: &'static str = "error";
+
+/// Create the template for the confirmation page for a confirmation/invite
+/// object.
+pub fn for_conf(conf: &Confirmation) -> Template {
+    if conf.creates_user() {
+        // New User.
+        Template::new(NEW_USER_CONF_FORM_TEMPLATE)
+            .field(INVITE, conf)
+            .field(NAME,text_field::plaintext_field(NAME, "Name"))
+            .field(PASSWORD, text_field::password_field(PASSWORD, "Password"))
+            .field(CONFIRM, text_field::password_field(CONFIRM, "Confirm Password"))
+    } else {
+        // Existing user.
+        Template::new(EXISTING_USER_CONF_TEMPLATE)
+            .field(INVITE, conf)
     }
-
-    /// Builder style function to set the name on this form.
-    pub fn name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
-        self
-    }
-}
-
-impl Template for NewUserConf {
-    const TEMPLATE_NAME: &'static str = "forms/confirm/new_user";
-}
-
-/// An email confirmed for an existing user.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ExistingUserConf {
-    /// The invite that spawned this page.
-    invite: Confirmation,
-    /// An error message if an error occurred.
-    error_message: Option<String>,
-}
-
-impl ExistingUserConf {
-    /// Create a new existing user confirmation page.
-    ///
-    /// Panics if conf is not for an existing user.
-    pub fn new(conf: Confirmation, err: Option<String>) -> Self {
-        if conf.creates_user() {
-            panic!("Cannot make ExistingUserConfirmation template for new user.")
-        }
-        Self {
-            invite: conf,
-            error_message: err,
-        }
-    }
-}
-
-impl Template for ExistingUserConf {
-    const TEMPLATE_NAME: &'static str = "forms/confirm/existing_user";
 }

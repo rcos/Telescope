@@ -1,6 +1,10 @@
 use crate::{
     models::confirmations::Confirmation,
-    templates::{forms::registration::RegistrationPage, jumbotron::Jumbotron},
+    templates::{
+        forms::registration::RegistrationPage,
+        jumbotron,
+        Template
+    },
     web::RequestContext,
 };
 use actix_web::web::Form;
@@ -19,16 +23,15 @@ pub struct RegistrationForm {
 pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
     // if a user is logged in they cannot register for a new account.
     if ctx.logged_in().await {
-        let jumbotron = Jumbotron::jumbotron_page(
-            &ctx,
-            "Registration Error",
+        let jumbotron: Template = jumbotron::new(
             "Signed In",
             "You are already signed in. Sign out before creating a new account.",
-        )
-        .await;
-        HttpResponse::BadRequest().body(jumbotron)
+        );
+
+        HttpResponse::BadRequest()
+            .body(ctx.render_in_page(&jumbotron, "Registration Error").await)
     } else {
-        let registration_page = RegistrationPage::default();
+        let registration_page: Template = RegistrationPage::default().into();
         HttpResponse::Ok().body(ctx.render_in_page(&registration_page, "Sign Up").await)
     }
 }
@@ -40,22 +43,22 @@ pub async fn registration_service(
     form: Form<RegistrationForm>,
 ) -> HttpResponse {
     if ctx.logged_in().await {
-        let jumbotron = Jumbotron::jumbotron_page(
-            &ctx,
-            "Registration Error",
+        let jumbotron: Template = jumbotron::new(
             "Signed In",
             "You are already signed in. Sign out before creating a new account.",
-        )
-        .await;
-        HttpResponse::BadRequest().body(jumbotron)
+        );
+        HttpResponse::BadRequest()
+            .body(ctx.render_in_page(&jumbotron, "Registration Error").await)
     } else {
-        let email = form.email.to_string();
-        let invite = Confirmation::invite_new(&ctx, email.clone()).await;
+        let email: String = form.email.to_string();
+        let invite: Result<Confirmation, String> =
+            Confirmation::invite_new(&ctx, email.clone()).await;
+
         if let Err(msg) = invite {
-            let page = RegistrationPage::error(email, msg);
+            let page: Template = RegistrationPage::error(email, msg).into();
             HttpResponse::InternalServerError().body(ctx.render_in_page(&page, "Sign Up").await)
         } else {
-            let page = RegistrationPage::success(email);
+            let page: Template = RegistrationPage::success(email).into();
             HttpResponse::Ok().body(ctx.render_in_page(&page, "Email Sent!").await)
         }
     }

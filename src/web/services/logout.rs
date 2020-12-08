@@ -1,4 +1,7 @@
-use crate::{templates::forms::login::LoginForm, web::RequestContext};
+use crate::{
+    templates::forms::login,
+    web::RequestContext
+};
 
 use actix_web::{http::header, HttpResponse};
 
@@ -10,7 +13,7 @@ use actix_web::{http::header, HttpResponse};
 #[get("/logout")]
 pub async fn logout_service(req_ctx: RequestContext) -> HttpResponse {
     req_ctx.identity().forget();
-    let target = LoginForm::target_page(&req_ctx);
+    let target = login::target_page(&req_ctx);
     HttpResponse::Found()
         .header(header::LOCATION, target)
         .finish()

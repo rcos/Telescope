@@ -4,7 +4,10 @@ use uuid::Uuid;
 
 use crate::{
     models::users::User,
-    templates::{jumbotron::Jumbotron, profile::Profile},
+    templates::{
+        jumbotron,
+        profile::Profile
+    },
     web::RequestContext,
 };
 
@@ -16,13 +19,13 @@ pub async fn profile(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpRespon
 
     if target.is_none() {
         return HttpResponse::NotFound().body(
-            Jumbotron::jumbotron_page(&ctx, "User Not Found", "404", "User not found.").await,
+            jumbotron::rendered_page(&ctx, "User Not Found", "404", "User not found.").await,
         );
     } else {
         let user = target.unwrap();
         let page_title = format!("RCOS - {}", user.name.as_str());
         let profile = Profile::for_user(user, &ctx).await;
-        let rendered = ctx.render_in_page(&profile, page_title).await;
+        let rendered = ctx.render_in_page(&profile.as_template(), page_title).await;
         HttpResponse::Ok().body(rendered)
     }
 }

@@ -1,7 +1,10 @@
 use crate::{
     models::users::User,
-    templates::page::Page,
     web::{api::graphql::ApiContext, app_data::AppData},
+    templates::{
+        page,
+        Template
+    }
 };
 
 use actix_web::{
@@ -12,9 +15,7 @@ use actix_web::{
 
 use futures::future::{ok, Ready};
 
-use handlebars::{Handlebars, RenderError};
-
-use serde::Serialize;
+use handlebars::Handlebars;
 
 use diesel::{
     r2d2::{ConnectionManager, Pool, PooledConnection},
@@ -25,15 +26,7 @@ use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use uuid::Uuid;
-
-/// Trait for renderable templates.
-pub trait Template: Serialize + Sized {
-    const TEMPLATE_NAME: &'static str;
-
-    fn render(&self, handlebars: &Handlebars) -> Result<String, RenderError> {
-        handlebars.render(Self::TEMPLATE_NAME, self)
-    }
-}
+use serde_json::Value;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
@@ -92,14 +85,8 @@ impl RequestContext {
     }
 
     /// Render a template using the handlebars templates in this context.
-    pub fn render<T: Template>(&self, template: &T) -> String {
-        template
-            .render(self.app_data.template_registry.as_ref())
-            .map_err(|e| {
-                error!("Handlebars rendering error: {}", e);
-                e
-            })
-            .unwrap_or("Handlebars rendering error".into())
+    pub fn render(&self, template: &Template) -> String {
+        template.render(self.app_data.template_registry.as_ref())
     }
 
     /// Asynchronously get a database connection.
@@ -145,12 +132,12 @@ impl RequestContext {
     }
 
     /// Render a page with the specified template as the page content and the title as specified.
-    pub async fn render_in_page<T: Template>(
+    pub async fn render_in_page(
         &self,
-        template: &T,
-        page_title: impl Into<String>,
+        template: &Template,
+        page_title: impl Into<Value>,
     ) -> String {
-        let page = Page::of(page_title, template, self).await;
+        let page: Template = page::of(&self, page_title, template).await;
         self.render(&page)
     }
 

@@ -9,6 +9,8 @@ use crate::{
 };
 
 use futures::prelude::*;
+use crate::templates::Template;
+use crate::models::users::User;
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -19,8 +21,8 @@ pub struct PasswordRecoveryForm {
 /// The password recovery page.
 #[get("/forgot")]
 pub async fn forgot_page(ctx: RequestContext) -> HttpResponse {
-    let form = PasswordRecoveryPage::new();
-    let rendered = ctx.render_in_page(&form, "Forgot Password").await;
+    let form: Template = PasswordRecoveryPage::new().as_template();
+    let rendered: String = ctx.render_in_page(&form, "Forgot Password").await;
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(rendered)
@@ -32,8 +34,8 @@ pub async fn recovery_service(
     form: Form<PasswordRecoveryForm>,
 ) -> HttpResponse {
     let email: &str = &form.email;
-    let mut form_page = PasswordRecoveryPage::new().email(email);
-    let database_result =
+    let mut form_page: PasswordRecoveryPage = PasswordRecoveryPage::new().email(email);
+    let database_result: Option<User> =
         Email::get_user_from_db_by_email(ctx.get_db_conn().await, email.to_string()).await;
     if let Some(target_user) = database_result {
         // get the user's emails.
@@ -84,7 +86,7 @@ pub async fn recovery_service(
             form_page =
                 form_page.error("Could not send email. Please contact a server administrator.");
             return HttpResponse::InternalServerError()
-                .body(ctx.render_in_page(&form_page, "Error").await);
+                .body(ctx.render_in_page(&form_page.as_template(), "Error").await);
         }
 
         // store the recovery to the database.
@@ -92,14 +94,14 @@ pub async fn recovery_service(
 
         if let Err(err_msg) = db_res {
             form_page = form_page.error(err_msg);
-            HttpResponse::InternalServerError().body(ctx.render_in_page(&form_page, "Error").await)
+            HttpResponse::InternalServerError().body(ctx.render_in_page(&form_page.as_template(), "Error").await)
         } else {
             form_page.success = true;
-            HttpResponse::Ok().body(ctx.render_in_page(&form_page, "Email Sent").await)
+            HttpResponse::Ok().body(ctx.render_in_page(&form_page.as_template(), "Email Sent").await)
         }
     } else {
         form_page = form_page.error("Email Not Found");
-        let page = ctx.render_in_page(&form_page, "Forgot Password").await;
+        let page = ctx.render_in_page(&form_page.as_template(), "Forgot Password").await;
         HttpResponse::Ok()
             .content_type("text/html; charset=utf-8")
             .body(page)

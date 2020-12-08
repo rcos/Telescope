@@ -1,9 +1,20 @@
 use crate::{
-    models::confirmations::{ConfirmNewUserError, Confirmation},
+    models::{
+        confirmations::{
+            ConfirmNewUserError,
+            Confirmation
+        },
+        password_requirements::PasswordRequirements,
+        users::User
+    },
     templates::{
-        forms::confirmation::{ExistingUserConf, NewUserConf},
-        jumbotron::Jumbotron,
-        page::Page,
+        forms::{
+            confirmation,
+            common::text_field
+        },
+        jumbotron,
+        page,
+        Template,
     },
     web::RequestContext,
 };
@@ -34,19 +45,20 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
     // handle missing or expired confirmation.
     if let Some(confirmation) = confirmation {
         if confirmation.creates_user() {
-            let form = NewUserConf::new(confirmation);
-            let page = Page::of("Create account", &form, &ctx).await;
+            let form: Template = confirmation::for_conf(&confirmation);
+            let page: Template = page::of(&ctx, "Create account", &form).await;
             HttpResponse::Ok().body(ctx.render(&page))
         } else {
-            let error_message = confirmation.clone().confirm_existing(&ctx).await.err();
+            let error_message = confirmation.confirm_existing(&ctx).await.err();
 
             // make page title
             let errored = error_message.is_some();
             let page_title = if errored { "Error" } else { "RCOS" };
 
             // make confirmation page
-            let conf = ExistingUserConf::new(confirmation, error_message);
-            let rendered = ctx.render_in_page(&conf, page_title).await;
+            let conf: Template = confirmation::for_conf(&confirmation)
+                .field(confirmation::ERROR, error_message);
+            let rendered: String = ctx.render_in_page(&conf, page_title).await;
 
             return if errored {
                 HttpResponse::InternalServerError().body(rendered)
@@ -55,17 +67,9 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
             };
         }
     } else {
-        let page = Jumbotron::jumbotron_page(
-            &ctx,
-            "Not Found",
-            "Invite Not Found",
-            format!(
-                "Could not find confirmation {}. It may have expired.",
-                invite_id
-            ),
-        )
-        .await;
-        HttpResponse::NotFound().body(page)
+        let err_msg: String = format!("Could not find confirmation {}. It may have expired.", invite_id);
+        let jumbo: Template = jumbotron::new("Invite Not Found", err_msg);
+        HttpResponse::NotFound().body(ctx.render_in_page(&jumbo, "Not Found").await)
     }
 }
 
@@ -75,113 +79,103 @@ pub async fn confirm(
     Path(invite_id): Path<Uuid>,
     Form(form): Form<NewUserConfInput>,
 ) -> HttpResponse {
-    let confirmation = Confirmation::get_by_id(ctx.get_db_conn().await, invite_id)
-        .await
-        .expect("Error getting confirmation.");
+    // Get confirmation record from database.
+    let confirmation: Option<Confirmation> =
+        Confirmation::get_by_id(ctx.get_db_conn().await, invite_id)
+            .await
+            .expect("Error getting confirmation.");
 
-    // handle missing or expired confirmation.
-    if let Some(confirmation) = confirmation {
-        if confirmation.creates_user() {
-            let NewUserConfInput {
-                name,
-                password,
-                confirm,
-            } = form;
+    // Handle missing confirmation.
+    if confirmation.is_none() {
+        let err_msg: String = format!("Could not find confirmation {}. It may have expired.", invite_id);
+        let jumbo: Template = jumbotron::new("Invite Not Found", err_msg);
+        return HttpResponse::NotFound()
+            .body(ctx.render_in_page(&jumbo, "Not Found").await);
+    }
 
-            // check that the pasword isn't way too long. This is unlikely to happen but
-            // serves to prevent bad actors from locking up the server by submitting super long
-            // passwords.
+    let confirmation: Confirmation = confirmation.unwrap();
 
-            const MAX_PASS_LEN: usize = 10_000;
+    // Make sure that the confirmation creates a user. We do not accept post requests for existing
+    // users.
+    if !confirmation.creates_user() {
+        let error_message: String = format!(
+            "Confirmation {} is already linked to an existing user",
+            invite_id
+        );
 
-            if password.len() > MAX_PASS_LEN {
-                let mut form = NewUserConf::new(confirmation).name(&name);
-                form.password = form
-                    .password
-                    .error("Password too long. Please stay under 10,000 bytes.");
-                return HttpResponse::BadRequest().body(ctx.render_in_page(&form, "Error").await);
-            }
+        let page: String = jumbotron::rendered_page(
+            &ctx,
+            "Cannot create user",
+            "Bad request",
+            error_message
+        ).await;
 
-            if confirm.len() > MAX_PASS_LEN {
-                let mut form = NewUserConf::new(confirmation).name(&name);
-                form.confirm_password = form
-                    .confirm_password
-                    .error("Password too long. Please stay under 10,000 bytes.");
-                return HttpResponse::BadRequest().body(ctx.render_in_page(&form, "Error").await);
-            }
+        return HttpResponse::BadRequest().body(page);
+    }
 
-            // check that the password and the confirm password are the same.
-            if password != confirm {
-                let mut form = NewUserConf::new(confirmation).name(&name);
-                form.password = form
-                    .password
-                    .error("Password does not match confirm password.");
-                return HttpResponse::BadRequest().body(ctx.render_in_page(&form, "Error").await);
-            }
+    // Destructure form.
+    let NewUserConfInput {
+        name,
+        password,
+        confirm,
+    } = form;
 
-            let res = confirmation
-                .clone()
-                .confirm_new(&ctx, name.clone(), password)
-                .await;
+    // Form to return if errors occur.
+    let mut form_err: Template = confirmation::for_conf(&confirmation);
+    form_err[confirmation::NAME][text_field::PREFILL_FIELD] = name.as_str().into();
 
-            match res {
-                Ok(new_user) => {
-                    // log the user in.
-                    // in the future we should probably have a better form
-                    // of user identity than just the uuid.
-                    ctx.identity().remember(new_user.id_str());
+    // Check that the password and the confirm password are the same.
+    if password != confirm {
+        form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] = "Password does not match confirm password.".into();
+        return HttpResponse::BadRequest()
+            .body(ctx.render_in_page(&form_err, "Error").await);
+    }
 
-                    let profile_url = format!("/profile/{}", new_user.id_str());
+    // Try to confirm the new user.
+    let res: Result<User, ConfirmNewUserError> = confirmation
+        .confirm_new(&ctx, name.clone(), password)
+        .await;
 
-                    return HttpResponse::Found()
-                        .header(header::LOCATION, profile_url)
-                        .finish();
-                }
-                Err(ConfirmNewUserError::BadPassword(reqs)) => {
-                    let mut form = NewUserConf::new(confirmation).name(name);
-                    form.password = form.password.error(
-                        reqs.get_error_string()
-                            .expect("Could not get error string for password requirements"),
-                    );
-                    HttpResponse::BadRequest().body(ctx.render_in_page(&form, "Error").await)
-                }
-                Err(ConfirmNewUserError::Other(msg)) => {
-                    error!("Could not confirm new user: {}", msg);
-                    let jumbotron = Jumbotron::jumbotron_page(
-                        &ctx,
-                        "Error",
-                        "500 - Internal Server Error",
-                        "We encountered an error while processing your request. Please try again \
-                        If you continue to have issues, please make a github issue and/or contact a server \
-                        administrator."
-                    ).await;
-                    HttpResponse::InternalServerError().body(jumbotron)
-                }
-            }
-        } else {
-            let error_message = format!(
-                "Confirmation {} is already linked to an existing user",
-                invite_id
-            );
+    match res {
+        // Success
+        Ok(new_user) => {
+            // log the user in.
+            // in the future we should probably have a better form
+            // of user identity than just the uuid.
+            ctx.identity().remember(new_user.id_str());
 
-            let page =
-                Jumbotron::jumbotron_page(&ctx, "Cannot create user", "Bad request", error_message)
-                    .await;
+            let profile_url: String = format!("/profile/{}", new_user.id_str());
 
-            return HttpResponse::BadRequest().body(page);
+            return HttpResponse::Found()
+                .header(header::LOCATION, profile_url)
+                .finish();
         }
-    } else {
-        HttpResponse::NotFound().body(
-            Jumbotron::jumbotron_page(
+
+        // Handle bad password.
+        Err(ConfirmNewUserError::BadPassword(reqs)) => {
+            let err_str: String = reqs.get_error_string()
+                .expect("Could not get error string for password requirements");
+
+            form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] = err_str.into();
+
+            HttpResponse::BadRequest()
+                .body(ctx.render_in_page(&form_err, "Error").await)
+        }
+
+        // Handle other confirmation error.
+        Err(ConfirmNewUserError::Other(msg)) => {
+            error!("Could not confirm new user: {}", msg);
+
+            let jumbotron: String = jumbotron::rendered_page(
                 &ctx,
-                "Not Found",
-                "Invite Not Found",
-                format!(
-                    "Could not find confirmation {}. It may have expired.",
-                    invite_id
-                ),
-            )
-            .await,
-        )
+                "Error",
+                "500 - Internal Server Error",
+                "We encountered an error while processing your request. Please try again \
+                If you continue to have issues, please make a github issue and/or contact a server \
+                administrator."
+            ).await;
+
+            HttpResponse::InternalServerError().body(jumbotron)
+        }
     }
 }

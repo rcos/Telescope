@@ -1,8 +1,18 @@
 use crate::{
     models::users::User,
-    templates::{forms::login::LoginForm, page::Page},
+    templates::{
+        forms::{
+            login,
+            common::text_field
+        },
+        page,
+        Template,
+    },
     web::{
-        api::rest::login::{login, LoginRequest},
+        api::rest::login::{
+            login,
+            LoginRequest
+        },
         RequestContext,
     },
 };
@@ -12,12 +22,13 @@ use actix_identity::Identity;
 use actix_web::{http::header, web::Form, HttpResponse};
 
 use uuid::Uuid;
+use crate::web::api::rest::login::LoginError;
 
 /// A request to the login form using a GET request. Sensitive user information
 /// is not accepted when using GET.
 #[get("/login")]
 pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
-    let target_page = LoginForm::target_page(&req_ctx);
+    let target_page: String = login::target_page(&req_ctx);
     let identity: &Identity = req_ctx.identity();
 
     // check the identity.
@@ -40,8 +51,8 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
     // forget it and return the login form.
     identity.forget();
 
-    let form = LoginForm::from_context(&req_ctx);
-    let login_page = Page::new("RCOS Login", req_ctx.render(&form), &req_ctx).await;
+    let form: Template = login::new(&req_ctx);
+    let login_page: Template = page::of(&req_ctx,"RCOS Login", &form).await;
 
     HttpResponse::Ok().body(req_ctx.render(&login_page))
 }
@@ -49,23 +60,36 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
 /// The Login page and service.
 #[post("/login")]
 pub async fn login_post(req_ctx: RequestContext, form: Form<LoginRequest>) -> HttpResponse {
-    let identity = req_ctx.identity();
-    let email = form.email.clone();
-    let target_page = LoginForm::target_page(&req_ctx);
-    let res = login(&req_ctx, form.into_inner()).await.map(|u| {
-        // if user logged in successfully, modify the identity
-        identity.remember(u.id_str());
-        HttpResponse::Found()
-            .header(header::LOCATION, target_page)
-            .finish()
-    });
+    let identity: &Identity = req_ctx.identity();
+    let email: String = form.email.clone();
+    let target_page: String = login::target_page(&req_ctx);
+    let res: Result<User, LoginError> = login(&req_ctx, form.into_inner()).await;
+
     match res {
-        Ok(r) => r,
+        Ok(user) => {
+            // Modify the identity
+            identity.remember(user.id_str());
+
+            HttpResponse::Found()
+                .header(header::LOCATION, target_page)
+                .finish()
+        },
+
         Err(e) => {
-            let login_form = LoginForm::from_context(&req_ctx)
-                .with_err(e)
-                .with_email(email);
-            let page = Page::of("RCOS Login", &login_form, &req_ctx).await;
+            let mut login_form: Template = login::new(&req_ctx);
+            login_form[login::EMAIL][text_field::PREFILL_FIELD] = email.into();
+
+            match e {
+                LoginError::WrongPassword => {
+                    login_form[login::PASSWORD][text_field::ERROR_FIELD] = "Incorrect password".into();
+                },
+
+                LoginError::EmailNotFound => {
+                    login_form[login::EMAIL][text_field::ERROR_FIELD] = "Email not found".into();
+                },
+            }
+
+            let page: Template = page::of(&req_ctx, "RCOS Login", &login_form).await;
             HttpResponse::Unauthorized().body(req_ctx.render(&page))
         }
     }

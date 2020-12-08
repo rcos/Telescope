@@ -135,8 +135,8 @@ impl Confirmation {
             // Until this changes, we log it in a trace message so that it's
             // easier to test on development without a full SMTP backend.
             // See https://github.com/lettre/lettre/pull/505.
-            .map(|url| {
-                trace!("Generated Invite URL: {}", url);
+            .map(|url: String| {
+                trace!("Generated Invite URL: {}/confirm/{}", url, invite.invite_id);
                 url
             })
             .ok_or("Could not get domain string.".to_string())
@@ -232,13 +232,14 @@ impl Confirmation {
     }
 
     /// Private function to remove a confirmation from the database.
-    async fn remove_from_db(self, conn: DbConnection) -> Result<(), String> {
+    async fn remove_from_db(&self, conn: DbConnection) -> Result<(), String> {
         trace!("Removing {:?} from database.", &self);
+        let self_id: Uuid = self.invite_id;
         block::<_, usize, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
             diesel::delete(confirmations)
-                .filter(invite_id.eq(self.invite_id))
+                .filter(invite_id.eq(self_id))
                 .execute(&conn)
         })
         .await
@@ -252,7 +253,7 @@ impl Confirmation {
     /// Assume that `self` is a valid invite in the confirmations table.
     /// Return the created user or a string describing the error.
     pub async fn confirm_new(
-        self,
+        &self,
         ctx: &RequestContext,
         name: String,
         pass: String,
@@ -261,9 +262,10 @@ impl Confirmation {
             return Err("Invite is for existing user".to_string().into());
         } else {
             // create user and email here to avoid use after move.
-            let user =
-                User::new(name, pass.as_str()).map_err::<ConfirmNewUserError, _>(|e| e.into())?;
-            let email = Email::new(user.id, self.email.clone())
+            let user: User = User::new(name, pass.as_str())
+                .map_err::<ConfirmNewUserError, _>(|e| e.into())?;
+
+            let email: Email = Email::new(user.id, self.email.clone())
                 .expect("Could not create email for new user.");
 
             // remove confirmation from database.
@@ -278,7 +280,7 @@ impl Confirmation {
 
     /// Confirm an invite for an existing user.
     /// Return a string describing the error if one occurs.
-    pub async fn confirm_existing(self, ctx: &RequestContext) -> Result<(), String> {
+    pub async fn confirm_existing(&self, ctx: &RequestContext) -> Result<(), String> {
         if self.creates_user() {
             return Err("Invite is not associated with existing user".to_string());
         } else {
