@@ -24,10 +24,12 @@ pub const NAME: &'static str = "name";
 
 /// For new users, the handlebars field that is associated with the
 /// password field.
+/// This must match the structure of ['crate::web::services::NewUserConfInput'].
 pub const PASSWORD: &'static str = "password";
 
 /// For new users, the handlebars field that is associated with the
 /// confirm password field.
+/// This must match the structure of ['crate::web::services::NewUserConfInput'].
 pub const CONFIRM: &'static str = "confirm";
 
 /// For existing users, if there is an error confirming their email,

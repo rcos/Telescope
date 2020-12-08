@@ -252,7 +252,7 @@ impl Confirmation {
     /// Assume that `self` is a valid invite in the confirmations table.
     /// Return the created user or a string describing the error.
     pub async fn confirm_new(
-        self,
+        &self,
         ctx: &RequestContext,
         name: String,
         pass: String,
@@ -261,9 +261,10 @@ impl Confirmation {
             return Err("Invite is for existing user".to_string().into());
         } else {
             // create user and email here to avoid use after move.
-            let user =
-                User::new(name, pass.as_str()).map_err::<ConfirmNewUserError, _>(|e| e.into())?;
-            let email = Email::new(user.id, self.email.clone())
+            let user: User = User::new(name, pass.as_str())
+                .map_err::<ConfirmNewUserError, _>(|e| e.into())?;
+
+            let email: Email = Email::new(user.id, self.email.clone())
                 .expect("Could not create email for new user.");
 
             // remove confirmation from database.
@@ -278,7 +279,7 @@ impl Confirmation {
 
     /// Confirm an invite for an existing user.
     /// Return a string describing the error if one occurs.
-    pub async fn confirm_existing(self, ctx: &RequestContext) -> Result<(), String> {
+    pub async fn confirm_existing(&self, ctx: &RequestContext) -> Result<(), String> {
         if self.creates_user() {
             return Err("Invite is not associated with existing user".to_string());
         } else {

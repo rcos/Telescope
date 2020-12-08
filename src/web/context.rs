@@ -133,10 +133,10 @@ impl RequestContext {
     /// Render a page with the specified template as the page content and the title as specified.
     pub async fn render_in_page(
         &self,
-        template: Template,
+        template: &Template,
         page_title: &str,
     ) -> String {
-        let page: Template = page::of(&self, page_title, &template).await;
+        let page: Template = page::of(&self, page_title, template).await;
         self.render(&page)
     }
 
