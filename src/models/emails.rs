@@ -7,13 +7,8 @@ use crate::{
 use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};
 use lettre::EmailAddress;
-use regex::Regex;
 use uuid::Uuid;
 
-lazy_static! {
-    static ref EMAIL_REGEX: Regex =
-        Regex::new(r#"^[[:alpha:]]+@[[:alpha:]]+(\.[[:alpha:]]+)+$"#).unwrap();
-}
 
 /// Field structure must match that in the SQL migration.
 /// (for diesel reasons it seems)
@@ -67,24 +62,21 @@ impl Email {
 }
 
 impl Email {
-    /// Get the email validation regex.
-    pub fn get_email_regex() -> &'static Regex {
-        &*EMAIL_REGEX
-    }
-
     /// Create a new email object. Return none if email does not
     /// match regex.
     pub fn new<T: Into<String>>(user_id: Uuid, email: T) -> Option<Self> {
-        let email = email.into();
-        if Self::get_email_regex().is_match(&email) {
-            Some(Self {
-                user_id,
-                email,
-                is_visible: false,
+        EmailAddress::new(email.into())
+            .map_err(|e| {
+                error!("Email malformed: {}", e);
             })
-        } else {
-            None
-        }
+            .map(|email: EmailAddress| {
+                Self {
+                    user_id,
+                    email: email.to_string(),
+                    is_visible: false,
+                }
+            })
+            .ok()
     }
 
     /// Create a new email object. This will not fail since the syntactic
