@@ -14,5 +14,3 @@ services:
     depends_on:
       - db
     build: .
-    environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}"
