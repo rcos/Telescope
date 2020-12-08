@@ -11,10 +11,11 @@ WORKDIR /build/
 
 RUN cargo build --release
 
-COPY ./templates/ /build/templates
-COPY ./static/ /build/static
-COPY ./docker-run.sh /build/
-
 EXPOSE 8080
 EXPOSE 8443
-ENTRYPOINT ["/build/docker_run.sh"]
+
+COPY ./templates/ /build/templates
+COPY ./static/ /build/static
+COPY ./docker-run.sh ./docker-run.sh
+
+ENTRYPOINT ["docker_run.sh"]
