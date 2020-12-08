@@ -74,7 +74,8 @@ fn main() -> std::io::Result<()> {
         .clone_db_conn_pool()
         .get()
         .expect("Could not get database connection.");
-    embedded_migrations::run_with_output(&conn, &mut std::io::stdout());
+    embedded_migrations::run_with_output(&conn, &mut std::io::stdout())
+        .expect("Could not run migrations.");
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use
