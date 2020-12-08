@@ -8,8 +8,8 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
     ports:
-    - "5432:5432"
-    - "5432:5432/udp"
+      - "5432:5432"
+      - "5432:5432/udp"
 
   telescope:
     restart: "no"
@@ -17,7 +17,7 @@ services:
       - db
     build: .
     ports:
-    - "80:8080"
-    - "80:8080/udp"
-    - "443:8443"
-    - "443/8443/udp"
+      - "80:8080"
+      - "80:8080/udp"
+      - "443:8443"
+      - "443/8443/udp"
