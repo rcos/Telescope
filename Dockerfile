@@ -18,4 +18,4 @@ COPY ./templates/ /build/templates
 COPY ./static/ /build/static
 COPY ./docker-run.sh /build/docker-run.sh
 
-ENTRYPOINT ["/bin/sh", "/build/docker_run.sh"]
+CMD ["/bin/sh", "/build/docker_run.sh"]
