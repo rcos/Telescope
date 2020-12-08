@@ -17,6 +17,7 @@ EXPOSE 8443
 COPY ./templates/ /build/templates
 COPY ./static/ /build/static
 COPY ./config.toml /build/config.toml
+COPY ./tls-ssl/ /build/tls-ssl
 COPY ./docker-run.sh /build/docker-run.sh
 
 CMD ["/bin/sh", "/build/docker-run.sh"]
