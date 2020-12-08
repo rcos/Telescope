@@ -19,7 +19,7 @@ pub async fn profile(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpRespon
 
     if target.is_none() {
         return HttpResponse::NotFound().body(
-            Jumbotron::jumbotron_page(&ctx, "User Not Found", "404", "User not found.").await,
+            jumbotron::rendered_page(&ctx, "User Not Found", "404", "User not found.").await,
         );
     } else {
         let user = target.unwrap();

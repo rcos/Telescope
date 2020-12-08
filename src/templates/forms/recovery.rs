@@ -2,6 +2,7 @@ use crate::templates::{
     forms::common::text_field,
     Template
 };
+use serde_json::Value;
 
 /// The password recovery form. This has a single field to indicate
 /// the email to send the recovery link to. All fields of this struct are
@@ -27,15 +28,15 @@ impl PasswordRecoveryPage {
     }
 
     /// Set the email field of this form.
-    pub fn email(mut self, email: impl Into<String>) -> Self {
-        self.email_field = self.email_field.prefill(email);
+    pub fn email(mut self, email: impl Into<Value>) -> Self {
+        self.email_field[text_field::PREFILL_FIELD] = email.into();
         self
     }
 
     /// Set the error field of this struct. This conflicts with the success
     /// field.
-    pub fn error(mut self, err: impl Into<String>) -> Self {
-        self.email_field = self.email_field.error(err);
+    pub fn error(mut self, err: impl Into<Value>) -> Self {
+        self.email_field[text_field::ERROR_FIELD] = err.into();
         self
     }
 }

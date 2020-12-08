@@ -69,14 +69,8 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
         }
     } else {
         let err_msg: String = format!("Could not find confirmation {}. It may have expired.", invite_id);
-        let page: String = Jumbotron::jumbotron_page(
-            &ctx,
-            "Not Found",
-            "Invite Not Found",
-            err_msg
-        )
-        .await;
-        HttpResponse::NotFound().body(page)
+        let jumbo: Template = jumbotron::new("Invite Not Found", err_msg);
+        HttpResponse::NotFound().body(ctx.render_in_page(&jumbo, "Not Found").await)
     }
 }
 
@@ -95,12 +89,9 @@ pub async fn confirm(
     // Handle missing confirmation.
     if confirmation.is_none() {
         let err_msg: String = format!("Could not find confirmation {}. It may have expired.", invite_id);
-
-        let jumbotron: String =
-            Jumbotron::jumbotron_page(&ctx, "Not Found", "Invite Not Found", err_msg)
-                .await;
-
-        return HttpResponse::NotFound().body(jumbotron);
+        let jumbo: Template = jumbotron::new("Invite Not Found", err_msg);
+        return HttpResponse::NotFound()
+            .body(ctx.render_in_page(&jumbo, "Not Found").await);
     }
 
     let confirmation: Confirmation = confirmation.unwrap();
@@ -113,7 +104,7 @@ pub async fn confirm(
             invite_id
         );
 
-        let page: String = Jumbotron::jumbotron_page(
+        let page: String = jumbotron::rendered_page(
             &ctx,
             "Cannot create user",
             "Bad request",
@@ -177,7 +168,7 @@ pub async fn confirm(
         Err(ConfirmNewUserError::Other(msg)) => {
             error!("Could not confirm new user: {}", msg);
 
-            let jumbotron: String = Jumbotron::jumbotron_page(
+            let jumbotron: String = jumbotron::rendered_page(
                 &ctx,
                 "Error",
                 "500 - Internal Server Error",

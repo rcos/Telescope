@@ -7,7 +7,7 @@ use juniper::http::GraphQLRequest;
 
 use crate::{
     templates::{
-        jumbotron::Jumbotron,
+        jumbotron,
         graphql_playground,
         Template
     },
@@ -43,17 +43,14 @@ pub async fn api(
 #[get("/playground")]
 pub async fn playground(req_ctx: RequestContext) -> HttpResponse {
     if !req_ctx.logged_in().await {
+        let jumbo: Template = jumbotron::new(
+            "Unauthorized",
+            "You must login to access the API playground.",
+        );
+
         HttpResponse::Unauthorized()
             .content_type("text/html; charset=utf-8")
-            .body(
-                Jumbotron::jumbotron_page(
-                    &req_ctx,
-                    "RCOS - Unauthorized",
-                    "Unauthorized",
-                    "You must login to access the API playground.",
-                )
-                .await,
-            )
+            .body(req_ctx.render_in_page(&jumbo, "RCOS - Unauthorized").await)
     } else {
         let endpoint = "/api/graphql";
 
