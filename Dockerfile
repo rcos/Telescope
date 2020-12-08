@@ -3,6 +3,7 @@ FROM rust:1-buster AS build
 RUN cargo install diesel_cli --no-default-features --features postgres
 
 COPY ./migrations /build/
+COPY ./Cargo.* /build/
 COPY ./diesel.toml /build/
 COPY ./.env /build/
 COPY ./src /build/
