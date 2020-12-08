@@ -10,6 +10,7 @@ RUN echo "fn main() {}" > /build/src/main.rs
 RUN cargo vendor > .cargo/config
 RUN cargo build --release
 
+RUN rm -rfv /build/src
 COPY ./src/ /build/src
 RUN cargo build --release
 
