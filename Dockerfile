@@ -5,6 +5,7 @@ RUN cargo install diesel_cli --no-default-features --features postgres
 COPY ./Cargo.* /build/
 WORKDIR /build/
 RUN mkdir .cargo
+RUN mkdir src
 RUN echo "fn main() {}" > /build/src/main.rs
 RUN cargo vendor > .cargo/config
 
