@@ -1,3 +1,6 @@
+//! Navbar and navbar links. This file was mostly unchanged in the December 2020
+//! template refactor and it is mostly fine as is at the moment.
+
 use crate::{
     templates::{
         forms::login,
@@ -7,8 +10,6 @@ use crate::{
 };
 
 use uuid::Uuid;
-
-
 
 /// A button that just links to a another part of the site (or another site entirely.)
 /// This is good for most items on the header bar.

@@ -3,10 +3,7 @@ use crate::{
         forms::common::text_field,
         Template,
     },
-    web::{
-        api::rest::login::LoginError,
-        RequestContext
-    }
+    web::RequestContext
 };
 
 /// The path to the template file from the template directory.
@@ -23,7 +20,6 @@ pub const EMAIL: &'static str = "email";
 
 /// Handlebars field for the password form component.
 pub const PASSWORD: &'static str = "password";
-
 
 /// Get the URL of the page the user is attempting to access.
 pub fn target_page(ctx: &RequestContext) -> String {

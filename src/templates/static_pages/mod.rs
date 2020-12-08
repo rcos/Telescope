@@ -6,7 +6,6 @@ use crate::{
     RequestContext
 };
 use actix_web::HttpResponse;
-use serde::Serialize;
 use std::marker::PhantomData;
 
 pub mod developers;

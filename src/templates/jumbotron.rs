@@ -3,6 +3,8 @@ use crate::{
     templates::Template
 };
 
+
+
 /// A template for a jumbotron.
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Jumbotron {

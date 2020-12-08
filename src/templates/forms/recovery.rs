@@ -1,5 +1,5 @@
 use crate::templates::{
-    forms::common::email::EmailField,
+    forms::common::text_field,
     Template
 };
 
@@ -11,7 +11,7 @@ pub struct PasswordRecoveryPage {
     /// A success message to indicate that the email was sent.
     pub success: bool,
     /// The email form field.
-    email_field: EmailField,
+    pub email_field: Template,
 }
 
 impl PasswordRecoveryPage {

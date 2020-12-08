@@ -5,7 +5,6 @@ use crate::{
     },
     web::RequestContext
 };
-use serde::Serialize;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";

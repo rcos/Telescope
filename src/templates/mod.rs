@@ -22,6 +22,7 @@ use std::ops::{Index, IndexMut};
 #[derive(Serialize, Debug, Clone)]
 pub struct Template {
     /// The file to use to render this template.
+    #[serde(skip)]
     pub handlebars_file: &'static str,
 
     /// The fields to render.

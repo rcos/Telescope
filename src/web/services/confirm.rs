@@ -3,7 +3,7 @@ use crate::{
     templates::{
         forms::confirmation::{ExistingUserConf, NewUserConf},
         jumbotron::Jumbotron,
-        page::Page,
+        page,
     },
     web::RequestContext,
 };

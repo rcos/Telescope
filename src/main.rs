@@ -166,16 +166,14 @@ fn main() -> std::io::Result<()> {
             // logger middleware
             .wrap(middleware::Logger::default())
             // register API and Services
-            //.configure(web::api::register_apis)
-            //.configure(web::services::register)
+            .configure(web::api::register_apis)
+            .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(Static::<LandingPage>::handle))
-            /*
             .route("/projects", get().to(Static::<ProjectsPage>::handle))
             .route("/developers", get().to(Static::<DevelopersPage>::handle))
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
-             */
             .default_service(aweb::route().to(services::p404::not_found))
     })
     .bind_openssl(config.bind_to.clone(), tls_builder)

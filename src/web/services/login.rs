@@ -1,6 +1,9 @@
 use crate::{
     models::users::User,
-    templates::{forms::login::LoginForm, page::Page},
+    templates::{
+        forms::login,
+        page
+    },
     web::{
         api::rest::login::{login, LoginRequest},
         RequestContext,
