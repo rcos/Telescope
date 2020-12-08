@@ -25,7 +25,7 @@ pub async fn profile(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpRespon
         let user = target.unwrap();
         let page_title = format!("RCOS - {}", user.name.as_str());
         let profile = Profile::for_user(user, &ctx).await;
-        let rendered = ctx.render_in_page(&profile, page_title).await;
+        let rendered = ctx.render_in_page(&profile.as_template(), page_title).await;
         HttpResponse::Ok().body(rendered)
     }
 }

@@ -24,7 +24,6 @@ use actix_web::{
     HttpResponse,
 };
 use uuid::Uuid;
-use serde_json::{Map, Value};
 
 /// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]

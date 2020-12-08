@@ -17,6 +17,6 @@ fn test_too_short() {
 #[test]
 fn test_good_passwords() {
     for p in &["AbcdE123", "7Ns&Z3*g76G@hTRe"] {
-        assert!(PasswordRequirements::for_password(p).are_satisfied());
+        assert!(PasswordRequirements::for_password(p).satisfied());
     }
 }

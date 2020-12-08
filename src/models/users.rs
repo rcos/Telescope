@@ -128,9 +128,9 @@ impl User {
     /// Create a new user from a name and a password. Randomly generate a UUID.
     /// Do not set any user info yet. Fail if password does nto meet requirements.
     pub fn new<T: Into<String>>(name: T, password: &str) -> Result<Self, PasswordRequirements> {
-        let reqs = PasswordRequirements::for_password(password);
+        let reqs: PasswordRequirements = PasswordRequirements::for_password(password);
 
-        if !reqs.are_satisfied() {
+        if !reqs.satisfied() {
             return Err(reqs);
         }
 

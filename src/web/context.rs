@@ -26,6 +26,7 @@ use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use uuid::Uuid;
+use serde_json::Value;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
@@ -134,7 +135,7 @@ impl RequestContext {
     pub async fn render_in_page(
         &self,
         template: &Template,
-        page_title: &str,
+        page_title: impl Into<Value>,
     ) -> String {
         let page: Template = page::of(&self, page_title, template).await;
         self.render(&page)

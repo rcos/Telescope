@@ -7,7 +7,7 @@ use serde_json::Value;
 /// The password recovery form. This has a single field to indicate
 /// the email to send the recovery link to. All fields of this struct are
 /// therefore optional, as described below.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PasswordRecoveryPage {
     /// A success message to indicate that the email was sent.
     pub success: bool,
@@ -39,12 +39,10 @@ impl PasswordRecoveryPage {
         self.email_field[text_field::ERROR_FIELD] = err.into();
         self
     }
-}
 
-impl Into<Template> for PasswordRecoveryPage {
-    fn into(self) -> Template {
-        let mut t = Template::new(Self::TEMPLATE_NAME);
-        t.append_fields(self);
-        t
+    /// Convert self to a template via serialization.
+    pub fn as_template(&self) -> Template {
+        Template::new(Self::TEMPLATE_NAME)
+            .with_fields(self)
     }
 }
