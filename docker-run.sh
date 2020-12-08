@@ -1,3 +1,3 @@
 diesel setup
 diesel migration run
-$1
+cargo run --release
