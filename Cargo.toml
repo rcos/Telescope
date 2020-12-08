@@ -59,11 +59,9 @@ lettre_email = "0.9.4"
 md5 = "0.7"
 # URL Parsing
 url = "2.2.0"
-# Embdedded database migrations
-diesel_migrations = "1.4.0"
 # Async functions in traits
 # Add this in when you have time (see src/templates/static_pages)
-#async-trait = "0.1.42"
+# async-trait = "0.1.42"
 
 # Date and time utilities
 [dependencies.chrono]
