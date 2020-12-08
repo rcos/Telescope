@@ -16,6 +16,6 @@ EXPOSE 8443
 
 COPY ./templates/ /build/templates
 COPY ./static/ /build/static
-COPY ./docker-run.sh ./docker-run.sh
+COPY ./docker-run.sh /build/docker-run.sh
 
-ENTRYPOINT ["docker_run.sh"]
+ENTRYPOINT ["/bin/sh", "/build/docker_run.sh"]
