@@ -877,6 +877,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_utils"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64196eb9f551916167225134f1e8a90f0b5774331d3c900d6328fd94bafe3544"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "diesel"
 version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -888,7 +899,7 @@ dependencies = [
  "diesel_derives",
  "pq-sys",
  "r2d2",
- "uuid",
+ "uuid 0.7.4",
 ]
 
 [[package]]
@@ -1167,6 +1178,17 @@ name = "futures-core"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "847ce131b72ffb13b6109a221da9ad97a64cbe48feb1028356b836b47b8f1748"
+
+[[package]]
+name = "futures-enum"
+version = "0.1.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70f3979efb3aea70991b7fd261a40decddae71f8bdfd8b2982cc8442e8f6813a"
+dependencies = [
+ "derive_utils",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "futures-executor"
@@ -1478,25 +1500,29 @@ checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 
 [[package]]
 name = "juniper"
-version = "0.14.2"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f662ba51e2fbc3d6dd1ca66be70b44963606a34473156abddcb0351fc6caa668"
+checksum = "18d2b30707fe15d9b703aa3967f8d680d460136d82be85da506e06db70b51d50"
 dependencies = [
+ "async-trait",
  "chrono",
  "fnv",
+ "futures",
+ "futures-enum",
  "indexmap",
  "juniper_codegen",
  "serde",
- "serde_derive",
- "uuid",
+ "static_assertions",
+ "uuid 0.8.1",
 ]
 
 [[package]]
 name = "juniper_codegen"
-version = "0.14.2"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d40af234d8e971a9d7dda93ffbcc8a44a93f17e69e3067f72ce7a6894c41d51b"
+checksum = "01ca688021de31672fb76baed11061b35a60845980eaead24c9a1c2565ae6f85"
 dependencies = [
+ "proc-macro-error",
  "proc-macro2",
  "quote",
  "syn",
@@ -1553,7 +1579,7 @@ dependencies = [
  "lettre",
  "mime",
  "time 0.1.44",
- "uuid",
+ "uuid 0.7.4",
 ]
 
 [[package]]
@@ -2546,6 +2572,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
 name = "stdweb"
 version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2674,7 +2706,7 @@ dependencies = [
  "time 0.2.23",
  "toml",
  "url",
- "uuid",
+ "uuid 0.7.4",
 ]
 
 [[package]]
@@ -3026,6 +3058,12 @@ dependencies = [
  "rand 0.6.5",
  "serde",
 ]
+
+[[package]]
+name = "uuid"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9fde2f6a4bea1d6e007c4ad38c6839fa71cbb63b6dbf5b595aa38dc9b1093c11"
 
 [[package]]
 name = "v_escape"
