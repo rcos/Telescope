@@ -84,7 +84,7 @@ features = ["uuidv07", "r2d2", "postgres", "chrono"]
 
 # GraphQL queries and API system.
 [dependencies.juniper]
-version = "0.14.2"
+version = "0.15.1"
 default-features = false
 features = ["uuid", "chrono"]
 
