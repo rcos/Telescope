@@ -15,7 +15,7 @@ structopt = "0.3"
 # environment variable reading through dotenv (.env files)
 dotenv = "0.15.0"
 # config file reading
-toml = "0.5.7"
+toml = "0.5.8"
 # actix actor framework -- system for running server and other tasks.
 actix = "0.10.0"
 # actix web server (use exact version)
