@@ -41,7 +41,7 @@ serde_json = "1"
 # generating QR codes (will be useful later for attendance QR codes perhaps)
 qrcodegen = "1.6.0"
 # cryptographically sound random number generation
-rand = "0.7"
+rand = "0.8"
 # lazily evaluated statics.
 lazy_static = "1.4.0"
 # utilities for dealing with async futures
