@@ -19,7 +19,7 @@ async def list_semesters(db: Connection = Depends(get_db)):
     return await fetch_semesters(db)
 
 
-@router.get("/{semester_id}")
+@router.get("/{semester_id}", responses={404: {"description": "Not found"}})
 async def get_semester(semester_id: str, db: Connection = Depends(get_db)):
     semester = await fetch_semester(db, semester_id)
     if semester is None:

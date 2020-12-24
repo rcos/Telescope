@@ -8,7 +8,7 @@ async def get_pool():
     global pool
     if pool is None:
         pool = await asyncpg.create_pool(
-            os.environ["POSTGRES_DSN"], min_size=5, max_size=5)
+            os.environ["POSTGRES_DSN"], min_size=4, max_size=4)
     return pool
 
 
