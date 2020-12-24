@@ -1,4 +1,7 @@
+from typing import List
+from api.schemas.users import User
 from api.db import get_db
+import api.db.users
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
@@ -9,9 +12,9 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("/", response_model=List[User])
 async def list_users(db=Depends(get_db)):
-    users = await db.fetch("SELECT 1 AS num")
+    users = await api.db.users.fetch_users(db)
     return users
 
 
