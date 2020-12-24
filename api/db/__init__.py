@@ -12,7 +12,7 @@ async def get_pool():
     return pool
 
 
-async def get_db():
+async def get_db() -> asyncpg.Connection:
     pool = await get_pool()
     async with pool.acquire() as connection:
         yield connection

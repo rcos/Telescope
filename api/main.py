@@ -15,11 +15,6 @@ async def connect_db():
     pool = await get_pool()
     await pool.close()
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
 app.include_router(semesters.router)
 app.include_router(users.router)
 app.include_router(enrollments.router)
