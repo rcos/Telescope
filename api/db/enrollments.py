@@ -1,13 +1,23 @@
-from typing import List, Dict
+from typing import Any, List, Dict, Optional
 from asyncpg import Connection
+from pydantic.fields import Field
 from pypika import Query, Table
 
 enr_t = Table("enrollments")
 
 
-async def fetch_enrollments(db: Connection, semester_id: str) -> List[Dict]:
+async def fetch_enrollments(db: Connection, semester_id: str, filter: Dict[str, Any]) -> List[Dict]:
     query = Query.from_(enr_t) \
-        .select("*").orderby(enr_t.semester_id).orderby(enr_t.username)
+        .select("*") \
+        .where(enr_t.semester_id == semester_id) \
+        .orderby(enr_t.semester_id) \
+        .orderby(enr_t.username)
+
+    # Apply queries
+    for key, value in filter.items():
+        if value is not None:
+            query = query.where(enr_t[key] == value)
+
     return await db.fetch(str(query))
 
 

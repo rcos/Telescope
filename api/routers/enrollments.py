@@ -14,8 +14,19 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[EnrollmentOut], summary="List all semester enrollments")
-async def list_enrollments(semester_id: str, db: Connection = Depends(get_db)):
-    return await fetch_enrollments(db, semester_id)
+async def list_enrollments(semester_id: str,
+                           project_id: Optional[int] = Query(None, example=1),
+                           is_project_lead: Optional[bool] = Query(
+                               None, example=True),
+                           is_coordinator: Optional[bool] = Query(
+                               None, example=False),
+                           db: Connection = Depends(get_db)):
+    filter = {
+        "project_id": project_id,
+        "is_project_lead": is_project_lead,
+        "is_coordinator": is_coordinator
+    }
+    return await fetch_enrollments(db, semester_id, filter)
 
 
 @router.get("/{username}", response_model=EnrollmentOut, responses={404: {"description": "Not found"}})
