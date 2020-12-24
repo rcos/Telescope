@@ -8,7 +8,7 @@ user_acc_t = Table("user_accounts")
 
 
 async def fetch_users(db: Connection) -> List[Dict]:
-    query = Query.from_(users_t).select("*").orderby("username")
+    query = Query.from_(users_t).select("*").orderby(users_t.username)
     return await db.fetch(str(query))
 
 
