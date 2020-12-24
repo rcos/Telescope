@@ -15,9 +15,16 @@ async def fetch_enrollments(db: Connection, semester_id: str, filter: Dict[str, 
 
     # Apply queries
     for key, value in filter.items():
-        if value is not None:
-            query = query.where(enr_t[key] == value)
+        if value is None:
+            continue
 
+        if key == "credits_min":
+            query = query.where(enr_t.credits >= value)
+        elif key == "credits_max":
+            query = query.where(enr_t.credits <= value)
+        else:
+            query = query.where(enr_t[key] == value)
+    print(str(query))
     return await db.fetch(str(query))
 
 

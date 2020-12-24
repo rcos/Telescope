@@ -15,16 +15,23 @@ router = APIRouter(
 
 @router.get("/", response_model=List[EnrollmentOut], summary="List all semester enrollments")
 async def list_enrollments(semester_id: str,
-                           project_id: Optional[int] = Query(None, example=1),
+                           project_id: Optional[int] = Query(
+                               None, example=None),
                            is_project_lead: Optional[bool] = Query(
-                               None, example=True),
+                               None, example=None),
                            is_coordinator: Optional[bool] = Query(
-                               None, example=False),
+                               None, example=None),
+                           credits_min: Optional[int] = Query(
+                               None, example=None),
+                           credits_max: Optional[int] = Query(
+                               None, example=None),
                            db: Connection = Depends(get_db)):
     filter = {
         "project_id": project_id,
         "is_project_lead": is_project_lead,
-        "is_coordinator": is_coordinator
+        "is_coordinator": is_coordinator,
+        "credits_min": credits_min,
+        "credits_max": credits_max,
     }
     return await fetch_enrollments(db, semester_id, filter)
 
