@@ -13,6 +13,7 @@ python_version = "3.8"
 asyncpg = "*"
 pypika = "*"
 python-dotenv = "*"
+pip = "*"
 
 [packages.fastapi]
 extras = [ "all",]
