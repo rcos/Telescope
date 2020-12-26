@@ -2,7 +2,7 @@ from api.db import ARRAY_ANY
 from typing import Any, List, Dict
 from asyncpg import Connection
 from pypika import Query, Table
-from pypika.terms import Parameter,
+from pypika.terms import Parameter
 
 proj_t = Table("projects")
 
@@ -27,6 +27,8 @@ async def fetch_projects(db: Connection, filter: Dict[str, Any]) -> List[Dict]:
                 query = query.where(Parameter("$" + str(len(params)+1))
                                     == ARRAY_ANY(proj_t[key]))
                 params.append(item)
+        else:
+            query = query.where(value == proj_t[key])
 
     return await db.fetch(str(query), *params)
 

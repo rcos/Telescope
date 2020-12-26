@@ -16,13 +16,15 @@ router = APIRouter(
 @router.get("/", response_model=List[ProjectOut])
 async def list_projects(
         semester_id: Optional[str] = Query(None),
+        title: Optional[str] = Query(None),
         languages: Optional[List[str]] = Query(None),
         stack: Optional[List[str]] = Query(None),
+        repository_url: Optional[str] = Query(None),
         db: Connection = Depends(get_db)):
     if semester_id is not None:
         raise HTTPException(status_code=501)
 
-    return await fetch_projects(db, filter_dict(locals(), ["languages", "stack"]))
+    return await fetch_projects(db, filter_dict(locals(), ["title", "languages", "stack", "repository_url"]))
 
 
 @router.get("/{project_id}", response_model=ProjectOut, responses={404: {"description": "Not found"}})
