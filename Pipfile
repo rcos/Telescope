@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+autopep8 = "*"
+
+[requires]
+python_version = "3.8"
+
+[packages]
+asyncpg = "*"
+pypika = "*"
+python-dotenv = "*"
+
+[packages.fastapi]
+extras = [ "all",]
