@@ -1,3 +1,4 @@
+from api.utils import filter_dict
 from api.schemas.enrollments import EnrollmentOut
 from os import stat
 from api.db import get_db
@@ -35,16 +36,7 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
     Find all enrolled students taking RCOS for credit with `credits_min=1` and find all students taking RCOS for experience with `credits_max=0, is_for_pay=false`.
     """
 
-    filter = {
-        "semester_id": semester_id,
-        "project_id": project_id,
-        "is_project_lead": is_project_lead,
-        "is_coordinator": is_coordinator,
-        "credits_min": credits_min,
-        "credits_max": credits_max,
-        "is_for_pay": is_for_pay,
-    }
-    return await fetch_enrollments(db, filter)
+    return await fetch_enrollments(db, filter_dict(locals(), ["semester_id", "project_id", "is_project_lead", "is_coordinator", "credits_min", "credits_max", "is_for_pay"]))
 
 
 @router.get("/{username}", response_model=EnrollmentOut, responses={404: {"description": "Not found"}})

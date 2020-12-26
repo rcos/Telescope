@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Any, List, Dict
 from asyncpg import Connection
 from pypika import Query, Table, Field
 from pypika.queries import QueryBuilder
@@ -7,8 +7,13 @@ users_t = Table("users")
 user_acc_t = Table("user_accounts")
 
 
-async def fetch_users(db: Connection) -> List[Dict]:
+async def fetch_users(db: Connection, filter: Dict[str, Any]) -> List[Dict]:
     query = Query.from_(users_t).select("*").orderby(users_t.username)
+
+    for key, value in filter.items():
+        if value is None:
+            continue
+        query = query.where(users_t[key] == value)
     return await db.fetch(str(query))
 
 

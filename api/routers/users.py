@@ -1,8 +1,9 @@
-from typing import List
+from api.utils import filter_dict
+from typing import List, Optional
 from asyncpg.connection import Connection
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
-from fastapi.param_functions import Depends
+from fastapi.param_functions import Depends, Query
 
 from api.schemas.users import UserAccount, UserIn, UserOut
 from api.db import get_db
@@ -15,8 +16,12 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[UserOut], summary="List all users")
-async def list_users(db: Connection = Depends(get_db)):
-    return await fetch_users(db)
+async def list_users(
+        is_rpi: Optional[bool] = Query(None, example=True),
+        is_faculty: Optional[bool] = Query(None, example=False),
+        timezone: Optional[str] = Query(None, example=None),
+        db: Connection = Depends(get_db)):
+    return await fetch_users(db, filter_dict(locals(), ["is_rpi", "is_faculty", "timezone"]))
 
 
 @router.get("/{username}", response_model=UserOut, summary="Get specific user", response_description="Get a specific user's profile with information that doesn't depend upon a specific semester.", responses={404: {"description": "Not found"}})
