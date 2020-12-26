@@ -32,6 +32,16 @@ async def get_user(username: str, db: Connection = Depends(get_db)):
     return user
 
 
+@router.put("/{username}", response_model=UserOut, summary="Update a specific user", responses={404: {"description": "Not found"}})
+async def update_user(username: str, updated_user: UserIn, db: Connection = Depends(get_db)):
+    raise HTTPException(status_code=501)
+
+
+@router.delete("/{username}", response_model=UserOut, summary="Delete a specific user", responses={404: {"description": "Not found"}})
+async def delete_user(username: str, db: Connection = Depends(get_db)):
+    raise HTTPException(status_code=501)
+
+
 @router.get("/{username}/accounts", response_model=List[UserAccount], summary="Get specific user's accounts", response_description="Get a user's connected social media and Git platform accounts.", responses={404: {"description": "Not found"}})
 async def get_user(username: str, db: Connection = Depends(get_db)):
     user = await fetch_user(db, username)

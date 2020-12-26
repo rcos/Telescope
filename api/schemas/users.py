@@ -8,12 +8,12 @@ class UserBase(BaseModel):
     last_name: str = Field(example="Man")
     graduation_year: int = Field(example=1828)
     timezone: str = Field(example="America/New_York")
+    is_rpi: bool = Field(example=True)
+    is_faculty: bool = Field(example=False)
 
 
 class UserOut(UserBase):
     username: str = Field(example="manp")
-    is_rpi: bool = Field(example=True)
-    is_faculty: bool = Field(example=False)
 
 
 class UserIn(UserBase):
