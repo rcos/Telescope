@@ -10,7 +10,9 @@ router = APIRouter(
 
 
 @router.get("/")
-async def list_small_groups(semester_id: str):
+async def list_small_groups(
+        semester_id: Optional[str] = Query(None),
+        location: Optional[str] = Query(None)):
     raise HTTPException(status_code=501)
 
 
