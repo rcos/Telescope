@@ -13,6 +13,7 @@ class UserBase(BaseModel):
 class UserOut(UserBase):
     username: str = Field(example="manp")
     is_rpi: bool = Field(example=True)
+    is_faculty: bool = Field(example=False)
 
 
 class UserIn(UserBase):
