@@ -1,9 +1,19 @@
 from fastapi.routing import APIRouter
 from api.db import get_pool
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .routers import users, enrollments, projects, semesters, small_groups, meetings
 
 app = FastAPI()
+
+# Allow requests from all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
