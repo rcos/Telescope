@@ -6,10 +6,9 @@ from pypika import Query, Table
 enr_t = Table("enrollments")
 
 
-async def fetch_enrollments(db: Connection, semester_id: str, filter: Dict[str, Any]) -> List[Dict]:
+async def fetch_enrollments(db: Connection, filter: Dict[str, Any]) -> List[Dict]:
     query = Query.from_(enr_t) \
         .select("*") \
-        .where(enr_t.semester_id == semester_id) \
         .orderby(enr_t.semester_id) \
         .orderby(enr_t.username)
 

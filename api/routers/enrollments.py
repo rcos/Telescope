@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[EnrollmentOut], summary="List all semester enrollments")
-async def list_enrollments(semester_id: str,
+async def list_enrollments(semester_id: Optional[str] = Query(None, example="202101"),
                            project_id: Optional[int] = Query(
                                None, example=None),
                            is_project_lead: Optional[bool] = Query(
@@ -25,15 +25,26 @@ async def list_enrollments(semester_id: str,
                                None, example=None),
                            credits_max: Optional[int] = Query(
                                None, example=None),
-                           db: Connection = Depends(get_db)):
+                           is_for_pay: Optional[bool] = Query(
+                               None, example=None
+),
+        db: Connection = Depends(get_db)):
+    """
+    List all enrollments meeting the specified filters. Each filter is added as an AND operation, so setting `semester_id='202101'`, `is_project_lead=true`, and `project_id=1` will return the project leads for project 1 in the Spring 2021 semester.
+
+    Find all enrolled students taking RCOS for credit with `credits_min=1` and find all students taking RCOS for experience with `credits_max=0, is_for_pay=false`.
+    """
+
     filter = {
+        "semester_id": semester_id,
         "project_id": project_id,
         "is_project_lead": is_project_lead,
         "is_coordinator": is_coordinator,
         "credits_min": credits_min,
         "credits_max": credits_max,
+        "is_for_pay": is_for_pay,
     }
-    return await fetch_enrollments(db, semester_id, filter)
+    return await fetch_enrollments(db, filter)
 
 
 @router.get("/{username}", response_model=EnrollmentOut, responses={404: {"description": "Not found"}})
