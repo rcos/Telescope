@@ -1,3 +1,4 @@
+from api.utils import filter_dict
 from api.db import get_db
 from asyncpg.connection import Connection
 from api.db.projects import fetch_project, fetch_projects
@@ -13,11 +14,15 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[ProjectOut])
-async def list_projects(semester_id: Optional[str] = Query(None), db: Connection = Depends(get_db)):
+async def list_projects(
+        semester_id: Optional[str] = Query(None),
+        languages: Optional[List[str]] = Query(None),
+        stack: Optional[List[str]] = Query(None),
+        db: Connection = Depends(get_db)):
     if semester_id is not None:
         raise HTTPException(status_code=501)
 
-    return await fetch_projects(db)
+    return await fetch_projects(db, filter_dict(locals(), ["languages", "stack"]))
 
 
 @router.get("/{project_id}", response_model=ProjectOut, responses={404: {"description": "Not found"}})

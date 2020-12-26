@@ -1,5 +1,6 @@
 import os
 import asyncpg
+from pypika import CustomFunction
 
 pool = None
 
@@ -16,3 +17,5 @@ async def get_db() -> asyncpg.Connection:
     pool = await get_pool()
     async with pool.acquire() as connection:
         yield connection
+
+ARRAY_ANY = CustomFunction('ANY', ['column'])
