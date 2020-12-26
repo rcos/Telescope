@@ -4,8 +4,6 @@ import datetime
 
 
 class EnrollmentBase(BaseModel):
-    semester_id: str = Field(example="202101")
-    username: str = Field(example="manp")
     project_id: Optional[int] = Field(None)
     is_project_lead: bool = Field(example=False)
     credits: int = Field(example=4)
@@ -16,4 +14,9 @@ class EnrollmentBase(BaseModel):
 
 
 class EnrollmentOut(EnrollmentBase):
+    semester_id: str = Field(example="202101")
+    username: str = Field(example="manp")
+
+
+class EnrollmentIn(EnrollmentBase):
     pass

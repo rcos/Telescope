@@ -1,6 +1,5 @@
 from api.utils import filter_dict
-from api.schemas.enrollments import EnrollmentOut
-from os import stat
+from api.schemas.enrollments import EnrollmentIn, EnrollmentOut
 from api.db import get_db
 from asyncpg.connection import Connection
 from api.db.enrollments import fetch_enrollment, fetch_enrollments
@@ -40,7 +39,7 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
 
 
 @router.get("/{semester_id}/{username}", response_model=EnrollmentOut, responses={404: {"description": "Not found"}})
-async def get_enrollment(username: str, semester_id: str, db: Connection = Depends(get_db)):
+async def get_enrollment(semester_id: str, username: str, db: Connection = Depends(get_db)):
     if semester_id is None:
         raise HTTPException(status_code=501)
 
@@ -48,3 +47,13 @@ async def get_enrollment(username: str, semester_id: str, db: Connection = Depen
     if enrollment is None:
         raise HTTPException(status_code=404, detail="Enrollment not found")
     return enrollment
+
+
+@router.put("/{semester_id}/{username}", response_model=EnrollmentOut, responses={404: {"description": "Not found"}})
+async def update_enrollment(semester_id: str, username: str, updated_enrollment: EnrollmentIn, db: Connection = Depends(get_db)):
+    raise HTTPException(status_code=501)
+
+
+@router.delete("/{semester_id}/{username}", response_model=EnrollmentOut, responses={404: {"description": "Not found"}})
+async def delete_enrollment(semester_id: str, username: str, db: Connection = Depends(get_db)):
+    raise HTTPException(status_code=501)
