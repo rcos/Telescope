@@ -1,10 +1,12 @@
+from api import VERSION
 from fastapi.routing import APIRouter
 from api.db import get_pool
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import users, enrollments, projects, semesters, small_groups, meetings
 
-app = FastAPI()
+app = FastAPI(title="RCOS API", version=VERSION,
+              description="Repository available at [Apexal/rcos-api](https://github.com/Apexal/rcos-api)")
 
 # Allow requests from all origins
 app.add_middleware(
