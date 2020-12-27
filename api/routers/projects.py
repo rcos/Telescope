@@ -1,7 +1,7 @@
 from api.utils import filter_dict
 from api.db import get_db
 from asyncpg.connection import Connection
-from api.db.projects import fetch_project, fetch_projects
+import api.db.projects as project_db
 from api.schemas.projects import ProjectOut
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
@@ -24,12 +24,12 @@ async def list_projects(
     if semester_id is not None:
         raise HTTPException(status_code=501)
 
-    return await fetch_projects(db, filter_dict(locals(), ["title", "languages", "stack", "repository_url"]))
+    return await project_db.fetch_projects(db, filter_dict(locals(), ["title", "languages", "stack", "repository_url"]))
 
 
 @router.get("/{project_id}", response_model=ProjectOut, responses={404: {"description": "Not found"}})
 async def get_project(project_id: str, db: Connection = Depends(get_db)):
-    project = await fetch_project(db, project_id)
+    project = await project_db.fetch_project(db, project_id)
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project

@@ -22,3 +22,8 @@ async def get_meeting(meeting_id: str):
 @router.get("/{meeting_id}/attendances")
 async def get_meeting_attendances(meeting_id: str):
     raise HTTPException(status_code=501)
+
+
+@router.post("/{meeting_id}/attendances")
+async def create_meeting_attendance(meeting_id: str, username: str = Query(..., example="manp")):
+    raise HTTPException(status_code=501)
