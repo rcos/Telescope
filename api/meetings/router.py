@@ -26,29 +26,32 @@ async def list_meetings(
 
 @router.post("/", response_model=schemas.MeetingOut)
 async def create_meeting(meeting: schemas.MeetingIn, conn: Connection = Depends(get_db)):
-    return await db.insert_meeting(conn, meeting.dict())
+    return await db.insert_meeting(conn, meeting.dict(exclude_unset=True))
 
 
-@router.get("/{meeting_id}")
+@router.get("/{meeting_id}", responses={404: {"description": "Not found"}})
 async def get_meeting(meeting_id: str, conn: Connection = Depends(get_db)):
-    raise HTTPException(status_code=501)
+    meeting = await db.fetch_meeting(conn, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    return meeting
 
 
-@router.put("/{meeting_id}")
+@router.put("/{meeting_id}", responses={404: {"description": "Not found"}})
 async def update_meeting(meeting_id: str, conn: Connection = Depends(get_db)):
     raise HTTPException(status_code=501)
 
 
-@router.delete("/{meeting_id}")
+@router.delete("/{meeting_id}", responses={404: {"description": "Not found"}})
 async def delete_meeting(meeting_id: str, conn: Connection = Depends(get_db)):
     raise HTTPException(status_code=501)
 
 
-@router.get("/{meeting_id}/attendances")
+@router.get("/{meeting_id}/attendances", responses={404: {"description": "Not found"}})
 async def get_meeting_attendances(meeting_id: str, conn: Connection = Depends(get_db)):
     raise HTTPException(status_code=501)
 
 
-@router.post("/{meeting_id}/attendances")
+@router.post("/{meeting_id}/attendances", responses={404: {"description": "Not found"}})
 async def create_meeting_attendance(meeting_id: str, username: str = Query(..., example="manp")):
     raise HTTPException(status_code=501)

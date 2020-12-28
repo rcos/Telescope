@@ -1,8 +1,6 @@
-from api.db import ARRAY_ANY
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
 from pypika import Query, Table
-from pypika.terms import Parameter
 
 meet_t = Table("meetings")
 
@@ -29,15 +27,15 @@ async def insert_meeting(conn: Connection, meeting: Dict[str, Any]) -> Dict:
     return await conn.fetchrow(str(query) + " RETURNING *")
 
 
-async def fetch_project(conn: Connection, project_id: str) -> Optional[Dict]:
-    query = Query.from_(proj_t) \
+async def fetch_meeting(conn: Connection, meeting_id: str) -> Optional[Dict]:
+    query = Query.from_(meet_t) \
         .select("*") \
-        .where(proj_t.project_id == project_id)
+        .where(meet_t.meeting_id == meeting_id)
     return await conn.fetchrow(str(query))
 
 
-async def delete_project(conn: Connection, project_id: str) -> Optional[Dict]:
-    query = Query.from_(proj_t) \
-        .where(proj_t.project_id == project_id) \
+async def delete_meeting(conn: Connection, meeting_id: str) -> Optional[Dict]:
+    query = Query.from_(meet_t) \
+        .where(meet_t.meeting_id == meeting_id) \
         .delete()
     return await conn.fetchrow(str(query) + " RETURNING *")
