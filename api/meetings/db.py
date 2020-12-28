@@ -27,14 +27,24 @@ async def insert_meeting(conn: Connection, meeting: Dict[str, Any]) -> Dict:
     return await conn.fetchrow(str(query) + " RETURNING *")
 
 
-async def fetch_meeting(conn: Connection, meeting_id: str) -> Optional[Dict]:
+async def fetch_meeting(conn: Connection, meeting_id: int) -> Optional[Dict]:
     query = Query.from_(meet_t) \
         .select("*") \
         .where(meet_t.meeting_id == meeting_id)
     return await conn.fetchrow(str(query))
 
 
-async def delete_meeting(conn: Connection, meeting_id: str) -> Optional[Dict]:
+async def update_meeting(conn: Connection, meeting_id: int, meeting_dict: Dict[str, Any]) -> Optional[Dict]:
+    query = Query \
+        .update(meet_t) \
+        .where(meet_t.meeting_id == meeting_id)
+    for col, value in meeting_dict.items():
+        query = query.set(meet_t[col], value)
+
+    return await conn.fetchrow(str(query) + " RETURNING *")
+
+
+async def delete_meeting(conn: Connection, meeting_id: int) -> Optional[Dict]:
     query = Query.from_(meet_t) \
         .where(meet_t.meeting_id == meeting_id) \
         .delete()
