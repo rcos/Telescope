@@ -1,7 +1,10 @@
+from api.utils import filter_dict
 from typing import List, Optional
+from asyncpg.connection import Connection
 from fastapi import APIRouter
-from fastapi.param_functions import Query
+from fastapi.param_functions import Depends, Query
 from starlette.exceptions import HTTPException
+from api.db import get_db
 from . import schemas, db
 
 router = APIRouter(
@@ -14,8 +17,9 @@ router = APIRouter(
 async def list_small_groups(
         semester_id: Optional[str] = Query(None),
         title: Optional[str] = Query(None),
-        location: Optional[str] = Query(None)):
-    raise HTTPException(status_code=501)
+        location: Optional[str] = Query(None),
+        conn: Connection = Depends(get_db)):
+    return await db.fetch_small_groups(conn, filter_dict(locals(), ["semester_id", "title", "location"]))
 
 
 @router.post("/", response_model=schemas.SmallGroupOut)
@@ -24,8 +28,11 @@ async def create_small_group(small_group: schemas.SmallGroupCreate):
 
 
 @router.get("/{small_group_id}", response_model=schemas.SmallGroupOut)
-async def get_small_group(small_group_id: str):
-    raise HTTPException(status_code=501)
+async def get_small_group(small_group_id: str, conn: Connection = Depends(get_db)):
+    small_group = await db.fetch_small_group(conn, small_group_id)
+    if small_group is None:
+        raise HTTPException(status_code=404, detail="Small group not found")
+    return small_group
 
 
 @router.put("/{small_group_id}", response_model=schemas.SmallGroupOut)
