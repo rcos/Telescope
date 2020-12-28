@@ -114,7 +114,27 @@ async def add_small_group_mentors(conn: Connection, small_group_id: int, mentor_
 
     # Only execute INSERT if there is at least one new mentor, otherwise SQL would be malformed
     if adding:
-        await conn.fetchrow(str(query) + " RETURNING *")
+        await conn.execute(str(query))
+
+    # Just refetch the small group and have it figure out the new list of mentors
+    return await fetch_small_group(conn, small_group_id)
+
+
+async def delete_small_group_mentors(conn: Connection, small_group_id: int, mentor_usernames: Optional[List[str]]) -> Optional[Dict]:
+    small_group = await fetch_small_group(conn, small_group_id)
+    if small_group is None:
+        return None
+
+    query = Query \
+        .from_(sg_mentors_t) \
+        .where(sg_mentors_t.small_group_id == small_group_id) \
+        .delete()
+
+    # If mentor_usernames is None, query will delete ALL mentors for this small group
+    if mentor_usernames:
+        query = query.where(sg_mentors_t.username.isin(mentor_usernames))
+
+    await conn.execute(str(query))
 
     # Just refetch the small group and have it figure out the new list of mentors
     return await fetch_small_group(conn, small_group_id)

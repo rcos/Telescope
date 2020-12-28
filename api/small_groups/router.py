@@ -57,8 +57,11 @@ async def add_mentors_to_small_group(
 
 
 @router.delete("/{small_group_id}/mentors", tags=["small_groups", "mentors"], response_model=schemas.SmallGroupOut)
-async def remove_mentors_from_small_group(small_group_id: int, mentor_usernames: Optional[List[str]] = Query(None)):
-    raise HTTPException(status_code=501)
+async def remove_mentors_from_small_group(
+        small_group_id: int,
+        mentor_usernames: Optional[List[str]] = Query(None),
+        conn: Connection = Depends(get_db)):
+    return await db.delete_small_group_mentors(conn, small_group_id, mentor_usernames)
 
 
 @router.post("/{small_group_id}/projects", tags=["small_groups", "projects"], response_model=schemas.SmallGroupOut)
@@ -67,5 +70,8 @@ async def add_projects_to_small_group(small_group_id: int, project_ids: List[str
 
 
 @router.delete("/{small_group_id}/projects", tags=["small_groups", "projects"], response_model=schemas.SmallGroupOut)
-async def remove_projects_from_small_group(small_group_id: int, project_ids: Optional[List[str]] = Query(None)):
+async def remove_projects_from_small_group(
+        small_group_id: int,
+        project_ids: Optional[List[str]] = Query(None),
+        conn: Connection = Depends(get_db)):
     raise HTTPException(status_code=501)
