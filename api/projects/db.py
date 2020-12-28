@@ -7,7 +7,7 @@ from pypika.terms import Parameter
 proj_t = Table("projects")
 
 
-async def fetch_projects(db: Connection, filter: Dict[str, Any]) -> List[Dict]:
+async def fetch_projects(conn: Connection, filter: Dict[str, Any]) -> List[Dict]:
     query = Query.from_(proj_t) \
         .select("*") \
         .orderby(proj_t.created_at)
@@ -30,16 +30,18 @@ async def fetch_projects(db: Connection, filter: Dict[str, Any]) -> List[Dict]:
         else:
             query = query.where(value == proj_t[key])
 
-    return await db.fetch(str(query), *params)
+    return await conn.fetch(str(query), *params)
 
 
-async def fetch_project(db: Connection, project_id: str) -> Optional[Dict]:
+async def fetch_project(conn: Connection, project_id: str) -> Optional[Dict]:
     query = Query.from_(proj_t) \
         .select("*") \
         .where(proj_t.project_id == project_id)
-    return await db.fetchrow(str(query))
+    return await conn.fetchrow(str(query))
 
 
-async def delete_project(db: Connection, project_id: str) -> Optional[Dict]:
-    query = Query.from_(proj_t).where(proj_t.project_id == project_id).delete()
-    return await db.fetchrow(str(query) + " RETURNING *")
+async def delete_project(conn: Connection, project_id: str) -> Optional[Dict]:
+    query = Query.from_(proj_t) \
+        .where(proj_t.project_id == project_id) \
+        .delete()
+    return await conn.fetchrow(str(query) + " RETURNING *")

@@ -3,7 +3,7 @@ from fastapi.routing import APIRouter
 from api.db import get_pool
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import users, enrollments, projects, semesters, small_groups, meetings
+from . import users, enrollments, projects, semesters, small_groups, meetings
 
 app = FastAPI(title="RCOS API", version=VERSION,
               description="Repository available at [Apexal/rcos-api](https://github.com/Apexal/rcos-api)")
