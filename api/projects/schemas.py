@@ -19,4 +19,8 @@ class ProjectBase(BaseModel):
 
 
 class ProjectOut(ProjectBase):
+    project_id: int = Field(example=1)
+
+
+class ProjectIn(ProjectBase):
     pass

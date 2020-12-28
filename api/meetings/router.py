@@ -19,6 +19,16 @@ async def get_meeting(meeting_id: str):
     raise HTTPException(status_code=501)
 
 
+@router.put("/{meeting_id}")
+async def update_meeting(meeting_id: str):
+    raise HTTPException(status_code=501)
+
+
+@router.delete("/{meeting_id}")
+async def delete_meeting(meeting_id: str):
+    raise HTTPException(status_code=501)
+
+
 @router.get("/{meeting_id}/attendances")
 async def get_meeting_attendances(meeting_id: str):
     raise HTTPException(status_code=501)
