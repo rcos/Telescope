@@ -61,3 +61,8 @@ async def get_meeting_attendances(meeting_id: str, conn: Connection = Depends(ge
 @router.post("/{meeting_id}/attendances", responses={404: {"description": "Not found"}})
 async def create_meeting_attendance(meeting_id: str, username: str = Query(..., example="manp")):
     raise HTTPException(status_code=501)
+
+
+@router.delete("/{meeting_id}/attendances/{username}", responses={404: {"description": "Not found"}})
+async def delete_meeting_attendance(meeting_id: str, username: str = Query(..., example="manp")):
+    raise HTTPException(status_code=501)
