@@ -1,7 +1,7 @@
 from api.utils import filter_dict
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
-from pypika import Query, Table
+from pypika import PostgreSQLQuery as Query, Table
 
 sg_t = Table("small_groups")
 sg_mentors_t = Table("small_group_mentors")
@@ -33,15 +33,15 @@ async def fetch_small_groups(conn: Connection, filter: Dict[str, Any]) -> List[D
         if result["small_group_id"] not in small_groups:
             small_groups[result["small_group_id"]] = {
                 **filter_dict(result, ["small_group_id", "semester_id", "title", "location"]),
-                "mentor_usernames": [],
-                "project_ids": []
+                "mentor_usernames": set(),
+                "project_ids": set()
             }
 
         if result["project_id"]:
             small_groups[result["small_group_id"]
-                         ]["project_ids"].append(result["project_id"])
+                         ]["project_ids"].add(result["project_id"])
         if result["mentor_username"]:
-            small_groups[result["small_group_id"]]["mentor_usernames"].append(
+            small_groups[result["small_group_id"]]["mentor_usernames"].add(
                 result["mentor_username"])
     return list(small_groups.values())
 
@@ -63,15 +63,15 @@ async def fetch_small_group(conn: Connection, small_group_id: int) -> Optional[D
 
     small_group = {
         **filter_dict(results[0], ["small_group_id", "semester_id", "title", "location"]),
-        "mentor_usernames": [],
-        "project_ids": []
+        "mentor_usernames": set(),
+        "project_ids": set()
     }
 
     for result in results:
         if result["project_id"]:
-            small_group["project_ids"].append(result["project_id"])
+            small_group["project_ids"].add(result["project_id"])
         if result["mentor_username"]:
-            small_group["mentor_usernames"].append(
+            small_group["mentor_usernames"].add(
                 result["mentor_username"])
 
     return small_group
@@ -95,4 +95,26 @@ async def fetch_small_group_mentors(conn: Connection, small_group_id: int) -> Li
         .select(sg_mentors_t.username) \
         .where(sg_mentors_t.small_group_id == small_group_id)
 
-    return await conn.fetch(str(query))
+    return list(map(lambda record: record["username"], await conn.fetch(str(query))))
+
+
+async def add_small_group_mentors(conn: Connection, small_group_id: int, mentor_usernames: List[str]) -> List[str]:
+    small_group = await fetch_small_group(conn, small_group_id)
+    if small_group is None:
+        return None
+
+    query = Query.into(sg_mentors_t)
+
+    # Only add new mentors to avoid conflicts
+    adding = False  # Tracks whether we are adding at least one mentor
+    for mu in mentor_usernames:
+        if mu not in small_group["mentor_usernames"]:
+            query = query.insert((small_group_id, mu))
+            adding = True
+
+    # Only execute INSERT if there is at least one new mentor, otherwise SQL would be malformed
+    if adding:
+        await conn.fetchrow(str(query) + " RETURNING *")
+
+    # Just refetch the small group and have it figure out the new list of mentors
+    return await fetch_small_group(conn, small_group_id)
