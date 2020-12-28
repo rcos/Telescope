@@ -24,6 +24,11 @@ async def list_meetings(
     return await db.fetch_meetings(conn, filter_dict(locals(), ["semester_id", "meeting_type", "host_username", "is_public", "location"]))
 
 
+@router.post("/", response_model=schemas.MeetingOut)
+async def create_meeting(meeting: schemas.MeetingIn, conn: Connection = Depends(get_db)):
+    return await db.insert_meeting(conn, meeting.dict())
+
+
 @router.get("/{meeting_id}")
 async def get_meeting(meeting_id: str, conn: Connection = Depends(get_db)):
     raise HTTPException(status_code=501)

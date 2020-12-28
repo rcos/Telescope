@@ -20,6 +20,15 @@ async def fetch_meetings(conn: Connection, filter: Dict[str, Any]) -> List[Dict]
     return await conn.fetch(str(query))
 
 
+async def insert_meeting(conn: Connection, meeting: Dict[str, Any]) -> Dict:
+    query = Query \
+        .into(meet_t) \
+        .columns(*meeting.keys()) \
+        .insert(*meeting.values())
+    print(str(query))
+    return await conn.fetchrow(str(query) + " RETURNING *")
+
+
 async def fetch_project(conn: Connection, project_id: str) -> Optional[Dict]:
     query = Query.from_(proj_t) \
         .select("*") \
