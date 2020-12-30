@@ -27,7 +27,7 @@ actix-identity = "0.3.1"
 # ratelimiting (not compatible with actix 3)
 #actix-ratelimit = "0.2"
 # html templating.
-handlebars = {version = "3.5.1", features = ["dir_source"]}
+handlebars = {version = "3.5.2", features = ["dir_source"]}
 # tls/ssl certification.
 openssl = {version = "0.10", features = ["vendored"]}
 # exit code standardization
