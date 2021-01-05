@@ -1,3 +1,4 @@
+from api.utils import update_item_query
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
 from pypika import Query, Table
@@ -29,9 +30,7 @@ async def upsert_user(conn: Connection, username: str, user_dict: Dict[str, Any]
     # Does user exist?
     user = await fetch_user(conn, username)
     if user:
-        query = Query.update(users_t).where(users_t.username == username)
-        for col, value in user_dict.items():
-            query = query.set(users_t[col], value)
+        query = update_item_query(users_t, {"username": username}, user_dict)
     else:
         query = Query.into(users_t).columns(
             "username", *user_dict.keys()).insert(username, *user_dict.values())

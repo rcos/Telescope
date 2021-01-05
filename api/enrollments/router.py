@@ -49,8 +49,9 @@ async def get_enrollment(semester_id: str, username: str, conn: Connection = Dep
 
 
 @router.put("/{semester_id}/{username}", response_model=schemas.EnrollmentOut, responses={404: {"description": "Not found"}})
-async def update_enrollment(semester_id: str, username: str, updated_enrollment: schemas.EnrollmentIn, conn: Connection = Depends(get_db)):
-    raise HTTPException(status_code=501)
+async def create_or_update_enrollment(semester_id: str, username: str, enrollment: schemas.EnrollmentIn, conn: Connection = Depends(get_db)):
+    updated_enrollment_dict = await db.upsert_enrollment(conn, semester_id, username, enrollment.dict(exclude_unset=True))
+    return updated_enrollment_dict
 
 
 @router.delete("/{semester_id}/{username}", response_model=schemas.EnrollmentOut, responses={404: {"description": "Not found"}})
