@@ -1,4 +1,4 @@
-from api.utils import fetch_item, upsert_item
+from api.utils import delete_item, fetch_item, upsert_item
 from os import stat
 from fastapi.exceptions import HTTPException
 from typing import List
@@ -32,3 +32,12 @@ async def get_semester(semester_id: str, conn: Connection = Depends(get_db)):
 async def create_or_update_semester(semester_id: str, semester: schemas.SemesterIn, conn: Connection = Depends(get_db)):
     updated_semester_dict = await upsert_item(conn, "semesters", {"semester_id": semester_id}, semester.dict(exclude_unset=True))
     return updated_semester_dict
+
+
+@router.delete("/{username}", response_model=schemas.SemesterOut, summary="Delete a specific semester", responses={404: {"description": "Not found"}})
+async def delete_semester(semester_id: str, conn: Connection = Depends(get_db)):
+    # TODO: Cascade deletions... probably should be done on DB end
+    deleted_semester = await delete_item(conn, "semesters", {"semester_id": semester_id})
+    if deleted_semester is None:
+        raise HTTPException(status_code=404, detail="Semester not found")
+    return deleted_semester
