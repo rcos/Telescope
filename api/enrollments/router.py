@@ -1,4 +1,4 @@
-from api.utils import filter_dict
+from api.utils import delete_item, fetch_item, filter_dict, upsert_item
 from asyncpg.connection import Connection
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
@@ -42,7 +42,7 @@ async def get_enrollment(semester_id: str, username: str, conn: Connection = Dep
     if semester_id is None:
         raise HTTPException(status_code=501)
 
-    enrollment = await db.fetch_enrollment(conn, semester_id, username)
+    enrollment = await fetch_item(conn, "enrollments", {"semester_id": semester_id, "username": username})
     if enrollment is None:
         raise HTTPException(status_code=404, detail="Enrollment not found")
     return enrollment
@@ -50,10 +50,13 @@ async def get_enrollment(semester_id: str, username: str, conn: Connection = Dep
 
 @router.put("/{semester_id}/{username}", response_model=schemas.EnrollmentOut, responses={404: {"description": "Not found"}})
 async def create_or_update_enrollment(semester_id: str, username: str, enrollment: schemas.EnrollmentIn, conn: Connection = Depends(get_db)):
-    updated_enrollment_dict = await db.upsert_enrollment(conn, semester_id, username, enrollment.dict(exclude_unset=True))
+    updated_enrollment_dict = await upsert_item(conn, "enrollments", {"semester_id": semester_id, "username": username}, enrollment.dict(exclude_unset=True))
     return updated_enrollment_dict
 
 
 @router.delete("/{semester_id}/{username}", response_model=schemas.EnrollmentOut, responses={404: {"description": "Not found"}})
 async def delete_enrollment(semester_id: str, username: str, conn: Connection = Depends(get_db)):
-    raise HTTPException(status_code=501)
+    deleted_enrollment = await delete_item(conn, "enrollments", {"semester_id": semester_id, "username": username})
+    if deleted_enrollment is None:
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+    return deleted_enrollment

@@ -19,30 +19,6 @@ async def fetch_users(conn: Connection, filter: Dict[str, Any]) -> List[Dict]:
     return await conn.fetch(str(query))
 
 
-async def fetch_user(conn: Connection, username: str) -> Optional[Dict]:
-    query = Query.from_(users_t) \
-        .select("*") \
-        .where(users_t.username == username)
-    return await conn.fetchrow(str(query))
-
-
-async def upsert_user(conn: Connection, username: str, user_dict: Dict[str, Any]) -> Dict:
-    # Does user exist?
-    user = await fetch_user(conn, username)
-    primary_keys = {"username": username}
-    if user:
-        query = update_item_query(users_t, primary_keys, user_dict)
-    else:
-        query = insert_item_query(users_t, primary_keys, user_dict)
-
-    return await conn.fetchrow(str(query) + " RETURNING *")
-
-
-async def delete_user(conn: Connection, username: str) -> Optional[Dict]:
-    query = Query.from_(users_t).where(users_t.username == username).delete()
-    return await conn.fetchrow(str(query) + " RETURNING *")
-
-
 async def fetch_user_accounts(conn: Connection, username: str) -> List[Dict]:
     query = Query.from_(user_acc_t) \
         .select("*").where(user_acc_t.username == username).orderby(user_acc_t.type)
