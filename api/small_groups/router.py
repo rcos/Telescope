@@ -1,4 +1,4 @@
-from api.utils import delete_item, filter_dict, insert_item
+from api.utils import delete_item, filter_dict, insert_item, update_item
 from typing import List, Optional
 from asyncpg.connection import Connection
 from fastapi import APIRouter
@@ -36,8 +36,11 @@ async def get_small_group(small_group_id: int, conn: Connection = Depends(get_db
 
 
 @router.put("/{small_group_id}", response_model=schemas.SmallGroupOut)
-async def update_small_group(small_group_id: int, small_group: schemas.SmallGroupIn):
-    raise HTTPException(status_code=501)
+async def update_small_group(small_group_id: int, small_group: schemas.SmallGroupIn, conn: Connection = Depends(get_db)):
+    updated_small_group = await update_item(conn, "small_groups", {"small_group_id": small_group_id}, small_group.dict(exclude_unset=True))
+    if updated_small_group is None:
+        raise HTTPException(status_code=404, detail="Small group not found")
+    return updated_small_group
 
 
 @router.delete("/{small_group_id}", response_model=schemas.SmallGroupOut)
