@@ -1,9 +1,14 @@
-from api import VERSION
-from fastapi.routing import APIRouter
-from api.db import get_pool
 from fastapi import FastAPI
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from . import users, enrollments, projects, semesters, small_groups, meetings
+from fastapi.param_functions import Depends
+from fastapi.routing import APIRouter
+
+from api import VERSION
+from api.db import get_pool
+from api.security import get_api_key
+
+from . import enrollments, meetings, projects, semesters, small_groups, users
 
 app = FastAPI(title="RCOS API", version=VERSION,
               description="Repository available at [rcos/rcos-api](https://github.com/rcos/rcos-api)")
@@ -30,11 +35,16 @@ async def connect_db():
 
 api = APIRouter(prefix="/api/v1")
 
-api.include_router(semesters.router)
-api.include_router(users.router)
-api.include_router(enrollments.router)
+# Protect most routers entirely with an API key, but allow some to manage their own protected routes
+api.include_router(semesters.router,
+                   dependencies=[Depends(get_api_key)])
+api.include_router(users.router,
+                   dependencies=[Depends(get_api_key)])
+api.include_router(enrollments.router,
+                   dependencies=[Depends(get_api_key)])
 api.include_router(projects.router)
-api.include_router(small_groups.router)
+api.include_router(small_groups.router,
+                   dependencies=[Depends(get_api_key)])
 api.include_router(meetings.router)
 
 app.include_router(api)

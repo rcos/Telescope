@@ -39,9 +39,6 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
 
 @router.get("/{semester_id}/{username}", response_model=schemas.EnrollmentOut, responses={404: {"description": "Not found"}})
 async def get_enrollment(semester_id: str, username: str, conn: Connection = Depends(get_db)):
-    if semester_id is None:
-        raise HTTPException(status_code=501)
-
     enrollment = await fetch_item(conn, "enrollments", {"semester_id": semester_id, "username": username})
     if enrollment is None:
         raise HTTPException(status_code=404, detail="Enrollment not found")
