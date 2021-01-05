@@ -1,4 +1,4 @@
-from api.utils import update_item_query
+from api.utils import insert_item_query, update_item_query
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
 from pydantic.fields import Field
@@ -37,11 +37,11 @@ async def fetch_enrollment(conn: Connection, semester_id: str, username: str) ->
 
 async def upsert_enrollment(conn: Connection, semester_id: str, username: str, enrollment_dict: Dict[str, Any]):
     enrollment = await fetch_enrollment(conn, semester_id, username)
+    primary_keys = {"semester_id": semester_id, "username": username}
     if enrollment:
         query = update_item_query(
-            enr_t, {"semester_id": semester_id, "username": username}, enrollment_dict)
+            enr_t, primary_keys, enrollment_dict)
     else:
-        query = Query.into(enr_t).columns(
-            "username", *enrollment_dict.keys()).insert(username, *enrollment_dict.values())
+        query = insert_item_query(enr_t, primary_keys, enrollment_dict)
 
     return await conn.fetchrow(str(query) + " RETURNING *")

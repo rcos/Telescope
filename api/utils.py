@@ -24,3 +24,9 @@ def update_item_query(table: Table, primary_keys: Dict[str, Any], update_dict: D
         query = query.set(table[col], value)
 
     return query
+
+
+def insert_item_query(table: Table, primary_keys: Dict[str, Any], item_dict: Dict[str, Any]):
+    query = Query.into(table).columns(
+        *primary_keys.keys(), *item_dict.keys()).insert(*primary_keys.values(), *item_dict.values())
+    return query
