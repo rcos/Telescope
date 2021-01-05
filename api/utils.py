@@ -55,6 +55,12 @@ async def fetch_item(conn: Connection, table: Union[Table, str], primary_keys: D
     return await conn.fetchrow(str(query))
 
 
+async def insert_item(conn: Connection, table_name: str, primary_keys: Dict[str, Any], item_dict: Dict[str, Any]):
+    table = Table(table_name)
+    query = insert_item_query(table, primary_keys, item_dict)
+    return await execute_and_return(conn, query)
+
+
 async def upsert_item(conn: Connection, table_name: str, primary_keys: Dict[str, Any], item_dict: Dict[str, Any]):
     table = Table(table_name)
     item = await fetch_item(conn, table, primary_keys)

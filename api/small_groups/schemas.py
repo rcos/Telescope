@@ -13,8 +13,8 @@ class SmallGroupCreate(SmallGroupBase):
 
 class SmallGroupOut(SmallGroupCreate):
     small_group_id: int = Field(example=1)
-    mentor_usernames: List[str] = Field(example=["manp", "matraf"])
-    project_ids: List[int] = Field(example=[1, 2])
+    mentor_usernames: List[str] = Field([], example=["manp", "matraf"])
+    project_ids: List[int] = Field([], example=[1, 2])
 
 
 class SmallGroupIn(SmallGroupBase):

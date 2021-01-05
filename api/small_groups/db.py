@@ -77,14 +77,6 @@ async def fetch_small_group(conn: Connection, small_group_id: int) -> Optional[D
     return small_group
 
 
-async def delete_small_group(conn: Connection, small_group_id: int) -> Optional[Dict]:
-    query = Query \
-        .from_(sg_t) \
-        .where(sg_t.small_group_id == small_group_id) \
-        .delete()
-    return await conn.fetchrow(str(query) + " RETURNING *")
-
-
 #######################
 # SMALL GROUP MENTORS #
 #######################
