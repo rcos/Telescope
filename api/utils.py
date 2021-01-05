@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Tuple, Union
 from asyncpg.connection import Connection
 
-from pypika.queries import Query, QueryBuilder, Table
+from pypika import PostgreSQLQuery as Query
+from pypika.queries import QueryBuilder, Table
 
 
 def filter_dict(locals: Dict[str, Any], keys: List[str]):

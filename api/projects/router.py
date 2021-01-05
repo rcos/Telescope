@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from api.db import get_db
 from api.security import get_api_key
-from api.utils import filter_dict
+from api.utils import delete_item, fetch_item, filter_dict, insert_item, update_item
 from asyncpg.connection import Connection
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
@@ -31,13 +31,14 @@ async def list_projects(
 
 @router.post("/", response_model=schemas.ProjectOut,
              dependencies=[Depends(get_api_key)])
-async def create_project(project: schemas.ProjectIn):
-    raise HTTPException(status_code=501)
+async def create_project(project: schemas.ProjectIn,
+                         conn: Connection = Depends(get_db)):
+    return await insert_item(conn, "projects", {}, project.dict(exclude_unset=True))
 
 
 @router.get("/{project_id}", response_model=schemas.ProjectOut, responses={404: {"description": "Not found"}})
 async def get_project(project_id: str, conn: Connection = Depends(get_db)):
-    project = await db.fetch_project(conn, project_id)
+    project = await fetch_item(conn, "projects", {"project_id": project_id})
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
@@ -46,10 +47,16 @@ async def get_project(project_id: str, conn: Connection = Depends(get_db)):
 @router.put("/{project_id}", response_model=schemas.ProjectOut, responses={404: {"description": "Not found"}},
             dependencies=[Depends(get_api_key)])
 async def update_project(project_id: str, project: schemas.ProjectIn, conn: Connection = Depends(get_db)):
-    raise HTTPException(status_code=501)
+    updated_project = await update_item(conn, "projects", {"project_id": project_id}, project.dict(exclude_unset=True))
+    if updated_project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return updated_project
 
 
 @router.delete("/{project_id}", response_model=Optional[schemas.ProjectOut], responses={404: {"description": "Not found"}},
                dependencies=[Depends(get_api_key)])
-async def delete_project(project_id: str):
-    raise HTTPException(status_code=501)
+async def delete_project(project_id: str, conn: Connection = Depends(get_db)):
+    deleted_project = await delete_item(conn, "projects", {"project_id": project_id})
+    if deleted_project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return deleted_project

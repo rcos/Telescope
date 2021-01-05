@@ -31,17 +31,3 @@ async def fetch_projects(conn: Connection, filter: Dict[str, Any]) -> List[Dict]
             query = query.where(value == proj_t[key])
 
     return await conn.fetch(str(query), *params)
-
-
-async def fetch_project(conn: Connection, project_id: str) -> Optional[Dict]:
-    query = Query.from_(proj_t) \
-        .select("*") \
-        .where(proj_t.project_id == project_id)
-    return await conn.fetchrow(str(query))
-
-
-async def delete_project(conn: Connection, project_id: str) -> Optional[Dict]:
-    query = Query.from_(proj_t) \
-        .where(proj_t.project_id == project_id) \
-        .delete()
-    return await conn.fetchrow(str(query) + " RETURNING *")
