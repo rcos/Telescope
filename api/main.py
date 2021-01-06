@@ -8,7 +8,7 @@ from api import VERSION
 from api.db import get_pool
 from api.security import requires_api_key
 
-from . import enrollments, meetings, projects, semesters, small_groups, users
+from . import enrollments, meetings, projects, semesters, small_groups, users, chat_associations
 
 app = FastAPI(title="RCOS API", version=VERSION,
               description="Repository available at [rcos/rcos-api](https://github.com/rcos/rcos-api)")
@@ -46,5 +46,7 @@ api.include_router(projects.router)
 api.include_router(small_groups.router,
                    dependencies=[Depends(requires_api_key)])
 api.include_router(meetings.router)
+api.include_router(chat_associations.router,
+                   dependencies=[Depends(requires_api_key)])
 
 app.include_router(api)
