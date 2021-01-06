@@ -6,7 +6,7 @@ from fastapi.routing import APIRouter
 
 from api import VERSION
 from api.db import get_pool
-from api.security import get_api_key
+from api.security import requires_api_key
 
 from . import enrollments, meetings, projects, semesters, small_groups, users
 
@@ -37,14 +37,14 @@ api = APIRouter(prefix="/api/v1")
 
 # Protect most routers entirely with an API key, but allow some to manage their own protected routes
 api.include_router(semesters.router,
-                   dependencies=[Depends(get_api_key)])
+                   dependencies=[Depends(requires_api_key)])
 api.include_router(users.router,
-                   dependencies=[Depends(get_api_key)])
+                   dependencies=[Depends(requires_api_key)])
 api.include_router(enrollments.router,
-                   dependencies=[Depends(get_api_key)])
+                   dependencies=[Depends(requires_api_key)])
 api.include_router(projects.router)
 api.include_router(small_groups.router,
-                   dependencies=[Depends(get_api_key)])
+                   dependencies=[Depends(requires_api_key)])
 api.include_router(meetings.router)
 
 app.include_router(api)
