@@ -5,7 +5,6 @@ from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
 from api.db import get_db
 from . import db, schemas
-from api import chat_associations
 
 router = APIRouter(
     prefix="/chat_associations",
@@ -13,35 +12,37 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schemas.ChatAssociationOut], summary="List all semester enrollments")
+@router.get("/", response_model=List[schemas.ChatAssociationOut])
 async def list_enrollments(
-        source_type: Optional[str] = Query(None, example="discord_role"),
-        target_type: Optional[str] = Query(None, example="project"),
+        source_type: Optional[schemas.Source] = Query(None, example="project"),
+        target_type: Optional[schemas.Target] = Query(
+            None, example="discord_role"),
         source_id: Optional[str] = Query(None),
+        target_id: Optional[str] = Query(None),
         conn: Connection = Depends(get_db)):
 
-    return await db.fetch_chat_associations(conn, filter_dict(locals(), ["source_type", "target_type", "source_id"]))
+    return await db.fetch_chat_associations(conn, filter_dict(locals(), ["source_type", "target_type", "source_id", "target_id"]))
 
 
-@router.get("/{target_id}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
-async def get_chat_association(target_id: str, conn: Connection = Depends(get_db)):
-    chat_association = await fetch_item(conn, "chat_associations", {"target_id": target_id})
+@router.get("/{source_type}/{source_id}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
+async def get_chat_association(source_type: schemas.Source, source_id: str, target_type: schemas.Target = Query(...), conn: Connection = Depends(get_db)):
+    chat_association = await fetch_item(conn, "chat_associations", filter_dict(locals(), ["source_type", "source_id", "target_type"]))
     if chat_association is None:
         raise HTTPException(
             status_code=404, detail="Chat association not found")
     return chat_association
 
 
-# @router.put("/{semester_id}/{username}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
-# async def create_or_update_enrollment(semester_id: str, username: str, enrollment: schemas.ChatAssociationIn, conn: Connection = Depends(get_db)):
-#     updated_enrollment_dict = await upsert_item(conn, "enrollments", {"semester_id": semester_id, "username": username}, enrollment.dict(exclude_unset=True))
-#     return updated_enrollment_dict
+@router.put("/{source_type}/{source_id}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
+async def create_or_update_chat_association(source_type: schemas.Source, source_id: str, chat_association: schemas.ChatAssociationIn, target_type: schemas.Target = Query(..., example="discord_role"), conn: Connection = Depends(get_db)):
+    updated_chat_association_dict = await upsert_item(conn, "chat_associations", filter_dict(locals(), ["source_type", "source_id", "target_type"]), chat_association.dict(exclude_unset=True))
+    return updated_chat_association_dict
 
 
-# @router.delete("/{semester_id}/{username}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
-# async def delete_enrollment(semester_id: str, username: str, conn: Connection = Depends(get_db)):
-#     deleted_enrollment = await delete_item(conn, "enrollments", {"semester_id": semester_id, "username": username})
-#     if deleted_enrollment is None:
-#         raise HTTPException(
-#             status_code=404, detail="ChatAssociation not found")
-#     return deleted_enrollment
+@router.delete("/{source_type}/{source_id}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
+async def delete_chat_association(source_type: schemas.Source, source_id: str, target_type: schemas.Target = Query(..., example="discord_role"), conn: Connection = Depends(get_db)):
+    deleted_chat_association = await delete_item(conn, "chat_associations", filter_dict(locals(), ["source_type", "source_id", "target_type"]))
+    if deleted_chat_association is None:
+        raise HTTPException(
+            status_code=404, detail="Chat association not found")
+    return deleted_chat_association
