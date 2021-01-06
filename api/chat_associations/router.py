@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
 from api.db import get_db
 from . import db, schemas
+from api import chat_associations
 
 router = APIRouter(
     prefix="/chat_associations",
@@ -22,13 +23,13 @@ async def list_enrollments(
     return await db.fetch_chat_associations(conn, filter_dict(locals(), ["source_type", "target_type", "source_id"]))
 
 
-# @router.get("/{semester_id}/{username}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
-# async def get_enrollment(semester_id: str, username: str, conn: Connection = Depends(get_db)):
-#     enrollment = await fetch_item(conn, "enrollments", {"semester_id": semester_id, "username": username})
-#     if enrollment is None:
-#         raise HTTPException(
-#             status_code=404, detail="ChatAssociation not found")
-#     return enrollment
+@router.get("/{target_id}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
+async def get_chat_association(target_id: str, conn: Connection = Depends(get_db)):
+    chat_association = await fetch_item(conn, "chat_associations", {"target_id": target_id})
+    if chat_association is None:
+        raise HTTPException(
+            status_code=404, detail="Chat association not found")
+    return chat_association
 
 
 # @router.put("/{semester_id}/{username}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})
