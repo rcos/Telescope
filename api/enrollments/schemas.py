@@ -10,7 +10,7 @@ class EnrollmentBase(BaseModel):
     is_for_pay: bool = Field(example=False)
     mid_year_grade: Optional[float] = Field(None)
     final_grade: Optional[float] = Field(None)
-    enrolled_at: datetime.datetime = Field()
+    enrolled_at: Optional[datetime.datetime] = Field()
 
 
 class EnrollmentOut(EnrollmentBase):
