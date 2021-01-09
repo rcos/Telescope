@@ -14,9 +14,11 @@ class MeetingBase(BaseModel):
     start_date_time: datetime.datetime = Field()
     end_date_time: datetime.datetime = Field()
     title: Optional[str] = Field(example="Day 15")
-    agenda: Optional[str] = Field()
-    recording_url: Optional[HttpUrl] = Field()
+    agenda: List[str] = Field()
+    attendance_code: Optional[str] = Field()
+    presentation_markdown: Optional[str] = Field()
     presentation_url: Optional[HttpUrl] = Field()
+    recording_url: Optional[HttpUrl] = Field()
     location: Optional[str] = Field()
 
 
