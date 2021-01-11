@@ -1,7 +1,7 @@
 from api.utils import execute_and_return, insert_item_query, update_item_query
 from typing import Any, List, Dict
 from asyncpg import Connection
-from pypika import Query, Table, Field
+from pypika import PostgreSQLQuery as Query, Table, Field
 from pypika.queries import QueryBuilder
 
 sems_t = Table("semesters")

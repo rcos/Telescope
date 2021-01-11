@@ -1,7 +1,7 @@
 from api.db import ARRAY_ANY
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
-from pypika import Query, Table
+from pypika import PostgreSQLQuery as Query, Table
 from pypika.terms import Parameter
 
 proj_t = Table("projects")

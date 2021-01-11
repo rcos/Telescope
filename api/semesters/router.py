@@ -5,7 +5,6 @@ from typing import List
 from asyncpg.connection import Connection
 from fastapi import APIRouter
 from fastapi.param_functions import Query, Depends
-from starlette import responses
 from api.db import get_db
 from . import schemas, db
 
@@ -34,7 +33,7 @@ async def create_or_update_semester(semester_id: str, semester: schemas.Semester
     return updated_semester_dict
 
 
-@router.delete("/{username}", response_model=schemas.SemesterOut, summary="Delete a specific semester", responses={404: {"description": "Not found"}})
+@router.delete("/{semester_id}", response_model=schemas.SemesterOut, summary="Delete a specific semester", responses={404: {"description": "Not found"}})
 async def delete_semester(semester_id: str, conn: Connection = Depends(get_db)):
     # TODO: Cascade deletions... probably should be done on DB end
     deleted_semester = await delete_item(conn, "semesters", {"semester_id": semester_id})

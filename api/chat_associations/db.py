@@ -2,7 +2,7 @@ from api.utils import execute_and_return, insert_item_query, update_item_query
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
 from pydantic.fields import Field
-from pypika import Query, Table
+from pypika import PostgreSQLQuery as Query, Table
 
 chat_t = Table("chat_associations")
 

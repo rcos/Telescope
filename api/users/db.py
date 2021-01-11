@@ -1,7 +1,7 @@
 from api.utils import insert_item_query, update_item_query
 from typing import Any, List, Dict, Optional
 from asyncpg import Connection
-from pypika import Query, Table
+from pypika import PostgreSQLQuery as Query, Table
 
 users_t = Table("users")
 user_acc_t = Table("user_accounts")

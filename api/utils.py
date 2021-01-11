@@ -3,6 +3,7 @@ from asyncpg.connection import Connection
 
 from pypika import PostgreSQLQuery as Query
 from pypika.queries import QueryBuilder, Table
+from pypika.terms import Array
 
 
 def filter_dict(locals: Dict[str, Any], keys: List[str]):
@@ -28,6 +29,8 @@ def update_item_query(table: Table, primary_keys: Dict[str, Any], update_dict: D
 
     # Update values present in update_dict
     for col, value in update_dict.items():
+        if isinstance(value, list):
+            value = Array(*value)
         query = query.set(table[col], value)
 
     return query

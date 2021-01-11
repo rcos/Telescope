@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from api.db import get_db
 from api.security import get_api_key, requires_api_key
-from api.utils import filter_dict
+from api.utils import fetch_item, filter_dict, insert_item, update_item, delete_item
 from asyncpg.connection import Connection
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
@@ -38,12 +38,12 @@ async def list_meetings(
 @router.post("/", response_model=schemas.MeetingOut,
              dependencies=[Depends(requires_api_key)])
 async def create_meeting(meeting: schemas.MeetingIn, conn: Connection = Depends(get_db)):
-    return await db.insert_meeting(conn, meeting.dict(exclude_unset=True))
+    return await insert_item(conn, "meetings", {}, meeting.dict(exclude_unset=True))
 
 
 @router.get("/{meeting_id}", response_model=schemas.MeetingOut, responses={404: {"description": "Not found"}})
 async def get_meeting(meeting_id: str, api_key=Depends(get_api_key), conn: Connection = Depends(get_db)):
-    meeting = await db.fetch_meeting(conn, meeting_id)
+    meeting = await fetch_item(conn, "meetings", {"meeting_id": meeting_id})
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
     if api_key is None and not meeting["is_public"]:
@@ -55,7 +55,7 @@ async def get_meeting(meeting_id: str, api_key=Depends(get_api_key), conn: Conne
 @router.put("/{meeting_id}", response_model=schemas.MeetingOut, responses={404: {"description": "Not found"}},
             dependencies=[Depends(requires_api_key)])
 async def update_meeting(meeting_id: str, meeting: schemas.MeetingIn, conn: Connection = Depends(get_db)):
-    updated_meeting = await db.update_meeting(conn, meeting_id, meeting.dict(exclude_unset=True))
+    updated_meeting = await update_item(conn, "meetings", {"meeting_id": meeting_id}, meeting.dict(exclude_unset=True))
     if updated_meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
     return updated_meeting
@@ -64,7 +64,7 @@ async def update_meeting(meeting_id: str, meeting: schemas.MeetingIn, conn: Conn
 @router.delete("/{meeting_id}", response_model=schemas.MeetingOut, responses={404: {"description": "Not found"}},
                dependencies=[Depends(requires_api_key)])
 async def delete_meeting(meeting_id: str, conn: Connection = Depends(get_db)):
-    deleted_meeting = await db.delete_meeting(conn, meeting_id)
+    deleted_meeting = await delete_item(conn, "meetings", {"meeting_id": meeting_id})
     if deleted_meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
     return deleted_meeting
