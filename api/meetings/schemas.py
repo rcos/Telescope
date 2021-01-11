@@ -5,10 +5,23 @@ import datetime
 
 from pydantic.networks import HttpUrl
 
+from enum import Enum
+
+
+class MeetingType(str, Enum):
+    large_group = "large_group"
+    small_group = "small_group"
+    presentations = "presentations"
+    bonus_session = "bonus_session"
+    grading = "grading"
+    mentors = "mentors"
+    coordinators = "coordinators"
+    other = "other"
+
 
 class MeetingBase(BaseModel):
     semester_id: str = Field(example="202101")
-    meeting_type: str = Field(example="large_group")
+    meeting_type: MeetingType = Field(example=MeetingType.large_group)
     host_username: Optional[str] = Field(None, example="manp")
     is_public: bool = Field(True, example=True)
     start_date_time: datetime.datetime = Field()
