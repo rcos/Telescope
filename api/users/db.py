@@ -17,9 +17,3 @@ async def fetch_users(conn: Connection, filter: Dict[str, Any]) -> List[Dict]:
             continue
         query = query.where(users_t[key] == value)
     return await conn.fetch(str(query))
-
-
-async def fetch_user_accounts(conn: Connection, username: str) -> List[Dict]:
-    query = Query.from_(user_acc_t) \
-        .select("*").where(user_acc_t.username == username).orderby(user_acc_t.type)
-    return await conn.fetch(str(query))

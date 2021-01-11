@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from asyncpg.connection import Connection
 
 from pypika import PostgreSQLQuery as Query
@@ -44,6 +44,20 @@ def insert_item_query(table: Table, primary_keys: Dict[str, Any], item_dict: Dic
 
 async def execute_and_return(conn: Connection, query: Query):
     return await conn.fetchrow(str(query) + " RETURNING *")
+
+
+async def list_items(conn: Connection, table: Union[Table, str], search_keys: Dict[str, any], order_by: Optional[List[str]] = None):
+    if isinstance(table, str):
+        table = Table(table)
+    query = Query.from_(table) \
+        .select("*")
+
+    if order_by:
+        query = query.orderby(order_by)
+
+    query = apply_where(query, table, search_keys)
+
+    return await conn.fetch(str(query))
 
 
 async def fetch_item(conn: Connection, table: Union[Table, str], primary_keys: Dict[str, Any]):

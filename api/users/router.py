@@ -1,5 +1,5 @@
 from asyncpg.exceptions import ForeignKeyViolationError
-from api.utils import delete_item, fetch_item, filter_dict, upsert_item
+from api.utils import delete_item, fetch_item, filter_dict, list_items, upsert_item
 from typing import List, Optional
 from asyncpg.connection import Connection
 from fastapi import APIRouter
@@ -47,9 +47,16 @@ async def delete_user(username: str, conn: Connection = Depends(get_db)):
     return deleted_user
 
 
-@router.get("/{username}/accounts", response_model=List[schemas.UserAccount], summary="Get specific user's accounts", response_description="Get a user's connected social media and Git platform accounts.", responses={404: {"description": "Not found"}})
+@router.get("/{username}/accounts", response_model=List[schemas.UserAccount], summary="Get specific user's accounts", response_description="List of user's connected social media and Git platform accounts.", responses={404: {"description": "Not found"}})
 async def get_user(username: str, conn: Connection = Depends(get_db)):
     user = await fetch_item(conn, "users", {"username": username})
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return await db.fetch_user_accounts(conn, username)
+    return await list_items(conn, "user_accounts", {"username": username})
+
+# @router.get("/{username}/accounts", response_model=List[schemas.UserAccount], summary="Get specific user's accounts", response_description="Get a user's connected social media and Git platform accounts.", responses={404: {"description": "Not found"}})
+# async def get_user(username: str, conn: Connection = Depends(get_db)):
+#     user = await fetch_item(conn, "users", {"username": username})
+#     if user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return await db.fetch_user_accounts(conn, username)
