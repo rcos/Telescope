@@ -1,2 +1,7 @@
-# rcos-api
-RCOS API
+# RCOS Data
+
+## Database
+`/database`
+
+## API
+`/api`
