@@ -1,4 +1,4 @@
-from api.utils import delete_item, fetch_item, filter_dict, upsert_item
+from api.utils import delete_item, fetch_item, filter_dict, list_items, upsert_item
 from asyncpg.connection import Connection
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
@@ -15,13 +15,22 @@ router = APIRouter(
 @router.get("/", response_model=List[schemas.ChatAssociationOut])
 async def list_enrollments(
         source_type: Optional[schemas.Source] = Query(None, example="project"),
+        source_type__in: Optional[List[schemas.Source]] = Query(None),
         target_type: Optional[schemas.Target] = Query(
-            None, example="discord_role"),
+            None),
+        target_type__in: Optional[List[schemas.Target]] = Query(
+            None),
         source_id: Optional[str] = Query(None),
         target_id: Optional[str] = Query(None),
         conn: Connection = Depends(get_db)):
 
-    return await db.fetch_chat_associations(conn, filter_dict(locals(), ["source_type", "target_type", "source_id", "target_id"]))
+    if source_type__in:
+        source_type__in = list(map(lambda e: e.value, source_type__in))
+
+    if target_type__in:
+        target_type__in = list(map(lambda e: e.value, target_type__in))
+
+    return await list_items(conn, "chat_associations", filter_dict(locals(), ["source_type", "source_type__in", "target_type", "target_type__in", "source_id", "target_id"]))
 
 
 @router.get("/{source_type}/{source_id}", response_model=schemas.ChatAssociationOut, responses={404: {"description": "Not found"}})

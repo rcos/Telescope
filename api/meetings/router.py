@@ -23,7 +23,7 @@ router = APIRouter(
 async def list_meetings(
         semester_id: Optional[str] = Query(None),
         meeting_type: Optional[schemas.MeetingType] = Query(None),
-        meeting_type__in: Optional[List[str]] = Query(None),
+        meeting_type__in: Optional[List[schemas.MeetingType]] = Query(None),
         host_username: Optional[str] = Query(None),
         is_public: Optional[bool] = Query(None),
         location: Optional[str] = Query(None),
@@ -39,6 +39,10 @@ async def list_meetings(
     # Only authenticated requests can fetch private meetings
     if api_key is None:
         search["is_public"] = True
+
+    if search["meeting_type__in"]:
+        search["meeting_type__in"] = list(
+            map(lambda e: e.value, search["meeting_type__in"]))
 
     return await list_items(conn, "meetings", search, order_by=[("start_date_time", Order.asc)])
 

@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 from asyncpg.connection import Connection
 
@@ -79,7 +80,7 @@ async def list_items(conn: Connection, table: Union[Table, str], search_keys: Di
         query = query.orderby(col, order=order)
 
     query = apply_where(query, table, search_keys, ignore_none=True)
-    # print(query)
+    print(query)
     return await conn.fetch(str(query))
 
 
