@@ -1,15 +1,17 @@
 from typing import List, Optional
 
+from pypika.enums import Order
+
 from api.db import get_db
 from api.security import get_api_key, requires_api_key
-from api.utils import fetch_item, filter_dict, insert_item, update_item, delete_item
+from api.utils import fetch_item, filter_dict, insert_item, list_items, update_item, delete_item
 from asyncpg.connection import Connection
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends, Query
 import datetime
 
-from . import db, schemas
+from . import schemas
 
 router = APIRouter(
     prefix="/meetings",
@@ -21,23 +23,24 @@ router = APIRouter(
 async def list_meetings(
         semester_id: Optional[str] = Query(None),
         meeting_type: Optional[schemas.MeetingType] = Query(None),
+        meeting_type__in: Optional[List[str]] = Query(None),
         host_username: Optional[str] = Query(None),
         is_public: Optional[bool] = Query(None),
         location: Optional[str] = Query(None),
-        start_date_time_before: Optional[datetime.datetime] = Query(None),
-        start_date_time_after: Optional[datetime.datetime] = Query(None),
-        end_date_time_before: Optional[datetime.datetime] = Query(None),
-        end_date_time_after: Optional[datetime.datetime] = Query(None),
+        start_date_time__gte: Optional[datetime.datetime] = Query(None),
+        start_date_time__lte: Optional[datetime.datetime] = Query(None),
+        end_date_time__gte: Optional[datetime.datetime] = Query(None),
+        end_date_time__lte: Optional[datetime.datetime] = Query(None),
         api_key=Depends(get_api_key),
         conn: Connection = Depends(get_db)):
     search = filter_dict(locals(), [
-                         "semester_id", "meeting_type", "host_username", "is_public", "location", "start_date_time_before", "start_date_time_after", "end_date_time_before", "end_date_time_before"])
+                         "semester_id", "meeting_type", "meeting_type__in", "host_username", "is_public", "location", "start_date_time__gte", "start_date_time__lte", "end_date_time__gte", "end_date_time__lte"])
 
     # Only authenticated requests can fetch private meetings
     if api_key is None:
         search["is_public"] = True
 
-    return await db.fetch_meetings(conn, search)
+    return await list_items(conn, "meetings", search, order_by=[("start_date_time", Order.asc)])
 
 
 @router.post("/", response_model=schemas.MeetingOut,

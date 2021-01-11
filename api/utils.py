@@ -79,6 +79,7 @@ async def list_items(conn: Connection, table: Union[Table, str], search_keys: Di
         query = query.orderby(col, order=order)
 
     query = apply_where(query, table, search_keys, ignore_none=True)
+    # print(query)
     return await conn.fetch(str(query))
 
 

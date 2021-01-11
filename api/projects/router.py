@@ -1,8 +1,10 @@
 from typing import List, Optional
 
+from pypika.enums import Order
+
 from api.db import get_db
 from api.security import requires_api_key
-from api.utils import delete_item, fetch_item, filter_dict, insert_item, update_item
+from api.utils import delete_item, fetch_item, filter_dict, insert_item, list_items, update_item
 from asyncpg.connection import Connection
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
@@ -26,7 +28,12 @@ async def list_projects(
     if semester_id is not None:
         raise HTTPException(status_code=501)
 
-    return await db.fetch_projects(conn, filter_dict(locals(), ["title", "languages", "stack", "repository_url"]))
+    return await list_items(
+        conn,
+        "projects",
+        filter_dict(locals(), ["title", "languages",
+                               "stack", "repository_url"]),
+        order_by=[("created_at", Order.desc)])
 
 
 @router.post("/", response_model=schemas.ProjectOut,
