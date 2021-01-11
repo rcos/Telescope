@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
 from api.db import get_db
-from . import db, schemas
+from . import schemas
 
 router = APIRouter(
     prefix="/chat_associations",
