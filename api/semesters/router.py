@@ -1,12 +1,16 @@
-from api.utils import delete_item, fetch_item, upsert_item
-from os import stat
-from fastapi.exceptions import HTTPException
+import datetime
 from typing import List
+
+from api.db import get_db
+from api.utils import (delete_item, fetch_item, filter_dict, list_items,
+                       upsert_item)
 from asyncpg.connection import Connection
 from fastapi import APIRouter
-from fastapi.param_functions import Query, Depends
-from api.db import get_db
-from . import schemas, db
+from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Depends, Query
+from pypika import Order
+
+from . import schemas
 
 router = APIRouter(
     prefix="/semesters",
@@ -15,8 +19,18 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schemas.SemesterOut])
-async def list_semesters(conn: Connection = Depends(get_db)):
-    return await db.fetch_semesters(conn)
+async def list_semesters(
+        start_date__gte: datetime.date = Query(None),
+        start_date__lte: datetime.date = Query(None),
+        end_date__gte: datetime.date = Query(None),
+        end_date__lte: datetime.date = Query(None),
+        conn: Connection = Depends(get_db)):
+    return await list_items(
+        conn,
+        "semesters",
+        filter_dict(locals(), [
+                    "start_date__gte", "start_date__lte", "end_date__gte", "end_date__lte"]),
+        order_by=[("semester_id", Order.asc)])
 
 
 @router.get("/{semester_id}", responses={404: {"description": "Not found"}})
