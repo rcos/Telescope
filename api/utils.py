@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
-from asyncpg.connection import Connection
 
+from asyncpg.connection import Connection
 from pypika import PostgreSQLQuery as Query
 from pypika.queries import QueryBuilder, Table
 from pypika.terms import Array

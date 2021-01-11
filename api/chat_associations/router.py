@@ -1,9 +1,12 @@
-from api.utils import delete_item, fetch_item, filter_dict, list_items, upsert_item
-from asyncpg.connection import Connection
 from typing import List, Optional
+
+from api.db import get_db
+from api.utils import (delete_item, fetch_item, filter_dict, list_items,
+                       upsert_item)
+from asyncpg.connection import Connection
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
-from api.db import get_db
+
 from . import schemas
 
 router = APIRouter(

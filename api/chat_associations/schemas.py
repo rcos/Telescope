@@ -1,9 +1,6 @@
-from api import small_groups
-from typing import Optional
-from pydantic import BaseModel, Field
-import datetime
-
 from enum import Enum
+
+from pydantic import BaseModel, Field
 
 
 class Source(str, Enum):
