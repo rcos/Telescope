@@ -7,6 +7,7 @@ from asyncpg.connection import Connection
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends, Query
+import datetime
 
 from . import db, schemas
 
@@ -19,14 +20,18 @@ router = APIRouter(
 @router.get("/", response_model=List[schemas.MeetingOut])
 async def list_meetings(
         semester_id: Optional[str] = Query(None),
-        meeting_type: Optional[str] = Query(None),
+        meeting_type: Optional[schemas.MeetingType] = Query(None),
         host_username: Optional[str] = Query(None),
         is_public: Optional[bool] = Query(None),
         location: Optional[str] = Query(None),
+        start_date_time_before: Optional[datetime.datetime] = Query(None),
+        start_date_time_after: Optional[datetime.datetime] = Query(None),
+        end_date_time_before: Optional[datetime.datetime] = Query(None),
+        end_date_time_after: Optional[datetime.datetime] = Query(None),
         api_key=Depends(get_api_key),
         conn: Connection = Depends(get_db)):
     search = filter_dict(locals(), [
-                         "semester_id", "meeting_type", "host_username", "is_public", "location"])
+                         "semester_id", "meeting_type", "host_username", "is_public", "location", "start_date_time_before", "start_date_time_after", "end_date_time_before", "end_date_time_before"])
 
     # Only authenticated requests can fetch private meetings
     if api_key is None:

@@ -13,6 +13,16 @@ async def fetch_meetings(conn: Connection, filter: Dict[str, Any]) -> List[Dict]
     for key, value in filter.items():
         if value is None:
             continue
-        query = query.where(value == meet_t[key])
+
+        if key == "start_date_time_before":
+            query = query.where(meet_t.start_date_time < value)
+        elif key == "start_date_time_after":
+            query = query.where(meet_t.start_date_time > value)
+        elif key == "end_date_time_before":
+            query = query.where(meet_t.end_date_time < value)
+        elif key == "end_date_time_after":
+            query = query.where(meet_t.end_date_time > value)
+        else:
+            query = query.where(value == meet_t[key])
 
     return await conn.fetch(str(query))

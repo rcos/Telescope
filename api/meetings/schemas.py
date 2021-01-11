@@ -34,6 +34,9 @@ class MeetingBase(BaseModel):
     recording_url: Optional[HttpUrl] = Field()
     location: Optional[str] = Field()
 
+    class Config:
+        use_enum_values = True
+
 
 class MeetingOut(MeetingBase):
     meeting_id: int = Field(example=1)
