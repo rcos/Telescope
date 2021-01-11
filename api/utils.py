@@ -6,14 +6,37 @@ from pypika.queries import QueryBuilder, Table
 from pypika.terms import Array
 
 
+def separate_col_op(pk: str):
+    parts = pk.split('__', 1)
+    if len(parts) == 1:
+        return (pk, None)
+    else:
+        return parts
+
+
 def filter_dict(locals: Dict[str, Any], keys: List[str]):
     return dict((key, locals[key])
                 for key in keys)
 
 
-def apply_where(query: QueryBuilder, table: Table, keys: Dict[str, Any]):
+def apply_where(query: QueryBuilder, table: Table, keys: Dict[str, Any], ignore_none: bool = False):
     for pk, value in keys.items():
-        query = query.where(table[pk] == value)
+        if value is None and ignore_none:
+            continue
+
+        col, op = separate_col_op(pk)
+        if op == 'gte':
+            query = query.where(table[col] >= value)
+        elif op == 'lte':
+            query = query.where(table[col] <= value)
+        elif op == 'gt':
+            query = query.where(table[col] > value)
+        elif op == 'lt':
+            query = query.where(table[col] < value)
+        elif op == 'in':
+            query = query.where(table[col].isin(value))
+        else:
+            query = query.where(table[pk] == value)
     return query
 
 
@@ -46,17 +69,17 @@ async def execute_and_return(conn: Connection, query: Query):
     return await conn.fetchrow(str(query) + " RETURNING *")
 
 
-async def list_items(conn: Connection, table: Union[Table, str], search_keys: Dict[str, any], order_by: Optional[List[str]] = None):
+async def list_items(conn: Connection, table: Union[Table, str], search_keys: Dict[str, any] = dict(), order_by: List[str] = []):
     if isinstance(table, str):
         table = Table(table)
     query = Query.from_(table) \
         .select("*")
 
-    if order_by:
-        query = query.orderby(order_by)
+    for col, order in order_by:
+        query = query.orderby(col, order=order)
 
-    query = apply_where(query, table, search_keys)
-
+    query = apply_where(query, table, search_keys, ignore_none=True)
+    print(query)
     return await conn.fetch(str(query))
 
 
