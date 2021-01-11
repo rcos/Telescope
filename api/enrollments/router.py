@@ -1,10 +1,11 @@
-from api.utils import delete_item, fetch_item, filter_dict, upsert_item
+from pypika.enums import Order
+from api.utils import delete_item, fetch_item, filter_dict, list_items, upsert_item
 from asyncpg.connection import Connection
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends, Query
 from api.db import get_db
-from . import db, schemas
+from . import schemas
 
 router = APIRouter(
     prefix="/enrollments",
@@ -21,9 +22,9 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
                                None, example=None),
                            is_coordinator: Optional[bool] = Query(
                                None, example=None),
-                           credits_min: Optional[int] = Query(
+                           credits__gte: Optional[int] = Query(
                                None, example=None),
-                           credits_max: Optional[int] = Query(
+                           credits__lte: Optional[int] = Query(
                                None, example=None),
                            is_for_pay: Optional[bool] = Query(
                                None, example=None),
@@ -31,10 +32,15 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
     """
     List all enrollments meeting the specified filters. Each filter is added as an AND operation, so setting `semester_id='202101'`, `is_project_lead=true`, and `project_id=1` will return the project leads for project 1 in the Spring 2021 semester.
 
-    Find all enrolled students taking RCOS for credit with `credits_min=1` and find all students taking RCOS for experience with `credits_max=0, is_for_pay=false`.
+    Find all enrolled students taking RCOS for credit with `credits_gte=1` and find all students taking RCOS for experience with `credits_lte=0, is_for_pay=false`.
     """
 
-    return await db.fetch_enrollments(conn, filter_dict(locals(), ["semester_id", "username", "project_id", "is_project_lead", "is_coordinator", "credits_min", "credits_max", "is_for_pay"]))
+    return await list_items(
+        conn,
+        "enrollments",
+        filter_dict(locals(), ["semester_id", "username", "project_id", "is_project_lead",
+                               "is_coordinator", "credits__gte", "credits__lte", "is_for_pay"]),
+        order_by=[("semester_id", Order.asc), ("username", Order.asc)])
 
 
 @router.get("/{semester_id}/{username}", response_model=schemas.EnrollmentOut, responses={404: {"description": "Not found"}})
