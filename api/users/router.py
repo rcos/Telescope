@@ -23,12 +23,14 @@ async def list_users(
         is_rpi: Optional[bool] = Query(None, example=True),
         is_faculty: Optional[bool] = Query(None, example=False),
         graduation_year: Optional[int] = Query(None, example=2022),
+        graduation_year__gte: Optional[int] = Query(None),
+        graduation_year__lte: Optional[int] = Query(None),
         timezone: Optional[str] = Query(None, example=None),
         conn: Connection = Depends(get_db)):
     return await list_items(conn,
                             "users",
                             filter_dict(
-                                locals(), ["is_rpi", "is_faculty", "graduation_year", "timezone"]),
+                                locals(), ["is_rpi", "is_faculty", "graduation_year", "graduation_year__gte", "graduation_year__lte", "timezone"]),
                             order_by=[("username", Order.asc)])
 
 

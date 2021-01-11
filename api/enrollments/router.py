@@ -26,6 +26,7 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
                                None, example=None),
                            credits__lte: Optional[int] = Query(
                                None, example=None),
+                           credits__in: Optional[List[int]] = Query(None),
                            is_for_pay: Optional[bool] = Query(
                                None, example=None),
                            conn: Connection = Depends(get_db)):
@@ -39,7 +40,7 @@ async def list_enrollments(semester_id: Optional[str] = Query(None, example="202
         conn,
         "enrollments",
         filter_dict(locals(), ["semester_id", "username", "project_id", "is_project_lead",
-                               "is_coordinator", "credits__gte", "credits__lte", "is_for_pay"]),
+                               "is_coordinator", "credits__gte", "credits__lte", "credits__in", "is_for_pay"]),
         order_by=[("semester_id", Order.asc), ("username", Order.asc)])
 
 
