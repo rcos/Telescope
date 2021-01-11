@@ -1,13 +1,16 @@
-from asyncpg.exceptions import ForeignKeyViolationError
-from api.utils import delete_item, fetch_item, filter_dict, list_items, upsert_item
 from typing import List, Optional
+
+from api.db import get_db
+from api.utils import (delete_item, fetch_item, filter_dict, list_items,
+                       upsert_item)
 from asyncpg.connection import Connection
+from asyncpg.exceptions import ForeignKeyViolationError
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends, Query
+from pypika.enums import Order
 
-from api.db import get_db
-from . import db, schemas
+from . import schemas
 
 router = APIRouter(
     prefix="/users",
@@ -19,9 +22,14 @@ router = APIRouter(
 async def list_users(
         is_rpi: Optional[bool] = Query(None, example=True),
         is_faculty: Optional[bool] = Query(None, example=False),
+        graduation_year: Optional[int] = Query(None, example=2022),
         timezone: Optional[str] = Query(None, example=None),
         conn: Connection = Depends(get_db)):
-    return await db.fetch_users(conn, filter_dict(locals(), ["is_rpi", "is_faculty", "timezone"]))
+    return await list_items(conn,
+                            "users",
+                            filter_dict(
+                                locals(), ["is_rpi", "is_faculty", "graduation_year", "timezone"]),
+                            order_by=[("username", Order.asc)])
 
 
 @router.get("/{username}", response_model=schemas.UserOut, summary="Get specific user", response_description="Get a specific user's profile with information that doesn't depend upon a specific semester.", responses={404: {"description": "Not found"}})
