@@ -90,6 +90,6 @@ features = ["uuid", "chrono"]
 
 # Universally unique identifier generation
 [dependencies.uuid]
-version = "0.7.4" # hold back from 0.8 because juniper doesn't support it yet
+version = "0.8.2" # hold back from 0.8 because juniper doesn't support it yet
 default-features = false
 features = ["serde", "v4"]
