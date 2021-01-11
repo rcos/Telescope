@@ -48,15 +48,16 @@ async def delete_user(username: str, conn: Connection = Depends(get_db)):
 
 
 @router.get("/{username}/accounts", response_model=List[schemas.UserAccount], summary="Get specific user's accounts", response_description="List of user's connected social media and Git platform accounts.", responses={404: {"description": "Not found"}})
-async def get_user(username: str, conn: Connection = Depends(get_db)):
+async def list_user_accounts(username: str, conn: Connection = Depends(get_db)):
     user = await fetch_item(conn, "users", {"username": username})
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return await list_items(conn, "user_accounts", {"username": username})
 
-# @router.get("/{username}/accounts", response_model=List[schemas.UserAccount], summary="Get specific user's accounts", response_description="Get a user's connected social media and Git platform accounts.", responses={404: {"description": "Not found"}})
-# async def get_user(username: str, conn: Connection = Depends(get_db)):
-#     user = await fetch_item(conn, "users", {"username": username})
-#     if user is None:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return await db.fetch_user_accounts(conn, username)
+
+@router.get("/{username}/accounts/{type}", response_model=schemas.UserAccount, summary="Get specific user's platform account", responses={404: {"description": "Not found"}})
+async def get_user_account(username: str, type: str, conn: Connection = Depends(get_db)):
+    user_account = await fetch_item(conn, "user_accounts", {"username": username, "type": type})
+    if user_account is None:
+        raise HTTPException(status_code=404, detail="User account not found")
+    return user_account
