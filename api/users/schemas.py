@@ -20,7 +20,14 @@ class UserIn(UserBase):
     pass
 
 
-class UserAccount(BaseModel):
+class UserAccountBase(BaseModel):
+    account_id: str = Field(example="7462762139")
+
+
+class UserAccountOut(UserAccountBase):
     username: str = Field(example="manp")
     type: str = Field(example="github")
-    account_id: str = Field(example="7462762139")
+
+
+class UserAccountIn(UserAccountBase):
+    pass
