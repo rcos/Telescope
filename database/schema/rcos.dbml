@@ -129,6 +129,13 @@ Table projects {
   Note: 'Project details are not semester dependent.'
 }
 
+Table project_presentations {
+  project_id int [pk]
+  semester_id int [pk]
+  presentation_url varchar [not null]
+  is_draft boolean [not null, default: true]
+}
+
 Table project_pitches {
   semester_id varchar [pk]
   username varchar [pk]
@@ -238,9 +245,11 @@ Table meetings {
   start_date_time timestamp [not null]
   end_date_time timestamp [not null]
   title varchar [note: 'Optional meeting title']
-  agenda text [note: 'Optional description of what the meeting will entail']
-  recording_url varchar
+  agenda varchar[] [default: '{}', note: 'List of agenda items']
+  presentation_markdown text
   presentation_url varchar
+  attendance_code varchar
+  recording_url varchar
   location varchar [note: 'Physical location or URL to join']
   
   indexes {
@@ -270,7 +279,7 @@ Table bonus_attendances {
   Note: 'Bonus attendances from different events'
 }
 
-Table presentation_grades {
+Table project_presentation_grades {
   semester_id varchar [pk]
   project_id int [pk]
   grader_username varchar [pk]
@@ -281,16 +290,16 @@ Table presentation_grades {
 }
 
 enum chat_association_source {
+  project
+  small_group
+}
+
+enum chat_association_target {
   discord_server
   discord_text_channel
   discord_voice_channel
   discord_category
   discord_role
-}
-
-enum chat_association_target {
-  project
-  small_group
 }
 
 Table chat_associations {
@@ -343,8 +352,14 @@ Ref: "users"."username" < "status_update_submissions"."username"
 
 Ref: "users"."username" < "status_update_submissions"."grader_username"
 
-Ref: "projects"."project_id" < "presentation_grades"."project_id"
+Ref: "projects"."project_id" < "project_presentation_grades"."project_id"
 
-Ref: "enrollments".("semester_id", "username") < "presentation_grades".("semester_id", "grader_username")
+Ref: "semesters"."semester_id" < "project_presentation_grades"."semester_id"
+
+Ref: "enrollments".("semester_id", "username") < "project_presentation_grades".("semester_id", "grader_username")
 
 Ref: "users"."username" < "user_accounts"."username"
+
+Ref: "projects"."project_id" < "project_presentations"."project_id"
+
+Ref: "semesters"."semester_id" < "project_presentations"."semester_id"
