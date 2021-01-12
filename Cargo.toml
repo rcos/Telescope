@@ -21,7 +21,7 @@ actix = "0.10.0"
 # actix web server (use exact version)
 actix-web = {version = "3.3.2", features = ["openssl"]}
 # static file serving
-actix-files = "0.4.1"
+actix-files = "0.5.0"
 # identity service -- cookie authentication
 actix-identity = "0.3.1"
 # ratelimiting (not compatible with actix 3)
