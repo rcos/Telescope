@@ -25,7 +25,7 @@ pub struct Email {
 }
 
 /// GraphQL operations on emails.
-#[juniper::object(Context = ApiContext)]
+#[graphql_object(Context = ApiContext)]
 impl Email {
     /// The email address
     fn address(&self) -> &str {

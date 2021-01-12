@@ -1,4 +1,4 @@
-use juniper::{FieldError, FieldResult, RootNode, Value};
+use juniper::{FieldError, FieldResult, RootNode, Value, EmptyMutation, EmptySubscription};
 
 use diesel::{
     prelude::*,
@@ -19,7 +19,7 @@ use crate::{
 use uuid::Uuid;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
-pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;
+pub type Schema = RootNode<'static, QueryRoot, EmptyMutation<ApiContext>, EmptySubscription<ApiContext>>;
 
 /// Context accessible to juniper when resolving GraphQl API requests.
 pub struct ApiContext {
@@ -56,7 +56,7 @@ impl ApiContext {
 
     /// Get the GraphQL schema object.
     pub fn make_schema() -> Schema {
-        Schema::new(QueryRoot, MutationRoot)
+        Schema::new(QueryRoot, EmptyMutation::new(), EmptySubscription::new())
     }
 
     /// Get a database connection. Log any errors and then map to a juniper error type.
@@ -76,7 +76,7 @@ pub struct QueryRoot;
 /// The root of all graphql mutations.
 pub struct MutationRoot;
 
-#[juniper::object(Context = ApiContext)]
+#[graphql_object(Context = ApiContext)]
 impl QueryRoot {
     /// Telescope Version
     fn version() -> &'static str {
@@ -125,5 +125,7 @@ impl QueryRoot {
     }
 }
 
-#[juniper::object(Context = ApiContext)]
+/*
+#[graphql_object(Context = ApiContext)]
 impl MutationRoot {}
+*/

@@ -155,7 +155,7 @@ pub struct PaginationInput {
 
 macro_rules! impl_juniper_pagination {
     ($t:ty, $n:literal) => {
-        #[juniper::object(
+        #[graphql_object(
                                                     Context = ApiContext,
                                                     name = $n
                                                 )]

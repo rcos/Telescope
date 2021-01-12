@@ -55,41 +55,20 @@ pulldown-cmark = "0.8"
 # Sending emails.
 lettre = {version = "0.9.5", features = ["serde-impls"]}
 lettre_email = "0.9.4"
+# GraphQL queries and API system.
+juniper = {version = "0.15.1", features = ["uuid", "chrono"]}
 # MD5 hashing to use to talk to Gravatar.
 md5 = "0.7"
 # URL Parsing
 url = "2.2.0"
+# Date and time utilities
+chrono = {version = "0.4.19", features = ["serde", "std", "clock"]}
+time = {version = "0.2.23", features = ["serde", "std"]}
+# ORM and query building (to interact with Postgres Database)
+diesel = {version = "1.4.5", features = ["uuidv07", "r2d2", "postgres", "chrono"]}
+# Universally unique identifier generation
+uuid = {version = "0.8.2", features = ["serde", "v4"]}
+
 # Async functions in traits
 # Add this in when you have time (see src/templates/static_pages)
 # async-trait = "0.1.42"
-
-# Date and time utilities
-[dependencies.chrono]
-version = "0.4.19"
-default-features = false
-features = ["serde", "std", "clock"]
-
-[dependencies.time]
-version = "0.2.23"
-default-features = false
-features = ["serde", "std"]
-
-# ORM and query building (to interact with Postgres Database)
-[dependencies.diesel]
-version = "1.4.5"
-default-features = false
-features = ["uuidv07", "r2d2", "postgres", "chrono"]
-
-
-
-# GraphQL queries and API system.
-[dependencies.juniper]
-version = "0.14.2"
-default-features = false
-features = ["uuid", "chrono"]
-
-# Universally unique identifier generation
-[dependencies.uuid]
-version = "0.7.4" # hold back from 0.8 because juniper doesn't support it yet
-default-features = false
-features = ["serde", "v4"]

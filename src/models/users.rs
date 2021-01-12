@@ -40,9 +40,7 @@ pub struct User {
 }
 
 /// An RCOS member.
-#[juniper::object(
-    Context = ApiContext,
-)]
+#[graphql_object(Context = ApiContext)]
 impl User {
     /// The user's unique identifier.
     fn id(&self) -> Uuid {

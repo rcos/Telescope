@@ -22,16 +22,14 @@ pub async fn api(
 ) -> Result<HttpResponse, Error> {
     if let Some(api_ctx) = ctx.get_api_context().await {
         // Execute request
-        let res = web::block(move || {
-            let res = data.execute(&api_ctx.schema, &api_ctx);
-            Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
-        })
-        .await
-        .map_err(Error::from)?;
+        let res = data
+            .execute(&api_ctx.schema, &api_ctx)
+            .await;
+        let json_str = serde_json::to_string(&res).map_err(Error::from)?;
 
         Ok(HttpResponse::Ok()
             .content_type("application/json")
-            .body(res))
+            .body(json_str))
     } else {
         Ok(HttpResponse::Unauthorized().body(r#"You must be logged in to make API requests."#))
     }

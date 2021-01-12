@@ -13,6 +13,10 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
+#[macro_use]
+extern crate juniper;
+
+
 pub mod util;
 
 mod web;
