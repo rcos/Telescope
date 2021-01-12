@@ -1,7 +1,7 @@
 use crate::{
     models::{markdown::render as md_render, users::User},
+    templates::Template,
     web::RequestContext,
-    templates::Template
 };
 use chrono::Local;
 
@@ -99,7 +99,6 @@ impl Profile {
 
     /// Convert this profile page to a template.
     pub fn as_template(&self) -> Template {
-        Template::new(Self::TEMPLATE_NAME)
-            .with_fields(self)
+        Template::new(Self::TEMPLATE_NAME).with_fields(self)
     }
 }

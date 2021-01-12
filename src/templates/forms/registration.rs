@@ -44,7 +44,6 @@ impl RegistrationPage {
 
 impl Into<Template> for RegistrationPage {
     fn into(self) -> Template {
-        Template::new(Self::TEMPLATE_NAME)
-            .with_fields(self)
+        Template::new(Self::TEMPLATE_NAME).with_fields(self)
     }
 }

@@ -64,8 +64,7 @@ pub fn new(field_name: &str, ty: TextFieldType, label: &str) -> Template {
 
 /// Make an email field. See [`new`]. Adds placeholder.
 pub fn email_field(name: &str, label: &str) -> Template {
-    new(name, TextFieldType::Email, label)
-        .field(PLACEHOLDER_FIELD, "example@email.com")
+    new(name, TextFieldType::Email, label).field(PLACEHOLDER_FIELD, "example@email.com")
 }
 
 /// Make a password field. See [`new`].

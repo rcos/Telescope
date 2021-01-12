@@ -1,7 +1,4 @@
-use crate::{
-    models::recoveries::Recovery,
-    templates::Template
-};
+use crate::{models::recoveries::Recovery, templates::Template};
 use chrono::Local;
 
 /// The email sent to users to recover their password.
@@ -38,13 +35,11 @@ impl PasswordRecoveryEmail {
 
     /// Make a plaintext message from this.
     pub fn plaintext(&self) -> Template {
-        Template::new(Self::TEXT_TEMPLATE)
-            .with_fields(self)
+        Template::new(Self::TEXT_TEMPLATE).with_fields(self)
     }
 
     /// Make an html message from this.
     pub fn html(&self) -> Template {
-        Template::new(Self::HTML_TEMPLATE)
-            .with_fields(self)
+        Template::new(Self::HTML_TEMPLATE).with_fields(self)
     }
 }

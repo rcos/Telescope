@@ -13,9 +13,9 @@ pub mod static_pages;
 
 pub use static_pages::*;
 
-use serde_json::{Value, Map};
-use serde::Serialize;
 use handlebars::Handlebars;
+use serde::Serialize;
+use serde_json::{Map, Value};
 use std::ops::{Index, IndexMut};
 
 /// A template that can be rendered using the handlebars template registry.
@@ -50,8 +50,7 @@ impl Template {
     /// Setter method for fields on this template instance.
     /// This will panic if there is a serialization failure.
     pub fn set_field(&mut self, key: impl Into<String>, val: impl Serialize) {
-        let serialized_val = serde_json::to_value(val)
-            .expect("Failed to serialize value");
+        let serialized_val = serde_json::to_value(val).expect("Failed to serialize value");
         self.fields.insert(key.into(), serialized_val);
     }
 
@@ -61,8 +60,8 @@ impl Template {
     /// is not a JSON Object.
     pub fn append_fields(&mut self, other: impl Serialize) {
         // Convert the other object to JSON values.
-        let converted: Value = serde_json::to_value(other)
-            .expect("Could not convert object to JSON value");
+        let converted: Value =
+            serde_json::to_value(other).expect("Could not convert object to JSON value");
 
         // Get the internal JSON object.
         if let Value::Object(mut obj) = converted {
@@ -80,7 +79,8 @@ impl Template {
 
     /// Render this template using a reference to the handlebars registry.
     pub fn render(&self, handlebars: &Handlebars) -> String {
-        handlebars.render(self.handlebars_file, &self)
+        handlebars
+            .render(self.handlebars_file, &self)
             .expect("Could not render template.")
     }
 }

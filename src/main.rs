@@ -32,15 +32,9 @@ use crate::{
     models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
         developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
-        sponsors::SponsorsPage,
-        Static,
+        sponsors::SponsorsPage, Static,
     },
-    web::{
-        app_data::AppData,
-        RequestContext,
-        cookies,
-        services
-    },
+    web::{app_data::AppData, cookies, services, RequestContext},
 };
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
@@ -48,12 +42,12 @@ use crate::{
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{middleware, web as aweb, web::get, App, HttpServer, http::Uri};
+use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
+use actix_web_middleware_redirect_scheme::{RedirectScheme, RedirectSchemeBuilder};
 use diesel::{Connection, RunQueryDsl};
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
 use std::process::exit;
-use actix_web_middleware_redirect_scheme::{RedirectScheme, RedirectSchemeBuilder};
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -143,13 +137,17 @@ fn main() -> std::io::Result<()> {
      */
 
     // Get ports for redirecting HTTP to HTTPS
-    let http_port = config.bind_http.as_str()
+    let http_port = config
+        .bind_http
+        .as_str()
         .parse::<Uri>()
         .expect("Invalid HTTP (http/1) URI")
         .port()
         .map(|p| format!(":{}", p.as_str()));
 
-    let https_port = config.bind_https.as_str()
+    let https_port = config
+        .bind_https
+        .as_str()
         .parse::<Uri>()
         .expect("Invalid HTTPS (http/2) URI")
         .port()
@@ -206,11 +204,11 @@ fn main() -> std::io::Result<()> {
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             .default_service(aweb::route().to(services::p404::not_found))
     })
-        .bind(config.bind_http.clone())
-        .expect("Could not bind HTTP/1 (HTTP)")
-        .bind_openssl(config.bind_https.clone(), tls_builder)
-        .expect("Could not bind HTTP/2 (HTTPS)")
-        .run();
+    .bind(config.bind_http.clone())
+    .expect("Could not bind HTTP/1 (HTTP)")
+    .bind_openssl(config.bind_https.clone(), tls_builder)
+    .expect("Could not bind HTTP/2 (HTTPS)")
+    .run();
 
     // Start the actix runtime.
     sys.run()

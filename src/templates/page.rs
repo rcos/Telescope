@@ -1,9 +1,6 @@
 use crate::{
-    templates::{
-        navbar::Navbar,
-        Template
-    },
-    web::RequestContext
+    templates::{navbar::Navbar, Template},
+    web::RequestContext,
 };
 use serde_json::Value;
 

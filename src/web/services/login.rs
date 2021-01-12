@@ -1,18 +1,11 @@
 use crate::{
     models::users::User,
     templates::{
-        forms::{
-            login,
-            common::text_field
-        },
-        page,
-        Template,
+        forms::{common::text_field, login},
+        page, Template,
     },
     web::{
-        api::rest::login::{
-            login,
-            LoginRequest
-        },
+        api::rest::login::{login, LoginRequest},
         RequestContext,
     },
 };
@@ -21,8 +14,8 @@ use actix_identity::Identity;
 
 use actix_web::{http::header, web::Form, HttpResponse};
 
-use uuid::Uuid;
 use crate::web::api::rest::login::LoginError;
+use uuid::Uuid;
 
 /// A request to the login form using a GET request. Sensitive user information
 /// is not accepted when using GET.
@@ -52,7 +45,7 @@ pub async fn login_get(req_ctx: RequestContext) -> HttpResponse {
     identity.forget();
 
     let form: Template = login::new(&req_ctx);
-    let login_page: Template = page::of(&req_ctx,"RCOS Login", &form).await;
+    let login_page: Template = page::of(&req_ctx, "RCOS Login", &form).await;
 
     HttpResponse::Ok().body(req_ctx.render(&login_page))
 }
@@ -73,7 +66,7 @@ pub async fn login_post(req_ctx: RequestContext, form: Form<LoginRequest>) -> Ht
             HttpResponse::Found()
                 .header(header::LOCATION, target_page)
                 .finish()
-        },
+        }
 
         Err(e) => {
             let mut login_form: Template = login::new(&req_ctx);
@@ -81,12 +74,13 @@ pub async fn login_post(req_ctx: RequestContext, form: Form<LoginRequest>) -> Ht
 
             match e {
                 LoginError::WrongPassword => {
-                    login_form[login::PASSWORD][text_field::ERROR_FIELD] = "Incorrect password".into();
-                },
+                    login_form[login::PASSWORD][text_field::ERROR_FIELD] =
+                        "Incorrect password".into();
+                }
 
                 LoginError::EmailNotFound => {
                     login_form[login::EMAIL][text_field::ERROR_FIELD] = "Email not found".into();
-                },
+                }
             }
 
             let page: Template = page::of(&req_ctx, "RCOS Login", &login_form).await;

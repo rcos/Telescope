@@ -6,11 +6,7 @@ use actix_web::{web, Error, HttpResponse};
 use juniper::http::GraphQLRequest;
 
 use crate::{
-    templates::{
-        jumbotron,
-        graphql_playground,
-        Template
-    },
+    templates::{graphql_playground, jumbotron, Template},
     web::RequestContext,
 };
 
@@ -22,9 +18,7 @@ pub async fn api(
 ) -> Result<HttpResponse, Error> {
     if let Some(api_ctx) = ctx.get_api_context().await {
         // Execute request
-        let res = data
-            .execute(&api_ctx.schema, &api_ctx)
-            .await;
+        let res = data.execute(&api_ctx.schema, &api_ctx).await;
         let json_str = serde_json::to_string(&res).map_err(Error::from)?;
 
         Ok(HttpResponse::Ok()

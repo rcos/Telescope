@@ -262,8 +262,8 @@ impl Confirmation {
             return Err("Invite is for existing user".to_string().into());
         } else {
             // create user and email here to avoid use after move.
-            let user: User = User::new(name, pass.as_str())
-                .map_err::<ConfirmNewUserError, _>(|e| e.into())?;
+            let user: User =
+                User::new(name, pass.as_str()).map_err::<ConfirmNewUserError, _>(|e| e.into())?;
 
             let email: Email = Email::new(user.id, self.email.clone())
                 .expect("Could not create email for new user.");

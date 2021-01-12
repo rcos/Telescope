@@ -1,9 +1,6 @@
 use crate::{
-    templates::{
-        Template,
-        page
-    },
-    RequestContext
+    templates::{page, Template},
+    RequestContext,
 };
 use actix_web::HttpResponse;
 use std::marker::PhantomData;

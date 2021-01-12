@@ -1,10 +1,6 @@
 use crate::{
     models::confirmations::Confirmation,
-    templates::{
-        forms::registration::RegistrationPage,
-        jumbotron,
-        Template
-    },
+    templates::{forms::registration::RegistrationPage, jumbotron, Template},
     web::RequestContext,
 };
 use actix_web::web::Form;
@@ -28,8 +24,7 @@ pub async fn signup_page(ctx: RequestContext) -> HttpResponse {
             "You are already signed in. Sign out before creating a new account.",
         );
 
-        HttpResponse::BadRequest()
-            .body(ctx.render_in_page(&jumbotron, "Registration Error").await)
+        HttpResponse::BadRequest().body(ctx.render_in_page(&jumbotron, "Registration Error").await)
     } else {
         let registration_page: Template = RegistrationPage::default().into();
         HttpResponse::Ok().body(ctx.render_in_page(&registration_page, "Sign Up").await)
@@ -47,8 +42,7 @@ pub async fn registration_service(
             "Signed In",
             "You are already signed in. Sign out before creating a new account.",
         );
-        HttpResponse::BadRequest()
-            .body(ctx.render_in_page(&jumbotron, "Registration Error").await)
+        HttpResponse::BadRequest().body(ctx.render_in_page(&jumbotron, "Registration Error").await)
     } else {
         let email: String = form.email.to_string();
         let invite: Result<Confirmation, String> =

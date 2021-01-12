@@ -1,9 +1,6 @@
 use crate::{
+    templates::{page, Template},
     web::RequestContext,
-    templates::{
-        Template,
-        page
-    }
 };
 use serde_json::Value;
 
@@ -28,7 +25,7 @@ pub async fn page(
     ctx: &RequestContext,
     title: impl Into<Value>,
     heading: impl Into<String>,
-    message: impl Into<String>
+    message: impl Into<String>,
 ) -> Template {
     let jumbotron: Template = new(heading, message);
     page::of(ctx, title, &jumbotron).await
@@ -39,7 +36,7 @@ pub async fn rendered_page(
     ctx: &RequestContext,
     title: impl Into<Value>,
     heading: impl Into<String>,
-    message: impl Into<String>
+    message: impl Into<String>,
 ) -> String {
     ctx.render(&page(ctx, title, heading, message).await)
 }

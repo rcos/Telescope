@@ -9,7 +9,6 @@ use juniper::{FieldError, FieldResult, Value};
 use lettre::EmailAddress;
 use uuid::Uuid;
 
-
 /// Field structure must match that in the SQL migration.
 /// (for diesel reasons it seems)
 #[derive(Clone, Serialize, Deserialize, Insertable, Queryable, Debug, Associations)]
@@ -69,12 +68,10 @@ impl Email {
             .map_err(|e| {
                 error!("Email malformed: {}", e);
             })
-            .map(|email: EmailAddress| {
-                Self {
-                    user_id,
-                    email: email.to_string(),
-                    is_visible: false,
-                }
+            .map(|email: EmailAddress| Self {
+                user_id,
+                email: email.to_string(),
+                is_visible: false,
             })
             .ok()
     }

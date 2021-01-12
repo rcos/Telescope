@@ -1,10 +1,7 @@
 use crate::{
     models::users::User,
+    templates::{page, Template},
     web::{api::graphql::ApiContext, app_data::AppData},
-    templates::{
-        page,
-        Template
-    }
 };
 
 use actix_web::{
@@ -25,8 +22,8 @@ use diesel::{
 use actix_identity::Identity;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
-use uuid::Uuid;
 use serde_json::Value;
+use uuid::Uuid;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;

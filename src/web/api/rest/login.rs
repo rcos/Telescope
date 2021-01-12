@@ -53,12 +53,10 @@ pub async fn login_rest(
     data: Json<LoginRequest>,
 ) -> Json<Result<User, LoginError>> {
     let identity: &Identity = ctx.identity();
-    let result: Result<User, LoginError> = login(&ctx, data.into_inner())
-        .await
-        .map(|t| {
-            identity.remember(t.id_str());
-            t
-        });
+    let result: Result<User, LoginError> = login(&ctx, data.into_inner()).await.map(|t| {
+        identity.remember(t.id_str());
+        t
+    });
 
     Json(result)
 }

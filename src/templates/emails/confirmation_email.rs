@@ -1,12 +1,8 @@
-use crate::{
-    models::confirmations::Confirmation,
-    web::RequestContext,
-    templates::Template
-};
+use crate::{models::confirmations::Confirmation, templates::Template, web::RequestContext};
 use chrono::Local;
+use handlebars::Handlebars;
 use lettre_email::EmailBuilder;
 use uuid::Uuid;
-use handlebars::Handlebars;
 
 /// Structure to hold the template data passed to each template
 /// that renders new user emails.
@@ -46,14 +42,12 @@ impl ConfirmationEmail {
 
     /// Make a plaintext clone.
     fn make_plaintext(&self) -> Template {
-        Template::new(Self::PLAINTEXT_TEMPLATE)
-            .with_fields(self)
+        Template::new(Self::PLAINTEXT_TEMPLATE).with_fields(self)
     }
 
     /// Make HTML clone.
     fn make_html(&self) -> Template {
-        Template::new(Self::HTML_TEMPLATE)
-            .with_fields(self)
+        Template::new(Self::HTML_TEMPLATE).with_fields(self)
     }
 
     /// Render the plaintext and HTML versions of this email and store them

@@ -1,4 +1,4 @@
-use juniper::{FieldError, FieldResult, RootNode, Value, EmptyMutation, EmptySubscription};
+use juniper::{EmptyMutation, EmptySubscription, FieldError, FieldResult, RootNode, Value};
 
 use diesel::{
     prelude::*,
@@ -19,7 +19,8 @@ use crate::{
 use uuid::Uuid;
 
 /// GraphQL Schema type. Used for executing all GraphQL requests.
-pub type Schema = RootNode<'static, QueryRoot, EmptyMutation<ApiContext>, EmptySubscription<ApiContext>>;
+pub type Schema =
+    RootNode<'static, QueryRoot, EmptyMutation<ApiContext>, EmptySubscription<ApiContext>>;
 
 /// Context accessible to juniper when resolving GraphQl API requests.
 pub struct ApiContext {

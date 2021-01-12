@@ -1,9 +1,6 @@
 use crate::{
-    templates::{
-        forms::common::text_field,
-        Template,
-    },
-    web::RequestContext
+    templates::{forms::common::text_field, Template},
+    web::RequestContext,
 };
 
 /// The path to the template file from the template directory.

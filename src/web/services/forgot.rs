@@ -8,9 +8,9 @@ use crate::{
     web::RequestContext,
 };
 
-use futures::prelude::*;
-use crate::templates::Template;
 use crate::models::users::User;
+use crate::templates::Template;
+use futures::prelude::*;
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -94,14 +94,20 @@ pub async fn recovery_service(
 
         if let Err(err_msg) = db_res {
             form_page = form_page.error(err_msg);
-            HttpResponse::InternalServerError().body(ctx.render_in_page(&form_page.as_template(), "Error").await)
+            HttpResponse::InternalServerError()
+                .body(ctx.render_in_page(&form_page.as_template(), "Error").await)
         } else {
             form_page.success = true;
-            HttpResponse::Ok().body(ctx.render_in_page(&form_page.as_template(), "Email Sent").await)
+            HttpResponse::Ok().body(
+                ctx.render_in_page(&form_page.as_template(), "Email Sent")
+                    .await,
+            )
         }
     } else {
         form_page = form_page.error("Email Not Found");
-        let page = ctx.render_in_page(&form_page.as_template(), "Forgot Password").await;
+        let page = ctx
+            .render_in_page(&form_page.as_template(), "Forgot Password")
+            .await;
         HttpResponse::Ok()
             .content_type("text/html; charset=utf-8")
             .body(page)

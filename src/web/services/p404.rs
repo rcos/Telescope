@@ -1,9 +1,6 @@
 use crate::{
-    templates::{
-        jumbotron,
-        Template
-    },
-    web::RequestContext
+    templates::{jumbotron, Template},
+    web::RequestContext,
 };
 
 use actix_web::HttpResponse;

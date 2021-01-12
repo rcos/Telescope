@@ -1,9 +1,6 @@
 use crate::{
-    templates::{
-        forms::common::text_field,
-        Template
-    },
-    models::confirmations::Confirmation
+    models::confirmations::Confirmation,
+    templates::{forms::common::text_field, Template},
 };
 
 /// Path to new user confirmation from templates directory. This form completes
@@ -43,12 +40,14 @@ pub fn for_conf(conf: &Confirmation) -> Template {
         // New User.
         Template::new(NEW_USER_CONF_FORM_TEMPLATE)
             .field(INVITE, conf)
-            .field(NAME,text_field::plaintext_field(NAME, "Name"))
+            .field(NAME, text_field::plaintext_field(NAME, "Name"))
             .field(PASSWORD, text_field::password_field(PASSWORD, "Password"))
-            .field(CONFIRM, text_field::password_field(CONFIRM, "Confirm Password"))
+            .field(
+                CONFIRM,
+                text_field::password_field(CONFIRM, "Confirm Password"),
+            )
     } else {
         // Existing user.
-        Template::new(EXISTING_USER_CONF_TEMPLATE)
-            .field(INVITE, conf)
+        Template::new(EXISTING_USER_CONF_TEMPLATE).field(INVITE, conf)
     }
 }

@@ -1,7 +1,4 @@
-use crate::templates::{
-    forms::common::text_field,
-    Template
-};
+use crate::templates::{forms::common::text_field, Template};
 use serde_json::Value;
 
 /// The password recovery form. This has a single field to indicate
@@ -42,7 +39,6 @@ impl PasswordRecoveryPage {
 
     /// Convert self to a template via serialization.
     pub fn as_template(&self) -> Template {
-        Template::new(Self::TEMPLATE_NAME)
-            .with_fields(self)
+        Template::new(Self::TEMPLATE_NAME).with_fields(self)
     }
 }

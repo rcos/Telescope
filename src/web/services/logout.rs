@@ -1,7 +1,4 @@
-use crate::{
-    templates::forms::login,
-    web::RequestContext
-};
+use crate::{templates::forms::login, web::RequestContext};
 
 use actix_web::{http::header, HttpResponse};
 

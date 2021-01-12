@@ -2,10 +2,7 @@
 //! template refactor and it is mostly fine as is at the moment.
 
 use crate::{
-    templates::{
-        forms::login,
-        Template
-    },
+    templates::{forms::login, Template},
     web::RequestContext,
 };
 
@@ -129,7 +126,7 @@ impl Navbar {
                                 format!("/profile/{}", uuid.to_hyphenated()),
                                 "Profile",
                             )
-                                .class("mr-2 mb-2 btn btn-primary"),
+                            .class("mr-2 mb-2 btn btn-primary"),
                         )
                         .add_right(
                             NavbarLink::new(ctx, format!("/logout?{}", logout_redir), "Logout")
@@ -144,7 +141,6 @@ impl Navbar {
 
     /// Convert this navbar to a template.
     pub fn template(&self) -> Template {
-        Template::new(Self::TEMPLATE_NAME)
-            .with_fields(self)
+        Template::new(Self::TEMPLATE_NAME).with_fields(self)
     }
 }
