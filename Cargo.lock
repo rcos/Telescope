@@ -327,6 +327,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-web-middleware-redirect-scheme"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "711ca00d71f91aadf3b2b89e3c28e9d9a48b5f28f861a2bd195cd689f1f553bd"
+dependencies = [
+ "actix-service",
+ "actix-web",
+ "futures",
+]
+
+[[package]]
 name = "actix_derive"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2798,6 +2809,7 @@ dependencies = [
  "actix-files",
  "actix-identity",
  "actix-web",
+ "actix-web-middleware-redirect-scheme",
  "chrono",
  "diesel",
  "dotenv",

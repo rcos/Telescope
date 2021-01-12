@@ -16,7 +16,6 @@ extern crate diesel;
 #[macro_use]
 extern crate juniper;
 
-
 pub mod util;
 
 mod web;
@@ -49,11 +48,12 @@ use crate::{
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
+use actix_web::{middleware, web as aweb, web::get, App, HttpServer, http::Uri};
 use diesel::{Connection, RunQueryDsl};
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
 use std::process::exit;
+use actix_web_middleware_redirect_scheme::{RedirectScheme, RedirectSchemeBuilder};
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -142,6 +142,31 @@ fn main() -> std::io::Result<()> {
     let ratelimit_memstore = MemoryStore::new();
      */
 
+    // Get ports for redirecting HTTP to HTTPS
+    let http_port = config.bind_http.as_str()
+        .parse::<Uri>()
+        .expect("Invalid HTTP (http/1) URI")
+        .port()
+        .map(|p| format!(":{}", p.as_str()));
+
+    let https_port = config.bind_https.as_str()
+        .parse::<Uri>()
+        .expect("Invalid HTTPS (http/2) URI")
+        .port()
+        .map(|p| format!(":{}", p.as_str()));
+
+    // Build redirect middleware.
+    let mut redirect_middleware: RedirectSchemeBuilder = RedirectSchemeBuilder::new();
+
+    redirect_middleware
+        .enable(true)
+        .http_to_https(true)
+        .permanent(true);
+
+    if http_port.is_some() && https_port.is_some() {
+        redirect_middleware.replacements(&[(http_port.unwrap(), https_port.unwrap())]);
+    }
+
     // Database janitor -- This actor runs a few database operations once every
     // 24 hours to clear out expired database records.
     let db_pool = app_data.clone_db_conn_pool();
@@ -166,6 +191,8 @@ fn main() -> std::io::Result<()> {
                     .with_max_requests(100),
             )
              */
+            // Redirect to https middleware
+            .wrap(redirect_middleware.build())
             // logger middleware
             .wrap(middleware::Logger::default())
             // register API and Services
@@ -179,10 +206,10 @@ fn main() -> std::io::Result<()> {
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             .default_service(aweb::route().to(services::p404::not_found))
     })
-        .bind_openssl(config.bind_https.clone(), tls_builder)
-        .expect("Could not bind HTTP/2 (HTTPS)")
         .bind(config.bind_http.clone())
         .expect("Could not bind HTTP/1 (HTTP)")
+        .bind_openssl(config.bind_https.clone(), tls_builder)
+        .expect("Could not bind HTTP/2 (HTTPS)")
         .run();
 
     // Start the actix runtime.
