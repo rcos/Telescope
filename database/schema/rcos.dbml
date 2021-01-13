@@ -38,6 +38,14 @@ Table semesters {
   '''
 }
 
+Table announcements {
+  announcement_id int [pk, increment]
+  semester_id varchar [not null]
+  title varchar [not null]
+  body_markdown text [not null]
+  close_date_time timestamp [note: 'Date and time the announcement ends.']
+}
+
 Table users {
   username varchar [pk, note: 'Will be RCS ID unless outside of RPI']
   preferred_name varchar [note: 'Optional preferred first name to use in UIs']
