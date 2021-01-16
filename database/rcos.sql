@@ -1,8 +1,14 @@
--- SQL dump generated using DBML (dbml-lang.org)
--- Database: PostgreSQL
--- Generated at: 2021-01-16T02:28:30.648Z
+CREATE TYPE "user_role" AS ENUM (
+  'student',
+  'faculty',
+  'faculty_advisor',
+  'alumn',
+  'external',
+  'external_mentor'
+);
 
 CREATE TYPE "user_account" AS ENUM (
+  'rpi',
   'discord',
   'mattermost',
   'github',
@@ -46,7 +52,8 @@ CREATE TABLE "announcements" (
   "semester_id" varchar NOT NULL,
   "title" varchar NOT NULL,
   "body_markdown" text NOT NULL,
-  "close_date_time" timestamp
+  "close_date_time" timestamp,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "users" (
@@ -54,16 +61,17 @@ CREATE TABLE "users" (
   "preferred_name" varchar,
   "first_name" varchar NOT NULL,
   "last_name" varchar NOT NULL,
-  "graduation_year" int,
-  "is_rpi" boolean DEFAULT true,
-  "is_faculty" boolean DEFAULT false,
-  "timezone" text NOT NULL DEFAULT 'America/New_York'
+  "cohort" int,
+  "role" user_role NOT NULL,
+  "timezone" text NOT NULL DEFAULT 'America/New_York',
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "user_accounts" (
   "username" varchar,
   "type" user_account,
   "account_id" varchar NOT NULL,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("username", "type")
 );
 
@@ -75,7 +83,7 @@ CREATE TABLE "mentor_proposals" (
   "reviewer_username" varchar,
   "reviewer_comments" text,
   "is_approved" boolean DEFAULT false,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("semester_id", "username")
 );
 
@@ -92,7 +100,7 @@ CREATE TABLE "workshop_proposals" (
   "reviewer_username" varchar,
   "reviewer_comments" text,
   "is_approved" boolean DEFAULT false,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "pay_requests" (
@@ -100,7 +108,7 @@ CREATE TABLE "pay_requests" (
   "username" varchar,
   "reason" varchar NOT NULL,
   "is_approved" boolean DEFAULT false,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("semester_id", "username")
 );
 
@@ -121,6 +129,7 @@ CREATE TABLE "project_presentations" (
   "semester_id" varchar,
   "presentation_url" varchar NOT NULL,
   "is_draft" boolean NOT NULL DEFAULT true,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("project_id", "semester_id")
 );
 
@@ -137,7 +146,7 @@ CREATE TABLE "project_pitches" (
   "is_approved" boolean NOT NULL DEFAULT false,
   "reviewer_username" varchar,
   "reviewer_comments" text,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("semester_id", "username")
 );
 
@@ -151,7 +160,7 @@ CREATE TABLE "enrollments" (
   "is_for_pay" boolean DEFAULT false,
   "mid_year_grade" real,
   "final_grade" real,
-  "enrolled_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("semester_id", "username")
 );
 
@@ -180,10 +189,10 @@ CREATE TABLE "status_update_submissions" (
   "this_week" text NOT NULL,
   "next_week" text NOT NULL,
   "blockers" text NOT NULL,
-  "submitted_at" timestamp NOT NULL,
   "grade" real,
   "grader_username" varchar,
   "grader_comments" text,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("status_update_id", "username")
 );
 
@@ -192,7 +201,8 @@ CREATE TABLE "status_updates" (
   "semester_id" varchar NOT NULL,
   "title" varchar,
   "open_date_time" timestamp NOT NULL,
-  "close_date_time" timestamp
+  "close_date_time" timestamp,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "meetings" (
@@ -206,17 +216,18 @@ CREATE TABLE "meetings" (
   "title" varchar,
   "agenda" varchar[] DEFAULT '{}',
   "presentation_markdown" text,
-  "presentation_url" varchar,
+  "external_presentation_url" varchar,
   "attendance_code" varchar,
   "recording_url" varchar,
-  "location" varchar
+  "location" varchar,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "meeting_attendances" (
   "meeting_id" int,
   "username" varchar,
   "is_manually_added" boolean DEFAULT false,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("meeting_id", "username")
 );
 
@@ -225,7 +236,7 @@ CREATE TABLE "bonus_attendances" (
   "semester_id" varchar,
   "username" varchar,
   "reason" varchar NOT NULL,
-  "submitted_at" timestamp DEFAULT (CURRENT_TIMESTAMP)
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "project_presentation_grades" (
@@ -233,7 +244,7 @@ CREATE TABLE "project_presentation_grades" (
   "project_id" int,
   "grader_username" varchar,
   "grade" real NOT NULL,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("semester_id", "project_id", "grader_username")
 );
 
@@ -242,6 +253,7 @@ CREATE TABLE "chat_associations" (
   "target_type" chat_association_target,
   "source_id" varchar,
   "target_id" varchar NOT NULL,
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("source_type", "target_type", "source_id")
 );
 
@@ -251,7 +263,7 @@ CREATE TABLE "final_grade_appeal" (
   "expected_grade" varchar NOT NULL,
   "reason" text NOT NULL,
   "is_handled" boolean NOT NULL DEFAULT false,
-  "submitted_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "created_at" timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ("semester_id", "username")
 );
 
@@ -337,6 +349,10 @@ CREATE UNIQUE INDEX ON "small_groups" ("semester_id", "title");
 
 CREATE INDEX ON "meetings" ("semester_id");
 
+CREATE INDEX ON "meetings" ("meeting_type");
+
+CREATE INDEX ON "meetings" ("is_public");
+
 CREATE INDEX ON "meetings" ("start_date_time", "end_date_time");
 
 CREATE INDEX ON "bonus_attendances" ("semester_id", "username");
@@ -346,25 +362,35 @@ A school year has 3 semesters, Spring, Summer, and Fall. Semester IDs are 4-digi
 
 COMMENT ON COLUMN "semesters"."title" IS 'Typically season and year, e.g. "Fall 2020"';
 
-COMMENT ON COLUMN "announcements"."close_date_time" IS 'Date and time the announcement ends.';
+COMMENT ON COLUMN "semesters"."start_date" IS 'Date that classes start';
+
+COMMENT ON COLUMN "semesters"."end_date" IS 'Date that semester ends';
+
+COMMENT ON COLUMN "announcements"."title" IS 'Short title of announcement';
+
+COMMENT ON COLUMN "announcements"."body_markdown" IS 'Markdown-supported announcement content';
+
+COMMENT ON COLUMN "announcements"."close_date_time" IS 'Date and time the announcement ends';
 
 COMMENT ON TABLE "users" IS 'Users can be students, external mentors, and faculty. Their user details are not dependent on the semester.';
 
-COMMENT ON COLUMN "users"."username" IS 'Will be RCS ID unless outside of RPI';
-
 COMMENT ON COLUMN "users"."preferred_name" IS 'Optional preferred first name to use in UIs';
 
-COMMENT ON COLUMN "users"."graduation_year" IS 'Only set for RPI students';
+COMMENT ON COLUMN "users"."first_name" IS 'Given name of user';
 
-COMMENT ON COLUMN "users"."is_rpi" IS 'True if current student or faculty at RPI';
+COMMENT ON COLUMN "users"."last_name" IS 'Family name of user';
 
-COMMENT ON COLUMN "users"."is_faculty" IS 'True if faculty at RPI';
+COMMENT ON COLUMN "users"."cohort" IS 'Entry year (only set for students)';
+
+COMMENT ON COLUMN "users"."role" IS 'Role of user in RCOS, determines permissions';
 
 COMMENT ON COLUMN "users"."timezone" IS 'Timezone from TZ list';
 
 COMMENT ON TABLE "user_accounts" IS 'User accounts such as Discord, GitHub, GitLab, etc.';
 
-COMMENT ON COLUMN "user_accounts"."account_id" IS 'ID/username of account';
+COMMENT ON COLUMN "user_accounts"."type" IS 'Type of external account that's connected';
+
+COMMENT ON COLUMN "user_accounts"."account_id" IS 'Unique ID/username of account';
 
 COMMENT ON TABLE "mentor_proposals" IS 'Users interested in mentoring each semester must submit a proposal and be approved.';
 
@@ -455,11 +481,17 @@ COMMENT ON COLUMN "status_updates"."open_date_time" IS 'When submissions start t
 
 COMMENT ON COLUMN "status_updates"."close_date_time" IS 'When submissions stop being submittable';
 
+COMMENT ON COLUMN "meetings"."host_username" IS 'Optional host of meeting, e.g. mentor username for bonus workshop';
+
 COMMENT ON COLUMN "meetings"."is_public" IS 'True if it appears on the schedule publicly (can be used for drafts)';
 
 COMMENT ON COLUMN "meetings"."title" IS 'Optional meeting title';
 
-COMMENT ON COLUMN "meetings"."agenda" IS 'List of agenda items';
+COMMENT ON COLUMN "meetings"."agenda" IS 'List of agenda items that will be covered in the meeting';
+
+COMMENT ON COLUMN "meetings"."presentation_markdown" IS 'Markdown for a RevealJS presentation that is used to auto-generate the presentation';
+
+COMMENT ON COLUMN "meetings"."external_presentation_url" IS 'Link to external presentation if markdown generated one is not used';
 
 COMMENT ON COLUMN "meetings"."location" IS 'Physical location or URL to join';
 
@@ -471,8 +503,16 @@ COMMENT ON TABLE "project_presentation_grades" IS 'Grades for end of semester pr
 
 COMMENT ON TABLE "chat_associations" IS 'Association of chat platform channel or other entity with a small group or project.';
 
+COMMENT ON COLUMN "chat_associations"."source_type" IS 'What the target is associated with, e.g. project or small group';
+
+COMMENT ON COLUMN "chat_associations"."target_type" IS 'What the source is associated with, e.g. Discord text channel';
+
 COMMENT ON COLUMN "chat_associations"."source_id" IS 'ID of source, e.g. project id or small group id';
 
 COMMENT ON COLUMN "chat_associations"."target_id" IS 'ID of target on platform, e.g. Discord channel ID';
+
+COMMENT ON COLUMN "final_grade_appeal"."expected_grade" IS 'Grade the student expected to receive';
+
+COMMENT ON COLUMN "final_grade_appeal"."reason" IS 'Reason the student believes they deserve expected_grade';
 
 COMMENT ON COLUMN "final_grade_appeal"."is_handled" IS 'Whether a faculty advisor has handled this appeal yet.';
