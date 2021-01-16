@@ -3,23 +3,18 @@ use crate::{
     templates::{page, Template},
     web::{api::graphql::ApiContext, app_data::AppData},
 };
-
+use actix_identity::Identity;
 use actix_web::{
     dev::{Payload, PayloadStream},
     web::{block, Data},
     Error, FromRequest, HttpRequest,
 };
-
-use futures::future::{ready, Ready};
-
-use handlebars::Handlebars;
-
 use diesel::{
     r2d2::{ConnectionManager, Pool, PooledConnection},
     PgConnection,
 };
-
-use actix_identity::Identity;
+use futures::future::{ready, Ready};
+use handlebars::Handlebars;
 use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use serde_json::Value;

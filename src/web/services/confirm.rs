@@ -1,4 +1,3 @@
-use crate::templates::static_pages::ise::ise;
 use crate::{
     models::{
         confirmations::{ConfirmNewUserError, Confirmation},
@@ -6,7 +5,9 @@ use crate::{
     },
     templates::{
         forms::{common::text_field, confirmation},
-        jumbotron, page, Template,
+        jumbotron, page,
+        static_pages::ise::ise,
+        Template,
     },
     web::RequestContext,
 };

@@ -1,7 +1,9 @@
 //! Internal server error response page.
 
-use crate::templates::{jumbotron, Template};
-use crate::web::RequestContext;
+use crate::{
+    templates::{jumbotron, Template},
+    web::RequestContext,
+};
 use actix_web::HttpResponse;
 
 const TITLE: &'static str = "Error";
