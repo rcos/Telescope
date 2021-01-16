@@ -1,6 +1,6 @@
 use crate::models::users::User;
-use crate::web::DbConnection;
 use crate::templates::Template;
+use crate::web::DbConnection;
 
 /// A user thumbnail on the developer's page.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -18,7 +18,7 @@ impl UserThumbnail {
 
         Self {
             user: u,
-            pic_location
+            pic_location,
         }
     }
 }
@@ -38,9 +38,7 @@ impl DevelopersPage {
 
     /// Create the developers page template.
     pub fn new(thumbs: Vec<UserThumbnail>) -> Self {
-        Self {
-            users: thumbs
-        }
+        Self { users: thumbs }
     }
 
     /// Convert to a render-able template.

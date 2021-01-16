@@ -2,13 +2,13 @@ use actix_web::web::ServiceConfig;
 
 pub mod blog;
 pub mod confirm;
+pub mod developers;
 pub mod forgot;
 pub mod login;
 pub mod logout;
 pub mod p404;
 pub mod profile;
 pub mod register;
-pub mod developers;
 
 /// Register services to the actix-web server config.
 pub fn register(config: &mut ServiceConfig) {

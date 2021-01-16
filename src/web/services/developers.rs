@@ -1,15 +1,12 @@
+use crate::templates::developers::DevelopersPage;
+use crate::templates::Template;
 use crate::{
-    web::{RequestContext, DbConnection},
     models::users::User,
-    templates::{
-        static_pages::ise::ise,
-        developers::UserThumbnail
-    },
+    templates::{developers::UserThumbnail, static_pages::ise::ise},
+    web::{DbConnection, RequestContext},
 };
 use actix_web::HttpResponse;
 use futures::future::join_all;
-use crate::templates::developers::DevelopersPage;
-use crate::templates::Template;
 
 #[get("/developers")]
 pub async fn developers_page(ctx: RequestContext) -> HttpResponse {
@@ -35,7 +32,9 @@ pub async fn developers_page(ctx: RequestContext) -> HttpResponse {
 
     // Create and render template.
     let template: Template = DevelopersPage::new(thumbnails).template();
-    let rendered: String = ctx.render_in_page(&template, DevelopersPage::PAGE_TITLE).await;
+    let rendered: String = ctx
+        .render_in_page(&template, DevelopersPage::PAGE_TITLE)
+        .await;
 
     return HttpResponse::Ok().body(rendered);
 }

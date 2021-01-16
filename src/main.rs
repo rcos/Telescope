@@ -31,10 +31,7 @@ use crate::{
     env::{ConcreteConfig, CONFIG},
     models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
-        index::LandingPage,
-        projects::ProjectsPage,
-        sponsors::SponsorsPage,
-        Static,
+        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
     },
     web::{app_data::AppData, cookies, services, RequestContext},
 };

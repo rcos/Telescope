@@ -176,13 +176,7 @@ impl User {
             let emails: Vec<Email> = self.get_emails_from_db(conn).await;
             // Use the first one to generate the Gravitar Hash (Users should
             // always have at least 1 email).
-            let email_str: String = emails
-                .first()
-                .unwrap()
-                .email
-                .as_str()
-                .trim()
-                .to_lowercase();
+            let email_str: String = emails.first().unwrap().email.as_str().trim().to_lowercase();
 
             let gravatar_hash = md5::compute(email_str);
             format!(
@@ -254,7 +248,7 @@ impl User {
             use diesel::prelude::*;
             users.load(&conn)
         })
-            .await
-            .map_err(|e| handle_blocking_err(e, "Could not load users from database."))
+        .await
+        .map_err(|e| handle_blocking_err(e, "Could not load users from database."))
     }
 }
