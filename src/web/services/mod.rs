@@ -21,5 +21,7 @@ pub fn register(config: &mut ServiceConfig) {
         .service(confirm::confirmations_page)
         .service(confirm::confirm)
         .service(register::signup_page)
-        .service(profile::profile);
+        .service(profile::profile)
+        .service(profile::settings_page)
+        .service(profile::settings_update);
 }

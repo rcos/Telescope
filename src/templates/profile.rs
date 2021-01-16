@@ -1,9 +1,13 @@
 use crate::{
     models::{markdown::render as md_render, users::User},
     templates::Template,
-    web::RequestContext,
+    web::{
+        RequestContext,
+        DbConnection
+    },
 };
 use chrono::Local;
+use uuid::Uuid;
 
 /// User profile template.
 #[derive(Clone, Serialize, Deserialize)]
@@ -12,6 +16,8 @@ pub struct Profile {
     user: User,
     /// Can this profile be edited by the logged in user / viewer.
     editable: bool,
+    /// Is this my own profile (enables adding emails).
+    own_profile: bool,
     /// User's profile picture. A default is generated using Gravatar.
     picture: String,
     /// User's bio rendered from markdown to html.
@@ -47,11 +53,18 @@ impl Profile {
             .map(|e| e.email.clone())
             .collect::<Vec<String>>();
 
+        let viewer: Option<User> = ctx.user_identity().await;
+
         // determine whether or not to make the profile editable.
-        let editable = ctx
-            .user_identity()
-            .await
-            .map(|viewer| Profile::can_edit(&viewer, &user))
+        let editable: bool = viewer
+            .as_ref()
+            .map(|v| Profile::can_edit(v, &user))
+            .unwrap_or(false);
+
+        // determine if the viewer is the profile owner.
+        let owned: bool = viewer
+            .as_ref()
+            .map(|v| v.id == user.id)
             .unwrap_or(false);
 
         // determine the profile picture to show.
@@ -90,11 +103,21 @@ impl Profile {
         Self {
             user,
             editable,
+            own_profile: owned,
             picture,
             bio: rendered_bio,
             public_emails,
             created_at: localized_time,
         }
+    }
+
+    /// Get a profile for a user by id.
+    /// This will retrieve the user from the database first.
+    /// Returns None if the user does not exist in the database.
+    pub async fn for_user_id(id: Uuid, ctx: &RequestContext) -> Option<Profile> {
+        let conn: DbConnection = ctx.get_db_conn().await;
+        let user: User = User::get_from_db_by_id(conn, id).await?;
+        Some(Profile::for_user(user, ctx).await)
     }
 
     /// Convert this profile page to a template.

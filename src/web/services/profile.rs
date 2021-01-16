@@ -26,3 +26,13 @@ pub async fn profile(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpRespon
         HttpResponse::Ok().body(rendered)
     }
 }
+
+#[get("/profile/{uid}/settings")]
+pub async fn settings_page(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpResponse {
+    unimplemented!()
+}
+
+#[post("/profile/{uid}/settings")]
+pub async fn settings_update(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpResponse {
+    unimplemented!()
+}

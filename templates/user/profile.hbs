@@ -12,6 +12,13 @@
                     Edit Profile
                 </a>
             {{/if}}
+            {{#if own_profile}}
+                <!-- Button to add email. This is currently separate from the
+                User Settings Form -->
+                <a href="/profile/{{user.id}}/add_email" class="btn btn-secondary mt-1">
+                    Add Email
+                </a>
+            {{/if}}
         </div>
         <div class="card text-dark mt-2">
             <span class="h4 card-header text-muted">
