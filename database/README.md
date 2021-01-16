@@ -18,3 +18,8 @@ This database is served by a Postgrest API at [TODO: put api url here] that allo
 2. Run `rcos.sql` to create tables and types
 3. Run `post.sql` to create the roles that Postgrest needs to use
 4. Run `procedures.sql` to add procedures
+
+## Postgrest Deployment
+
+1. Copy and modify `postgrest.conf`
+2. Run Postgrest with the .conf file
