@@ -4,7 +4,7 @@ use crate::{
     web::{api::graphql::ApiContext, app_data::AppData},
 };
 
-use actix_web::{dev::{Payload, PayloadStream}, web::{block, Data}, Error, FromRequest, HttpRequest, ResponseError};
+use actix_web::{dev::{Payload, PayloadStream}, web::{block, Data}, Error, FromRequest, HttpRequest};
 
 use futures::future::{Ready, ready};
 
@@ -20,7 +20,6 @@ use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use serde_json::Value;
 use uuid::Uuid;
-use actix_web::dev::Service;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
@@ -138,9 +137,7 @@ impl RequestContext {
     /// Send an email using the internal app data mailers derived from the
     /// server config.
     pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
-    where
-        M: Into<SendableEmail> + Clone + Send + Sync + 'static,
-    {
+    where M: Into<SendableEmail> + Clone + Send + Sync + 'static {
         self.app_data.send_mail(mail).await
     }
 
@@ -150,7 +147,8 @@ impl RequestContext {
     }
 
     /// Extract the components of a context object and build it from
-    /// an http request.
+    /// an http request. This exists for the request extractor trait,
+    /// which doesn't allow for the `?` operator.
     fn extract(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Result<Self, Error> {
         let app_data: Data<AppData> = Data::<AppData>::from_request(req, payload).into_inner()?;
         let request: HttpRequest = HttpRequest::from_request(req, payload).into_inner()?;

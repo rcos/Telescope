@@ -1,7 +1,6 @@
 use crate::{
     models::{
         confirmations::{ConfirmNewUserError, Confirmation},
-        password_requirements::PasswordRequirements,
         users::User,
     },
     templates::{
@@ -16,6 +15,7 @@ use actix_web::{
     HttpResponse,
 };
 use uuid::Uuid;
+use crate::templates::static_pages::ise::ise;
 
 /// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -158,18 +158,7 @@ pub async fn confirm(
         // Handle other confirmation error.
         Err(ConfirmNewUserError::Other(msg)) => {
             error!("Could not confirm new user: {}", msg);
-
-            let jumbotron: String = jumbotron::rendered_page(
-                &ctx,
-                "Error",
-                "500 - Internal Server Error",
-                "We encountered an error while processing your request. Please try again \
-                If you continue to have issues, please make a github issue and/or contact a server \
-                administrator.",
-            )
-            .await;
-
-            HttpResponse::InternalServerError().body(jumbotron)
+            ise(&ctx).await
         }
     }
 }

@@ -9,6 +9,7 @@ pub mod developers;
 pub mod index;
 pub mod projects;
 pub mod sponsors;
+pub mod ise;
 
 /// An intermediate workaround structure to deal with the lack of support
 /// for async functions in traits. This is a zero-sized structure that holds
