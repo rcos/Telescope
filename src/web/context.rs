@@ -4,13 +4,9 @@ use crate::{
     web::{api::graphql::ApiContext, app_data::AppData},
 };
 
-use actix_web::{
-    dev::{Payload, PayloadStream},
-    web::{block, Data},
-    Error, FromRequest, HttpRequest,
-};
+use actix_web::{dev::{Payload, PayloadStream}, web::{block, Data}, Error, FromRequest, HttpRequest, ResponseError};
 
-use futures::future::{ok, Ready};
+use futures::future::{Ready, ready};
 
 use handlebars::Handlebars;
 
@@ -24,6 +20,7 @@ use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use serde_json::Value;
 use uuid::Uuid;
+use actix_web::dev::Service;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
@@ -151,6 +148,16 @@ impl RequestContext {
     pub fn email_sender(&self) -> Mailbox {
         self.app_data.mail_sender.clone()
     }
+
+    /// Extract the components of a context object and build it from
+    /// an http request.
+    fn extract(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Result<Self, Error> {
+        let app_data: Data<AppData> = Data::<AppData>::from_request(req, payload).into_inner()?;
+        let request: HttpRequest = HttpRequest::from_request(req, payload).into_inner()?;
+        let identity: Identity = Identity::from_request(req, payload).into_inner()?;
+        Ok(Self::new(app_data, request, identity))
+    }
+
 }
 
 impl FromRequest for RequestContext {
@@ -159,13 +166,6 @@ impl FromRequest for RequestContext {
     type Config = ();
 
     fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
-        let app_data = Data::<AppData>::from_request(req, payload)
-            .into_inner()
-            .unwrap();
-        let request = HttpRequest::from_request(req, payload)
-            .into_inner()
-            .unwrap();
-        let identity = Identity::from_request(req, payload).into_inner().unwrap();
-        ok(Self::new(app_data, request, identity))
+        ready(RequestContext::extract(req, payload))
     }
 }
