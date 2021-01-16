@@ -1,3 +1,4 @@
+use crate::templates::static_pages::ise::ise;
 use crate::{
     models::{
         confirmations::{ConfirmNewUserError, Confirmation},
@@ -15,7 +16,6 @@ use actix_web::{
     HttpResponse,
 };
 use uuid::Uuid;
-use crate::templates::static_pages::ise::ise;
 
 /// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]

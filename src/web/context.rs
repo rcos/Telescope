@@ -4,9 +4,13 @@ use crate::{
     web::{api::graphql::ApiContext, app_data::AppData},
 };
 
-use actix_web::{dev::{Payload, PayloadStream}, web::{block, Data}, Error, FromRequest, HttpRequest};
+use actix_web::{
+    dev::{Payload, PayloadStream},
+    web::{block, Data},
+    Error, FromRequest, HttpRequest,
+};
 
-use futures::future::{Ready, ready};
+use futures::future::{ready, Ready};
 
 use handlebars::Handlebars;
 
@@ -137,7 +141,9 @@ impl RequestContext {
     /// Send an email using the internal app data mailers derived from the
     /// server config.
     pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
-    where M: Into<SendableEmail> + Clone + Send + Sync + 'static {
+    where
+        M: Into<SendableEmail> + Clone + Send + Sync + 'static,
+    {
         self.app_data.send_mail(mail).await
     }
 
@@ -155,7 +161,6 @@ impl RequestContext {
         let identity: Identity = Identity::from_request(req, payload).into_inner()?;
         Ok(Self::new(app_data, request, identity))
     }
-
 }
 
 impl FromRequest for RequestContext {

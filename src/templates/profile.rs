@@ -1,10 +1,7 @@
 use crate::{
     models::{markdown::render as md_render, users::User},
     templates::Template,
-    web::{
-        RequestContext,
-        DbConnection
-    },
+    web::{DbConnection, RequestContext},
 };
 use chrono::Local;
 use uuid::Uuid;
@@ -62,10 +59,7 @@ impl Profile {
             .unwrap_or(false);
 
         // determine if the viewer is the profile owner.
-        let owned: bool = viewer
-            .as_ref()
-            .map(|v| v.id == user.id)
-            .unwrap_or(false);
+        let owned: bool = viewer.as_ref().map(|v| v.id == user.id).unwrap_or(false);
 
         // determine the profile picture to show.
         let picture = user

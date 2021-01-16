@@ -1,9 +1,6 @@
 //! Internal server error response page.
 
-use crate::templates::{
-    Template,
-    jumbotron
-};
+use crate::templates::{jumbotron, Template};
 use crate::web::RequestContext;
 use actix_web::HttpResponse;
 

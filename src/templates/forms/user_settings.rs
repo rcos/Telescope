@@ -1,4 +1,3 @@
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserSettingsForm {
     name: String,
