@@ -333,6 +333,8 @@ ALTER TABLE "project_presentations" ADD FOREIGN KEY ("project_id") REFERENCES "p
 
 ALTER TABLE "project_presentations" ADD FOREIGN KEY ("semester_id") REFERENCES "semesters" ("semester_id");
 
+ALTER TABLE "announcements" ADD FOREIGN KEY ("semester_id") REFERENCES "semesters" ("semester_id");
+
 CREATE INDEX ON "semesters" ("start_date", "end_date");
 
 CREATE INDEX ON "workshop_proposals" ("semester_id");
