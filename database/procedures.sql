@@ -1,9 +1,9 @@
 create or replace
-function get_small_group_members( sgid int ) returns table ( username varchar )
+function get_small_group_enrollments( sgid int ) returns setof enrollments
 language plpgsql as $$
 begin return query
 select
-	e.username
+	e.*
 from
 	enrollments e
 join projects p on
@@ -14,4 +14,5 @@ join small_groups sg on
 	sg.small_group_id = sgp.small_group_id
 where
 	sg.small_group_id = sgid;
-end;$$
+end;
+$$
