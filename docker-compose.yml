@@ -3,7 +3,7 @@ version: "3.2"
 services:
   db:
     image: postgres
-    restart: always
+    restart: on-failure
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -12,7 +12,7 @@ services:
       - "5432:5432/udp"
 
   telescope:
-    restart: "no"
+    restart: on-failure
     depends_on:
       - db
     build: .
