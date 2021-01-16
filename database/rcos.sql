@@ -390,7 +390,7 @@ COMMENT ON COLUMN "users"."timezone" IS 'Timezone from TZ list';
 
 COMMENT ON TABLE "user_accounts" IS 'User accounts such as Discord, GitHub, GitLab, etc.';
 
-COMMENT ON COLUMN "user_accounts"."type" IS 'Type of external account that's connected';
+COMMENT ON COLUMN "user_accounts"."type" IS 'Type of external account that is connected';
 
 COMMENT ON COLUMN "user_accounts"."account_id" IS 'Unique ID/username of account';
 

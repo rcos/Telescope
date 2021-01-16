@@ -1,10 +1,11 @@
 -- Create user that unauthenicated API requests will use. By default can't do anything.
 create role web_anon nologin;
 grant usage on schema api to web_anon;
-grant select on api.public_meetings to web_anon; -- Can only read *public* meetings
-grant select on api.public_faculty_advisors to web_anon; -- Can only read faculty advisors
-grant select on api.projects to web_anon; -- Can only read projects
-grant select on api.announcements to web_anon; -- Can only read announcements
+grant select on api.public_meetings to web_anon; -- Can read *public* meetings
+grant select on api.public_faculty_advisors to web_anon; -- Can read faculty advisors
+grant select on api.public_coordinators to web_anon; -- Can read coordinators
+grant select on api.projects to web_anon; -- Can read projects
+grant select on api.announcements to web_anon; -- Can read announcements
 
 -- Create user that authenticated API requests will use
 create role api_user nologin;

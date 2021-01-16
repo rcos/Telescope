@@ -15,11 +15,12 @@ This database is served by a Postgrest API at [TODO: put api url here] that allo
 ## Setup
 
 1. Run `pre.sql` to create database and `api` schema
-2. Run `rcos.sql` to create tables and types
-3. Run `post.sql` to create the roles that Postgrest needs to use
-4. Run `procedures.sql` to add procedures
+1. Run `rcos.sql` to create tables and types
+1. Run `views.sql` to create views
+1. Run `post.sql` to create the roles that Postgrest needs to use
+1. Run `procedures.sql` to add procedures
 
 ## Postgrest Deployment
 
 1. Copy and modify `postgrest.conf`
-2. Run Postgrest with the .conf file
+1. Run Postgrest with the .conf file
