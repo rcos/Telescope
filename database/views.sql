@@ -1,3 +1,21 @@
+-- View for easy access to small group members
+create or replace
+view small_group_members as
+select
+	sg.small_group_id,
+    e.*
+from
+	enrollments e
+join projects p on
+	p.project_id = e.project_id
+join small_group_projects sgp on
+	sgp.project_id = p.project_id
+join small_groups sg on
+	sg.small_group_id = sgp.small_group_id
+where
+	sg.small_group_id = sgid;
+end;
+
 -- View for access to public meetings
 create or replace
 view public_meetings as

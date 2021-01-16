@@ -18,7 +18,6 @@ This database is served by a Postgrest API at [TODO: put api url here] that allo
 1. Run `rcos.sql` to create tables and types
 1. Run `views.sql` to create views
 1. Run `post.sql` to create the roles that Postgrest needs to use
-1. Run `procedures.sql` to add procedures
 
 ## Postgrest Deployment
 
