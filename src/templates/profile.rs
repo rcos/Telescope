@@ -61,28 +61,8 @@ impl Profile {
         // determine if the viewer is the profile owner.
         let owned: bool = viewer.as_ref().map(|v| v.id == user.id).unwrap_or(false);
 
-        // determine the profile picture to show.
-        let picture = user
-            .avi_location
-            .as_ref()
-            .map(|s| s.to_string())
-            // if no user specified one is available,
-            // make a gravatar url from the first email
-            // (there must be at least one).
-            .unwrap_or_else(|| {
-                emails
-                    .first()
-                    .map(|e| {
-                        let email_str = e.email.as_str().trim().to_lowercase();
-                        // make md5 hash of the email and build gravitar url
-                        let gravatar_hash = md5::compute(email_str);
-                        format!(
-                            "https://www.gravatar.com/avatar/{:x}?d=identicon&s=600",
-                            gravatar_hash
-                        )
-                    })
-                    .expect("Could not get gravitar email.")
-            });
+        // Get the user's profile picture.
+        let picture: String = user.picture_url(ctx.get_db_conn().await).await;
 
         // render the user's bio
         let rendered_bio = md_render(user.bio.as_str());

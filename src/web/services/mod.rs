@@ -8,6 +8,7 @@ pub mod logout;
 pub mod p404;
 pub mod profile;
 pub mod register;
+pub mod developers;
 
 /// Register services to the actix-web server config.
 pub fn register(config: &mut ServiceConfig) {
@@ -23,5 +24,6 @@ pub fn register(config: &mut ServiceConfig) {
         .service(register::signup_page)
         .service(profile::profile)
         .service(profile::settings_page)
-        .service(profile::settings_update);
+        .service(profile::settings_update)
+        .service(developers::developers_page);
 }

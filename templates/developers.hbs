@@ -1,0 +1,16 @@
+<h3>Developers</h3>
+
+<div class="row row-cols-lg-5 row-cols-sm-1 row-cols-md-3">
+    {{#each users}}
+        <div class="col p-2">
+            <a class="card h-100 text-dark" href="/profile/{{this.user.id}}">
+                <img src="{{this.pic_location}}" alt="Profile Picture" class="card-img-top">
+                <div class="card-body card-text">
+                    <div class="card-title text-center h5">
+                        {{this.user.name}}
+                    </div>
+                </div>
+            </a>
+        </div>
+    {{/each}}
+</div>

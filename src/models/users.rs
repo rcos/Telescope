@@ -22,7 +22,7 @@ pub struct User {
     /// Optionally, a link to the user's avatar (profile picture).
     ///
     /// Use the default statically served avatar photo if this is not available.
-    pub avi_location: Option<String>,
+    avi_location: Option<String>,
     /// The user's bio. This is in commonmark markdown format.
     pub bio: String,
     // FIXME: Discord & Mattermost integration.
@@ -166,6 +166,32 @@ impl User {
         Self::format_uuid(self.id)
     }
 
+    /// Resolve the location for the user's profile picture.
+    pub async fn picture_url(&self, conn: DbConnection) -> String {
+        // Check for existing specification.
+        if self.avi_location.is_some() {
+            return self.avi_location.clone().unwrap();
+        } else {
+            // get user emails.
+            let emails: Vec<Email> = self.get_emails_from_db(conn).await;
+            // Use the first one to generate the Gravitar Hash (Users should
+            // always have at least 1 email).
+            let email_str: String = emails
+                .first()
+                .unwrap()
+                .email
+                .as_str()
+                .trim()
+                .to_lowercase();
+
+            let gravatar_hash = md5::compute(email_str);
+            format!(
+                "https://www.gravatar.com/avatar/{:x}?d=identicon&s=600",
+                gravatar_hash
+            )
+        }
+    }
+
     /// Get a user from the database by user id asynchronously.
     ///
     /// Return none if user is not found.
@@ -219,5 +245,16 @@ impl User {
         .await
         .map_err(|e| handle_blocking_err(e, "Could not add user to database."))
         .map(|n| trace!("Added {} user(s) to database.", n))
+    }
+
+    /// Get all users from database.
+    pub async fn get_all_from_db(conn: DbConnection) -> Result<Vec<User>, String> {
+        block::<_, Vec<User>, _>(move || {
+            use crate::schema::users::dsl::*;
+            use diesel::prelude::*;
+            users.load(&conn)
+        })
+            .await
+            .map_err(|e| handle_blocking_err(e, "Could not load users from database."))
     }
 }

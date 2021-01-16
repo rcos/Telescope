@@ -31,8 +31,10 @@ use crate::{
     env::{ConcreteConfig, CONFIG},
     models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
-        developers::DevelopersPage, index::LandingPage, projects::ProjectsPage,
-        sponsors::SponsorsPage, Static,
+        index::LandingPage,
+        projects::ProjectsPage,
+        sponsors::SponsorsPage,
+        Static,
     },
     web::{app_data::AppData, cookies, services, RequestContext},
 };
@@ -43,7 +45,7 @@ use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
-use actix_web_middleware_redirect_scheme::{RedirectScheme, RedirectSchemeBuilder};
+use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use diesel::{Connection, RunQueryDsl};
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
@@ -200,7 +202,6 @@ fn main() -> std::io::Result<()> {
             .service(afs::Files::new("/static", "static"))
             .route("/", get().to(Static::<LandingPage>::handle))
             .route("/projects", get().to(Static::<ProjectsPage>::handle))
-            .route("/developers", get().to(Static::<DevelopersPage>::handle))
             .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
             .default_service(aweb::route().to(services::p404::not_found))
     })

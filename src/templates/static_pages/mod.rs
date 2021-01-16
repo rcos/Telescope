@@ -5,7 +5,6 @@ use crate::{
 use actix_web::HttpResponse;
 use std::marker::PhantomData;
 
-pub mod developers;
 pub mod index;
 pub mod ise;
 pub mod projects;
