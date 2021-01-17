@@ -8,7 +8,7 @@ CREATE TABLE projects (
   stack VARCHAR[] NOT NULL DEFAULT '{}',
   cover_image_url url,
   homepage_url url,
-  repository_url VARCHAR NOT NULL,
+  repository_urls url[] NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

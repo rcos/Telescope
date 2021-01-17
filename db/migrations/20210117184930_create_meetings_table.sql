@@ -11,11 +11,16 @@ CREATE TABLE meetings (
   title VARCHAR,
   agenda VARCHAR[] DEFAULT '{}',
   presentation_markdown TEXT,
-  external_presentation_url VARCHAR,
+  external_presentation_url url,
   attendance_code VARCHAR,
-  recording_url VARCHAR,
+  recording_url url,
+  is_remote BOOLEAN NOT NULL DEFAULT false, -- A default for better days...
   location VARCHAR,
+  meeting_url url,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  CHECK ((is_remote AND meeting_url IS NOT NULL)
+         OR (NOT is_remote AND location IS NOT NULL)),
 
   FOREIGN KEY (semester_id, host_username) REFERENCES enrollments (semester_id, username)
 );
