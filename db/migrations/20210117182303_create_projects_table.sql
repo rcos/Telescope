@@ -14,7 +14,7 @@ CREATE TABLE projects (
 
 -- TODO indexes for searching
 
-COMMENT ON TABLE projects IS 'Project details are not semester dependent.';
+COMMENT ON TABLE projects IS 'Project details are not semester dependent';
 COMMENT ON COLUMN projects.languages IS 'List of languages used, all lowercase';
 COMMENT ON COLUMN projects.stack IS 'List of technologies used';
 COMMENT ON COLUMN projects.cover_image_url IS 'URL to logo image';

@@ -11,7 +11,7 @@ CREATE TABLE chat_associations (
 );
 
 COMMENT ON TABLE chat_associations IS 'Association of chat platform channel or
-other entity with a small group or project.';
+other entity with a small group or project';
 COMMENT ON COLUMN chat_associations.source_type IS 'What the target is
 associated with, e.g. project or small group';
 COMMENT ON COLUMN chat_associations.target_type IS 'What the source is

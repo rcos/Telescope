@@ -13,7 +13,7 @@ CREATE TABLE project_presentation_grades (
 );
 
 COMMENT ON TABLE project_presentation_grades IS 'Grades for end of semester
-project presentations. Might need to separate grade Into multiple.';
+project presentations. Might need to separate grade Into multiple';
 
 -- migrate:down
 

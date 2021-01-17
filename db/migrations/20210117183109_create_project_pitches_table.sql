@@ -24,7 +24,7 @@ CREATE TABLE project_pitches (
 COMMENT ON TABLE project_pitches IS 'Represents a project pitch by a member at
 the start of a semester.  If the pitch is for an existing project, the title,
 description, stack can be grabbed. Otherwise, when the proposal is approved
-those fields are used to create the actual project.';
+those fields are used to create the actual project';
 COMMENT ON COLUMN project_pitches.existing_project_id IS 'Only if pitch for
 existing RCOS project';
 COMMENT ON COLUMN project_pitches.proposed_title IS 'Null if for existing RCOS project';

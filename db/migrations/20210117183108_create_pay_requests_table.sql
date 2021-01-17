@@ -13,8 +13,8 @@ CREATE TABLE pay_requests (
 );
 
 COMMENT ON TABLE pay_requests IS 'Users can request to take RCOS for pay INSTEAD
-of credit and must be approved.';
-COMMENT ON COLUMN pay_requests.reason IS 'The justification for being paid.';
+of credit and must be approved';
+COMMENT ON COLUMN pay_requests.reason IS 'The justification for being paid';
 
 -- migrate:down
 

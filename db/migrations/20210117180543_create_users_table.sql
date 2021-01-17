@@ -12,7 +12,7 @@ CREATE TABLE users (
 );
 
 COMMENT ON TABLE users IS 'Users can be students, external mentors, and faculty.
-Their user details are not dependent on the semester.';
+Their user details are not dependent on the semester';
 COMMENT ON COLUMN users.preferred_name IS 'Optional preferred first name to use in UIs';
 COMMENT ON COLUMN users.first_name IS 'Given name of user';
 COMMENT ON COLUMN users.last_name IS 'Family name of user';

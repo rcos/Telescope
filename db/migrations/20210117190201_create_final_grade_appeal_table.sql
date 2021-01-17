@@ -18,7 +18,7 @@ expected to receive';
 COMMENT ON COLUMN final_grade_appeal.reason IS 'Reason the student believes they
 deserve expected_grade';
 COMMENT ON COLUMN final_grade_appeal.is_handled IS 'Whether a faculty advisor
-has handled this appeal yet.';
+has handled this appeal yet';
 
 -- migrate:down
 

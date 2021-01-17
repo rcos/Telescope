@@ -23,7 +23,7 @@ CREATE INDEX ON workshop_proposals (semester_id);
 CREATE INDEX ON workshop_proposals (username);
 
 COMMENT ON TABLE workshop_proposals IS 'Users (typically mentors) must submit a
-proposal to host a workshop and be approved.';
+proposal to host a workshop and be approved';
 COMMENT ON COLUMN workshop_proposals.first_choice_at IS 'First choice for date
 and time to host workshop';
 COMMENT ON COLUMN workshop_proposals.second_choice_at IS 'Second choice for date

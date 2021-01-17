@@ -17,7 +17,7 @@ CREATE TABLE mentor_proposals (
 );
 
 COMMENT ON TABLE mentor_proposals IS 'Users Interested in mentoring each
-semester must submit a proposal and be approved.';
+semester must submit a proposal and be approved';
 COMMENT ON COLUMN mentor_proposals.username IS 'Username of mentor to-be';
 COMMENT ON COLUMN mentor_proposals.reason IS 'The reason the user would like to mentor';
 COMMENT ON COLUMN mentor_proposals.skillset IS 'Short details of technologies
