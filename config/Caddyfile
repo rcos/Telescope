@@ -1,0 +1,26 @@
+{ email rcos.management@gmail.com }
+
+rcos.io {
+    # TODO Observatory
+}
+
+api.rcos.io {
+    encode zstd gzip
+    log { output discard }
+
+    # Must be the same as BASE_URL in the compose file
+    handle_path /swagger/* {
+        reverse_proxy swagger:8080
+    }
+
+    handle_path /* {
+        reverse_proxy postgrest:3000
+    }
+}
+
+wiki.rcos.io {
+    encode zstd gzip
+    log { output discard }
+
+    reverse_proxy wikijs:3000
+}

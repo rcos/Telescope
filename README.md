@@ -19,13 +19,15 @@ allows access to some resources when unauthenticated for public access, and
 allows full access to all resources when authenticated. RCOS infrastructure
 cannot connect to the database directly but must interact through this API.
 
-## Setup
+## Deployment
 
-TODO DbMate docs
+1. Replace the `<PASSWORD>` and `<ADMINPASS>` placeholders in
+   `docker-compose.yml` and the [roles migration
+   file](./db/migrations/20210117194733_create_roles.sql) with secure passwords.
+2. Run `docker-compose up -d` to start everything.
+3. Use [DbMate](https://github.com/amacneil/dbmate) to apply the migations
+   `dbmate up`.
 
-## Postgrest Deployment
-
-1. Copy and modify `postgrest.conf`
-2. Run Postgrest with the .conf file
-
-TODO docker-compose stuff
+## TODO
+-[ ] Wiki config and DB setup
+-[ ] Observatory container and Caddy rules
