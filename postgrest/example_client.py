@@ -14,6 +14,9 @@ s.headers["Authorization"] = "Bearer " + encoded_jwt
 
 # Get RPI student members
 students = s.get(
-    API_URL + "/users?is_rpi=eq.true&select=username,first_name,last_name").json()
+    API_URL + "/users", params={
+        "role": "eq.student",
+        "select": "username,first_name,last_name"
+    }).json()
 for student in students:
     print(student)
