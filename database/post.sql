@@ -11,6 +11,8 @@ grant select on api.announcements to web_anon; -- Can read announcements
 create role api_user nologin;
 grant usage on schema api to api_user;
 grant all on api to api_user;
+grant all on all tables in schema api to api_user;
+grant all on all sequences in schema api to api_user;
 
 -- Create user that can be logged in for the API
 create role authenticator noinherit login password '<password>';
