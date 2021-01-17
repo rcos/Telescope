@@ -2,7 +2,7 @@
 
 CREATE TABLE final_grade_appeal (
   semester_id VARCHAR NOT NULL REFERENCES semesters (semester_id),
-  username VARCHAR NOT NULL REFERENCES users (user_id),
+  username VARCHAR NOT NULL REFERENCES users (username),
   expected_grade VARCHAR NOT NULL, -- TODO is this supposed to be a letter grade?
   reason TEXT NOT NULL,
   is_handled BOOLEAN NOT NULL DEFAULT false,

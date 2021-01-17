@@ -5,7 +5,7 @@ CREATE TABLE status_updates (
   semester_id VARCHAR NOT NULL REFERENCES semesters (semester_id),
   title VARCHAR,
   open_date_time TIMESTAMPTZ NOT NULL,
-  close_date_time TIMESTAMPTZ CHECK ((close_date_time IS NULL) || (close_date_time > open_date_time)),
+  close_date_time TIMESTAMPTZ CHECK ((close_date_time IS NULL) OR (close_date_time > open_date_time)),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

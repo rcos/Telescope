@@ -9,7 +9,7 @@ CREATE TYPE user_role AS ENUM (
   'external_mentor'
 );
 
-COMMMENT ON TYPE user_role IS 'The user''s position within RCOS';
+COMMENT ON TYPE user_role IS 'The user''s position within RCOS';
 
 CREATE TYPE user_account AS ENUM (
   'rpi',
@@ -20,7 +20,7 @@ CREATE TYPE user_account AS ENUM (
   'bitbucket'
 );
 
-COMMMENT ON TYPE user_account IS 'The website this account is for';
+COMMENT ON TYPE user_account IS 'The website this account is for';
 
 CREATE TYPE meeting_type AS ENUM (
   'large_group',
@@ -33,14 +33,14 @@ CREATE TYPE meeting_type AS ENUM (
   'other'
 );
 
-COMMMENT ON TYPE meeting_type IS 'The kind of RCOS meeting this was';
+COMMENT ON TYPE meeting_type IS 'The kind of RCOS meeting this was';
 
 CREATE TYPE chat_association_source AS ENUM (
   'project',
   'small_group'
 );
 
-COMMMENT ON TYPE chat_association_source IS 'The kind of group this chat is for';
+COMMENT ON TYPE chat_association_source IS 'The kind of group this chat is for';
 
 CREATE TYPE chat_association_target AS ENUM (
   'discord_server',
@@ -50,7 +50,7 @@ CREATE TYPE chat_association_target AS ENUM (
   'discord_role'
 );
 
-COMMMENT ON TYPE chat_association_target IS 'The kind of chat that this refers to';
+COMMENT ON TYPE chat_association_target IS 'The kind of chat that this refers to';
 
 -- https://www.cybertec-postgresql.com/en/postgresql-useful-new-data-types/
 CREATE DOMAIN url AS TEXT

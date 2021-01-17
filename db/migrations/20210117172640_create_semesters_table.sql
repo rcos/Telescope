@@ -1,6 +1,6 @@
 -- migrate:up
 
-CREATE TABLE api.semesters (
+CREATE TABLE semesters (
   semester_id VARCHAR(6) PRIMARY KEY CHECK(LENGTH(semester_id) = 6),
   title VARCHAR NOT NULL,
   start_date DATE NOT NULL,
