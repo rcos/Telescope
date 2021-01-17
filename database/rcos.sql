@@ -208,7 +208,7 @@ CREATE TABLE "status_updates" (
 CREATE TABLE "meetings" (
   "meeting_id" SERIAL PRIMARY KEY,
   "semester_id" varchar NOT NULL,
-  "meeting_type" meeting_type NOT NULL,
+  "type" meeting_type NOT NULL,
   "host_username" varchar,
   "is_public" boolean DEFAULT true,
   "start_date_time" timestamp NOT NULL,
@@ -351,7 +351,7 @@ CREATE UNIQUE INDEX ON "small_groups" ("semester_id", "title");
 
 CREATE INDEX ON "meetings" ("semester_id");
 
-CREATE INDEX ON "meetings" ("meeting_type");
+CREATE INDEX ON "meetings" ("type");
 
 CREATE INDEX ON "meetings" ("is_public");
 
