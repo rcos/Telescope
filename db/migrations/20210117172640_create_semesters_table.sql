@@ -1,7 +1,9 @@
 -- migrate:up
 
 CREATE TABLE semesters (
-  semester_id VARCHAR(6) PRIMARY KEY CHECK(LENGTH(semester_id) = 6),
+  -- Semester ID must be 6 numbers.
+  -- This assumes all semesters are after the year 999 and before 10,000
+  semester_id VARCHAR(6) PRIMARY KEY CHECK(semester_id ~ '^\d{6}$'),
   title VARCHAR NOT NULL,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL CHECK (end_date > start_date)
