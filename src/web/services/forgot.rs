@@ -1,15 +1,14 @@
 use actix_web::{web::Form, HttpResponse};
 
 use crate::{
-    models::{emails::Email, recoveries::Recovery},
+    models::{emails::Email, recoveries::Recovery, users::User},
     templates::{
         emails::recovery_email::PasswordRecoveryEmail, forms::recovery::PasswordRecoveryPage,
+        Template
     },
     web::RequestContext,
 };
 
-use crate::models::users::User;
-use crate::templates::Template;
 use futures::prelude::*;
 
 /// Form submitted by users to recovery service to set a new password.
@@ -52,7 +51,7 @@ pub async fn recovery_service(
             .request()
             .uri()
             .authority()
-            .map(|a| format!("https://{}/{}", a.as_str(), recovery.recovery_id))
+            .map(|a| format!("https://{}/recover/{}", a.as_str(), recovery.recovery_id))
             // since lettre doesn't currently store the messages in a human readable
             // format in stub or file transport, we log the generated address here.
             .map(|url| {

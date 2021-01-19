@@ -4,6 +4,7 @@ pub mod blog;
 pub mod confirm;
 pub mod developers;
 pub mod forgot;
+pub mod recover;
 pub mod login;
 pub mod logout;
 pub mod p404;
@@ -18,6 +19,8 @@ pub fn register(config: &mut ServiceConfig) {
         .service(logout::logout_service)
         .service(forgot::forgot_page)
         .service(forgot::recovery_service)
+        .service(recover::recover_form)
+        .service(recover::recovery)
         .service(register::registration_service)
         .service(confirm::confirmations_page)
         .service(confirm::confirm)
@@ -25,5 +28,7 @@ pub fn register(config: &mut ServiceConfig) {
         .service(profile::profile)
         .service(profile::settings_page)
         .service(profile::settings_update)
+        .service(profile::add_email_page)
+        .service(profile::add_email)
         .service(developers::developers_page);
 }

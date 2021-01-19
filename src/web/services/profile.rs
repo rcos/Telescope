@@ -36,3 +36,13 @@ pub async fn settings_page(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> Http
 pub async fn settings_update(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpResponse {
     unimplemented!()
 }
+
+#[get("/profile/{uid}/add_email")]
+pub async fn add_email_page(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpResponse {
+    unimplemented!()
+}
+
+#[post("/profile/{uid}/add_email")]
+pub async fn add_email(ctx: RequestContext, Path(t_uid): Path<Uuid>) -> HttpResponse {
+    unimplemented!()
+}
