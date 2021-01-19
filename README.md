@@ -27,7 +27,3 @@ cannot connect to the database directly but must interact through this API.
 2. Run `docker-compose up -d` to start everything.
 3. Use [DbMate](https://github.com/amacneil/dbmate) to apply the migations
    `dbmate up`.
-
-## TODO
--[ ] Wiki config and DB setup
--[ ] Observatory container and Caddy rules
