@@ -16,7 +16,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO api_user;
 GRANT ALL ON ALL sequences IN SCHEMA public TO api_user;
 
 -- Create user that can be logged in for the API
-CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD '<password>'; -- MAKE SURE TO CHANGE THIS
+CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD '<PASSWORD>'; -- MAKE SURE TO CHANGE THIS
 GRANT web_anon TO authenticator;
 
 -- migrate:down

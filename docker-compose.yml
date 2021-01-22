@@ -1,0 +1,32 @@
+version: '3'
+services:
+    postgrest:
+        image: postgrest/postgrest:v7.0.1
+        restart: unless-stopped
+        environment:
+            PGRST_DB_URI: <FILL ME IN>
+            PGRST_DB_SCHEMA: public
+            PGRST_DB_ANON_ROLE: web_anon
+
+    swagger:
+        image: swaggerapi/swagger-ui:v3.40.0
+        restart: unless-stopped
+        environment:
+            URL: api.rcos.io
+
+    wikijs:
+        image: requarks/wiki:2
+        restart: unless-stopped
+        volumes:
+        - /home/rcos/config/wiki.yml:/wiki/config.yml
+        - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
+
+    caddy:
+        image: caddy:2
+        restart: unless-stopped
+        volumes:
+        - /home/rcos/config/Caddyfile:/etc/caddy/Caddyfile
+        - caddy_data:/data
+
+volumes:
+    caddy_data:
