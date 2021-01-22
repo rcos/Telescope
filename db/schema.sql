@@ -74,7 +74,7 @@ COMMENT ON TYPE public.meeting_type IS 'The kind of RCOS meeting this was';
 --
 
 CREATE DOMAIN public.url AS text
-	CONSTRAINT url_check CHECK ((VALUE ~ 'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)'::text));
+	CONSTRAINT url_check CHECK ((VALUE ~ 'https?:\/\/.+'::text));
 
 
 --
@@ -2061,4 +2061,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20210117191043'),
     ('20210117191050'),
     ('20210117194733'),
-    ('20210122203649');
+    ('20210122203649'),
+    ('20210122222933');
