@@ -4,7 +4,6 @@ services:
         image: postgrest/postgrest:v7.0.1
         restart: unless-stopped
         environment:
-            PGRST_DB_URI: <FILL ME IN>
             PGRST_DB_SCHEMA: public
             PGRST_DB_ANON_ROLE: web_anon
 
