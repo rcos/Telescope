@@ -27,6 +27,9 @@ services:
         volumes:
         - /home/rcos/config/Caddyfile:/etc/caddy/Caddyfile
         - caddy_data:/data
+        ports:
+        - "80:80"
+        - "443:443"
 
 volumes:
     caddy_data:
