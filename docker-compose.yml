@@ -12,7 +12,7 @@ services:
         image: swaggerapi/swagger-ui:v3.40.0
         restart: unless-stopped
         environment:
-            URL: api.rcos.io
+            URL: https://api.rcos.io
 
     wikijs:
         image: requarks/wiki:2
