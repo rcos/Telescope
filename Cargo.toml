@@ -65,7 +65,7 @@ md5 = "0.7"
 url = "2.2.0"
 # Date and time utilities
 chrono = {version = "0.4.19", features = ["serde", "std", "clock"]}
-time = {version = "0.2.23", features = ["serde", "std"]}
+time = {version = "0.2.25", features = ["serde", "std"]}
 # ORM and query building (to interact with Postgres Database)
 diesel = {version = "1.4.5", features = ["uuidv07", "r2d2", "postgres", "chrono"]}
 # Universally unique identifier generation
