@@ -13,8 +13,6 @@ pub struct AttendanceCode {
     created_at: DateTime<Utc>,
     /// Timestamp that the attendance code expires at.
     expires_at: DateTime<Utc>,
-    /// The id of the group that can access this attendance code.
-    target_id: Uuid,
     /// The code itself. This is None if not used.
     code: Option<String>,
     /// Can attendance be taken using the link?
