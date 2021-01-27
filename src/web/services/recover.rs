@@ -10,12 +10,14 @@ pub struct RecoveryForm {
     confirm: String,
 }
 
+/// The page to display the form to set a new password.
 #[get("/recover/{rid}")]
 pub async fn recover_form(ctx: RequestContext, Path(r_id): Path<Uuid>) -> HttpResponse {
     unimplemented!()
 }
 
-
+/// The page to receive requests to set a new password and either change the password or
+/// or respond with the partial form and feedback.
 #[post("/recovery/{rid}")]
 pub async fn recovery(ctx: RequestContext, Path(r_id): Path<Uuid>, Form(f): Form<RecoveryForm>) -> HttpResponse {
     unimplemented!()
