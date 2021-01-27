@@ -35,7 +35,7 @@ openssl = {version = "0.10", features = ["vendored"]}
 # exit code standardization
 exitcode = "1"
 # logging
-log = "0.4.11"
+log = "0.4.14"
 env_logger = "0.8.2"
 # (de)serialization
 serde = {version = "1", features = ["derive"]}
