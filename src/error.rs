@@ -39,16 +39,15 @@ pub enum TelescopeError {
     InternalServerError(String),
 
     /// The request was malformed.
-    BadRequest(String)
+    BadRequest {
+        /// The header of the jumbotron to be displayed.
+        header: String,
+        /// The error message to be displayed under the jumbotron.
+        message: String,
+    }
 }
 
 impl TelescopeError {
-    // /// Make a telescope error from a blocking error. This is a
-    // /// function alias to the convert implementation.
-    // pub fn from_blocking<E: Into<TelescopeError> + fmt::Debug>(e: BlockingError<E>) -> Self {
-    //     Self::from(e)
-    // }
-
     /// Create a resource not found error with converted fields.
     pub fn resource_not_found(header: impl Into<String>, message: impl Into<String>) -> Self {
         Self::ResourceNotFound {
@@ -62,9 +61,12 @@ impl TelescopeError {
         Self::InternalServerError(message.into())
     }
 
-    /// Construct a Bad Request error and convert the message.
-    pub fn bad_request(message: impl Into<String>) -> Self {
-        Self::BadRequest(message.into())
+    /// Construct a Bad Request error and convert the fields.
+    pub fn bad_request(header: impl Into<String>, message: impl Into<String>) -> Self {
+        Self::BadRequest {
+            header: header.into(),
+            message: message.into()
+        }
     }
 }
 

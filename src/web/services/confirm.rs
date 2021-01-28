@@ -32,6 +32,20 @@ pub struct NewUserConfInput {
     confirm: String,
 }
 
+/// Error header when a confirmation is not found.
+const CONF_NOT_FOUND_HEADER: &'static str = "Confirmation Not Found";
+
+/// Error message when a confirmation is not found.
+const CONF_NOT_FOUND_MESSAGE: &'static str = "We could not find an email \
+    confirmation for that ID. It may have expired, in which case you should \
+    try again. If it was recent, and should not have expired, please contact \
+    a coordinator.";
+
+/// Make an error for missing confirmations.
+fn conf_not_found() -> TelescopeError {
+    TelescopeError::resource_not_found(CONF_NOT_FOUND_HEADER, CONF_NOT_FOUND_MESSAGE)
+}
+
 /// The page shown to users accepting an invitation to create an account.
 #[get("/confirm/{invite_id}")]
 pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>) -> Result<Template, TelescopeError> {
@@ -39,14 +53,9 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
     let db_conn: DbConnection = AppData::global().get_db_conn().await?;
 
     // Get confirmation record.
-    let confirmation: Confirmation = Confirmation::get_by_id(db_conn, invite_id)
+    let confirmation: Confirmation = Confirmation::get_by_id(invite_id)
         .await?
-        .ok_or(TelescopeError::resource_not_found(
-            "Confirmation Not Found",
-            "We could not find an email confirmation for that ID. It may have \
-             expired, in which case you should try again. If it was recent, and should \
-             not have expired, please contact a coordinator."
-        ))?;
+        .ok_or_else(conf_not_found)?;
 
     if confirmation.creates_user() {
         // Show the new user the form to create their account.
@@ -77,24 +86,11 @@ pub async fn confirm(
     ctx: RequestContext,
     Path(invite_id): Path<Uuid>,
     Form(form): Form<NewUserConfInput>,
-) -> HttpResponse {
+) -> Result<HttpResponse, TelescopeError> {
     // Get confirmation record from database.
-    let confirmation: Option<Confirmation> =
-        Confirmation::get_by_id(ctx.get_db_conn().await, invite_id)
-            .await
-            .expect("Error getting confirmation.");
-
-    // Handle missing confirmation.
-    if confirmation.is_none() {
-        let err_msg: String = format!(
-            "Could not find confirmation {}. It may have expired.",
-            invite_id
-        );
-        let jumbo: Template = jumbotron::new("Invite Not Found", err_msg);
-        return HttpResponse::NotFound().body(ctx.render_in_page(&jumbo, "Not Found").await);
-    }
-
-    let confirmation: Confirmation = confirmation.unwrap();
+    let confirmation: Confirmation = Confirmation::get_by_id(invite_id)
+        .await?
+        .ok_or_else(conf_not_found)?;
 
     // Make sure that the confirmation creates a user. We do not accept post requests for existing
     // users.
