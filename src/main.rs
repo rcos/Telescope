@@ -32,6 +32,7 @@ mod models;
 mod schema;
 mod templates;
 mod db_crud;
+mod error;
 
 use crate::{
     db_janitor::DbJanitor,
