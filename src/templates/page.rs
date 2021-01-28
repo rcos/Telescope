@@ -3,6 +3,8 @@ use crate::{
     web::RequestContext,
 };
 use serde_json::Value;
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";
@@ -22,10 +24,11 @@ pub const VERSION: &'static str = "version";
 
 /// Create a new template object to hold the page.
 /// The content of the page is rendered here and must be re-rendered if updated.
-pub async fn of(ctx: &RequestContext, title: impl Into<Value>, content: &Template) -> Template {
-    Template::new(TEMPLATE_PATH)
+pub async fn of(ctx: &RequestContext, title: impl Into<Value>, content: &Template) -> Result<Template, TelescopeError> {
+    let content_rendered = AppData::global().render_template(content)?;
+    Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
         .field(NAVBAR, Navbar::from_context(ctx).await.template())
-        .field(CONTENT, ctx.render(content))
-        .field(VERSION, env!("CARGO_PKG_VERSION"))
+        .field(CONTENT, content_rendered)
+        .field(VERSION, env!("CARGO_PKG_VERSION")))
 }

@@ -34,15 +34,39 @@ pub enum TelescopeError {
     /// An internal future was canceled unexpectedly. This will always report
     /// as an internal server error.
     FutureCanceled,
+
+    /// There was an internal server error.
+    InternalServerError(String),
+
+    /// The request was malformed.
+    BadRequest(String)
 }
 
-// impl TelescopeError {
-//     /// Make a telescope error from a blocking error. This is a
-//     /// function alias to the convert implementation.
-//     pub fn from_blocking<E: Into<TelescopeError> + fmt::Debug>(e: BlockingError<E>) -> Self {
-//         Self::from(e)
-//     }
-// }
+impl TelescopeError {
+    // /// Make a telescope error from a blocking error. This is a
+    // /// function alias to the convert implementation.
+    // pub fn from_blocking<E: Into<TelescopeError> + fmt::Debug>(e: BlockingError<E>) -> Self {
+    //     Self::from(e)
+    // }
+
+    /// Create a resource not found error with converted fields.
+    pub fn resource_not_found(header: impl Into<String>, message: impl Into<String>) -> Self {
+        Self::ResourceNotFound {
+            header: header.into(),
+            message: message.into()
+        }
+    }
+
+    /// Construct an Internal Server Error and convert the message.
+    pub fn ise(message: impl Into<String>) -> Self {
+        Self::InternalServerError(message.into())
+    }
+
+    /// Construct a Bad Request error and convert the message.
+    pub fn bad_request(message: impl Into<String>) -> Self {
+        Self::BadRequest(message.into())
+    }
+}
 
 impl<E> From<BlockingError<E>> for TelescopeError
 where E: Into<TelescopeError> + fmt::Debug {

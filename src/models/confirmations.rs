@@ -281,8 +281,7 @@ impl Confirmation {
     }
 
     /// Confirm an invite for an existing user.
-    /// Return a string describing the error if one occurs.
-    pub async fn confirm_existing(&self, ctx: &RequestContext) -> Result<(), String> {
+    pub async fn confirm_existing(&self, ctx: &RequestContext) -> Result<(), TelescopeError> {
         if self.creates_user() {
             return Err("Invite is not associated with existing user".to_string());
         } else {

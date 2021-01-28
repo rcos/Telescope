@@ -32,44 +32,43 @@ pub struct NewUserConfInput {
     confirm: String,
 }
 
+/// The page shown to users accepting an invitation to create an account.
 #[get("/confirm/{invite_id}")]
-pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>) -> Result<HttpResponse, TelescopeError> {
+pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>) -> Result<Template, TelescopeError> {
+    // Get database connection.
     let db_conn: DbConnection = AppData::global().get_db_conn().await?;
-    let confirmation = Confirmation::get_by_id(db_conn, invite_id)
-        .await
-        .expect("Error getting confirmation.");
 
-    // handle missing or expired confirmation.
-    if let Some(confirmation) = confirmation {
-        if confirmation.creates_user() {
-            let form: Template = confirmation::for_conf(&confirmation);
-            let page: Template = page::of(&ctx, "Create account", &form).await;
-            HttpResponse::Ok().body(ctx.render(&page))
-        } else {
-            let error_message = confirmation.confirm_existing(&ctx).await.err();
+    // Get confirmation record.
+    let confirmation: Confirmation = Confirmation::get_by_id(db_conn, invite_id)
+        .await?
+        .ok_or(TelescopeError::resource_not_found(
+            "Confirmation Not Found",
+            "We could not find an email confirmation for that ID. It may have \
+             expired, in which case you should try again. If it was recent, and should \
+             not have expired, please contact a coordinator."
+        ))?;
 
-            // make page title
-            let errored = error_message.is_some();
-            let page_title = if errored { "Error" } else { "RCOS" };
-
-            // make confirmation page
-            let conf: Template =
-                confirmation::for_conf(&confirmation).field(confirmation::ERROR, error_message);
-            let rendered: String = ctx.render_in_page(&conf, page_title).await;
-
-            return if errored {
-                HttpResponse::InternalServerError().body(rendered)
-            } else {
-                HttpResponse::Ok().body(rendered)
-            };
-        }
+    if confirmation.creates_user() {
+        // Show the new user the form to create their account.
+        let form: Template = confirmation::for_conf(&confirmation);
+        page::of(&ctx, "Create account", &form).await
     } else {
-        let err_msg: String = format!(
-            "Could not find confirmation {}. It may have expired.",
-            invite_id
-        );
-        let jumbo: Template = jumbotron::new("Invite Not Found", err_msg);
-        HttpResponse::NotFound().body(ctx.render_in_page(&jumbo, "Not Found").await)
+        let error_message = confirmation.confirm_existing(&ctx).await.err();
+
+        // make page title
+        let errored = error_message.is_some();
+        let page_title = if errored { "Error" } else { "RCOS" };
+
+        // make confirmation page
+        let conf: Template =
+            confirmation::for_conf(&confirmation).field(confirmation::ERROR, error_message);
+        let rendered: String = ctx.render_in_page(&conf, page_title).await;
+
+        return if errored {
+            HttpResponse::InternalServerError().body(rendered)
+        } else {
+            HttpResponse::Ok().body(rendered)
+        };
     }
 }
 
