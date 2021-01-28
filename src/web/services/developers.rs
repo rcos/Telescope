@@ -3,7 +3,8 @@ use crate::templates::Template;
 use crate::{
     models::users::User,
     templates::{developers::UserThumbnail, static_pages::ise::ise},
-    web::{DbConnection, RequestContext},
+    web::RequestContext,
+    util::DbConnection,
 };
 use actix_web::HttpResponse;
 use futures::future::join_all;

@@ -1,7 +1,7 @@
 use crate::{models::users::User, schema::lost_passwords};
 
 use crate::util::handle_blocking_err;
-use crate::web::DbConnection;
+use crate::util::DbConnection;
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;

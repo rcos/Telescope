@@ -7,7 +7,7 @@ use diesel::{
     QueryResult,
     result::Error as DieselError
 };
-use crate::web::DbConnection;
+use crate::util::DbConnection;
 use actix_web::{
     web::block,
     Responder,

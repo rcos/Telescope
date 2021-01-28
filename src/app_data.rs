@@ -1,15 +1,20 @@
-use crate::env::{ConcreteConfig, CONFIG};
+use crate::{
+    env::{ConcreteConfig, CONFIG},
+    templates::Template,
+    util::DbConnection,
+};
 use actix_web::web::block;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
-use handlebars::Handlebars;
+use handlebars::{Handlebars, RenderError};
 use lettre::{
     stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
 };
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
+use crate::error::TelescopeError;
 
 lazy_static!{
     /// Lazy Static to store app data at runtime.
@@ -22,7 +27,7 @@ lazy_static!{
 #[derive(Clone)]
 pub struct AppData {
     /// The handlebars template registry.
-    pub template_registry: Arc<Handlebars<'static>>,
+    template_registry: Arc<Handlebars<'static>>,
     /// Database connection pool
     db_connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// SMTP Mailer client config (if in use).
@@ -32,7 +37,7 @@ pub struct AppData {
     /// Should mail stubs be created?
     use_stub_mailer: bool,
     /// The email sender address.
-    pub mail_sender: Mailbox,
+    mail_sender: Mailbox,
 }
 
 impl AppData {
@@ -82,7 +87,7 @@ impl AppData {
     }
 
     /// Get an [`Arc`] reference to the global, lazily generated app-data.
-    pub fn get_global() -> Arc<AppData> {
+    pub fn global() -> Arc<AppData> {
         APP_DATA.clone()
     }
 
@@ -156,4 +161,27 @@ impl AppData {
 
         Ok(())
     }
+
+    /// Get an [`Arc`] reference to the template registry.
+    pub fn get_handlebars_registry(&self) -> Arc<Handlebars<'static>> {
+        self.template_registry.clone()
+    }
+
+    /// Render a handlebars template using this object's registry.
+    pub fn render_template(&self, template: &Template) -> Result<String, RenderError> {
+        self.get_handlebars_registry().render(template.handlebars_file, &template)
+    }
+
+    /// Asynchronously get a database connection.
+    pub async fn get_db_conn(&self) -> Result<DbConnection, TelescopeError> {
+        // Clone the connection pool reference.
+        let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_db_conn_pool();
+
+        // Asynchronously try to retrieve a connection from the pool.
+        // This may block/take some time, but should timeout instead of waiting indefinitely.
+        block::<_, DbConnection, _>(move || {
+            db_conn_pool.get()
+        }).await.into()
+    }
+
 }

@@ -13,7 +13,8 @@ use crate::{
         password_requirements::PasswordRequirements,
         users::User,
     },
-    web::{DbConnection, RequestContext},
+    web::RequestContext,
+    util::DbConnection
 };
 
 use uuid::Uuid;

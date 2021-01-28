@@ -3,12 +3,14 @@ use crate::{
     schema::confirmations,
     templates::emails::confirmation_email::ConfirmationEmail,
     util::handle_blocking_err,
-    web::{DbConnection, RequestContext},
+    web::RequestContext,
+    util::DbConnection
 };
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use diesel::result::Error as DieselError;
 use uuid::Uuid;
+use crate::error::TelescopeError;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -216,19 +218,19 @@ impl Confirmation {
 
     /// Get a confirmation by id. If there is an error, it will be logged and a string describing
     /// it will be returned.
-    pub async fn get_by_id(db_conn: DbConnection, inv_id: Uuid) -> Result<Option<Self>, String> {
-        block::<_, Option<Confirmation>, _>(move || {
+    pub async fn get_by_id(db_conn: DbConnection, inv_id: Uuid) -> Result<Option<Self>, TelescopeError> {
+        block::<_, Option<Confirmation>, TelescopeError>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
             confirmations
                 .filter(invite_id.eq(inv_id))
                 .first::<Confirmation>(&db_conn)
                 .optional()
+                // filter out expired invite
+                .map(|opt| opt.filter(|c| !c.is_expired()))
         })
-        .await
-        .map_err(|e| handle_blocking_err(e, "Could not query database."))
-        // filter out expired invite
-        .map(|opt| opt.filter(|c| !c.is_expired()))
+            .await
+            .map_err(TelescopeError::from_blocking)
     }
 
     /// Private function to remove a confirmation from the database.

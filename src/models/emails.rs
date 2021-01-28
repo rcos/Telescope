@@ -2,7 +2,8 @@ use crate::{
     models::users::User,
     schema::emails,
     util::handle_blocking_err,
-    web::{api::graphql::ApiContext, DbConnection},
+    web::{api::graphql::ApiContext},
+    util::DbConnection,
 };
 use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};

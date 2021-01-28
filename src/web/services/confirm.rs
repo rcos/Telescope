@@ -17,6 +17,9 @@ use actix_web::{
     HttpResponse,
 };
 use uuid::Uuid;
+use crate::error::TelescopeError;
+use crate::util::DbConnection;
+use crate::app_data::AppData;
 
 /// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -30,8 +33,9 @@ pub struct NewUserConfInput {
 }
 
 #[get("/confirm/{invite_id}")]
-pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>) -> HttpResponse {
-    let confirmation = Confirmation::get_by_id(ctx.get_db_conn().await, invite_id)
+pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>) -> Result<HttpResponse, TelescopeError> {
+    let db_conn: DbConnection = AppData::global().get_db_conn().await?;
+    let confirmation = Confirmation::get_by_id(db_conn, invite_id)
         .await
         .expect("Error getting confirmation.");
 

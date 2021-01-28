@@ -2,7 +2,8 @@ use crate::{
     models::{emails::Email, password_requirements::PasswordRequirements},
     schema::users,
     util::handle_blocking_err,
-    web::{api::graphql::ApiContext, DbConnection},
+    web::{api::graphql::ApiContext},
+    util::DbConnection
 };
 
 use actix_web::web::block;

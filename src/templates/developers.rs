@@ -1,6 +1,6 @@
 use crate::models::users::User;
 use crate::templates::Template;
-use crate::web::DbConnection;
+use crate::util::DbConnection;
 
 /// A user thumbnail on the developer's page.
 #[derive(Clone, Debug, Serialize, Deserialize)]

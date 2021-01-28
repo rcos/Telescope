@@ -22,8 +22,6 @@ use crate::{
 };
 use crate::app_data::AppData;
 
-/// Database connection type.
-pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
 /// The items making up a page context (the context in which a request has been made.)
 pub struct RequestContext {
@@ -71,36 +69,6 @@ impl RequestContext {
         } else {
             false
         }
-    }
-
-    /// Get associated Handlebars template registry for manual template rendering.
-    pub fn handlebars(&self) -> &Handlebars<'static> {
-        self.app_data.template_registry.as_ref()
-    }
-
-    /// Render a template using the handlebars templates in this context.
-    pub fn render(&self, template: &Template) -> String {
-        template.render(self.app_data.template_registry.as_ref())
-    }
-
-    /// Asynchronously get a database connection.
-    pub async fn get_db_conn(&self) -> DbConnection {
-        let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_connection_pool();
-        block(move || {
-            db_conn_pool.get().map_err(|e| {
-                error!("Could not get database connection: {}", e);
-                e
-            })
-        })
-        .await
-        .unwrap()
-    }
-
-    /// Clone the connection pool. This can be useful for async operation,
-    /// as this Context is not threadsafe (since HTTPRequest isn't) but Connection
-    /// pools are.
-    pub fn clone_connection_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
-        self.app_data.clone_db_conn_pool()
     }
 
     /// Get an API context object (a partial sub-context of this context) to execute

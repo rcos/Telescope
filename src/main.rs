@@ -73,7 +73,7 @@ fn main() -> std::io::Result<()> {
     //
     // Database pool creation and registration of handlebars templates occurs
     // here.
-    let app_data: Arc<AppData> = AppData::get_global();
+    let app_data: Arc<AppData> = AppData::global();
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use
@@ -185,6 +185,8 @@ fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
+            // Compression middleware
+            .wrap(middleware::Compress::default())
             // Identity and authentication middleware.
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&cookie_key)
