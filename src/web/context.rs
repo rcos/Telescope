@@ -1,17 +1,12 @@
-use crate::{
-    models::users::User,
-    templates::{page, Template},
-    web::{api::graphql::ApiContext, app_data::AppData},
-};
 use actix_identity::Identity;
 use actix_web::{
     dev::{Payload, PayloadStream},
-    web::{block, Data},
-    Error, FromRequest, HttpRequest,
+    Error,
+    FromRequest, HttpRequest, web::{block, Data},
 };
 use diesel::{
-    r2d2::{ConnectionManager, Pool, PooledConnection},
     PgConnection,
+    r2d2::{ConnectionManager, Pool, PooledConnection},
 };
 use futures::future::{ready, Ready};
 use handlebars::Handlebars;
@@ -19,6 +14,13 @@ use lettre::SendableEmail;
 use lettre_email::Mailbox;
 use serde_json::Value;
 use uuid::Uuid;
+
+use crate::{
+    models::users::User,
+    templates::{page, Template},
+    web::{api::graphql::ApiContext},
+};
+use crate::app_data::AppData;
 
 /// Database connection type.
 pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;

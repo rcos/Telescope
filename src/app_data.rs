@@ -11,6 +11,13 @@ use lettre::{
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
 
+lazy_static!{
+    /// Lazy Static to store app data at runtime.
+    static ref APP_DATA: Arc<AppData> = {
+        Arc::new(AppData::new())
+    };
+}
+
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
 pub struct AppData {
@@ -30,7 +37,7 @@ pub struct AppData {
 
 impl AppData {
     /// Create new App Data object using the global static config.
-    pub fn new() -> Self {
+    fn new() -> Self {
         let config: &ConcreteConfig = &*CONFIG;
         // register handlebars templates
         let mut template_registry = Handlebars::new();
@@ -72,6 +79,11 @@ impl AppData {
                 address: config.email_config.address.to_string(),
             },
         }
+    }
+
+    /// Get an [`Arc`] reference to the global, lazily generated app-data.
+    pub fn get_global() -> Arc<AppData> {
+        APP_DATA.clone()
     }
 
     /// Get a clone of the database connection pool (which internally uses an Arc,

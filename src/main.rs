@@ -22,6 +22,30 @@ extern crate async_trait;
 #[macro_use]
 extern crate derive_more;
 
+use std::process::exit;
+
+use actix::prelude::*;
+use actix_files as afs;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::{App, http::Uri, HttpServer, middleware, web as aweb, web::get};
+use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
+use diesel::{Connection, RunQueryDsl};
+use openssl::ssl::{SslAcceptor, SslMethod};
+use rand::{Rng, rngs::OsRng};
+
+use app_data::AppData;
+
+use crate::{
+    db_janitor::DbJanitor,
+    env::{ConcreteConfig, CONFIG},
+    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
+    templates::static_pages::{
+        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
+    },
+    web::{cookies, RequestContext, services},
+};
+use std::sync::Arc;
+
 pub mod util;
 
 mod web;
@@ -33,28 +57,9 @@ mod schema;
 mod templates;
 mod db_crud;
 mod error;
-
-use crate::{
-    db_janitor::DbJanitor,
-    env::{ConcreteConfig, CONFIG},
-    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
-    templates::static_pages::{
-        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
-    },
-    web::{app_data::AppData, cookies, services, RequestContext},
-};
+pub mod app_data;
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
-
-use actix::prelude::*;
-use actix_files as afs;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
-use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
-use diesel::{Connection, RunQueryDsl};
-use openssl::ssl::{SslAcceptor, SslMethod};
-use rand::{rngs::OsRng, Rng};
-use std::process::exit;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -68,7 +73,7 @@ fn main() -> std::io::Result<()> {
     //
     // Database pool creation and registration of handlebars templates occurs
     // here.
-    let app_data = AppData::new();
+    let app_data: Arc<AppData> = AppData::get_global();
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use

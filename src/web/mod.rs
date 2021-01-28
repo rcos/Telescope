@@ -6,8 +6,6 @@ pub mod services;
 
 pub mod api;
 
-pub mod app_data;
-
 pub mod cookies;
 
 /// Page Context holder.
