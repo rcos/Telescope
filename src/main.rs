@@ -16,6 +16,12 @@ extern crate diesel;
 #[macro_use]
 extern crate juniper;
 
+#[macro_use]
+extern crate async_trait;
+
+#[macro_use]
+extern crate derive_more;
+
 pub mod util;
 
 mod web;
