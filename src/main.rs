@@ -25,6 +25,7 @@ mod env;
 mod models;
 mod schema;
 mod templates;
+mod db_crud;
 
 use crate::{
     db_janitor::DbJanitor,
