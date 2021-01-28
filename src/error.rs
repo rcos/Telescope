@@ -9,6 +9,11 @@ pub enum TelescopeError {
 
     /// 404 - Resource Not Found.
     ResourceNotFound {
-
-    }
+        /// The header of the jumbotron to be displayed.
+        header: String,
+        /// The message to display under the jumbotron.
+        message: String
+    },
 }
+
+
