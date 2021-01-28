@@ -3,7 +3,7 @@ use actix_web::{web::Form, HttpResponse};
 use crate::{
     models::{emails::Email, recoveries::Recovery, users::User},
     templates::{
-        emails::recovery_email::PasswordRecoveryEmail, forms::recovery::PasswordRecoveryPage,
+        emails::recovery_email::PasswordRecoveryEmail, forms::recovery::ForgotPasswordPage,
         Template
     },
     web::RequestContext,
@@ -20,7 +20,7 @@ pub struct PasswordRecoveryForm {
 /// The password recovery page.
 #[get("/forgot")]
 pub async fn forgot_page(ctx: RequestContext) -> HttpResponse {
-    let form: Template = PasswordRecoveryPage::new().as_template();
+    let form: Template = ForgotPasswordPage::new().as_template();
     let rendered: String = ctx.render_in_page(&form, "Forgot Password").await;
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -33,7 +33,7 @@ pub async fn recovery_service(
     form: Form<PasswordRecoveryForm>,
 ) -> HttpResponse {
     let email: &str = &form.email;
-    let mut form_page: PasswordRecoveryPage = PasswordRecoveryPage::new().email(email);
+    let mut form_page: ForgotPasswordPage = ForgotPasswordPage::new().email(email);
     let database_result: Option<User> =
         Email::get_user_from_db_by_email(ctx.get_db_conn().await, email.to_string()).await;
     if let Some(target_user) = database_result {

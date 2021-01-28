@@ -1,0 +1,16 @@
+<div class="card text-dark">
+    <h1 class="card-header">
+        Set New Password
+    </h1>
+    <div class="card-body">
+        <form method="post">
+            {{> forms/common/text_field new_pass}}
+            {{> forms/common/text_field confirm_pass}}
+            <div class="form-group d-block float-right">
+                <button class="btn btn-primary btn-spinner" type="submit">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
