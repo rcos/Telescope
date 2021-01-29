@@ -21,6 +21,7 @@ use crate::{
     web::{api::graphql::ApiContext},
 };
 use crate::app_data::AppData;
+use crate::error::TelescopeError;
 
 
 /// The items making up a page context (the context in which a request has been made.)
@@ -51,24 +52,22 @@ impl RequestContext {
     }
 
     /// Check if a user is logged in. Calls the database to check user valididty.
-    pub async fn logged_in(&self) -> bool {
-        let id = self
+    pub async fn logged_in(&self) -> Result<bool, TelescopeError> {
+        let id: Option<Uuid> = self
             .identity
             .identity()
-            .and_then(|s| Uuid::parse_str(&s).ok());
-        if let Some(uid) = id {
-            let db_res: Option<User> = User::get_from_db_by_id(self.get_db_conn().await, uid).await;
-
-            if db_res.is_some() {
-                true
-            } else {
-                // bad uuid in identity
+            .and_then(|s| Uuid::parse_str(&s).ok())
+            .or_else(|| {
+                // If there is no identity or the identity is malformed,
+                // forget it.
                 self.identity.forget();
-                false
-            }
-        } else {
-            false
-        }
+                None
+            });
+
+        if let Some(uid) = id {
+            let db_res: Option<User> = User::get_from_db_by_id(uid).await?;
+            if db_res.is_some() { Ok(true) } else { Ok(false) }
+        } else { Ok(false) }
     }
 
     /// Get an API context object (a partial sub-context of this context) to execute

@@ -192,17 +192,16 @@ impl User {
     /// Get a user from the database by user id asynchronously.
     ///
     /// Return none if user is not found.
-    pub async fn get_from_db_by_id(conn: DbConnection, uid: Uuid) -> Option<User> {
+    pub async fn get_from_db_by_id(uid: Uuid) -> Result<Option<User>, TelescopeError> {
         use crate::schema::users::dsl::*;
         use diesel::prelude::*;
 
+        // Get database connection
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
+
         block(move || users.find(uid).first::<User>(&conn).optional())
             .await
-            .map_err(|e| {
-                error!("Could not get user from database: {}", e);
-                e
-            })
-            .unwrap()
+            .map_err(TelescopeError::from)
     }
 
     // TODO: Test?
