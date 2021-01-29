@@ -7,6 +7,8 @@ use crate::{
 };
 
 use uuid::Uuid;
+use crate::error::TelescopeError;
+use crate::models::users::User;
 
 /// A button that just links to a another part of the site (or another site entirely.)
 /// This is good for most items on the header bar.
@@ -107,36 +109,37 @@ impl Navbar {
     }
 
     /// Create a navbar based on the page context.
-    pub async fn from_context(ctx: &RequestContext) -> Self {
-        if !(ctx.logged_in().await) {
-            Self::without_user(ctx)
-        } else {
-            ctx.identity()
-                .identity()
-                .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
-                .map(|uuid| {
-                    let logout_redir = url::form_urlencoded::Serializer::new(String::new())
-                        .append_pair(login::REDIRECT_QUERY_VAR, ctx.request().uri().path())
-                        .finish();
+    pub async fn from_context(ctx: &RequestContext) -> Result<Self, TelescopeError> {
+        // Get the logged in user.
+        let user_login: Option<User> = ctx.user_identity().await?;
 
-                    Self::with_defaults(ctx)
-                        .add_right(
-                            NavbarLink::new(
-                                ctx,
-                                format!("/profile/{}", uuid.to_hyphenated()),
-                                "Profile",
-                            )
-                            .class("mr-2 mb-2 btn btn-primary"),
-                        )
-                        .add_right(
-                            NavbarLink::new(ctx, format!("/logout?{}", logout_redir), "Logout")
-                                .class("mr-2 mb-2 btn btn-secondary"),
-                        )
-                        // Add API access for users.
-                        .add_left(NavbarLink::new(ctx, "/playground", "API Playground"))
-                })
-                .unwrap()
+        // If there is no user return a user-less navbar.
+        if user_login.is_none() {
+            return Ok(Self::without_user(ctx));
         }
+
+        // Otherwise extract the user's id.
+        let user_id: Uuid = user_login.unwrap().id;
+
+        // Convert it to the appropriate logout redirect and profile links.
+        let logout_redir_query: String = url::form_urlencoded::Serializer::new(String::new())
+            .append_pair(login::REDIRECT_QUERY_VAR, ctx.request().uri().path())
+            .finish();
+
+        let profile_link: String = format!("/profile/{}", user_id.to_hyphenated());
+        let logout_link: String = format!("/logout?{}", logout_redir_query);
+
+        // Put those links in navbar objects.
+        let profile_btn: NavbarLink = NavbarLink::new(ctx, profile_link, "Profile")
+            .class("mr-2 mb-2 btn-primary");
+        let logout_btn: NavbarLink = NavbarLink::new(ctx, logout_link, "Logout")
+            .class("mr-2 mb-2 btn-secondary");
+
+        // And create a navbar object with those link objects added.
+        let navbar: Navbar = Self::with_defaults(ctx)
+            .add_right(profile_btn)
+            .add_right(logout_btn);
+        return Ok(navbar);
     }
 
     /// Convert this navbar to a template.

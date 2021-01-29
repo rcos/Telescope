@@ -50,63 +50,34 @@ impl RequestContext {
         &self.identity
     }
 
-    /// Check if a user is logged in. Calls the database to check user valididty.
-    pub async fn logged_in(&self) -> Result<bool, TelescopeError> {
-        let id: Option<Uuid> = self
-            .identity
+    /// Get the user id of the logged in user. This does not check if the
+    /// user exists in the database though, so avoid
+    /// using it in favor of [`user_identity`] where possible.
+    fn identity_user_id(&self) -> Option<Uuid> {
+        self.identity
             .identity()
-            .and_then(|s| Uuid::parse_str(&s).ok())
+            .and_then(|s| Uuid::parse_str(s.as_str()).ok())
             .or_else(|| {
                 // If there is no identity or the identity is malformed,
                 // forget it.
                 self.identity.forget();
                 None
-            });
-
-        if let Some(uid) = id {
-            let db_res: Option<User> = User::get_from_db_by_id(uid).await?;
-            if db_res.is_some() { Ok(true) } else { Ok(false) }
-        } else { Ok(false) }
+            })
     }
 
     /// Asynchronously get the logged in user if there is one.
-    pub async fn user_identity(&self) -> Option<User> {
-        match self.user_id_identity() {
-            Some(uid) => User::get_from_db_by_id(self.get_db_conn().await, uid).await,
-            None => None,
+    pub async fn user_identity(&self) -> Result<Option<User>, TelescopeError> {
+        match self.identity_user_id() {
+            Some(uid) => User::get_from_db_by_id(uid).await,
+            None => Ok(None),
         }
     }
 
-    /// Get the user id of the logged in user. This should be preferred
-    /// to `get_user_identity` when possible to avoid an extra database query.
-    pub fn user_id_identity(&self) -> Option<Uuid> {
-        self.identity
-            .identity()
-            .and_then(|s| Uuid::parse_str(s.as_str()).ok())
-    }
-
-    /// Render a page with the specified template as the page content and the title as specified.
-    pub async fn render_in_page(
-        &self,
-        template: &Template,
-        page_title: impl Into<Value>,
-    ) -> String {
-        let page: Template = page::of(&self, page_title, template).await;
-        self.render(&page)
-    }
-
-    /// Send an email using the internal app data mailers derived from the
-    /// server config.
-    pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
-    where
-        M: Into<SendableEmail> + Clone + Send + Sync + 'static,
-    {
-        self.app_data.send_mail(mail).await
-    }
-
-    /// Get the mail sender from the app data config.
-    pub fn email_sender(&self) -> Mailbox {
-        self.app_data.mail_sender.clone()
+    /// Check if a user is logged in. Calls the database to check user valididty.
+    pub async fn logged_in(&self) -> Result<bool, TelescopeError> {
+        self.user_identity()
+            .await
+            .map(Option::is_some)
     }
 
     /// Extract the components of a context object and build it from
