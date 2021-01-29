@@ -181,7 +181,9 @@ impl AppData {
         // This may block/take some time, but should timeout instead of waiting indefinitely.
         block::<_, DbConnection, _>(move || {
             db_conn_pool.get()
-        }).await.into()
+        })
+            .await
+            .map_err(TelescopeError::from)
     }
 
 }

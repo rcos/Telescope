@@ -1,6 +1,7 @@
 //! Error handling.
 
 use diesel::r2d2::PoolError;
+use diesel::result::Error as DieselError;
 use handlebars::RenderError;
 use actix_web::rt::blocking::BlockingError;
 use std::fmt;
@@ -30,6 +31,10 @@ pub enum TelescopeError {
     /// Error retrieving connection to database from the database connection
     /// pool. This will always report as an internal server error.
     DbConnectionError(PoolError),
+
+    /// Error querying database. Should report as internal server error
+    /// most of the time.
+    DbQueryError(DieselError),
 
     /// An internal future was canceled unexpectedly. This will always report
     /// as an internal server error.
@@ -76,6 +81,15 @@ where E: Into<TelescopeError> + fmt::Debug {
         match error {
             BlockingError::Canceled => TelescopeError::FutureCanceled,
             BlockingError::Error(e) => e.into()
+        }
+    }
+}
+
+impl From<DieselError> for TelescopeError {
+    fn from(db_err: DieselError) -> TelescopeError {
+        match db_err {
+            not_found @ DieselError::NotFound => unimplemented!(),
+            other => TelescopeError::DbQueryError(other)
         }
     }
 }

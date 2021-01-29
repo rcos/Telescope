@@ -223,7 +223,7 @@ impl Confirmation {
     /// it will be returned.
     pub async fn get_by_id(inv_id: Uuid) -> Result<Option<Self>, TelescopeError> {
         let db_conn: DbConnection = AppData::global().get_db_conn().await?;
-        block::<_, Option<Confirmation>, TelescopeError>(move || {
+        block::<_, Option<Confirmation>, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
             confirmations
