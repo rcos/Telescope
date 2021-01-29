@@ -13,7 +13,6 @@ extern crate serde;
 #[macro_use]
 extern crate diesel;
 
-
 #[macro_use]
 extern crate async_trait;
 

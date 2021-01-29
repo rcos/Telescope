@@ -18,7 +18,6 @@ use uuid::Uuid;
 use crate::{
     models::users::User,
     templates::{page, Template},
-    web::{api::graphql::ApiContext},
 };
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
