@@ -2,10 +2,9 @@ use crate::{
     models::users::User,
     schema::emails,
     util::handle_blocking_err,
-    web::{api::graphql::ApiContext, DbConnection},
+    web::DbConnection,
 };
 use actix_web::web::block;
-use juniper::{FieldError, FieldResult, Value};
 use lettre::EmailAddress;
 use uuid::Uuid;
 
@@ -23,46 +22,9 @@ pub struct Email {
     pub user_id: Uuid,
 }
 
-/// GraphQL operations on emails.
-#[graphql_object(Context = ApiContext)]
-impl Email {
-    /// The email address
-    fn address(&self) -> &str {
-        self.email.as_str()
-    }
-
-    // this code may block, but since its only executed by juniper
-    // it should always be executed on an async thread pool anyways.
-    /// The user associated with this email address.
-    fn user(&self, ctx: &ApiContext) -> FieldResult<User> {
-        use crate::schema::users;
-        use diesel::prelude::*;
-
-        let conn = ctx.get_db_conn()?;
-
-        let results: QueryResult<Vec<(Email, User)>> = emails::table
-            .inner_join(users::table)
-            .filter(emails::dsl::email.eq(self.email.as_str()))
-            .limit(1)
-            .load(&conn);
-
-        results
-            .map_err(|e| {
-                error!("Could not query database: {}", e);
-                FieldError::new("Could not query database.", Value::null())
-            })?
-            .pop()
-            .ok_or(FieldError::new(
-                "Could not find associated user.",
-                Value::null(),
-            ))
-            .map(|(e, u)| u)
-    }
-}
-
 impl Email {
     /// Create a new email object. Return none if email does not
-    /// match regex.
+    /// have proper format.
     pub fn new<T: Into<String>>(user_id: Uuid, email: T) -> Option<Self> {
         EmailAddress::new(email.into())
             .map_err(|e| {

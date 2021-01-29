@@ -57,8 +57,6 @@ pulldown-cmark = "~0.8"
 # Sending emails.
 lettre = {version = "~0.9", features = ["serde-impls"]}
 lettre_email = "~0.9"
-# GraphQL queries and API system.
-juniper = {version = "~0.15", features = ["uuid", "chrono"]}
 # MD5 hashing to use to talk to Gravatar.
 md5 = "~0.7"
 # URL Parsing

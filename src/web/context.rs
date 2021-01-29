@@ -1,7 +1,7 @@
 use crate::{
     models::users::User,
     templates::{page, Template},
-    web::{api::graphql::ApiContext, app_data::AppData},
+    web::app_data::AppData,
 };
 use actix_identity::Identity;
 use actix_web::{
@@ -99,12 +99,6 @@ impl RequestContext {
     /// pools are.
     pub fn clone_connection_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
         self.app_data.clone_db_conn_pool()
-    }
-
-    /// Get an API context object (a partial sub-context of this context) to execute
-    /// GraphQL API requests in.
-    pub async fn get_api_context(&self) -> Option<ApiContext> {
-        ApiContext::new(self.clone_connection_pool(), self).await
     }
 
     /// Asynchronously get the logged in user if there is one.

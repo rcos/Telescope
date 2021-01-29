@@ -14,7 +14,7 @@ lazy_static! {
 }
 
 /// Requirements for a valid password.
-#[derive(Copy, Clone, Deserialize, Serialize, Debug, juniper::GraphQLObject, Default)]
+#[derive(Copy, Clone, Deserialize, Serialize, Debug, Default)]
 pub struct PasswordRequirements {
     /// Password is minimum required length.
     pub is_min_len: bool,
