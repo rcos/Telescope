@@ -13,7 +13,7 @@ use diesel::{
 
 use actix_web::{rt::blocking::BlockingError, web::block};
 
-use crate::{models::users::User, web::api::graphql::ApiContext};
+use crate::models::users::User;
 
 /// Trait for paginating diesel queries.
 pub trait Paginate: Sized + QueryId {
@@ -140,44 +140,3 @@ impl<N, T> PaginatedData<N, T> {
         }
     }
 }
-
-/// Pagination input represented by the offset into the dataset and the maximum
-/// number of entries to fetch.
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, juniper::GraphQLInputObject, Default)]
-pub struct PaginationInput {
-    /// The offset into the dataset.
-    offset: i32,
-    /// The maximum number of entries to fetch.
-    /// If this is null then the number of fetched entries will be the total
-    /// number of entries minus the offset.
-    count: Option<i32>,
-}
-
-macro_rules! impl_juniper_pagination {
-    ($t:ty, $n:literal) => {
-        #[graphql_object(Context = ApiContext, name = $n)]
-        impl PaginatedData<i32, $t> {
-            /// The offset into the dataset.
-            fn offset(&self) -> i32 {
-                self.offset
-            }
-
-            /// The number of items retrieved.
-            fn count(&self) -> i32 {
-                self.count
-            }
-
-            /// The total number of items in the dataset.
-            fn total(&self) -> i32 {
-                self.total
-            }
-
-            /// The data retrieved.
-            fn data(&self) -> &Vec<$t> {
-                &self.data
-            }
-        }
-    };
-}
-
-impl_juniper_pagination!(User, "PaginatedUsers");
