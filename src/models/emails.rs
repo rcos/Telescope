@@ -9,6 +9,8 @@ use actix_web::web::block;
 use juniper::{FieldError, FieldResult, Value};
 use lettre::EmailAddress;
 use uuid::Uuid;
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
 
 /// Field structure must match that in the SQL migration.
 /// (for diesel reasons it seems)
@@ -126,14 +128,20 @@ impl Email {
     }
 
     /// Store an email in the database.
-    pub async fn store(self, conn: DbConnection) -> Result<(), String> {
+    pub async fn store(self) -> Result<(), TelescopeError> {
+        // Get database connection
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
+
+        // Asynchronously store this email record in the database.
         block::<_, Self, _>(move || {
             use crate::schema::emails::dsl::*;
             use diesel::prelude::*;
-            diesel::insert_into(emails).values(&self).get_result(&conn)
+            diesel::insert_into(emails)
+                .values(&self)
+                .get_result(&conn)
         })
         .await
-        .map_err(|e| handle_blocking_err(e, "Could not store email to database."))
+        .map_err(TelescopeError::from)
         .map(|stored| {
             trace!("Saved email to database: {:?}", stored);
         })

@@ -11,15 +11,12 @@ use crate::{
     },
     web::RequestContext,
 };
-use actix_web::{
-    http::header,
-    web::{Form, Path},
-    HttpResponse,
-};
+use actix_web::{http::header, web::{Form, Path}, HttpResponse, Responder};
 use uuid::Uuid;
 use crate::error::TelescopeError;
 use crate::util::DbConnection;
 use crate::app_data::AppData;
+use actix_web::http::StatusCode;
 
 /// The form sent to new users to confirm the account creation.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -62,7 +59,7 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
         let form: Template = confirmation::for_conf(&confirmation);
         page::of(&ctx, "Create account", &form).await
     } else {
-        let error_message = confirmation.confirm_existing(&ctx).await.err();
+        let error_message = confirmation.confirm_existing().await.err();
 
         // make page title
         let errored = error_message.is_some();
@@ -86,7 +83,7 @@ pub async fn confirm(
     ctx: RequestContext,
     Path(invite_id): Path<Uuid>,
     Form(form): Form<NewUserConfInput>,
-) -> Result<HttpResponse, TelescopeError> {
+) -> Result<impl Responder, TelescopeError> {
     // Get confirmation record from database.
     let confirmation: Confirmation = Confirmation::get_by_id(invite_id)
         .await?
@@ -96,15 +93,11 @@ pub async fn confirm(
     // users.
     if !confirmation.creates_user() {
         let error_message: String = format!(
-            "Confirmation {} is already linked to an existing user",
+            "Confirmation {} is associated with an existing user, and cannot be used to register.",
             invite_id
         );
 
-        let page: String =
-            jumbotron::rendered_page(&ctx, "Cannot create user", "Bad request", error_message)
-                .await;
-
-        return HttpResponse::BadRequest().body(page);
+        return Err(TelescopeError::bad_request("Bad Request", error_message));
     }
 
     // Destructure form.
@@ -120,9 +113,11 @@ pub async fn confirm(
 
     // Check that the password and the confirm password are the same.
     if password != confirm {
-        form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] =
-            "Password does not match confirm password.".into();
-        return HttpResponse::BadRequest().body(ctx.render_in_page(&form_err, "Error").await);
+        // Set the error field as necessary.
+        form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] = "Password does not match confirm password.".into();
+        // Return the HTTP
+        return Ok(page::of(&ctx, "Error", &form_err).await?.with_status(StatusCode::BAD_REQUEST));
+
     }
 
     // Try to confirm the new user.

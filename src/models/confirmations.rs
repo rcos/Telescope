@@ -292,7 +292,7 @@ impl Confirmation {
     /// ## Panics:
     /// - If this confirmation is not associated with an existing user.
     /// - If the email us malformed or the email object cannot be created.
-    pub async fn confirm_existing(&self, ctx: &RequestContext) -> Result<(), TelescopeError> {
+    pub async fn confirm_existing(&self) -> Result<(), TelescopeError> {
         // Construct the email instance here to avoid use after move.
         let email = Email::new(self.user_id.unwrap(), self.email.clone())
             .expect("Could not make email instance.");
@@ -301,6 +301,6 @@ impl Confirmation {
         self.remove_from_db().await?;
 
         // add email to emails table
-        email.store(ctx.get_db_conn().await).await
+        email.store().await
     }
 }
