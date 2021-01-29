@@ -294,6 +294,7 @@ impl Confirmation {
     /// - If the email us malformed or the email object cannot be created.
     pub async fn confirm_existing(&self) -> Result<(), TelescopeError> {
         // Construct the email instance here to avoid use after move.
+        // Panic on errors as they should be checked before this point.
         let email = Email::new(self.user_id.unwrap(), self.email.clone())
             .expect("Could not make email instance.");
 

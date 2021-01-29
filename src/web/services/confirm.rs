@@ -57,24 +57,13 @@ pub async fn confirmations_page(ctx: RequestContext, Path(invite_id): Path<Uuid>
     if confirmation.creates_user() {
         // Show the new user the form to create their account.
         let form: Template = confirmation::for_conf(&confirmation);
-        page::of(&ctx, "Create account", &form).await
+        return page::of(&ctx, "Create account", &form).await;
     } else {
-        let error_message = confirmation.confirm_existing().await.err();
+        confirmation.confirm_existing().await?;
 
-        // make page title
-        let errored = error_message.is_some();
-        let page_title = if errored { "Error" } else { "RCOS" };
-
-        // make confirmation page
-        let conf: Template =
-            confirmation::for_conf(&confirmation).field(confirmation::ERROR, error_message);
-        let rendered: String = ctx.render_in_page(&conf, page_title).await;
-
-        return if errored {
-            HttpResponse::InternalServerError().body(rendered)
-        } else {
-            HttpResponse::Ok().body(rendered)
-        };
+        // Make confirmation page
+        let conf: Template = confirmation::for_conf(&confirmation);
+        return page::of(&ctx, "RCOS", &conf).await;
     }
 }
 
