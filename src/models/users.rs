@@ -11,6 +11,8 @@ use argon2::{self, Config};
 use chrono::{DateTime, Utc};
 use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
 
 /// A telescope user.
 #[derive(Insertable, Queryable, Debug, Clone, Serialize, Deserialize, Associations)]
@@ -207,9 +209,11 @@ impl User {
     /// Get a user's emails from the database. Return empty vector if there are no
     /// emails found. Returned emails will be sorted by visibility, and then
     /// alphabetically.
-    pub async fn get_emails_from_db_by_id(conn: DbConnection, uid: Uuid) -> Vec<Email> {
+    pub async fn get_emails_from_db_by_id(uid: Uuid) -> Result<Vec<Email>, TelescopeError> {
         use crate::schema::emails::dsl::*;
         use diesel::prelude::*;
+
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
 
         block::<_, Vec<Email>, _>(move || {
             emails
@@ -218,38 +222,41 @@ impl User {
                 .load(&conn)
         })
         .await
-        .map_err(|e| {
-            error!("Could not query database: {}", e);
-            e
-        })
-        .unwrap()
+        .map_err(TelescopeError::from)
     }
 
     /// See the get_emails_from_db_by_id
-    pub async fn get_emails_from_db(&self, conn: DbConnection) -> Vec<Email> {
-        User::get_emails_from_db_by_id(conn, self.id).await
+    pub async fn get_emails_from_db(&self) -> Result<Vec<Email>, TelescopeError> {
+        User::get_emails_from_db_by_id(self.id).await
     }
 
     /// Store the user in the database. On conflict, return error.
-    pub async fn store(self, conn: DbConnection) -> Result<(), String> {
+    pub async fn store(&self) -> Result<(), TelescopeError> {
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
         block::<_, usize, _>(move || {
             use crate::schema::users::dsl::*;
             use diesel::prelude::*;
-            diesel::insert_into(users).values(&self).execute(&conn)
+            diesel::insert_into(users)
+                .values(&self)
+                .execute(&conn)
         })
         .await
-        .map_err(|e| handle_blocking_err(e, "Could not add user to database."))
+        .map_err(TelescopeError::from)
         .map(|n| trace!("Added {} user(s) to database.", n))
     }
 
     /// Get all users from database.
-    pub async fn get_all_from_db(conn: DbConnection) -> Result<Vec<User>, String> {
+    pub async fn get_all_from_db() -> Result<Vec<User>, TelescopeError> {
+        // Get database connection.
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
+        // Load all users from database.
         block::<_, Vec<User>, _>(move || {
             use crate::schema::users::dsl::*;
             use diesel::prelude::*;
             users.load(&conn)
         })
-        .await
-        .map_err(|e| handle_blocking_err(e, "Could not load users from database."))
+            .await
+            // Convert error
+            .map_err(TelescopeError::from)
     }
 }

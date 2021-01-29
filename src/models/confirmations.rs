@@ -281,7 +281,7 @@ impl Confirmation {
             self.remove_from_db().await?;
 
             // save email and user records.
-            user.clone().store(ctx.get_db_conn().await).await?;
+            user.clone().store().await?;
             email.store(ctx.get_db_conn().await).await?;
             Ok(user)
         }
