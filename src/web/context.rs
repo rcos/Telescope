@@ -70,12 +70,6 @@ impl RequestContext {
         } else { Ok(false) }
     }
 
-    /// Get an API context object (a partial sub-context of this context) to execute
-    /// GraphQL API requests in.
-    pub async fn get_api_context(&self) -> Option<ApiContext> {
-        ApiContext::new(self.clone_connection_pool(), self).await
-    }
-
     /// Asynchronously get the logged in user if there is one.
     pub async fn user_identity(&self) -> Option<User> {
         match self.user_id_identity() {

@@ -2,14 +2,12 @@ use crate::{
     models::{emails::Email, password_requirements::PasswordRequirements},
     schema::users,
     util::handle_blocking_err,
-    web::{api::graphql::ApiContext},
     util::DbConnection
 };
 
 use actix_web::web::block;
 use argon2::{self, Config};
 use chrono::{DateTime, Utc};
-use juniper::{FieldError, FieldResult, Value};
 use uuid::Uuid;
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
@@ -40,69 +38,6 @@ pub struct User {
     pub hashed_pwd: String,
     /// The moment that the account was created.
     pub account_created: DateTime<Utc>,
-}
-
-/// An RCOS member.
-#[graphql_object(Context = ApiContext)]
-impl User {
-    /// The user's unique identifier.
-    fn id(&self) -> Uuid {
-        self.id
-    }
-
-    /// The user's name.
-    fn name(&self) -> &str {
-        self.name.as_str()
-    }
-
-    /// The profile picture url of the user.
-    fn avi_location(&self) -> &Option<String> {
-        &self.avi_location
-    }
-
-    /// The bio of the user.
-    fn bio(&self) -> &str {
-        self.bio.as_str()
-    }
-
-    /// Is this user a sysadmin.
-    fn is_sysadmin(&self) -> bool {
-        self.sysadmin
-    }
-
-    /// When the account was created.
-    fn account_created(&self) -> DateTime<Utc> {
-        self.account_created
-    }
-
-    // Github links and chat handles are not public as they are not stable API
-    // They will be replaced when these services are integrated
-
-    // passwords are out of the public API for obvious reasons.
-
-    // computed fields below
-
-    // this code may block, but since its only executed by juniper
-    // it should always be executed on an async thread pool anyways.
-    /// Public emails of this user.
-    fn emails(&self, ctx: &ApiContext) -> FieldResult<Vec<Email>> {
-        use crate::schema::emails;
-        use diesel::prelude::*;
-
-        let conn = ctx.get_db_conn()?;
-
-        let db_results: QueryResult<Vec<(User, Email)>> = users::table
-            .inner_join(emails::table)
-            .filter(users::dsl::id.eq(self.id).and(emails::dsl::is_visible))
-            .load(&conn);
-
-        db_results
-            .map_err(|e| {
-                error!("Could not query database: {}", e);
-                FieldError::new("Could not query database.", Value::null())
-            })
-            .map(|v: Vec<(User, Email)>| v.into_iter().map(|(u, e)| e).collect())
-    }
 }
 
 /// Rust only user operations and constants.
