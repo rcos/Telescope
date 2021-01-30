@@ -105,22 +105,28 @@ impl User {
     }
 
     /// Resolve the location for the user's profile picture.
-    pub async fn picture_url(&self, conn: DbConnection) -> String {
+    pub async fn picture_url(&self) -> Result<String, TelescopeError> {
         // Check for existing specification.
         if self.avi_location.is_some() {
-            return self.avi_location.clone().unwrap();
+            return Ok(self.avi_location.clone().unwrap());
         } else {
-            // get user emails.
-            let emails: Vec<Email> = self.get_emails_from_db(conn).await;
+            // Get user emails.
+            let emails: Vec<Email> = self.get_emails_from_db().await?;
+
             // Use the first one to generate the Gravitar Hash (Users should
             // always have at least 1 email).
-            let email_str: String = emails.first().unwrap().email.as_str().trim().to_lowercase();
+            let email_str: String = emails.first()
+                .expect("All users should have at least one email.")
+                .email
+                .as_str()
+                .trim()
+                .to_lowercase();
 
             let gravatar_hash = md5::compute(email_str);
-            format!(
+            Ok(format!(
                 "https://www.gravatar.com/avatar/{:x}?d=identicon&s=600",
                 gravatar_hash
-            )
+            ))
         }
     }
 
@@ -165,13 +171,13 @@ impl User {
     }
 
     /// Store the user in the database. On conflict, return error.
-    pub async fn store(&self) -> Result<(), TelescopeError> {
+    pub async fn store(self) -> Result<(), TelescopeError> {
         let conn: DbConnection = AppData::global().get_db_conn().await?;
         block::<_, usize, _>(move || {
             use crate::schema::users::dsl::*;
             use diesel::prelude::*;
             diesel::insert_into(users)
-                .values(&self)
+                .values(self)
                 .execute(&conn)
         })
         .await
