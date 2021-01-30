@@ -31,24 +31,12 @@ pub struct Confirmation {
 ///
 /// There shouldn't be any email related errors as the confirmation needs to
 /// be for a new email to exist.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, From)]
 pub enum ConfirmNewUserError {
     /// User had bad password.
     BadPassword(PasswordRequirements),
     /// Other error occurred.
-    Other(String),
-}
-
-impl From<String> for ConfirmNewUserError {
-    fn from(s: String) -> Self {
-        Self::Other(s)
-    }
-}
-
-impl From<PasswordRequirements> for ConfirmNewUserError {
-    fn from(e: PasswordRequirements) -> Self {
-        Self::BadPassword(e)
-    }
+    Other(TelescopeError),
 }
 
 impl Confirmation {
@@ -240,13 +228,13 @@ impl Confirmation {
     /// Private function to remove a confirmation from the database.
     async fn remove_from_db(&self) -> Result<(), TelescopeError> {
         // Get Database connection.
-        let conn: DbConnection = AppData::global().get_db_conn()?;
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
 
         // Get a copy of the confirmation id.
         let self_id: Uuid = self.invite_id;
 
         // Asynchronously remove the confirmation record from the database.
-        block::<_, _, _>(move || {
+        block::<_, usize, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
 
@@ -254,37 +242,55 @@ impl Confirmation {
                 .filter(invite_id.eq(self_id)) // This should be only one confirmation record.
                 .execute(&conn)
         })
-        .await
-        .map_err(TelescopeError::from)
+            .await
+            .map_err(TelescopeError::from)
+            .map(|n: usize| {
+                trace!("Removed {} confirmations", n);
+            })
     }
 
     /// Try to confirm a new user invite.
     /// Assume that `self` is a valid invite in the confirmations table.
     /// Return the created user or a string describing the error.
+    ///
+    /// ## Panics:
+    /// - If this invite is associated with an existing user.
+    /// - If the confirmation's email is malformed (or cannot be created).
     pub async fn confirm_new(
         &self,
-        ctx: &RequestContext,
         name: String,
         pass: String,
     ) -> Result<User, ConfirmNewUserError> {
+        // Check that invite isn't associated with existing user.
         if !self.creates_user() {
-            return Err("Invite is for existing user".to_string().into());
-        } else {
-            // create user and email here to avoid use after move.
-            let user: User =
-                User::new(name, pass.as_str()).map_err::<ConfirmNewUserError, _>(|e| e.into())?;
-
-            let email: Email = Email::new(user.id, self.email.clone())
-                .expect("Could not create email for new user.");
-
-            // remove confirmation from database.
-            self.remove_from_db().await?;
-
-            // save email and user records.
-            user.clone().store().await?;
-            email.store(ctx.get_db_conn().await).await?;
-            Ok(user)
+            panic!("Invite {} is for an existing user", self.invite_id.to_hyphenated());
         }
+
+        // Create user and email here to avoid use after move.
+        let user: User = User::new(name, pass.as_str())
+            .map_err(ConfirmNewUserError::from)?;
+
+        let email: Email = Email::new(user.id, self.email.clone())
+            .expect("Could not create email for new user.");
+
+        // Remove confirmation from database.
+        self.remove_from_db()
+            .await
+            .map_err(ConfirmNewUserError::from)?;
+
+        // Save email and user records.
+        user.clone()
+            .store()
+            .await
+            .map_err(ConfirmNewUserError::from)?;
+
+        // If this call fails the user will not be able to log in and that would
+        // be bad news so hopefully this call does not fail.
+        email.store()
+            .await
+            .map_err(ConfirmNewUserError::from)?;
+
+        return Ok(user);
     }
 
     /// Confirm an invite for an existing user.

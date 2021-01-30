@@ -28,7 +28,7 @@ pub async fn of(ctx: &RequestContext, title: impl Into<Value>, content: &Templat
     let content_rendered = AppData::global().render_template(content)?;
     Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
-        .field(NAVBAR, Navbar::from_context(ctx).await.template())
+        .field(NAVBAR, Navbar::from_context(ctx).await?.template())
         .field(CONTENT, content_rendered)
         .field(VERSION, env!("CARGO_PKG_VERSION")))
 }

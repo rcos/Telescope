@@ -72,7 +72,7 @@ pub async fn confirm(
     ctx: RequestContext,
     Path(invite_id): Path<Uuid>,
     Form(form): Form<NewUserConfInput>,
-) -> Result<impl Responder, TelescopeError> {
+) -> Result<HttpResponse, TelescopeError> {
     // Get confirmation record from database.
     let confirmation: Confirmation = Confirmation::get_by_id(invite_id)
         .await?
@@ -82,7 +82,8 @@ pub async fn confirm(
     // users.
     if !confirmation.creates_user() {
         let error_message: String = format!(
-            "Confirmation {} is associated with an existing user, and cannot be used to register.",
+            "Confirmation {} is associated with an existing user, and cannot be \
+            used to register a new user.",
             invite_id
         );
 
@@ -104,45 +105,51 @@ pub async fn confirm(
     if password != confirm {
         // Set the error field as necessary.
         form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] = "Password does not match confirm password.".into();
-        // Return the HTTP
-        return Ok(page::of(&ctx, "Error", &form_err).await?.with_status(StatusCode::BAD_REQUEST));
+        // Build and render the page.
+        let rendered: String = page::of(&ctx, "Error", &form_err)
+            .await?
+            .render()?;
+        // Return the response.
+        return Ok(HttpResponse::BadRequest().body(rendered));
 
     }
 
     // Try to confirm the new user.
-    let res: Result<User, ConfirmNewUserError> =
-        confirmation.confirm_new(&ctx, name.clone(), password).await;
+    let res: Result<User, ConfirmNewUserError> = confirmation.confirm_new(name.clone(), password).await;
 
     match res {
         // Success
         Ok(new_user) => {
-            // log the user in.
+            // Log the user in.
             // in the future we should probably have a better form
             // of user identity than just the uuid.
             ctx.identity().remember(new_user.id_str());
 
             let profile_url: String = format!("/profile/{}", new_user.id_str());
 
-            return HttpResponse::Found()
+            return Ok(HttpResponse::Found()
                 .header(header::LOCATION, profile_url)
-                .finish();
+                .finish());
         }
 
         // Handle bad password.
         Err(ConfirmNewUserError::BadPassword(reqs)) => {
+            // This will only panic if there are no unmet password requirements.
             let err_str: String = reqs
                 .get_error_string()
                 .expect("Could not get error string for password requirements");
 
+            // Add the error message to the form.
             form_err[confirmation::PASSWORD][text_field::ERROR_FIELD] = err_str.into();
 
-            HttpResponse::BadRequest().body(ctx.render_in_page(&form_err, "Error").await)
+            // Render the form and send it back to the user.
+            let rendered: String = page::of(&ctx, "Error", &form_err)
+                .await?
+                .render()?;
+            return Ok(HttpResponse::BadRequest().body(rendered));
         }
 
         // Handle other confirmation error.
-        Err(ConfirmNewUserError::Other(msg)) => {
-            error!("Could not confirm new user: {}", msg);
-            ise(&ctx).await
-        }
+        Err(ConfirmNewUserError::Other(telescope_err)) => Err(telescope_err)
     }
 }
