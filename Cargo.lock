@@ -1060,9 +1060,9 @@ dependencies = [
 
 [[package]]
 name = "exitcode"
-version = "1.0.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ca8bfcc11d7d07ef2e4f33b9e47b35fe07aca9fd5535c6866cbe6839b3c6566"
+checksum = "de853764b47027c2e862a995c34978ffa63c1501f2e15f987ba11bd4f9bba193"
 
 [[package]]
 name = "fake-simd"
