@@ -33,7 +33,7 @@ handlebars = {version = "~3.5", features = ["dir_source"]}
 # tls/ssl certification.
 openssl = {version = "~0.10", features = ["vendored"]}
 # exit code standardization
-exitcode = "~1.0"
+exitcode = "~1.1"
 # logging
 log = "~0.4"
 env_logger = "~0.8"
