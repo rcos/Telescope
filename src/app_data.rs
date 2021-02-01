@@ -186,4 +186,8 @@ impl AppData {
             .map_err(TelescopeError::from)
     }
 
+    /// Clone the mailbox used to send telescope related email. 
+    pub fn email_sender(&self) -> Mailbox {
+        self.mail_sender.clone()
+    }
 }

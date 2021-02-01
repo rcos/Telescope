@@ -53,7 +53,8 @@ impl Email {
     /// Try to get a user based on an email from the database.
     ///
     /// Returns None if the user was not found or if there was an issues accessing the database.
-    pub async fn get_user_from_db_by_email(conn: DbConnection, email_: String) -> Option<User> {
+    pub async fn get_user_from_db_by_email(email_: String) -> Result<Option<User>, TelescopeError> {
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
         block::<_, Option<(Email, User)>, _>(move || {
             use crate::schema::{emails::dsl::*, users::dsl::*};
             use diesel::prelude::*;
@@ -63,12 +64,9 @@ impl Email {
                 .first(&conn)
                 .optional()
         })
-        .await
-        .unwrap_or_else(|e| {
-            error!("Could not query database: {}", e);
-            None
-        })
-        .map(|(_, u)| u)
+            .await
+            .map_err(TelescopeError::from)
+            .map(|opt| opt.map(|(_, u)| u))
     }
 
     /// Check if an email exists in the telescope database.

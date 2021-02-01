@@ -1,4 +1,4 @@
-use actix_web::{web::Form, HttpResponse};
+use actix_web::{web::Form, HttpResponse, Responder};
 
 use crate::{
     models::{emails::Email, recoveries::Recovery, users::User},
@@ -10,6 +10,8 @@ use crate::{
 };
 
 use futures::prelude::*;
+use crate::error::TelescopeError;
+use crate::app_data::AppData;
 
 /// Form submitted by users to recovery service to set a new password.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -19,29 +21,25 @@ pub struct PasswordRecoveryForm {
 
 /// The password recovery page.
 #[get("/forgot")]
-pub async fn forgot_page(ctx: RequestContext) -> HttpResponse {
-    let form: Template = ForgotPasswordPage::new().as_template();
-    let rendered: String = ctx.render_in_page(&form, "Forgot Password").await;
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(rendered)
+pub async fn forgot_page(ctx: RequestContext) -> impl Responder {
+    ForgotPasswordPage::new().as_template()
 }
 
 #[post("/forgot")]
 pub async fn recovery_service(
     ctx: RequestContext,
     form: Form<PasswordRecoveryForm>,
-) -> HttpResponse {
+) -> Result<HttpResponse, TelescopeError> {
     let email: &str = &form.email;
     let mut form_page: ForgotPasswordPage = ForgotPasswordPage::new().email(email);
     let database_result: Option<User> =
-        Email::get_user_from_db_by_email(ctx.get_db_conn().await, email.to_string()).await;
+        Email::get_user_from_db_by_email(email.to_string()).await?;
     if let Some(target_user) = database_result {
         // get the user's emails.
         let emails: Vec<String> = target_user
-            .get_emails_from_db(ctx.get_db_conn().await)
-            .map(|emails: Vec<Email>| emails.into_iter().map(|e| e.email).collect())
-            .await;
+            .get_emails_from_db()
+            .await
+            .map(|emails: Vec<Email>| emails.into_iter().map(|e| e.email).collect())?;
 
         // make a recovery record
         let recovery = Recovery::for_user(&target_user);
@@ -71,7 +69,7 @@ pub async fn recovery_service(
         }
 
         let email = email_builder
-            .from(ctx.email_sender())
+            .from(AppData::global().email_sender())
             .alternative(
                 ctx.render(&recovery_email.html()),
                 ctx.render(&recovery_email.plaintext()),
