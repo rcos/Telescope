@@ -15,19 +15,15 @@ pub mod util;
 
 mod web;
 mod env;
-mod schema;
 mod templates;
 
 use crate::{
     env::{ConcreteConfig, CONFIG},
-    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
         index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
     },
     web::{app_data::AppData, cookies, services, RequestContext},
 };
-
-//use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
 use actix::prelude::*;
 use actix_files as afs;
