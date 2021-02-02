@@ -3,8 +3,8 @@ on: [push, pull_request]
 name: Test
 
 jobs:
-  build_and_test:
-    name: Telescope
+  test:
+    name: Cargo Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
