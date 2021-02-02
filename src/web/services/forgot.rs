@@ -71,14 +71,14 @@ pub async fn recovery_service(
         let email = email_builder
             .from(AppData::global().email_sender())
             .alternative(
-                ctx.render(&recovery_email.html()),
-                ctx.render(&recovery_email.plaintext()),
+                recovery_email.html().render()?,
+                recovery_email.plaintext().render()?,
             )
             .build()
             .expect("Could not build email");
 
         // send the email
-        let email_result = ctx.send_mail(email).await;
+        let email_result = AppData::global().send_mail(email).await;
         if email_result.is_err() {
             form_page =
                 form_page.error("Could not send email. Please contact a server administrator.");

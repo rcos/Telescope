@@ -15,6 +15,7 @@ use lettre::{
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
 use crate::error::TelescopeError;
+use lettre::smtp::response::Response as SmtpResponse;
 
 lazy_static!{
     /// Lazy Static to store app data at runtime.
@@ -121,19 +122,18 @@ impl AppData {
     /// Send an email over all available mailer interfaces.
     /// Any errors caught while mailing will be logged and then an `Err`
     /// will be returned.
-    pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
+    pub async fn send_mail<M>(&self, mail: M) -> Result<(), TelescopeError>
     where
         M: Into<SendableEmail> + Clone + Send + Sync + 'static,
     {
         if let Some(mut t) = self.get_stub_transport() {
-            t.send(mail.clone().into())?;
+            t.send(mail.clone().into())
+                .expect("Stub Transport Error");
         }
 
         if let Some(mut t) = self.get_file_mail_transport() {
-            t.send(mail.clone().into()).map_err(|e| {
-                error!("Error while mailing to local file system: {}", e);
-                ()
-            })?;
+            t.send(mail.clone().into())
+                .map_err(TelescopeError::from)?;
         }
 
         if let Some(mut t) = self.get_smtp_transport() {
@@ -141,21 +141,16 @@ impl AppData {
             // will or won't block, but it seems to establish a connection to the
             // SMTP server so I'm assuming it does.
 
-            let result = block(move || {
+            let response: SmtpResponse = block(move || {
                 let res = t.send(mail.into());
                 t.close();
                 res
-            })
-            .await;
+            }).await.map_err(TelescopeError::from)?;
 
-            if let Err(e) = result {
-                error!("Could not send mail over SMTP: {}", e);
-                return Err(());
-            } else {
-                let response = result.unwrap();
-                if !response.is_positive() {
-                    return Err(());
-                }
+            // If the response from the SMTP server is negative, return it as an
+            // error.
+            if !response.is_positive() {
+                return Err(TelescopeError::from(response));
             }
         }
 

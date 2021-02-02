@@ -6,6 +6,9 @@ use handlebars::RenderError;
 use actix_web::rt::blocking::BlockingError;
 use std::fmt;
 use std::error::Error;
+use lettre::file::error::Error as LettreFileError;
+use lettre::smtp::error::Error as LettreSmtpError;
+use lettre::smtp::response::Response as SmtpResponse;
 
 /// All major errors that can occur while responding to a request.
 #[derive(Debug, From, Error)]
@@ -49,7 +52,26 @@ pub enum TelescopeError {
         header: String,
         /// The error message to be displayed under the jumbotron.
         message: String,
-    }
+    },
+
+
+    #[from]
+    /// Error sending an email using lettre's file transport. This should report
+    /// as an internal server error most of the time as it is used for debugging
+    /// and logging.
+    LettreFileError(LettreFileError),
+
+    #[from]
+    /// Error sending mail using lettre's SMTP transport. This should report as
+    /// an internal server error when unexpected, but otherwise should
+    /// be lowered to a form error and reported in the webpage.
+    LettreSmtpError(LettreSmtpError),
+
+    /// A negative response from the SMTP server, indicating a failure to
+    /// authenticate or send an email. This should be reported as an internal
+    /// server error where necessary but otherwise can be lowered to a form
+    /// error.
+    NegativeSmtpResponse(SmtpResponse),
 }
 
 impl TelescopeError {
@@ -82,6 +104,16 @@ where E: Into<TelescopeError> + fmt::Debug {
             BlockingError::Canceled => TelescopeError::FutureCanceled,
             BlockingError::Error(e) => e.into()
         }
+    }
+}
+
+impl From<SmtpResponse> for TelescopeError {
+    /// Convert the SMTP response. Panic if it is not negative.
+    fn from(res: SmtpResponse) -> Self {
+        if res.is_positive() {
+            panic!("Cannot construct error from positive SMTP response.");
+        }
+        TelescopeError::NegativeSmtpResponse(res)
     }
 }
 
