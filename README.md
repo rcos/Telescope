@@ -21,10 +21,6 @@ as the RCOS website.
         $ sudo apt update
         $ sudo apt install openssl libssl-dev libssl-doc
         ```
-    4. Diesel client (see [https://diesel.rs/](https://diesel.rs/))
-        ```shell script
-        $ cargo install diesel_cli --no-default-features --features postgres
-        ``` 
 2. Make sure that you have a user and password set up in postgres and can log in
     with a password. You may have to modify `/etc/postgresql/12/main/pg_hba.conf` 
     (or something along those lines) to use md5 authentication rather than peer 

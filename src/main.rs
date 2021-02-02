@@ -11,31 +11,19 @@ extern crate lazy_static;
 extern crate serde;
 
 #[macro_use]
-extern crate diesel;
-
-#[macro_use]
 extern crate async_trait;
 
 #[macro_use]
 extern crate derive_more;
 
-use std::process::exit;
-
-use actix::prelude::*;
-use actix_files as afs;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{App, http::Uri, HttpServer, middleware, web as aweb, web::get};
-use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
-use diesel::{Connection, RunQueryDsl};
-use openssl::ssl::{SslAcceptor, SslMethod};
-use rand::{Rng, rngs::OsRng};
-
 use app_data::AppData;
 
+mod web;
+mod env;
+mod templates;
+
 use crate::{
-    db_janitor::DbJanitor,
     env::{ConcreteConfig, CONFIG},
-    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
         index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
     },
@@ -44,19 +32,20 @@ use crate::{
 use std::sync::Arc;
 
 pub mod util;
-
-mod web;
-
-mod db_janitor;
-mod env;
-mod models;
-mod schema;
-mod templates;
-mod db_crud;
 mod error;
 pub mod app_data;
 
 //use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
+
+use actix::prelude::*;
+use actix_files as afs;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
+use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
+use diesel::{Connection, RunQueryDsl};
+use openssl::ssl::{SslAcceptor, SslMethod};
+use rand::{rngs::OsRng, Rng};
+use std::process::exit;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -174,11 +163,6 @@ fn main() -> std::io::Result<()> {
         redirect_middleware.replacements(&[(http_port.unwrap(), https_port.unwrap())]);
     }
 
-    // Database janitor -- This actor runs a few database operations once every
-    // 24 hours to clear out expired database records.
-    let db_pool = app_data.clone_db_conn_pool();
-    DbJanitor::new(db_pool).start();
-
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
@@ -204,8 +188,7 @@ fn main() -> std::io::Result<()> {
             .wrap(redirect_middleware.build())
             // logger middleware
             .wrap(middleware::Logger::default())
-            // register API and Services
-            .configure(web::api::register_apis)
+            // register Services
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))

@@ -48,8 +48,6 @@ rand = "~0.8"
 lazy_static = "~1.4"
 # utilities for dealing with async futures
 futures = "~0.3"
-# Pasword hashing and verification
-rust-argon2 = "~0.8"
 # Regular expressions
 regex = "~1.4"
 # Markdown - HTML rendering
@@ -64,8 +62,6 @@ url = "~2.2"
 # Date and time utilities
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
 time = {version = "~0.2", features = ["serde", "std"]}
-# ORM and query building (to interact with Postgres Database)
-diesel = {version = "~1.4", features = ["uuidv07", "r2d2", "postgres", "chrono"]}
 # Universally unique identifier generation
 uuid = {version = "~0.8", features = ["serde", "v4"]}
 # Async functions in traits

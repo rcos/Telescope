@@ -1,8 +1,4 @@
 use crate::{
-    models::{
-        confirmations::{ConfirmNewUserError, Confirmation},
-        users::User,
-    },
     templates::{
         forms::{common::text_field, confirmation},
         jumbotron, page,
