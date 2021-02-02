@@ -3,8 +3,6 @@ use actix_web::web::ServiceConfig;
 pub mod blog;
 pub mod confirm;
 pub mod developers;
-pub mod forgot;
-pub mod recover;
 pub mod login;
 pub mod logout;
 pub mod p404;
@@ -17,10 +15,6 @@ pub fn register(config: &mut ServiceConfig) {
         .service(login::login_get)
         .service(login::login_post)
         .service(logout::logout_service)
-        .service(forgot::forgot_page)
-        .service(forgot::recovery_service)
-        .service(recover::recover_form)
-        .service(recover::recovery)
         .service(register::registration_service)
         .service(confirm::confirmations_page)
         .service(confirm::confirm)
