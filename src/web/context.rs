@@ -4,10 +4,6 @@ use actix_web::{
     Error,
     FromRequest, HttpRequest, web::{block, Data},
 };
-use diesel::{
-    PgConnection,
-    r2d2::{ConnectionManager, Pool, PooledConnection},
-};
 use futures::future::{ready, Ready};
 use handlebars::Handlebars;
 use lettre::SendableEmail;
@@ -16,7 +12,6 @@ use serde_json::Value;
 use uuid::Uuid;
 
 use crate::{
-    models::users::User,
     templates::{page, Template},
 };
 use crate::app_data::AppData;
