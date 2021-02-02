@@ -3,6 +3,7 @@ use chrono::Local;
 use handlebars::Handlebars;
 use lettre_email::EmailBuilder;
 use uuid::Uuid;
+use crate::error::TelescopeError;
 
 /// Structure to hold the template data passed to each template
 /// that renders new user emails.
@@ -52,16 +53,13 @@ impl ConfirmationEmail {
 
     /// Render the plaintext and HTML versions of this email and store them
     /// in the body of the email builder object.
-    ///
-    /// Panics if there are issues rendering either variant of the email.
     pub fn write_email(
         &self,
         ctx: &RequestContext,
         email: EmailBuilder,
-    ) -> Result<EmailBuilder, String> {
-        let registry: &Handlebars = ctx.handlebars();
-        let plaintext: String = self.make_plaintext().render(registry);
-        let html: String = self.make_html().render(registry);
+    ) -> Result<EmailBuilder, TelescopeError> {
+        let plaintext: String = self.make_plaintext().render()?;
+        let html: String = self.make_html().render()?;
         Ok(email.alternative(html, plaintext))
     }
 }

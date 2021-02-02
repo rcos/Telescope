@@ -2,11 +2,13 @@ use crate::{
     models::users::User,
     schema::emails,
     util::handle_blocking_err,
-    web::DbConnection,
+    util::DbConnection,
 };
 use actix_web::web::block;
 use lettre::EmailAddress;
 use uuid::Uuid;
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
 
 /// Field structure must match that in the SQL migration.
 /// (for diesel reasons it seems)
@@ -51,7 +53,8 @@ impl Email {
     /// Try to get a user based on an email from the database.
     ///
     /// Returns None if the user was not found or if there was an issues accessing the database.
-    pub async fn get_user_from_db_by_email(conn: DbConnection, email_: String) -> Option<User> {
+    pub async fn get_user_from_db_by_email(email_: String) -> Result<Option<User>, TelescopeError> {
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
         block::<_, Option<(Email, User)>, _>(move || {
             use crate::schema::{emails::dsl::*, users::dsl::*};
             use diesel::prelude::*;
@@ -61,12 +64,9 @@ impl Email {
                 .first(&conn)
                 .optional()
         })
-        .await
-        .unwrap_or_else(|e| {
-            error!("Could not query database: {}", e);
-            None
-        })
-        .map(|(_, u)| u)
+            .await
+            .map_err(TelescopeError::from)
+            .map(|opt| opt.map(|(_, u)| u))
     }
 
     /// Check if an email exists in the telescope database.
@@ -87,14 +87,20 @@ impl Email {
     }
 
     /// Store an email in the database.
-    pub async fn store(self, conn: DbConnection) -> Result<(), String> {
+    pub async fn store(self) -> Result<(), TelescopeError> {
+        // Get database connection
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
+
+        // Asynchronously store this email record in the database.
         block::<_, Self, _>(move || {
             use crate::schema::emails::dsl::*;
             use diesel::prelude::*;
-            diesel::insert_into(emails).values(&self).get_result(&conn)
+            diesel::insert_into(emails)
+                .values(&self)
+                .get_result(&conn)
         })
         .await
-        .map_err(|e| handle_blocking_err(e, "Could not store email to database."))
+        .map_err(TelescopeError::from)
         .map(|stored| {
             trace!("Saved email to database: {:?}", stored);
         })

@@ -3,12 +3,15 @@ use crate::{
     schema::confirmations,
     templates::emails::confirmation_email::ConfirmationEmail,
     util::handle_blocking_err,
-    web::{DbConnection, RequestContext},
+    web::RequestContext,
+    util::DbConnection
 };
 use actix_web::web::block;
 use chrono::{DateTime, Duration, Utc};
 use diesel::result::Error as DieselError;
 use uuid::Uuid;
+use crate::error::TelescopeError;
+use crate::app_data::AppData;
 
 /// An email to a user asking them to confirm their email (and possibly set up an account).
 #[derive(Clone, Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -28,24 +31,12 @@ pub struct Confirmation {
 ///
 /// There shouldn't be any email related errors as the confirmation needs to
 /// be for a new email to exist.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, From)]
 pub enum ConfirmNewUserError {
     /// User had bad password.
     BadPassword(PasswordRequirements),
     /// Other error occurred.
-    Other(String),
-}
-
-impl From<String> for ConfirmNewUserError {
-    fn from(s: String) -> Self {
-        Self::Other(s)
-    }
-}
-
-impl From<PasswordRequirements> for ConfirmNewUserError {
-    fn from(e: PasswordRequirements) -> Self {
-        Self::BadPassword(e)
-    }
+    Other(TelescopeError),
 }
 
 impl Confirmation {
@@ -63,6 +54,8 @@ impl Confirmation {
     pub fn creates_user(&self) -> bool {
         self.user_id.is_none()
     }
+
+
 
     /// Create a new email confirmation/invite that will create a new user.
     fn new(email: String) -> Self {
@@ -216,7 +209,8 @@ impl Confirmation {
 
     /// Get a confirmation by id. If there is an error, it will be logged and a string describing
     /// it will be returned.
-    pub async fn get_by_id(db_conn: DbConnection, inv_id: Uuid) -> Result<Option<Self>, String> {
+    pub async fn get_by_id(inv_id: Uuid) -> Result<Option<Self>, TelescopeError> {
+        let db_conn: DbConnection = AppData::global().get_db_conn().await?;
         block::<_, Option<Confirmation>, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
@@ -224,75 +218,96 @@ impl Confirmation {
                 .filter(invite_id.eq(inv_id))
                 .first::<Confirmation>(&db_conn)
                 .optional()
+                // filter out expired invite
+                .map(|opt| opt.filter(|c| !c.is_expired()))
         })
-        .await
-        .map_err(|e| handle_blocking_err(e, "Could not query database."))
-        // filter out expired invite
-        .map(|opt| opt.filter(|c| !c.is_expired()))
+            .await
+            .map_err(TelescopeError::from)
     }
 
     /// Private function to remove a confirmation from the database.
-    async fn remove_from_db(&self, conn: DbConnection) -> Result<(), String> {
-        trace!("Removing {:?} from database.", &self);
+    async fn remove_from_db(&self) -> Result<(), TelescopeError> {
+        // Get Database connection.
+        let conn: DbConnection = AppData::global().get_db_conn().await?;
+
+        // Get a copy of the confirmation id.
         let self_id: Uuid = self.invite_id;
+
+        // Asynchronously remove the confirmation record from the database.
         block::<_, usize, _>(move || {
             use crate::schema::confirmations::dsl::*;
             use diesel::prelude::*;
+
             diesel::delete(confirmations)
-                .filter(invite_id.eq(self_id))
+                .filter(invite_id.eq(self_id)) // This should be only one confirmation record.
                 .execute(&conn)
         })
-        .await
-        .map_err(|e| handle_blocking_err(e, "Could not delete confirmation"))
-        .map(|removed| {
-            trace!("Removed {} record from confirmations database.", removed);
-        })
+            .await
+            .map_err(TelescopeError::from)
+            .map(|n: usize| {
+                trace!("Removed {} confirmations", n);
+            })
     }
 
     /// Try to confirm a new user invite.
     /// Assume that `self` is a valid invite in the confirmations table.
     /// Return the created user or a string describing the error.
+    ///
+    /// ## Panics:
+    /// - If this invite is associated with an existing user.
+    /// - If the confirmation's email is malformed (or cannot be created).
     pub async fn confirm_new(
         &self,
-        ctx: &RequestContext,
         name: String,
         pass: String,
     ) -> Result<User, ConfirmNewUserError> {
+        // Check that invite isn't associated with existing user.
         if !self.creates_user() {
-            return Err("Invite is for existing user".to_string().into());
-        } else {
-            // create user and email here to avoid use after move.
-            let user: User =
-                User::new(name, pass.as_str()).map_err::<ConfirmNewUserError, _>(|e| e.into())?;
-
-            let email: Email = Email::new(user.id, self.email.clone())
-                .expect("Could not create email for new user.");
-
-            // remove confirmation from database.
-            self.remove_from_db(ctx.get_db_conn().await).await?;
-
-            // save email and user records.
-            user.clone().store(ctx.get_db_conn().await).await?;
-            email.store(ctx.get_db_conn().await).await?;
-            Ok(user)
+            panic!("Invite {} is for an existing user", self.invite_id.to_hyphenated());
         }
+
+        // Create user and email here to avoid use after move.
+        let user: User = User::new(name, pass.as_str())
+            .map_err(ConfirmNewUserError::from)?;
+
+        let email: Email = Email::new(user.id, self.email.clone())
+            .expect("Could not create email for new user.");
+
+        // Remove confirmation from database.
+        self.remove_from_db()
+            .await
+            .map_err(ConfirmNewUserError::from)?;
+
+        // Save email and user records.
+        user.clone()
+            .store()
+            .await
+            .map_err(ConfirmNewUserError::from)?;
+
+        // If this call fails the user will not be able to log in and that would
+        // be bad news so hopefully this call does not fail.
+        email.store()
+            .await
+            .map_err(ConfirmNewUserError::from)?;
+
+        return Ok(user);
     }
 
     /// Confirm an invite for an existing user.
-    /// Return a string describing the error if one occurs.
-    pub async fn confirm_existing(&self, ctx: &RequestContext) -> Result<(), String> {
-        if self.creates_user() {
-            return Err("Invite is not associated with existing user".to_string());
-        } else {
-            // Construct the email instance here to avoid use after move.
-            let email = Email::new(self.user_id.unwrap(), self.email.clone())
-                .expect("Could not make email instance.");
+    ///
+    /// ## Panics:
+    /// - If this confirmation is not associated with an existing user.
+    /// - If the email us malformed or the email object cannot be created.
+    pub async fn confirm_existing(&self) -> Result<(), TelescopeError> {
+        // Construct the email instance here to avoid use after move.
+        // Panic on errors as they should be checked before this point.
+        let email = Email::new(self.user_id.unwrap(), self.email.clone())
+            .expect("Could not make email instance.");
 
-            // remove confirmation from database
-            self.remove_from_db(ctx.get_db_conn().await).await?;
+        // Remove this confirmation from database
+        self.remove_from_db().await?;
 
-            // add email to emails table
-            email.store(ctx.get_db_conn().await).await
-        }
+        // add email to emails table
+        email.store().await
     }
 }

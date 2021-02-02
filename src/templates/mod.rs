@@ -17,6 +17,17 @@ use handlebars::Handlebars;
 use serde::Serialize;
 use serde_json::{Map, Value};
 use std::ops::{Index, IndexMut};
+use crate::app_data::AppData;
+use std::sync::Arc;
+use crate::error::TelescopeError;
+use actix_web::{Responder, HttpRequest, Error, HttpResponse};
+use actix_web::body::Body;
+use actix_web::web::block;
+use actix_web::rt::blocking::BlockingError;
+use futures::future::{
+    Ready,
+    ready
+};
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]
@@ -77,11 +88,11 @@ impl Template {
         self
     }
 
-    /// Render this template using a reference to the handlebars registry.
-    pub fn render(&self, handlebars: &Handlebars) -> String {
-        handlebars
-            .render(self.handlebars_file, &self)
-            .expect("Could not render template.")
+    /// Render this template using the global handlebars registry.
+    pub fn render(&self) -> Result<String, TelescopeError> {
+        AppData::global()
+            .render_template(self)
+            .map_err(|e| e.into())
     }
 }
 
@@ -98,5 +109,22 @@ impl<T: Into<String>> IndexMut<T> for Template {
     fn index_mut(&mut self, index: T) -> &mut Self::Output {
         // Mutable indexing for fields.
         &mut self.fields[&index.into()]
+    }
+}
+
+impl Responder for Template {
+    type Error = TelescopeError;
+    type Future = Ready<Result<HttpResponse, Self::Error>>;
+
+    fn respond_to(self, req: &HttpRequest) -> Self::Future {
+        let result = AppData::global()
+            .render_template(&self)
+            .map(|rendered: String| {
+                HttpResponse::Ok()
+                    .content_type("text/html; charset=UTF-8")
+                    .body(rendered)
+            })
+            .map_err(TelescopeError::from);
+        ready(result)
     }
 }
