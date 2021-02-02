@@ -9,18 +9,17 @@ as the RCOS website.
         $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
         $ source ~/.cargo/env
         ```
-    2. Postgres (see [https://www.postgresql.org/](https://www.postgresql.org/))
-        ```shell script
-        $ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-        $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-        $ sudo apt update
-        $ sudo apt install postgresql libpq-dev
-        ```
-    3. OpenSSL and libssl (see [https://www.openssl.org/](https://www.openssl.org/) for more info)
+    2. OpenSSL and libssl (see [https://www.openssl.org/](https://www.openssl.org/) for more info)
         ```shell script
         $ sudo apt update
         $ sudo apt install openssl libssl-dev libssl-doc
         ```
+    3. DbMate to run database migrations. See [https://github.com/amacneil/dbmate](https://github.com/amacneil/dbmate) for more info.
+        ```shell script
+        $ sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+        $ sudo chmod +x /usr/local/bin/dbmate
+        ```
+       
 2. Make sure that you have a user and password set up in postgres and can log in
     with a password. You may have to modify `/etc/postgresql/12/main/pg_hba.conf` 
     (or something along those lines) to use md5 authentication rather than peer 
@@ -29,13 +28,15 @@ as the RCOS website.
     ```shell script
     $ psql -U <username> -W
     ```
+   
 3. Clone this repository:
     ```shell script
     $ git clone --recurse-submodules https://github.com/rcos/Telescope.git
     ```
    You need to make sure you get all of the submodules here using 
    `--recurse-submodules` otherwise you won't have any of the RCOS branding
-   logos or icons. 
+   logos or icons, or any of the database migrations and setup.
+   
 4. Generate self-signed TLS/SSL certificate and keys for testing: 
     ```shell script
     $ mkdir tls-ssl
@@ -45,18 +46,13 @@ as the RCOS website.
    a certificate signed by a trusted certificate authority. See 
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
-5. Copy the configuration template at `config_example.toml` to `config.toml`. 
-    Modify your configuration to your needs using the documentation in the 
-    example file. You may also create a `.env` file to store any commandline 
-    variables (currently just the location of the config file if not `config.toml` 
-    and the profile to load from the config file). You may also feel free to store
-    your database url in the `.env` file using the variable `DATABASE_URL` i.e.:
-    ```shell script
-    DATABASE_URL=postgres://username:password@localhost/telescope
-    ```
-   This will not be used by telescope but will be read and used by diesel (the 
-   database management tool). If you do not do this, then you may store it in an
-   environment variable manually or it in the commandline arguments to diesel.
+   
+5. Copy the configuration templates as follows:
+    - `config_example.toml` -> `config.toml`
+    - `.env.example` -> `.env`
+    
+    Then modify them to match your environment.
+   
 6. Run the database setup and migrations. This will create a database and then 
     run all of the necessary migrations. If you have stored the database url in 
     an environment variable or in your `.env` file the commands are as such:
