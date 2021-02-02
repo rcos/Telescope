@@ -17,15 +17,12 @@ extern crate diesel;
 pub mod util;
 
 mod web;
-
-mod db_janitor;
 mod env;
 mod models;
 mod schema;
 mod templates;
 
 use crate::{
-    db_janitor::DbJanitor,
     env::{ConcreteConfig, CONFIG},
     models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
@@ -161,11 +158,6 @@ fn main() -> std::io::Result<()> {
     if http_port.is_some() && https_port.is_some() {
         redirect_middleware.replacements(&[(http_port.unwrap(), https_port.unwrap())]);
     }
-
-    // Database janitor -- This actor runs a few database operations once every
-    // 24 hours to clear out expired database records.
-    let db_pool = app_data.clone_db_conn_pool();
-    DbJanitor::new(db_pool).start();
 
     HttpServer::new(move || {
         App::new()
