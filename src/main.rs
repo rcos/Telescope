@@ -174,8 +174,7 @@ fn main() -> std::io::Result<()> {
             .wrap(redirect_middleware.build())
             // logger middleware
             .wrap(middleware::Logger::default())
-            // register API and Services
-            .configure(web::api::register_apis)
+            // register Services
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
