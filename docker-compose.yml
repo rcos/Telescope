@@ -18,6 +18,8 @@ services:
   postgrest:
     image: postgrest/postgrest:v7.0.1
     restart: unless-stopped
+    depends_on:
+      - db
     environment:
       PGRST_DB_SCHEMA: public
       PGRST_DB_ANON_ROLE: web_anon
@@ -31,6 +33,8 @@ services:
   swagger:
     image: swaggerapi/swagger-ui:v3.40.0
     restart: unless-stopped
+    depends_on:
+      - postgrest
     environment:
       URL: http://localhost:8000
     ports:
@@ -38,7 +42,13 @@ services:
 
   # Telescope itself
   telescope:
-
+    build: .
+    image: telescope:latest
+    depends_on:
+      - postgrest
+    ports:
+      - "8080:80"
+      - "8443:443"
 
 volumes:
   db_data:
