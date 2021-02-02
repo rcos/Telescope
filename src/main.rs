@@ -15,7 +15,6 @@ pub mod util;
 
 mod web;
 mod env;
-mod models;
 mod schema;
 mod templates;
 
