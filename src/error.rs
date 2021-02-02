@@ -43,6 +43,7 @@ pub enum TelescopeError {
     /// as an internal server error.
     FutureCanceled,
 
+    #[error(ignore)]
     /// There was an internal server error.
     InternalServerError(String),
 
@@ -67,6 +68,7 @@ pub enum TelescopeError {
     /// be lowered to a form error and reported in the webpage.
     LettreSmtpError(LettreSmtpError),
 
+    #[error(ignore)]
     /// A negative response from the SMTP server, indicating a failure to
     /// authenticate or send an email. This should be reported as an internal
     /// server error where necessary but otherwise can be lowered to a form

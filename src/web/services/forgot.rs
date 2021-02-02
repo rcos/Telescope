@@ -25,11 +25,9 @@ pub async fn forgot_page(ctx: RequestContext) -> impl Responder {
     ForgotPasswordPage::new().as_template()
 }
 
+/// The rout for password recovery requests.
 #[post("/forgot")]
-pub async fn recovery_service(
-    ctx: RequestContext,
-    form: Form<PasswordRecoveryForm>,
-) -> Result<HttpResponse, TelescopeError> {
+pub async fn recovery_service(ctx: RequestContext, form: Form<PasswordRecoveryForm>) -> Result<HttpResponse, TelescopeError> {
     let email: &str = &form.email;
     let mut form_page: ForgotPasswordPage = ForgotPasswordPage::new().email(email);
     let database_result: Option<User> =
