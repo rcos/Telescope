@@ -1,7 +1,6 @@
 //! Navbar template constants and functions.
 
 use crate::templates::Template;
-use serde::Serialize;
 use actix_web::HttpRequest;
 
 /// The handlebars key for the links on the left side of the navbar.
@@ -29,8 +28,6 @@ pub const ICON: &'static str = "icon";
 /// file.
 fn empty_navbar() -> Template {
     Template::new("navbar/navbar")
-        .field(LEFT_ITEMS, None)
-        .field(RIGHT_ITEMS, None)
 }
 
 /// Create a navbar item with the given text and location.
@@ -59,7 +56,14 @@ fn with_defaults(req: &HttpRequest) -> Template {
 }
 
 /// Construct a navbar for an anonymous viewer by adding onto the defaults.
-fn userless(req: &HttpRequest) -> Template {
-    unimplemented!()
+pub fn userless(req: &HttpRequest) -> Template {
+    let right_items = vec![
+        item(req, "Login with GitHub", "/login")
+            .field(CLASS, "btn mr-2 mb-2 btn-primary")
+            .field(ICON, "github"),
+    ];
+
+    // Add items to right side of navbar.
+    with_defaults(req).field(RIGHT_ITEMS, right_items)
 }
 

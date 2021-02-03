@@ -1,9 +1,9 @@
-use crate::{
-    templates::{navbar::Navbar, Template}
-};
+use crate::templates::Template;
+use crate::templates::navbar;
 use serde_json::Value;
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
+use actix_web::HttpRequest;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";
@@ -23,11 +23,15 @@ pub const VERSION: &'static str = "version";
 
 /// Create a new template object to hold the page.
 /// The content of the page is rendered here and must be re-rendered if updated.
-pub async fn of(ctx: &RequestContext, title: impl Into<Value>, content: &Template) -> Result<Template, TelescopeError> {
+pub fn of(
+    req: &HttpRequest,
+    title: impl Into<Value>,
+    content: &Template
+) -> Result<Template, TelescopeError> {
     let content_rendered = AppData::global().render_template(content)?;
     Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
-        .field(NAVBAR, Navbar::from_context(ctx).await?.template())
+        .field(NAVBAR, navbar::userless(req))
         .field(CONTENT, content_rendered)
         .field(VERSION, env!("CARGO_PKG_VERSION")))
 }

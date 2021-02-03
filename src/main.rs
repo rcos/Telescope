@@ -22,12 +22,16 @@ mod templates;
 mod error;
 mod models;
 mod app_data;
+mod web;
 
 use app_data::AppData;
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::static_pages::{
-        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
+        index::LandingPage,
+        projects::ProjectsPage,
+        sponsors::SponsorsPage,
+        StaticPage
     },
 };
 use std::sync::Arc;
@@ -39,6 +43,7 @@ use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
 use std::process::exit;
+use crate::error::TelescopeError;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -92,13 +97,13 @@ fn main() -> std::io::Result<()> {
             // Compression middleware
             .wrap(middleware::Compress::default())
             // Identity and authentication middleware.
-            .wrap(IdentityService::new(
-                CookieIdentityPolicy::new(&cookie_key)
-                    .name(cookies::AUTH_TOKEN)
-                    .secure(true)
-                    // Cookies / sessions expire after 24 hours
-                    .max_age_time(time::Duration::hours(24)),
-            ))
+            // .wrap(IdentityService::new(
+            //     CookieIdentityPolicy::new(&cookie_key)
+            //         .name(cookies::AUTH_TOKEN)
+            //         .secure(true)
+            //         // Cookies / sessions expire after 24 hours
+            //         .max_age_time(time::Duration::hours(24)),
+            // ))
             // Redirect to HTTP -> HTTPS middleware.
             .wrap(redirect_middleware.build())
             // logger middleware
@@ -107,10 +112,10 @@ fn main() -> std::io::Result<()> {
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
-            .route("/", get().to(Static::<LandingPage>::handle))
-            .route("/projects", get().to(Static::<ProjectsPage>::handle))
-            .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
-            .default_service(aweb::route().to(services::p404::not_found))
+            .route("/", get().to(LandingPage::handle))
+            .route("/projects", get().to(ProjectsPage::handle))
+            .route("/sponsors", get().to(SponsorsPage::handle))
+            // .default_service(aweb::route().to(TelescopeError::PageNotFound))
     })
     .bind(config.bind_http.clone())
     .expect("Could not bind HTTP/1 (HTTP)")
