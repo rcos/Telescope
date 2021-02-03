@@ -1,5 +1,4 @@
 use crate::{
-    models::confirmations::Confirmation,
     templates::{forms::common::text_field, Template},
 };
 
