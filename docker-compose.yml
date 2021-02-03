@@ -1,0 +1,54 @@
+# Development docker-compose file. Will pull up local Postgres database
+# and local PostgREST API for running telescope locally.
+version: "3.1"
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - "/var/run/postgres/postgres.sock:/var/run/postgres/postgres.sock"
+      - "db_data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+
+  # PostgREST API hosted at http://localhost:8000
+  postgrest:
+    image: postgrest/postgrest:v7.0.1
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web_anon
+      SERVER_PORT: 3000
+      PGRST_DB_URI: "${PGRST_DB_URI}"
+      PGRST_JWT_SECRET: "${PGRST_JWT_SECRET}"
+    ports:
+      - "8000:3000"
+
+  # API explorer page at http://localhost:8001
+  swagger:
+    image: swaggerapi/swagger-ui:v3.40.0
+    restart: unless-stopped
+    depends_on:
+      - postgrest
+    environment:
+      URL: http://localhost:8000
+    ports:
+      - "8001:8080"
+
+  # Telescope itself
+  telescope:
+    build: .
+    image: telescope:latest
+    depends_on:
+      - postgrest
+    ports:
+      - "8080:80"
+      - "8443:443"
+
+volumes:
+  db_data:
