@@ -15,7 +15,7 @@ use actix_web::dev::ServiceResponse;
 /// All major errors that can occur while responding to a request.
 #[derive(Debug, From, Error, Display)]
 pub enum TelescopeError {
-    #[display(fmt = "404 - Page Not Found")]
+    #[display(fmt = "Page Not Found")]
     /// 404 - Page not found. Use [`TelescopeError::ResourceNotFound`] instead
     /// when possible, as it will have more info.
     PageNotFound,
