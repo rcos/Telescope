@@ -1,5 +1,4 @@
 use crate::{
-    models::{markdown::render as md_render, users::User},
     templates::Template,
     web::RequestContext,
     util::DbConnection
