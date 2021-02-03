@@ -30,8 +30,10 @@ database_url = "postgres://username:password@localhost/telescope"
 # [REQUIRED]
 # Specify the location to bind the running server.
 # HTTP traffic will be rediected to HTTPS.
-bind_https = "localhost:8443"
-bind_http  = "localhost:8000"
+# These default ports work with Docker but may need to be changed to work
+# outside of docker.
+bind_https = "localhost:443"
+bind_http  = "localhost:80"
 
 # [REQUIRED]
 # The TLS/SSL configurations. These are specified as the paths of the
@@ -116,4 +118,4 @@ create = true
 # Production profile.
 # Use `telescope -p production`
 [profile.production]
-bind_to = "0.0.0.0:443"
+bind_https = "0.0.0.0:443"
