@@ -29,7 +29,7 @@ use crate::{
     templates::static_pages::{
         index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
     },
-    web::{cookies, RequestContext, services},
+    web::{cookies, context::RequestContext, services},
 };
 use std::sync::Arc;
 use actix::prelude::*;

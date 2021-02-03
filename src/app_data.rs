@@ -1,7 +1,6 @@
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::Template,
-    util::DbConnection,
 };
 use actix_web::web::block;
 use handlebars::{Handlebars, RenderError};

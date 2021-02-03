@@ -2,13 +2,14 @@
 //! template refactor and it is mostly fine as is at the moment.
 
 use crate::{
-    templates::{forms::login, Template},
+    templates::Template,
     web::context::RequestContext,
 };
 
 use uuid::Uuid;
 use crate::error::TelescopeError;
 use crate::models::users::User;
+
 
 /// A button that just links to a another part of the site (or another site entirely.)
 /// This is good for most items on the header bar.

@@ -20,16 +20,14 @@ use crate::error::TelescopeError;
 
 /// The items making up a page context (the context in which a request has been made.)
 pub struct RequestContext {
-    app_data: Data<AppData>,
     request: HttpRequest,
     identity: Identity,
 }
 
 impl RequestContext {
     /// Construct a new page context from a request and site data.
-    pub fn new(data: Data<AppData>, request: HttpRequest, identity: Identity) -> Self {
+    pub fn new(request: HttpRequest, identity: Identity) -> Self {
         Self {
-            app_data: data,
             request,
             identity,
         }
@@ -79,10 +77,9 @@ impl RequestContext {
     /// an http request. This exists for the request extractor trait,
     /// which doesn't allow for the `?` operator.
     fn extract(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Result<Self, Error> {
-        let app_data: Data<AppData> = Data::<AppData>::from_request(req, payload).into_inner()?;
         let request: HttpRequest = HttpRequest::from_request(req, payload).into_inner()?;
         let identity: Identity = Identity::from_request(req, payload).into_inner()?;
-        Ok(Self::new(app_data, request, identity))
+        Ok(Self::new(request, identity))
     }
 }
 

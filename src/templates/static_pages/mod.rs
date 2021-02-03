@@ -1,12 +1,11 @@
 use crate::{
     templates::{page, Template},
-    RequestContext,
+    web::context::RequestContext,
 };
 use actix_web::HttpResponse;
 use std::marker::PhantomData;
 
 pub mod index;
-pub mod ise;
 pub mod projects;
 pub mod sponsors;
 
