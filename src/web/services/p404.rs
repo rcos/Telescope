@@ -3,7 +3,7 @@ use crate::{
     web::RequestContext,
 };
 
-use actix_web::HttpResponse;
+use actix_web::{HttpResponse, ResponseError};
 
 /// 404 Page.
 pub async fn not_found(ctx: RequestContext) -> HttpResponse {

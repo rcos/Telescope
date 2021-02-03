@@ -4,8 +4,6 @@ pub use context::*;
 // reexport all services
 pub mod services;
 
-pub mod app_data;
-
 pub mod cookies;
 
 /// Page Context holder.

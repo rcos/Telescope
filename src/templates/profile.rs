@@ -1,7 +1,8 @@
 use crate::{
     models::{markdown::render as md_render, users::User},
     templates::Template,
-    web::{DbConnection, RequestContext},
+    web::RequestContext,
+    util::DbConnection
 };
 use chrono::Local;
 use uuid::Uuid;

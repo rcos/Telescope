@@ -10,8 +10,13 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde;
 
+#[macro_use]
+extern crate async_trait;
 
-pub mod util;
+#[macro_use]
+extern crate derive_more;
+
+use app_data::AppData;
 
 mod web;
 mod env;
@@ -22,8 +27,15 @@ use crate::{
     templates::static_pages::{
         index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
     },
-    web::{app_data::AppData, cookies, services, RequestContext},
+    web::{cookies, RequestContext, services},
 };
+use std::sync::Arc;
+
+pub mod util;
+mod error;
+pub mod app_data;
+
+//use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
 use actix::prelude::*;
 use actix_files as afs;
@@ -47,7 +59,7 @@ fn main() -> std::io::Result<()> {
     //
     // Database pool creation and registration of handlebars templates occurs
     // here.
-    let app_data = AppData::new();
+    let app_data: Arc<AppData> = AppData::global();
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use
@@ -154,6 +166,8 @@ fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(app_data.clone())
+            // Compression middleware
+            .wrap(middleware::Compress::default())
             // Identity and authentication middleware.
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&cookie_key)

@@ -1,6 +1,8 @@
 use crate::models::users::User;
 use crate::templates::Template;
-use crate::web::DbConnection;
+use crate::util::DbConnection;
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
 
 /// A user thumbnail on the developer's page.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -13,13 +15,9 @@ pub struct UserThumbnail {
 
 impl UserThumbnail {
     /// Create the thumbnail for a user.
-    pub async fn for_user(u: User, conn: DbConnection) -> Self {
-        let pic_location: String = u.picture_url(conn).await;
-
-        Self {
-            user: u,
-            pic_location,
-        }
+    pub async fn for_user(u: User) -> Result<Self, TelescopeError> {
+        let pic_location: String = u.picture_url().await?;
+        Ok(Self { user: u, pic_location })
     }
 }
 

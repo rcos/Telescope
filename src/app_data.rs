@@ -1,21 +1,34 @@
-use crate::env::{ConcreteConfig, CONFIG};
+use crate::{
+    env::{ConcreteConfig, CONFIG},
+    templates::Template,
+    util::DbConnection,
+};
 use actix_web::web::block;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
-use handlebars::Handlebars;
+use handlebars::{Handlebars, RenderError};
 use lettre::{
     stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
 };
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
+use crate::error::TelescopeError;
+use lettre::smtp::response::Response as SmtpResponse;
+
+lazy_static!{
+    /// Lazy Static to store app data at runtime.
+    static ref APP_DATA: Arc<AppData> = {
+        Arc::new(AppData::new())
+    };
+}
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
 pub struct AppData {
     /// The handlebars template registry.
-    pub template_registry: Arc<Handlebars<'static>>,
+    template_registry: Arc<Handlebars<'static>>,
     /// Database connection pool
     db_connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// SMTP Mailer client config (if in use).
@@ -25,12 +38,12 @@ pub struct AppData {
     /// Should mail stubs be created?
     use_stub_mailer: bool,
     /// The email sender address.
-    pub mail_sender: Mailbox,
+    mail_sender: Mailbox,
 }
 
 impl AppData {
     /// Create new App Data object using the global static config.
-    pub fn new() -> Self {
+    fn new() -> Self {
         let config: &ConcreteConfig = &*CONFIG;
         // register handlebars templates
         let mut template_registry = Handlebars::new();
@@ -74,6 +87,11 @@ impl AppData {
         }
     }
 
+    /// Get an [`Arc`] reference to the global, lazily generated app-data.
+    pub fn global() -> Arc<AppData> {
+        APP_DATA.clone()
+    }
+
     /// Get a clone of the database connection pool (which internally uses an Arc,
     /// so this is just a reference copy).
     pub fn clone_db_conn_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
@@ -104,19 +122,18 @@ impl AppData {
     /// Send an email over all available mailer interfaces.
     /// Any errors caught while mailing will be logged and then an `Err`
     /// will be returned.
-    pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
+    pub async fn send_mail<M>(&self, mail: M) -> Result<(), TelescopeError>
     where
         M: Into<SendableEmail> + Clone + Send + Sync + 'static,
     {
         if let Some(mut t) = self.get_stub_transport() {
-            t.send(mail.clone().into())?;
+            t.send(mail.clone().into())
+                .expect("Stub Transport Error");
         }
 
         if let Some(mut t) = self.get_file_mail_transport() {
-            t.send(mail.clone().into()).map_err(|e| {
-                error!("Error while mailing to local file system: {}", e);
-                ()
-            })?;
+            t.send(mail.clone().into())
+                .map_err(TelescopeError::from)?;
         }
 
         if let Some(mut t) = self.get_smtp_transport() {
@@ -124,24 +141,48 @@ impl AppData {
             // will or won't block, but it seems to establish a connection to the
             // SMTP server so I'm assuming it does.
 
-            let result = block(move || {
+            let response: SmtpResponse = block(move || {
                 let res = t.send(mail.into());
                 t.close();
                 res
-            })
-            .await;
+            }).await.map_err(TelescopeError::from)?;
 
-            if let Err(e) = result {
-                error!("Could not send mail over SMTP: {}", e);
-                return Err(());
-            } else {
-                let response = result.unwrap();
-                if !response.is_positive() {
-                    return Err(());
-                }
+            // If the response from the SMTP server is negative, return it as an
+            // error.
+            if !response.is_positive() {
+                return Err(TelescopeError::from(response));
             }
         }
 
         Ok(())
+    }
+
+    /// Get an [`Arc`] reference to the template registry.
+    pub fn get_handlebars_registry(&self) -> Arc<Handlebars<'static>> {
+        self.template_registry.clone()
+    }
+
+    /// Render a handlebars template using this object's registry.
+    pub fn render_template(&self, template: &Template) -> Result<String, RenderError> {
+        self.get_handlebars_registry().render(template.handlebars_file, &template)
+    }
+
+    /// Asynchronously get a database connection.
+    pub async fn get_db_conn(&self) -> Result<DbConnection, TelescopeError> {
+        // Clone the connection pool reference.
+        let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_db_conn_pool();
+
+        // Asynchronously try to retrieve a connection from the pool.
+        // This may block/take some time, but should timeout instead of waiting indefinitely.
+        block::<_, DbConnection, _>(move || {
+            db_conn_pool.get()
+        })
+            .await
+            .map_err(TelescopeError::from)
+    }
+
+    /// Clone the mailbox used to send telescope related email. 
+    pub fn email_sender(&self) -> Mailbox {
+        self.mail_sender.clone()
     }
 }
