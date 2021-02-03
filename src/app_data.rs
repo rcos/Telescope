@@ -4,10 +4,6 @@ use crate::{
     util::DbConnection,
 };
 use actix_web::web::block;
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    PgConnection,
-};
 use handlebars::{Handlebars, RenderError};
 use lettre::{
     stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
@@ -29,8 +25,6 @@ lazy_static!{
 pub struct AppData {
     /// The handlebars template registry.
     template_registry: Arc<Handlebars<'static>>,
-    /// Database connection pool
-    db_connection_pool: Pool<ConnectionManager<PgConnection>>,
     /// SMTP Mailer client config (if in use).
     smtp_client: Option<SmtpClient>,
     /// Path for file mailer if in use.
@@ -59,24 +53,8 @@ impl AppData {
         template_registry.set_strict_mode(true);
         info!("Handlebars templates registered.");
 
-        // Set up database connection pool.
-        let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
-        let pool = diesel::r2d2::Pool::builder()
-            // max 12 connections at once
-            .max_size(12)
-            // if a connection cannot be pulled from the pool in 20 seconds, timeout
-            .connection_timeout(std::time::Duration::from_secs(20))
-            .build(manager)
-            .map_err(|e| {
-                error!("Could not create database connection pool {}", e);
-                e
-            })
-            .unwrap();
-        info!("Created database connection pool.");
-
         Self {
             template_registry: Arc::new(template_registry),
-            db_connection_pool: pool,
             use_stub_mailer: config.email_config.stub,
             file_mailer_path: config.email_config.file.clone(),
             smtp_client: config.email_config.make_smtp_client(),
@@ -90,12 +68,6 @@ impl AppData {
     /// Get an [`Arc`] reference to the global, lazily generated app-data.
     pub fn global() -> Arc<AppData> {
         APP_DATA.clone()
-    }
-
-    /// Get a clone of the database connection pool (which internally uses an Arc,
-    /// so this is just a reference copy).
-    pub fn clone_db_conn_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
-        self.db_connection_pool.clone()
     }
 
     /// Get an SMTP transport if available.
@@ -165,20 +137,6 @@ impl AppData {
     /// Render a handlebars template using this object's registry.
     pub fn render_template(&self, template: &Template) -> Result<String, RenderError> {
         self.get_handlebars_registry().render(template.handlebars_file, &template)
-    }
-
-    /// Asynchronously get a database connection.
-    pub async fn get_db_conn(&self) -> Result<DbConnection, TelescopeError> {
-        // Clone the connection pool reference.
-        let db_conn_pool: Pool<ConnectionManager<PgConnection>> = self.clone_db_conn_pool();
-
-        // Asynchronously try to retrieve a connection from the pool.
-        // This may block/take some time, but should timeout instead of waiting indefinitely.
-        block::<_, DbConnection, _>(move || {
-            db_conn_pool.get()
-        })
-            .await
-            .map_err(TelescopeError::from)
     }
 
     /// Clone the mailbox used to send telescope related email. 

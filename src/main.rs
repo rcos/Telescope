@@ -40,7 +40,6 @@ use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
-use diesel::{Connection, RunQueryDsl};
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
 use std::process::exit;
@@ -66,71 +65,8 @@ fn main() -> std::io::Result<()> {
         .expect("Could not create SSL Acceptor.");
     config.tls_config.init_tls_acceptor(&mut tls_builder);
 
-    if config
-        .sysadmin_config
-        .as_ref()
-        .map(|c| c.create)
-        .unwrap_or(false)
-    {
-        let config = config.sysadmin_config.clone().unwrap();
-        let admin_password = config.password.as_str();
-        let admin_email = config.email;
-        let mut user: User = User::new("Telescope admin", admin_password)
-            .map_err(|e: PasswordRequirements| {
-                error!(
-                    "Admin password {} failed to satisfy password requirements.",
-                    admin_password
-                );
-                if !e.not_common_password {
-                    error!(
-                        "Admin password {} is too common. Please choose a different password.",
-                        admin_password
-                    );
-                }
-                if !e.is_min_len {
-                    error!(
-                        "Admin password {} is too short. \
-                        Please choose a password more than {} characters.",
-                        admin_password,
-                        PasswordRequirements::MIN_PASSWORD_LENGTH
-                    )
-                }
-                exit(exitcode::DATAERR)
-            })
-            .unwrap();
-        let email = Email::new_prechecked(user.id, admin_email);
-
-        user.sysadmin = true;
-
-        // I'm pretty sure this has to be written out manually in synchronous
-        // diesel code here, since this is not an async context.
-        let pool = app_data.clone_db_conn_pool();
-        let conn = pool.get().unwrap();
-        conn.transaction::<(), diesel::result::Error, _>(|| {
-            use crate::schema::emails::dsl::emails;
-            use crate::schema::users::dsl::users;
-
-            diesel::insert_into(users).values(&user).execute(&conn)?;
-
-            diesel::insert_into(emails).values(email).execute(&conn)?;
-
-            info!("Successfully added admin user (id: {})", user.id_str());
-            Ok(())
-        })
-        .map_err(|e| {
-            error!("Could not add admin user to database: {}", e);
-            e
-        })
-        .unwrap();
-    }
-
     // generate a random key to encrypt cookies.
     let cookie_key = OsRng::default().gen::<[u8; 32]>();
-
-    /*
-    // memory store for rate limiting.
-    let ratelimit_memstore = MemoryStore::new();
-     */
 
     // Get ports for redirecting HTTP to HTTPS
     let http_port = config

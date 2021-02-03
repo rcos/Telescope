@@ -61,6 +61,7 @@ md5 = "~0.7"
 url = "~2.2"
 # Date and time utilities
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
+time = {version = "~0.2", features = ["serde", "std"]}
 # Universally unique identifier generation
 uuid = {version = "~0.8", features = ["serde", "v4"]}
 # Async functions in traits
