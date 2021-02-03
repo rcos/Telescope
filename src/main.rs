@@ -16,7 +16,7 @@ extern crate async_trait;
 #[macro_use]
 extern crate derive_more;
 
-mod web;
+// mod web;
 mod env;
 mod templates;
 mod error;
@@ -29,7 +29,6 @@ use crate::{
     templates::static_pages::{
         index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
     },
-    web::{cookies, context::RequestContext, services},
 };
 use std::sync::Arc;
 use actix::prelude::*;

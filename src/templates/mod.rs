@@ -1,10 +1,10 @@
 //pub mod developers;
 //pub mod emails;
 //pub mod jumbotron;
-pub mod navbar;
+// pub mod navbar;
 pub mod page;
 //pub mod profile;
-pub mod forms;
+// pub mod forms;
 pub mod static_pages;
 
 use handlebars::Handlebars;
