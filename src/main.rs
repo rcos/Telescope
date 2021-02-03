@@ -94,6 +94,8 @@ fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            // Middleware to render telescope errors into pages
+            .wrap(web::error_rendering_middleware::TelescopeErrorHandler)
             // Compression middleware
             .wrap(middleware::Compress::default())
             // Identity and authentication middleware.
@@ -115,7 +117,7 @@ fn main() -> std::io::Result<()> {
             .route("/", get().to(LandingPage::handle))
             .route("/projects", get().to(ProjectsPage::handle))
             .route("/sponsors", get().to(SponsorsPage::handle))
-            // .default_service(aweb::route().to(TelescopeError::PageNotFound))
+            .default_service(aweb::to(web::services::not_found::not_found))
     })
     .bind(config.bind_http.clone())
     .expect("Could not bind HTTP/1 (HTTP)")

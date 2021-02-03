@@ -31,24 +31,24 @@ fn empty_navbar() -> Template {
 }
 
 /// Create a navbar item with the given text and location.
-fn item(req: &HttpRequest, text: impl Into<String>, location: impl Into<String>) -> Template {
+fn item(req_path: &str, text: impl Into<String>, location: impl Into<String>) -> Template {
     let loc_str: String = location.into();
     Template::new("navbar/item")
         .field(TEXT, text.into())
         .field(LOCATION, loc_str.as_str())
-        .field(IS_ACTIVE, req.uri().path() == loc_str.as_str())
+        .field(IS_ACTIVE, req_path == loc_str.as_str())
         .field(CLASS, "nav-link")
 }
 
 /// Create an empty navbar and add the default links that should be visible to
 /// everyone at all times.
-fn with_defaults(req: &HttpRequest) -> Template {
+fn with_defaults(req_path: &str) -> Template {
     let left_items = vec![
-        item(req, "Home", "/"),
-        item(req, "Projects", "/projects"),
-        item(req, "Developers", "/developers"),
-        item(req, "Sponsors", "/sponsors"),
-        item(req, "Blog", "/blog")
+        item(req_path, "Home", "/"),
+        item(req_path, "Projects", "/projects"),
+        item(req_path, "Developers", "/developers"),
+        item(req_path, "Sponsors", "/sponsors"),
+        item(req_path, "Blog", "/blog")
     ];
 
     // Add items to empty navbar.
@@ -56,14 +56,14 @@ fn with_defaults(req: &HttpRequest) -> Template {
 }
 
 /// Construct a navbar for an anonymous viewer by adding onto the defaults.
-pub fn userless(req: &HttpRequest) -> Template {
+pub fn userless(req_path: &str) -> Template {
     let right_items = vec![
-        item(req, "Login with GitHub", "/login")
+        item(req_path, "Login with GitHub", "/login")
             .field(CLASS, "btn mr-2 mb-2 btn-primary")
             .field(ICON, "github"),
     ];
 
     // Add items to right side of navbar.
-    with_defaults(req).field(RIGHT_ITEMS, right_items)
+    with_defaults(req_path).field(RIGHT_ITEMS, right_items)
 }
 

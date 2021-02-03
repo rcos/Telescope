@@ -24,14 +24,14 @@ pub const VERSION: &'static str = "version";
 /// Create a new template object to hold the page.
 /// The content of the page is rendered here and must be re-rendered if updated.
 pub fn of(
-    req: &HttpRequest,
+    req_path: &str,
     title: impl Into<Value>,
     content: &Template
 ) -> Result<Template, TelescopeError> {
     let content_rendered = AppData::global().render_template(content)?;
     Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
-        .field(NAVBAR, navbar::userless(req))
+        .field(NAVBAR, navbar::userless(req_path))
         .field(CONTENT, content_rendered)
         .field(VERSION, env!("CARGO_PKG_VERSION")))
 }

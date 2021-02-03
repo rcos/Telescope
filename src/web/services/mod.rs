@@ -1,5 +1,7 @@
 //! Web services.
 
+pub mod not_found;
+
 use actix_web::web::ServiceConfig;
 
 /// Register all of the routs to the actix app.

@@ -7,15 +7,18 @@ use std::error::Error;
 use lettre::file::error::Error as LettreFileError;
 use lettre::smtp::error::Error as LettreSmtpError;
 use lettre::smtp::response::Response as SmtpResponse;
-use actix_web::ResponseError;
+use actix_web::{ResponseError, HttpResponse, HttpRequest};
+use actix_web::http::StatusCode;
+use actix_web::error::Error as ActixError;
+use actix_web::dev::ServiceResponse;
 
 /// All major errors that can occur while responding to a request.
 #[derive(Debug, From, Error, Display)]
 pub enum TelescopeError {
-    // #[display(fmt = "404 - Page Not Found")]
-    // /// 404 - Page not found. Use [`TelescopeError::ResourceNotFound`] instead
-    // /// when possible, as it will have more info.
-    // PageNotFound,
+    #[display(fmt = "404 - Page Not Found")]
+    /// 404 - Page not found. Use [`TelescopeError::ResourceNotFound`] instead
+    /// when possible, as it will have more info.
+    PageNotFound,
 
     #[display(fmt = "{}: {}", header, message)]
     /// 404 - Resource Not Found.
@@ -23,7 +26,7 @@ pub enum TelescopeError {
         /// The header of the jumbotron to be displayed.
         header: String,
         /// The message to display under the jumbotron.
-        message: String
+        message: String,
     },
 
     #[from]
@@ -72,6 +75,10 @@ pub enum TelescopeError {
     /// server error where necessary but otherwise can be lowered to a form
     /// error.
     NegativeSmtpResponse(SmtpResponse),
+
+    #[display(fmt = "Not Implemented")]
+    /// Error to send when user accesses something that is not yet implemented.
+    NotImplemented,
 }
 
 impl TelescopeError {
@@ -94,6 +101,12 @@ impl TelescopeError {
             header: header.into(),
             message: message.into()
         }
+    }
+
+    /// Function that should only be used by the middleware to render a
+    /// telescope error into an error page.
+    pub fn render_error_page(&self, req_path: String) -> Result<ServiceResponse, ActixError> {
+        unimplemented!()
     }
 }
 
@@ -119,4 +132,15 @@ impl From<SmtpResponse> for TelescopeError {
 
 // This may produce a warning in some IDEs because the `Display` trait
 // is derived. You can safely ignore it.
-impl ResponseError for TelescopeError {}
+impl ResponseError for TelescopeError {
+    // Override the default status code (500 - Internal Server Error) here.
+    fn status_code(&self) -> StatusCode {
+        match self {
+            TelescopeError::BadRequest {..} => StatusCode::BAD_REQUEST,
+            TelescopeError::ResourceNotFound {..} => StatusCode::NOT_FOUND,
+            TelescopeError::PageNotFound => StatusCode::NOT_FOUND,
+            TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}

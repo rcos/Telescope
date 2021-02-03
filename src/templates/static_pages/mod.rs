@@ -26,13 +26,13 @@ pub trait StaticPage {
     }
 
     /// Create a page containing the static content.
-    fn page(req: &HttpRequest) -> Result<Template, TelescopeError> {
-        page::of(req, Self::PAGE_TITLE, &Self::template())
+    fn page(req_path: &str) -> Result<Template, TelescopeError> {
+        page::of(req_path, Self::PAGE_TITLE, &Self::template())
     }
 
     /// Actix handler that can be used to generate responses. This just wraps
     /// the page in an immediately ready future.
     fn handle(req: HttpRequest) -> Ready<Result<Template, TelescopeError>> {
-        ready(Self::page(&req))
+        ready(Self::page(req.path()))
     }
 }
