@@ -16,11 +16,16 @@ extern crate async_trait;
 #[macro_use]
 extern crate derive_more;
 
-use app_data::AppData;
-
 mod web;
 mod env;
 mod templates;
+mod error;
+mod models;
+pub mod util;
+pub mod app_data;
+
+
+use app_data::AppData;
 
 use crate::{
     env::{ConcreteConfig, CONFIG},
@@ -30,13 +35,6 @@ use crate::{
     web::{cookies, RequestContext, services},
 };
 use std::sync::Arc;
-
-pub mod util;
-mod error;
-pub mod app_data;
-
-//use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
-
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
