@@ -41,12 +41,13 @@ as the RCOS website.
    a certificate signed by a trusted certificate authority. See 
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
-   
 4. Copy the configuration templates as follows:
     - `config_example.toml` -> `config.toml`
     - `.env.example` -> `.env`
     
-    Then modify them to match your environment.
+    Then modify them to match your environment. You may need to generate the 
+    GitHub related credentials. Go [here](https://github.com/settings/applications/new)
+    to register a new GitHub OAuth application or get a new client secret.
    
 5. Build and start the docker images.
     ```shell

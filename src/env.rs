@@ -7,6 +7,7 @@ use openssl::ssl::{SslAcceptorBuilder, SslFiletype};
 use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
+use std::sync::Arc;
 
 /// The Tls credentials of a given configuration.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -17,17 +18,6 @@ pub struct TlsConfig {
     /// The TLS private key file. See the readme for instructions to generate
     /// your own.
     private_key_file: PathBuf,
-}
-
-/// The configuration used to create a sysadmin account.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SysadminCreationConfig {
-    /// Should a sysadmin account be created and added to the database on start.
-    pub create: bool,
-    /// The email to create the sysadmin account with.
-    pub email: EmailAddress,
-    /// The password to create the sysadmin account with.
-    pub password: String,
 }
 
 /// Configuration of email senders for the telescope webapp.
@@ -60,6 +50,17 @@ pub struct SmtpConfig {
     pub host: String,
 }
 
+/// Credentials granted by GitHub for the OAuth application.
+/// Generated these by creating an application at
+/// https://github.com/settings/applications/new/.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct GithubOauthConfig {
+    /// The GitHub OAuth application client id.
+    pub client_id: String,
+    /// The GitHub OAuth application client secret.
+    pub client_secret: String
+}
+
 /// The config of the server instance.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 struct TelescopeConfig {
@@ -73,15 +74,11 @@ struct TelescopeConfig {
     /// Set the URL to bind the running server to under HTTP/1.
     bind_http: Option<String>,
 
-    /// The URL the Postgres Database is running at.
-    /// This is passed directly to diesel.
-    database_url: Option<String>,
+    /// GitHub OAuth application credentials.
+    github_credentials: Option<GithubOauthConfig>,
 
     /// The configuration of email senders.
     email_config: Option<EmailSenderConfig>,
-
-    /// The configuration of sysadmin creation.
-    sysadmin_config: Option<SysadminCreationConfig>,
 
     /// The TLS credential config.
     tls_config: Option<TlsConfig>,
@@ -98,17 +95,18 @@ struct TelescopeConfig {
 /// TelescopeConfig struct.
 #[derive(Serialize, Debug)]
 pub struct ConcreteConfig {
+    /// The tls configuration.
     pub tls_config: TlsConfig,
+    /// The log level. Private because the logger is initialized in this module.
     log_level: String,
     /// The location to bind services under HTTP/2 (HTTPS).
     pub bind_https: String,
     /// The location to bind services under HTTP/1 (HTTP).
     pub bind_http: String,
-    //pub domain: String,
-    pub database_url: String,
+    /// The email configuration.
     pub email_config: EmailSenderConfig,
-    /// Sysadmin creation is not necessary to run the server.
-    pub sysadmin_config: Option<SysadminCreationConfig>,
+    /// The GitHub OAuth Application Credentials.
+    pub github_credentials: GithubOauthConfig
 }
 
 impl TlsConfig {
@@ -175,13 +173,12 @@ impl TelescopeConfig {
             bind_http: self
                 .reverse_lookup(profile_slice, |c| c.bind_http.clone())
                 .expect("Could not resolve binding URL (HTTP/1)."),
-            database_url: self
-                .reverse_lookup(profile_slice, |c| c.database_url.clone())
-                .expect("Could not resolve database URL."),
             email_config: self
                 .reverse_lookup(profile_slice, |c| c.email_config.clone())
                 .expect("Could not resolve email config."),
-            sysadmin_config: self.reverse_lookup(profile_slice, |c| c.sysadmin_config.clone()),
+            github_credentials: self
+                .reverse_lookup(profile_slice, |c| c.github_credentials.clone())
+                .expect("Could not resolve GitHub OAuth credentials."),
         }
     }
 
@@ -239,7 +236,7 @@ struct CommandLine {
 
 lazy_static! {
     /// Global web server configuration.
-    pub static ref CONFIG: ConcreteConfig = cli();
+    pub static ref CONFIG: Arc<ConcreteConfig> = Arc::new(cli());
 }
 
 /// After the global configuration is initialized, log it as info.
@@ -253,6 +250,12 @@ pub fn init() {
     info!("telescope {}", env!("CARGO_PKG_VERSION"));
     trace!("Config: \n{}", serde_json::to_string_pretty(cfg).unwrap());
 }
+
+/// Get the global configuration.
+pub fn global_config() -> Arc<ConcreteConfig> {
+    CONFIG.clone()
+}
+
 
 /// Digest and handle arguments from the command line. Read arguments from environment
 /// variables where necessary. Construct and return the configuration specified.
