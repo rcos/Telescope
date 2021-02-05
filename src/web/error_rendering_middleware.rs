@@ -5,8 +5,13 @@ use actix_web::error::Error as ActixError;
 use futures::future::{Ready, ok, BoxFuture};
 use futures::task::{Context, Poll};
 use std::pin::Pin;
-use crate::error::TelescopeError;
+use crate::error::{TelescopeError, TELESCOPE_ERROR_MIME};
 use std::future::Future;
+use actix_web::http::header::CONTENT_TYPE;
+use actix_web::HttpResponse;
+use actix_web::body::{ResponseBody, Body};
+use futures::prelude::*;
+use futures::TryStreamExt;
 
 /// The factory to create handlers for telescope errors.
 pub struct TelescopeErrorHandler;
@@ -50,35 +55,40 @@ where
     }
 
     fn call(&mut self, req: Self::Request) -> Self::Future {
-        debug!("Received: {:?}", req);
-        // Extract the request path here to send to page renderer.
-        let req_path: String = req.path().to_owned();
-
         // Call wrapped service.
         let service_response_future = self.service.call(req);
 
         // Create the pinned, boxed, async future here.
         Box::pin(async move {
             match service_response_future.await {
-                // Pass through successful responses.
                 Ok(s) => {
-                    debug!("Sub-service success: {:?}", s);
-                    Ok(s)
-                },
-                // Catch errors and check if they are telescope errors.
-                Err(e) => {
-                    debug!("Sub-service error: {:?}", e);
-                    let actix_err: ActixError = e;
-                    match actix_err.as_error::<TelescopeError>() {
-                        Some(e) => {
-                            debug!("Downgrade successful - Rendering error page");
-                            // It is a telescope error! Render an error page.
-                            let err: &TelescopeError = e;
-                            err.render_error_page(req_path)
-                        }
-                        None => Err(actix_err)
+                    // See if the success response is a serialized telescope
+                    // error.
+                    let mut service_response: ServiceResponse = s;
+                    let has_telescope_mime: bool = service_response.headers()
+                        .get(CONTENT_TYPE)
+                        .map_or(false, |val| {
+                            val == TELESCOPE_ERROR_MIME
+                        });
+
+                    if has_telescope_mime {
+                        // If we have the custom telescope MIME type,
+                        // get the response's body. This type is a Stream
+                        // future.
+                        let response_body: ResponseBody<Body> = service_response.take_body()
+                            // Map all the actix errors into futures
+                            .try_concat()
+
+                    } else {
+                        // If it doesn't have the custom telescope MIME type,
+                        // pass it on to the next middleware or the user.
+                        Ok(service_response)
                     }
-                }
+                },
+
+                // Propagate any errors that have not been converted to
+                // a successful response with JSON in the right MIME type.
+                error => error
             }
         })
     }

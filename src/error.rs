@@ -10,7 +10,12 @@ use lettre::smtp::response::Response as SmtpResponse;
 use actix_web::{ResponseError, HttpResponse, HttpRequest};
 use actix_web::http::StatusCode;
 use actix_web::error::Error as ActixError;
-use actix_web::dev::ServiceResponse;
+use actix_web::http::header::CONTENT_TYPE;
+use actix_web::dev::{HttpResponseBuilder, ServiceResponse};
+
+/// Custom MIME Type for telescope errors. Should only be used internally
+/// as a signal value.
+pub const TELESCOPE_ERROR_MIME: &'static str = "application/prs.telescope.error+json";
 
 /// All major errors that can occur while responding to a request.
 #[derive(Debug, From, Error, Display)]
@@ -142,5 +147,21 @@ impl ResponseError for TelescopeError {
             TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
+    }
+
+    // Override the default http response here.
+    // Panic if the error cannot be serialized.
+    fn error_response(&self) -> HttpResponse {
+        // Since we cannot render the html page here, we serialize
+        // it to JSON and let the custom error handling middleware
+        // render the HTTP page off of it later.
+        let json_str: String = serde_json::to_string(self)
+            .expect("Could not serialize self to JSON.");
+
+        // Create and return the response with the JSON and the custom
+        // content type here.
+        HttpResponseBuilder::new(self.status_code())
+            .set_header(CONTENT_TYPE, TELESCOPE_ERROR_MIME)
+            .body(json_str)
     }
 }
