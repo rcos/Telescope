@@ -60,8 +60,13 @@ as the RCOS website.
     ```
 
 7. At this point Postgrest, the PostgREST API, the Swagger API explorer, and 
-   Telescope should all be running on your system. To shut them down and make 
-   changes, run
+   Telescope should all be running on your system. To shut them all down, run
    ```shell
    $ docker-compose down
+   ```
+   If you only want to make changes to telescope, you don't need to take down
+   all the containers. Simply make your changes, run `cargo check` to verify 
+   that it compiles, and then rebuild just telescope in docker using
+   ```shell
+   $ docker-compose up --build -d
    ```
