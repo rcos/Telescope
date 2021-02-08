@@ -728,7 +728,6 @@ CREATE TABLE public.projects (
     project_id integer NOT NULL,
     title character varying NOT NULL,
     description text NOT NULL,
-    languages character varying[] DEFAULT '{}'::character varying[] NOT NULL,
     stack character varying[] DEFAULT '{}'::character varying[] NOT NULL,
     cover_image_url public.url,
     homepage_url public.url,
@@ -743,13 +742,6 @@ CREATE TABLE public.projects (
 --
 
 COMMENT ON TABLE public.projects IS 'Project details are not semester dependent';
-
-
---
--- Name: COLUMN projects.languages; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.projects.languages IS 'List of languages used, all lowercase';
 
 
 --
@@ -2000,4 +1992,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20210117194733'),
     ('20210122203649'),
     ('20210122222933'),
-    ('20210208222336');
+    ('20210208222336'),
+    ('20210208223049');
