@@ -350,115 +350,6 @@ COMMENT ON COLUMN public.enrollments.final_grade IS '0.0-100.0';
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.users (
-    username character varying NOT NULL,
-    preferred_name character varying,
-    first_name character varying NOT NULL,
-    last_name character varying NOT NULL,
-    cohort integer,
-    role public.user_role NOT NULL,
-    timezone text DEFAULT 'America/New_York'::text NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: TABLE users; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON TABLE public.users IS 'Users can be students, external mentors, and faculty.
-Their user details are not dependent on the semester';
-
-
---
--- Name: COLUMN users.preferred_name; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.preferred_name IS 'Optional preferred first name to use in UIs';
-
-
---
--- Name: COLUMN users.first_name; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.first_name IS 'Given name of user';
-
-
---
--- Name: COLUMN users.last_name; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.last_name IS 'Family name of user';
-
-
---
--- Name: COLUMN users.cohort; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.cohort IS 'Entry year (only set for students)';
-
-
---
--- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.role IS 'Role of user in RCOS, determines permissions';
-
-
---
--- Name: COLUMN users.timezone; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.timezone IS 'Timezone from TZ list';
-
-
---
--- Name: coordinators; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW public.coordinators AS
- SELECT DISTINCT e.semester_id,
-    u.username,
-    u.preferred_name,
-    u.first_name,
-    u.last_name
-   FROM (public.users u
-     JOIN public.enrollments e ON (((e.username)::text = (u.username)::text)))
-  WHERE (e.is_coordinator = true)
-  ORDER BY e.semester_id, u.username;
-
-
---
--- Name: VIEW coordinators; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON VIEW public.coordinators IS 'View for access to Coordinators each semester';
-
-
---
--- Name: faculty_advisors; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW public.faculty_advisors AS
- SELECT u.username,
-    u.preferred_name,
-    u.first_name,
-    u.last_name
-   FROM public.users u
-  WHERE (u.role = 'faculty_advisor'::public.user_role);
-
-
---
--- Name: VIEW faculty_advisors; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON VIEW public.faculty_advisors IS 'View for access to Faculty Advisors';
-
-
---
 -- Name: final_grade_appeal; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -842,7 +733,8 @@ CREATE TABLE public.projects (
     cover_image_url public.url,
     homepage_url public.url,
     repository_urls public.url[] NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    is_external boolean DEFAULT false NOT NULL
 );
 
 
@@ -1244,6 +1136,51 @@ COMMENT ON COLUMN public.user_accounts.type IS 'Type of external account that is
 --
 
 COMMENT ON COLUMN public.user_accounts.account_id IS 'Unique ID/username of account';
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    username character varying NOT NULL,
+    cohort integer,
+    role public.user_role NOT NULL,
+    timezone text DEFAULT 'America/New_York'::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    preferred_name character varying,
+    first_name character varying,
+    last_name character varying
+);
+
+
+--
+-- Name: TABLE users; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.users IS 'Users can be students, external mentors, and faculty.
+Their user details are not dependent on the semester';
+
+
+--
+-- Name: COLUMN users.cohort; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.cohort IS 'Entry year (only set for students)';
+
+
+--
+-- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.role IS 'Role of user in RCOS, determines permissions';
+
+
+--
+-- Name: COLUMN users.timezone; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.timezone IS 'Timezone from TZ list';
 
 
 --
@@ -2062,4 +1999,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20210117191050'),
     ('20210117194733'),
     ('20210122203649'),
-    ('20210122222933');
+    ('20210122222933'),
+    ('20210208222336');
