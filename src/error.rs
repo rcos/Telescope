@@ -12,13 +12,14 @@ use actix_web::http::StatusCode;
 use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;
 use actix_web::dev::{HttpResponseBuilder, ServiceResponse};
+use serde::__private::Formatter;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
 pub const TELESCOPE_ERROR_MIME: &'static str = "application/prs.telescope.error+json";
 
 /// All major errors that can occur while responding to a request.
-#[derive(Debug, From, Error, Display)]
+#[derive(Debug, From, Error, Display, Serialize, Deserialize)]
 pub enum TelescopeError {
     #[display(fmt = "Page Not Found")]
     /// 404 - Page not found. Use [`TelescopeError::ResourceNotFound`] instead
@@ -38,7 +39,7 @@ pub enum TelescopeError {
     #[display(fmt = "Error rendering handlebars template: {}", _0)]
     /// An error in rendering a handlebars template. This will report as
     /// an internal server error.
-    RenderingError(RenderError),
+    RenderingError(SimplifiedHandlebarsError),
 
     #[display(fmt = "Internal future canceled")]
     /// An internal future was canceled unexpectedly. This will always report
@@ -165,3 +166,68 @@ impl ResponseError for TelescopeError {
             .body(json_str)
     }
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, Error)]
+/// A simplified handlebars rendering error that can be serialized.
+/// This struct is separate from the variant used above to make the
+/// implementation easier, since the traits on [`TelescopeError`]
+/// can be derived in most cases.
+pub struct SimplifiedHandlebarsError {
+    /// Description of the error.
+    desc: String,
+    /// The name of the template that the error was in.
+    template_name: Option<String>,
+    /// The line that the error was on.
+    line_no: Option<usize>,
+    /// The column that the error was on.
+    column_no: Option<usize>
+}
+
+impl From<RenderError> for SimplifiedHandlebarsError {
+    fn from(err: RenderError) -> Self {
+        // Destructure original error.
+        let RenderError {
+            desc,
+            template_name,
+            line_no,
+            column_no,
+            ..
+        } = err;
+
+        // Restructure into simplified error.
+        Self {desc, template_name, line_no, column_no}
+    }
+}
+
+impl fmt::Display for SimplifiedHandlebarsError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        // Display the description
+        write!(f, "A handlebars rendering error occurred: {}", self.desc)?;
+
+        // Check for a template name.
+        if let Some(name) = self.template_name.as_ref() {
+            write!(f, " in template {}", name)?;
+            // Check for a line number.
+            if let Some(line) = self.line_no {
+                write!(f, " at line {}", line)?;
+
+                // Check for a column number.
+                if let Some(col) = self.column_no {
+                    write!(f, ", column {}", col)?;
+                }
+            }
+        }
+
+        // Return Ok.
+        Ok(())
+    }
+}
+
+impl From<RenderError> for TelescopeError {
+    fn from(err: RenderError) -> Self {
+        // Convert the error and construct the variant.
+        Self::RenderingError(SimplifiedHandlebarsError::from(err))
+    }
+}
+
+

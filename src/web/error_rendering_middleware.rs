@@ -12,6 +12,7 @@ use actix_web::HttpResponse;
 use actix_web::body::{ResponseBody, Body};
 use futures::prelude::*;
 use futures::TryStreamExt;
+use actix_web::web::Buf;
 
 /// The factory to create handlers for telescope errors.
 pub struct TelescopeErrorHandler;
@@ -75,10 +76,16 @@ where
                         // If we have the custom telescope MIME type,
                         // get the response's body. This type is a Stream
                         // future.
-                        let response_body: ResponseBody<Body> = service_response.take_body()
-                            // Map all the actix errors into futures
-                            .try_concat()
-
+                        let response_body: String = service_response.take_body()
+                            // Convert every segment of the body into a string.
+                            .map_ok(|bytes| String::from_utf8_lossy(bytes.as_ref()))
+                            // Collect all of the bytes of the stream or
+                            // collect the first encountered error.
+                            .try_collect::<String>()
+                            // Waif for the stream to collect and propagate
+                            // any errors.
+                            .await?;
+                        unimplemented!()
                     } else {
                         // If it doesn't have the custom telescope MIME type,
                         // pass it on to the next middleware or the user.
