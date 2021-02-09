@@ -6,5 +6,5 @@ use actix_web::error::Error as ActixError;
 /// Respond to all requests with page not found.
 /// Used as default service.
 pub async fn not_found() -> Result<HttpResponse, TelescopeError> {
-    Err(TelescopeError::ise("testing"))
+    Err(TelescopeError::PageNotFound)
 }

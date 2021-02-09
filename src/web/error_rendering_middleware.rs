@@ -1,6 +1,6 @@
 //! Middleware for rendering telescope errors into full pages on the way out.
 
-use actix_web::dev::{Transform, ServiceRequest, ServiceResponse, Service};
+use actix_web::dev::{Transform, ServiceRequest, ServiceResponse, Service, HttpResponseBuilder};
 use actix_web::error::Error as ActixError;
 use futures::future::{Ready, ok, BoxFuture};
 use futures::task::{Context, Poll};
@@ -8,11 +8,12 @@ use std::pin::Pin;
 use crate::error::{TelescopeError, TELESCOPE_ERROR_MIME};
 use std::future::Future;
 use actix_web::http::header::CONTENT_TYPE;
-use actix_web::HttpResponse;
+use actix_web::{HttpResponse, ResponseError};
 use actix_web::body::{ResponseBody, Body};
 use futures::TryStreamExt;
 use actix_web::web::Buf;
 use actix_web::HttpRequest;
+use actix_web::http::{HeaderMap, HeaderValue};
 
 /// The factory to create handlers for telescope errors.
 pub struct TelescopeErrorHandler;
@@ -103,10 +104,11 @@ where
             let req: &HttpRequest = service_response.request();
             // Render the error page to a string
             let rendered: String = err.render_error_page(req)?;
-            // Convert the rendered page into a response.
-            let intermediate_response: HttpResponse = rendered.into();
-            // Return the original service response with the body from the
-            // rendered error response.
+            // Convert the rendered page into a response with the right headers and status code.
+            let intermediate_response: HttpResponse = HttpResponseBuilder::new(err.status_code())
+                .header(CONTENT_TYPE, "text/html;charset=UTF-8")
+                .body(rendered);
+            // Construct and return the appropriate service response.
             let final_response: ServiceResponse = service_response.into_response(intermediate_response);
             return Ok(final_response);
         })

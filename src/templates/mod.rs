@@ -6,6 +6,7 @@ pub mod page;
 //pub mod profile;
 // pub mod forms;
 pub mod static_pages;
+pub mod jumbotron;
 
 use handlebars::Handlebars;
 use serde::Serialize;

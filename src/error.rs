@@ -14,6 +14,7 @@ use actix_web::http::header::CONTENT_TYPE;
 use actix_web::dev::{HttpResponseBuilder, ServiceResponse};
 use serde::__private::Formatter;
 use std::string::FromUtf8Error;
+use crate::templates::{Template, jumbotron, page};
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -127,7 +128,31 @@ impl TelescopeError {
     /// Function that should only be used by the middleware to render a
     /// telescope error into an error page.
     pub fn render_error_page(&self, req: &HttpRequest) -> Result<String, ActixError> {
-        unimplemented!()
+        // Extract the path from the request for constructing the
+        // page template later.
+        let path = req.path();
+
+        // Get the status code for this response.
+        let status_code: StatusCode = self.status_code();
+
+        // Create an inner template depending on the error.
+        let inner_template: Template = match self {
+            TelescopeError::PageNotFound => jumbotron::new(
+                format!("{} - Page Not Found", status_code),
+                "We could not find the page you are looking for. If you think this is in \
+                error, please reach out to a coordinator or make an issue on the Github repo."),
+
+            _ => unimplemented!()
+        };
+
+        // Put jumbotron in a page and return the content.
+        return page::of(path, "RCOS - Error", &inner_template)
+            // Convert and handle jumbotron rendering errors.
+            .map_err(ActixError::from)?
+            // Render the page.
+            .render()
+            // Convert any error that occurs.
+            .map_err(ActixError::from);
     }
 }
 
