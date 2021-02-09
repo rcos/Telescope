@@ -12,6 +12,7 @@ use actix_web::HttpResponse;
 use actix_web::body::{ResponseBody, Body};
 use futures::TryStreamExt;
 use actix_web::web::Buf;
+use actix_web::HttpRequest;
 
 /// The factory to create handlers for telescope errors.
 pub struct TelescopeErrorHandler;
@@ -60,42 +61,54 @@ where
 
         // Create the pinned, boxed, async future here.
         Box::pin(async move {
-            match service_response_future.await {
-                Ok(s) => {
-                    // See if the success response is a serialized telescope
-                    // error.
-                    let mut service_response: ServiceResponse = s;
-                    let has_telescope_mime: bool = service_response.headers()
-                        .get(CONTENT_TYPE)
-                        .map_or(false, |val| {
-                            val == TELESCOPE_ERROR_MIME
-                        });
+            // Wait for the service response to resolve. Propagate any
+            // errors that have not already been converted to an HTTP
+            // response. (All telescope errors should have been serialized
+            // into an HTTP response at this point).
+            let mut service_response: ServiceResponse = service_response_future.await?;
 
-                    if has_telescope_mime {
-                        // If we have the custom telescope MIME type,
-                        // get the response's body. This type is a Stream
-                        // future.
-                        let response_body: String = service_response.take_body()
-                            // Convert every segment of the body into a string.
-                            .map_ok(|bytes| String::from_utf8_lossy(bytes.as_ref()).to_string())
-                            // Collect all of the bytes of the stream or
-                            // collect the first encountered error.
-                            .try_collect::<String>()
-                            // Waif for the stream to collect and propagate
-                            // any errors.
-                            .await?;
-                        unimplemented!()
-                    } else {
-                        // If it doesn't have the custom telescope MIME type,
-                        // pass it on to the next middleware or the user.
-                        Ok(service_response)
-                    }
-                },
 
-                // Propagate any errors that have not been converted to
-                // a successful response with JSON in the right MIME type.
-                error => error
+            // See if the success response is a serialized telescope error.
+            let has_telescope_mime: bool = service_response.headers()
+                .get(CONTENT_TYPE)
+                .map_or(false, |val| {
+                    val == TELESCOPE_ERROR_MIME
+                });
+
+            // If not just return it as is.
+            if !has_telescope_mime {
+                return Ok(service_response);
             }
+
+            // If it is, we will collect the body and deserialize the error
+            // from it.
+            // First, get the body without destroying or loosing ownership of the service response.
+            // This will remove the body from the response, leaving the response with no body.
+            let body: ResponseBody<Body> = service_response.response_mut().take_body();
+            // Then convert it to a string using Stream future utility functions.
+            let body_str: String = body
+                // Convert every segment of the body into a string.
+                .map_ok(|bytes| String::from_utf8_lossy(bytes.as_ref()).to_string())
+                // Collect all of the segments of the stream into one string.
+                .try_collect::<String>()
+                // Waif for the stream to collect and propagate any errors.
+                .await?;
+
+            // Deserialize the telescope error from the response.
+            let err: TelescopeError = serde_json::from_str(body_str.as_str())
+                // Convert and propagate any serialization errors.
+                .map_err(ActixError::from)?;
+
+            // Get a reference to the original request.
+            let req: &HttpRequest = service_response.request();
+            // Render the error page to a string
+            let rendered: String = err.render_error_page(req)?;
+            // Convert the rendered page into a response.
+            let intermediate_response: HttpResponse = rendered.into();
+            // Return the original service response with the body from the
+            // rendered error response.
+            let final_response: ServiceResponse = service_response.into_response(intermediate_response);
+            return Ok(final_response);
         })
     }
 }

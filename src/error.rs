@@ -126,7 +126,7 @@ impl TelescopeError {
 
     /// Function that should only be used by the middleware to render a
     /// telescope error into an error page.
-    pub fn render_error_page(&self, req_path: String) -> Result<ServiceResponse, ActixError> {
+    pub fn render_error_page(&self, req: &HttpRequest) -> Result<String, ActixError> {
         unimplemented!()
     }
 }
