@@ -3,7 +3,7 @@
 
 ## Overview
 
-This repo holds the SQL for setting up the RCOS database, the database
+This repo holds the SQL code for setting up the RCOS database, the database
 definition, views and triggers, and tools for importing RCOS data from external
 platforms like Submitty and Venue.
 
@@ -14,10 +14,10 @@ are open-sourced here.
 
 ## API
 
-This database is served by a Postgrest API at [TODO: put api url here] that
+This database is served by a Postgrest API [here](https://swagger.rcos.io/#/) that
 allows access to some resources when unauthenticated for public access, and
 allows full access to all resources when authenticated. RCOS infrastructure
-cannot connect to the database directly but must interact through this API.
+cannot connect to the database directly and must interact through this API.
 
 ## Deployment
 
