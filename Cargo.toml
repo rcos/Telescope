@@ -25,7 +25,7 @@ actix-files = "~0.5"
 # identity service -- cookie authentication
 actix-identity = "~0.3"
 # ratelimiting (not compatible with actix 3)
-#actix-ratelimit = "~0.2"
+actix-ratelimit = "~0.3"
 # redirect all traffic over https.
 actix-web-middleware-redirect-scheme = "~3.0"
 # html templating.
@@ -48,8 +48,6 @@ rand = "~0.8"
 lazy_static = "~1.4"
 # utilities for dealing with async futures
 futures = "~0.3"
-# Regular expressions
-regex = "~1.4"
 # Markdown - HTML rendering
 pulldown-cmark = "~0.8"
 # Sending emails.
@@ -72,3 +70,4 @@ derive_more = "~0.99"
 jsonwebtoken = "~7.2"
 # OAuth2 models and flows
 oauth2 = {version = "~3.0", features = ["futures-03"], default_features = false}
+

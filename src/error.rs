@@ -13,6 +13,7 @@ use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;
 use actix_web::dev::{HttpResponseBuilder, ServiceResponse};
 use serde::__private::Formatter;
+use std::string::FromUtf8Error;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -39,7 +40,7 @@ pub enum TelescopeError {
     #[display(fmt = "Error rendering handlebars template: {}", _0)]
     /// An error in rendering a handlebars template. This will report as
     /// an internal server error.
-    RenderingError(SimplifiedHandlebarsError),
+    RenderingError(#[serde(with = "RenderErrorDef")] RenderError),
 
     #[display(fmt = "Internal future canceled")]
     /// An internal future was canceled unexpectedly. This will always report
@@ -60,19 +61,33 @@ pub enum TelescopeError {
         message: String,
     },
 
-    #[from]
-    #[display(fmt = "Lettre File Error: {}", _0)]
+    #[display(fmt = "Lettre File Error: {}", description)]
+    #[error(ignore)]
     /// Error sending an email using lettre's file transport. This should report
-    /// as an internal server error most of the time as it is used for debugging
-    /// and logging.
-    LettreFileError(LettreFileError),
+    /// as an internal server error most of the time as file transport is used
+    /// for debugging and logging.
+    LettreFileError {
+        #[serde(skip)]
+        /// The lettre error that caused this. This gets stripped away on
+        /// serialization.
+        source: Option<LettreFileError>,
+        /// A description of the cause.
+        description: String
+    },
 
-    #[from]
-    #[display(fmt = "Lettre SMTP Error: {}", _0)]
+    #[display(fmt = "Lettre SMTP Error: {}", description)]
+    #[error(ignore)]
     /// Error sending mail using lettre's SMTP transport. This should report as
     /// an internal server error when unexpected, but otherwise should
     /// be lowered to a form error and reported in the webpage.
-    LettreSmtpError(LettreSmtpError),
+    LettreSmtpError {
+        #[serde(skip)]
+        /// The lettre error that caused this. This gets stripped away during
+        /// serialization.
+        source: Option<LettreSmtpError>,
+        /// The description of the error.
+        description: String
+    },
 
     #[error(ignore)]
     #[display(fmt = "Negative SMTP response: {} - {:?}", "_0.code", "_0.message")]
@@ -153,6 +168,10 @@ impl ResponseError for TelescopeError {
     // Override the default http response here.
     // Panic if the error cannot be serialized.
     fn error_response(&self) -> HttpResponse {
+        // Firstly log the error, so we at least know what it was before
+        // being serialized.
+        error!("Service generated error: {}", self);
+
         // Since we cannot render the html page here, we serialize
         // it to JSON and let the custom error handling middleware
         // render the HTTP page off of it later.
@@ -167,12 +186,12 @@ impl ResponseError for TelescopeError {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Error)]
-/// A simplified handlebars rendering error that can be serialized.
-/// This struct is separate from the variant used above to make the
-/// implementation easier, since the traits on [`TelescopeError`]
-/// can be derived in most cases.
-pub struct SimplifiedHandlebarsError {
+// Serde compatibility for remote types below.
+
+#[derive(Serialize, Deserialize)]
+#[serde(remote = "RenderError")]
+/// Definition of foreign type that projects Serialization.
+struct RenderErrorDef {
     /// Description of the error.
     desc: String,
     /// The name of the template that the error was in.
@@ -180,54 +199,44 @@ pub struct SimplifiedHandlebarsError {
     /// The line that the error was on.
     line_no: Option<usize>,
     /// The column that the error was on.
-    column_no: Option<usize>
+    column_no: Option<usize>,
+
+    #[serde(skip)]
+    #[serde(getter = "Option::None")]
+    /// Private field of remote struct. Skipped for serde.
+    cause: Option<Box<dyn Error + Send + Sync + 'static>>
 }
 
-impl From<RenderError> for SimplifiedHandlebarsError {
-    fn from(err: RenderError) -> Self {
-        // Destructure original error.
-        let RenderError {
-            desc,
-            template_name,
-            line_no,
-            column_no,
-            ..
-        } = err;
-
-        // Restructure into simplified error.
-        Self {desc, template_name, line_no, column_no}
+impl From<RenderErrorDef> for RenderError {
+    fn from(err: RenderErrorDef) -> Self {
+        let mut new: RenderError = RenderError::new(err.desc);
+        new.column_no = err.column_no;
+        new.line_no = err.line_no;
+        new.template_name = err.template_name;
+        return new;
     }
 }
 
-impl fmt::Display for SimplifiedHandlebarsError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        // Display the description
-        write!(f, "A handlebars rendering error occurred: {}", self.desc)?;
+impl From<LettreFileError> for TelescopeError {
+    fn from(err: LettreFileError) -> Self {
+        let description: String = format!("{}", err);
 
-        // Check for a template name.
-        if let Some(name) = self.template_name.as_ref() {
-            write!(f, " in template {}", name)?;
-            // Check for a line number.
-            if let Some(line) = self.line_no {
-                write!(f, " at line {}", line)?;
-
-                // Check for a column number.
-                if let Some(col) = self.column_no {
-                    write!(f, ", column {}", col)?;
-                }
-            }
-        }
-
-        // Return Ok.
-        Ok(())
+        return TelescopeError::LettreFileError {
+            source: Some(err),
+            description,
+        };
     }
 }
 
-impl From<RenderError> for TelescopeError {
-    fn from(err: RenderError) -> Self {
-        // Convert the error and construct the variant.
-        Self::RenderingError(SimplifiedHandlebarsError::from(err))
+
+impl From<LettreSmtpError> for TelescopeError {
+    fn from(err: LettreSmtpError) -> Self {
+        let description: String = format!("{}", err);
+
+        return TelescopeError::LettreSmtpError {
+            source: Some(err),
+            description,
+        };
     }
 }
-
 

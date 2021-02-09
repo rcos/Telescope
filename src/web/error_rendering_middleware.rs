@@ -10,7 +10,6 @@ use std::future::Future;
 use actix_web::http::header::CONTENT_TYPE;
 use actix_web::HttpResponse;
 use actix_web::body::{ResponseBody, Body};
-use futures::prelude::*;
 use futures::TryStreamExt;
 use actix_web::web::Buf;
 
@@ -78,7 +77,7 @@ where
                         // future.
                         let response_body: String = service_response.take_body()
                             // Convert every segment of the body into a string.
-                            .map_ok(|bytes| String::from_utf8_lossy(bytes.as_ref()))
+                            .map_ok(|bytes| String::from_utf8_lossy(bytes.as_ref()).to_string())
                             // Collect all of the bytes of the stream or
                             // collect the first encountered error.
                             .try_collect::<String>()
