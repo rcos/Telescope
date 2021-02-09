@@ -350,112 +350,35 @@ COMMENT ON COLUMN public.enrollments.final_grade IS '0.0-100.0';
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: external_organizations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.users (
-    username character varying NOT NULL,
-    preferred_name character varying,
-    first_name character varying NOT NULL,
-    last_name character varying NOT NULL,
-    cohort integer,
-    role public.user_role NOT NULL,
-    timezone text DEFAULT 'America/New_York'::text NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+CREATE TABLE public.external_organizations (
+    external_organization_id integer NOT NULL,
+    title character varying NOT NULL,
+    homepage public.url NOT NULL,
+    contact_emails public.url[] DEFAULT '{}'::public.url[] NOT NULL
 );
 
 
 --
--- Name: TABLE users; Type: COMMENT; Schema: public; Owner: -
+-- Name: external_organizations_external_organization_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.users IS 'Users can be students, external mentors, and faculty.
-Their user details are not dependent on the semester';
-
-
---
--- Name: COLUMN users.preferred_name; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.preferred_name IS 'Optional preferred first name to use in UIs';
+CREATE SEQUENCE public.external_organizations_external_organization_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 --
--- Name: COLUMN users.first_name; Type: COMMENT; Schema: public; Owner: -
+-- Name: external_organizations_external_organization_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.users.first_name IS 'Given name of user';
-
-
---
--- Name: COLUMN users.last_name; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.last_name IS 'Family name of user';
-
-
---
--- Name: COLUMN users.cohort; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.cohort IS 'Entry year (only set for students)';
-
-
---
--- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.role IS 'Role of user in RCOS, determines permissions';
-
-
---
--- Name: COLUMN users.timezone; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.users.timezone IS 'Timezone from TZ list';
-
-
---
--- Name: coordinators; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW public.coordinators AS
- SELECT DISTINCT e.semester_id,
-    u.username,
-    u.preferred_name,
-    u.first_name,
-    u.last_name
-   FROM (public.users u
-     JOIN public.enrollments e ON (((e.username)::text = (u.username)::text)))
-  WHERE (e.is_coordinator = true)
-  ORDER BY e.semester_id, u.username;
-
-
---
--- Name: VIEW coordinators; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON VIEW public.coordinators IS 'View for access to Coordinators each semester';
-
-
---
--- Name: faculty_advisors; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW public.faculty_advisors AS
- SELECT u.username,
-    u.preferred_name,
-    u.first_name,
-    u.last_name
-   FROM public.users u
-  WHERE (u.role = 'faculty_advisor'::public.user_role);
-
-
---
--- Name: VIEW faculty_advisors; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON VIEW public.faculty_advisors IS 'View for access to Faculty Advisors';
+ALTER SEQUENCE public.external_organizations_external_organization_id_seq OWNED BY public.external_organizations.external_organization_id;
 
 
 --
@@ -837,12 +760,12 @@ CREATE TABLE public.projects (
     project_id integer NOT NULL,
     title character varying NOT NULL,
     description text NOT NULL,
-    languages character varying[] DEFAULT '{}'::character varying[] NOT NULL,
     stack character varying[] DEFAULT '{}'::character varying[] NOT NULL,
     cover_image_url public.url,
     homepage_url public.url,
     repository_urls public.url[] NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    external_organization_id integer
 );
 
 
@@ -851,13 +774,6 @@ CREATE TABLE public.projects (
 --
 
 COMMENT ON TABLE public.projects IS 'Project details are not semester dependent';
-
-
---
--- Name: COLUMN projects.languages; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.projects.languages IS 'List of languages used, all lowercase';
 
 
 --
@@ -879,6 +795,13 @@ COMMENT ON COLUMN public.projects.cover_image_url IS 'URL to logo image';
 --
 
 COMMENT ON COLUMN public.projects.homepage_url IS 'Optional link to project homepage';
+
+
+--
+-- Name: COLUMN projects.external_organization_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.projects.external_organization_id IS 'Optional external org this project belongs to, e.g. IBM';
 
 
 --
@@ -1247,6 +1170,51 @@ COMMENT ON COLUMN public.user_accounts.account_id IS 'Unique ID/username of acco
 
 
 --
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    username character varying NOT NULL,
+    cohort integer,
+    role public.user_role NOT NULL,
+    timezone text DEFAULT 'America/New_York'::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    preferred_name character varying,
+    first_name character varying,
+    last_name character varying
+);
+
+
+--
+-- Name: TABLE users; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.users IS 'Users can be students, external mentors, and faculty.
+Their user details are not dependent on the semester';
+
+
+--
+-- Name: COLUMN users.cohort; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.cohort IS 'Entry year (only set for students)';
+
+
+--
+-- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.role IS 'Role of user in RCOS, determines permissions';
+
+
+--
+-- Name: COLUMN users.timezone; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.timezone IS 'Timezone from TZ list';
+
+
+--
 -- Name: workshop_proposals; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1352,6 +1320,13 @@ ALTER TABLE ONLY public.bonus_attendances ALTER COLUMN bonus_attendance_id SET D
 
 
 --
+-- Name: external_organizations external_organization_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_organizations ALTER COLUMN external_organization_id SET DEFAULT nextval('public.external_organizations_external_organization_id_seq'::regclass);
+
+
+--
 -- Name: meetings meeting_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1416,6 +1391,14 @@ ALTER TABLE ONLY public.chat_associations
 
 ALTER TABLE ONLY public.enrollments
     ADD CONSTRAINT enrollments_pkey PRIMARY KEY (semester_id, username);
+
+
+--
+-- Name: external_organizations external_organizations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_organizations
+    ADD CONSTRAINT external_organizations_pkey PRIMARY KEY (external_organization_id);
 
 
 --
@@ -1903,6 +1886,14 @@ ALTER TABLE ONLY public.project_presentations
 
 
 --
+-- Name: projects projects_external_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_external_organization_id_fkey FOREIGN KEY (external_organization_id) REFERENCES public.external_organizations(external_organization_id);
+
+
+--
 -- Name: small_group_mentors small_group_mentors_small_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2062,4 +2053,8 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20210117191050'),
     ('20210117194733'),
     ('20210122203649'),
-    ('20210122222933');
+    ('20210122222933'),
+    ('20210208222336'),
+    ('20210208223049'),
+    ('20210209004802'),
+    ('20210209005151');
