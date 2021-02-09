@@ -68,7 +68,6 @@ where
             // into an HTTP response at this point).
             let mut service_response: ServiceResponse = service_response_future.await?;
 
-
             // See if the success response is a serialized telescope error.
             let has_telescope_mime: bool = service_response.headers()
                 .get(CONTENT_TYPE)

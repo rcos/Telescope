@@ -132,8 +132,11 @@ impl TelescopeError {
         // page template later.
         let path = req.path();
 
-        // Get the status code for this response.
-        let status_code: StatusCode = self.status_code();
+        // Get the status code and canonical reason for this response.
+        let status_code: u16 = self.status_code().as_u16();
+        let canonical_reason: &'static str = self.status_code()
+            .canonical_reason()
+            .unwrap_or("Unknown Error");
 
         // Create an inner template depending on the error.
         let inner_template: Template = match self {
@@ -142,7 +145,42 @@ impl TelescopeError {
                 "We could not find the page you are looking for. If you think this is in \
                 error, please reach out to a coordinator or make an issue on the Github repo."),
 
-            _ => unimplemented!()
+            TelescopeError::NotImplemented => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                "The telescope developers have not finished implementing this page. Please \
+                contact a coordinator AND open a GitHub issue."),
+
+            TelescopeError::ResourceNotFound { header, message} =>
+                jumbotron::new(format!("{} - {}", status_code, header), message),
+
+            TelescopeError::FutureCanceled => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                "An internal future was canceled unexpectedly. Please try again. If you \
+                keep seeing this error message, contact a coordinator and open an issue on the \
+                Telescope GitHub repository."),
+
+            TelescopeError::LettreFileError {description, ..} => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                format!("There was an error saving a server generated email to the local \
+                filesystem. Please contact a coordinator and open a GitHub issue. Internal \
+                error description: \"{}\"", description)),
+
+            TelescopeError::LettreSmtpError {description, ..} => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                format!("There was an error sending a server generated email via SMTP. \
+                Please contact a coordinator and open a GitHub issue on the Telescope repository. \
+                Internal error description: \"{}\"", description)),
+
+            TelescopeError::NegativeSmtpResponse(response) => jumbotron::new(
+                
+            )
+
+            // If there is a variant without an error page implementation,
+            // log an error message and render the unimplemented page.
+            other => return {
+                error!("{} does not have an error page implementation.", other);
+                TelescopeError::NotImplemented.render_error_page(req)
+            },
         };
 
         // Put jumbotron in a page and return the content.
