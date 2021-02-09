@@ -350,6 +350,38 @@ COMMENT ON COLUMN public.enrollments.final_grade IS '0.0-100.0';
 
 
 --
+-- Name: external_organizations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_organizations (
+    external_organization_id integer NOT NULL,
+    title character varying NOT NULL,
+    homepage public.url NOT NULL,
+    contact_emails public.url[] DEFAULT '{}'::public.url[] NOT NULL
+);
+
+
+--
+-- Name: external_organizations_external_organization_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.external_organizations_external_organization_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: external_organizations_external_organization_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.external_organizations_external_organization_id_seq OWNED BY public.external_organizations.external_organization_id;
+
+
+--
 -- Name: final_grade_appeal; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -733,7 +765,7 @@ CREATE TABLE public.projects (
     homepage_url public.url,
     repository_urls public.url[] NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    is_external boolean DEFAULT false NOT NULL
+    external_organization_id integer
 );
 
 
@@ -763,6 +795,13 @@ COMMENT ON COLUMN public.projects.cover_image_url IS 'URL to logo image';
 --
 
 COMMENT ON COLUMN public.projects.homepage_url IS 'Optional link to project homepage';
+
+
+--
+-- Name: COLUMN projects.external_organization_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.projects.external_organization_id IS 'Optional external org this project belongs to, e.g. IBM';
 
 
 --
@@ -1281,6 +1320,13 @@ ALTER TABLE ONLY public.bonus_attendances ALTER COLUMN bonus_attendance_id SET D
 
 
 --
+-- Name: external_organizations external_organization_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_organizations ALTER COLUMN external_organization_id SET DEFAULT nextval('public.external_organizations_external_organization_id_seq'::regclass);
+
+
+--
 -- Name: meetings meeting_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1345,6 +1391,14 @@ ALTER TABLE ONLY public.chat_associations
 
 ALTER TABLE ONLY public.enrollments
     ADD CONSTRAINT enrollments_pkey PRIMARY KEY (semester_id, username);
+
+
+--
+-- Name: external_organizations external_organizations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_organizations
+    ADD CONSTRAINT external_organizations_pkey PRIMARY KEY (external_organization_id);
 
 
 --
@@ -1832,6 +1886,14 @@ ALTER TABLE ONLY public.project_presentations
 
 
 --
+-- Name: projects projects_external_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_external_organization_id_fkey FOREIGN KEY (external_organization_id) REFERENCES public.external_organizations(external_organization_id);
+
+
+--
 -- Name: small_group_mentors small_group_mentors_small_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1993,4 +2055,6 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20210122203649'),
     ('20210122222933'),
     ('20210208222336'),
-    ('20210208223049');
+    ('20210208223049'),
+    ('20210209004802'),
+    ('20210209005151');
