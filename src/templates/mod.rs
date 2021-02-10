@@ -1,12 +1,8 @@
-//pub mod developers;
-//pub mod emails;
-//pub mod jumbotron;
 pub mod navbar;
 pub mod page;
-//pub mod profile;
-// pub mod forms;
 pub mod jumbotron;
 pub mod static_pages;
+pub mod login;
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
