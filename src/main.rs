@@ -45,9 +45,6 @@ fn main() -> std::io::Result<()> {
         .expect("Could not create SSL Acceptor.");
     config.tls_config.init_tls_acceptor(&mut tls_builder);
 
-    // generate a random key to encrypt cookies.
-    //let cookie_key = OsRng::default().gen::<[u8; 32]>();
-
     // Get ports for redirecting HTTP to HTTPS
     let http_port = config
         .bind_http
@@ -83,14 +80,6 @@ fn main() -> std::io::Result<()> {
             .wrap(web::error_rendering_middleware::TelescopeErrorHandler)
             // Compression middleware
             .wrap(middleware::Compress::default())
-            // Identity and authentication middleware.
-            // .wrap(IdentityService::new(
-            //     CookieIdentityPolicy::new(&cookie_key)
-            //         .name(cookies::AUTH_TOKEN)
-            //         .secure(true)
-            //         // Cookies / sessions expire after 24 hours
-            //         .max_age_time(time::Duration::hours(24)),
-            // ))
             // Redirect to HTTP -> HTTPS middleware.
             .wrap(redirect_middleware.build())
             // logger middleware
