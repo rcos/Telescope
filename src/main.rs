@@ -10,7 +10,6 @@ extern crate serde;
 #[macro_use]
 extern crate derive_more;
 
-// mod web;
 mod app_data;
 mod env;
 mod error;
