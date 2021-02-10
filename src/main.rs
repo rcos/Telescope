@@ -17,20 +17,17 @@ extern crate async_trait;
 extern crate derive_more;
 
 // mod web;
+mod app_data;
 mod env;
-mod templates;
 mod error;
 mod models;
-mod app_data;
+mod templates;
 mod web;
 
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::static_pages::{
-        index::LandingPage,
-        projects::ProjectsPage,
-        sponsors::SponsorsPage,
-        StaticPage
+        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, StaticPage,
     },
 };
 use actix::prelude::*;

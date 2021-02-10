@@ -1,6 +1,6 @@
 //! Models pertaining to users and their accounts on the RCOS database.
 
-use chrono::{Utc, DateTime};
+use chrono::{DateTime, Utc};
 
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -21,7 +21,7 @@ pub enum UserAccountType {
     Mattermost,
     GitHub,
     GitLab,
-    BitBucket
+    BitBucket,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -33,7 +33,7 @@ pub struct User {
     cohort: Option<i32>,
     role: UserRole,
     timezone: String,
-    created_at: DateTime<Utc>
+    created_at: DateTime<Utc>,
 }
 
 #[derive(Clone, Deserialize, Debug, Serialize)]
@@ -42,5 +42,5 @@ pub struct UserAccount {
     #[serde(rename = "type")]
     ty: UserAccountType,
     account_id: String,
-    created_at: DateTime<Utc>
+    created_at: DateTime<Utc>,
 }

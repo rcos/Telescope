@@ -1,8 +1,8 @@
-use crate::templates::Template;
-use crate::templates::navbar;
-use serde_json::Value;
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
+use crate::templates::navbar;
+use crate::templates::Template;
+use serde_json::Value;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";
@@ -25,7 +25,7 @@ pub const VERSION: &'static str = "version";
 pub fn of(
     req_path: &str,
     title: impl Into<Value>,
-    content: &Template
+    content: &Template,
 ) -> Result<Template, TelescopeError> {
     let content_rendered = AppData::global().render_template(content)?;
     Ok(Template::new(TEMPLATE_PATH)

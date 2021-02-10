@@ -4,10 +4,10 @@ use lettre::smtp::{
 };
 use lettre::EmailAddress;
 use openssl::ssl::{SslAcceptorBuilder, SslFiletype};
+use std::sync::Arc;
 use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
-use std::sync::Arc;
 
 /// The Tls credentials of a given configuration.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -58,7 +58,7 @@ pub struct GithubOauthConfig {
     /// The GitHub OAuth application client id.
     pub client_id: String,
     /// The GitHub OAuth application client secret.
-    pub client_secret: String
+    pub client_secret: String,
 }
 
 /// The config of the server instance.
@@ -106,7 +106,7 @@ pub struct ConcreteConfig {
     /// The email configuration.
     pub email_config: EmailSenderConfig,
     /// The GitHub OAuth Application Credentials.
-    pub github_credentials: GithubOauthConfig
+    pub github_credentials: GithubOauthConfig,
 }
 
 impl TlsConfig {
@@ -255,7 +255,6 @@ pub fn init() {
 pub fn global_config() -> Arc<ConcreteConfig> {
     CONFIG.clone()
 }
-
 
 /// Digest and handle arguments from the command line. Read arguments from environment
 /// variables where necessary. Construct and return the configuration specified.

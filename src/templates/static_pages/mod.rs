@@ -1,10 +1,8 @@
-use crate::{
-    templates::{page, Template},
-};
-use actix_web::HttpRequest;
 use crate::error::TelescopeError;
-use futures::future::Ready;
+use crate::templates::{page, Template};
+use actix_web::HttpRequest;
 use futures::future::ready;
+use futures::future::Ready;
 
 pub mod index;
 pub mod projects;

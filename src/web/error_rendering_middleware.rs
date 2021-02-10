@@ -1,17 +1,17 @@
 //! Middleware for rendering telescope errors into full pages on the way out.
 
-use actix_web::dev::{Transform, ServiceRequest, ServiceResponse, Service, HttpResponseBuilder};
-use actix_web::error::Error as ActixError;
-use futures::future::{Ready, ok};
-use futures::task::{Context, Poll};
-use std::pin::Pin;
 use crate::error::{TelescopeError, TELESCOPE_ERROR_MIME};
-use std::future::Future;
+use actix_web::body::{Body, ResponseBody};
+use actix_web::dev::{HttpResponseBuilder, Service, ServiceRequest, ServiceResponse, Transform};
+use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;
-use actix_web::{HttpResponse, ResponseError};
-use actix_web::body::{ResponseBody, Body};
-use futures::TryStreamExt;
 use actix_web::HttpRequest;
+use actix_web::{HttpResponse, ResponseError};
+use futures::future::{ok, Ready};
+use futures::task::{Context, Poll};
+use futures::TryStreamExt;
+use std::future::Future;
+use std::pin::Pin;
 
 /// The factory to create handlers for telescope errors.
 pub struct TelescopeErrorHandler;
@@ -20,7 +20,7 @@ pub struct TelescopeErrorHandler;
 /// into the appropriate web pages.
 pub struct TelescopeErrorHandlerMiddleware<S> {
     /// The next service in the chain.
-    service: S
+    service: S,
 }
 
 impl<S> Transform<S> for TelescopeErrorHandler
@@ -67,11 +67,10 @@ where
             let mut service_response: ServiceResponse = service_response_future.await?;
 
             // See if the success response is a serialized telescope error.
-            let has_telescope_mime: bool = service_response.headers()
+            let has_telescope_mime: bool = service_response
+                .headers()
                 .get(CONTENT_TYPE)
-                .map_or(false, |val| {
-                    val == TELESCOPE_ERROR_MIME
-                });
+                .map_or(false, |val| val == TELESCOPE_ERROR_MIME);
 
             // If not just return it as is.
             if !has_telescope_mime {
@@ -106,7 +105,8 @@ where
                 .header(CONTENT_TYPE, "text/html;charset=UTF-8")
                 .body(rendered);
             // Construct and return the appropriate service response.
-            let final_response: ServiceResponse = service_response.into_response(intermediate_response);
+            let final_response: ServiceResponse =
+                service_response.into_response(intermediate_response);
             return Ok(final_response);
         })
     }

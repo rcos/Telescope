@@ -1,18 +1,18 @@
+use crate::error::TelescopeError;
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::Template,
 };
 use actix_web::web::block;
 use handlebars::{Handlebars, RenderError};
+use lettre::smtp::response::Response as SmtpResponse;
 use lettre::{
     stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
 };
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
-use crate::error::TelescopeError;
-use lettre::smtp::response::Response as SmtpResponse;
 
-lazy_static!{
+lazy_static! {
     /// Lazy Static to store app data at runtime.
     static ref APP_DATA: Arc<AppData> = {
         Arc::new(AppData::new())
@@ -98,13 +98,11 @@ impl AppData {
         M: Into<SendableEmail> + Clone + Send + Sync + 'static,
     {
         if let Some(mut t) = self.get_stub_transport() {
-            t.send(mail.clone().into())
-                .expect("Stub Transport Error");
+            t.send(mail.clone().into()).expect("Stub Transport Error");
         }
 
         if let Some(mut t) = self.get_file_mail_transport() {
-            t.send(mail.clone().into())
-                .map_err(TelescopeError::from)?;
+            t.send(mail.clone().into()).map_err(TelescopeError::from)?;
         }
 
         if let Some(mut t) = self.get_smtp_transport() {
@@ -116,7 +114,9 @@ impl AppData {
                 let res = t.send(mail.into());
                 t.close();
                 res
-            }).await.map_err(TelescopeError::from)?;
+            })
+            .await
+            .map_err(TelescopeError::from)?;
 
             // If the response from the SMTP server is negative, return it as an
             // error.
@@ -135,10 +135,11 @@ impl AppData {
 
     /// Render a handlebars template using this object's registry.
     pub fn render_template(&self, template: &Template) -> Result<String, RenderError> {
-        self.get_handlebars_registry().render(template.handlebars_file, &template)
+        self.get_handlebars_registry()
+            .render(template.handlebars_file, &template)
     }
 
-    /// Clone the mailbox used to send telescope related email. 
+    /// Clone the mailbox used to send telescope related email.
     pub fn email_sender(&self) -> Mailbox {
         self.mail_sender.clone()
     }

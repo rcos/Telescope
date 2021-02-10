@@ -1,18 +1,18 @@
 //! Error handling.
 
-use handlebars::RenderError;
+use crate::templates::{jumbotron, page, Template};
+use actix_web::dev::HttpResponseBuilder;
+use actix_web::error::Error as ActixError;
+use actix_web::http::header::CONTENT_TYPE;
+use actix_web::http::StatusCode;
 use actix_web::rt::blocking::BlockingError;
-use std::fmt;
-use std::error::Error;
+use actix_web::{HttpRequest, HttpResponse, ResponseError};
+use handlebars::RenderError;
 use lettre::file::error::Error as LettreFileError;
 use lettre::smtp::error::Error as LettreSmtpError;
 use lettre::smtp::response::Response as SmtpResponse;
-use actix_web::{ResponseError, HttpResponse, HttpRequest};
-use actix_web::http::StatusCode;
-use actix_web::error::Error as ActixError;
-use actix_web::http::header::CONTENT_TYPE;
-use actix_web::dev::HttpResponseBuilder;
-use crate::templates::{Template, jumbotron, page};
+use std::error::Error;
+use std::fmt;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -71,7 +71,7 @@ pub enum TelescopeError {
         /// serialization.
         source: Option<LettreFileError>,
         /// A description of the cause.
-        description: String
+        description: String,
     },
 
     #[display(fmt = "Lettre SMTP Error: {}", description)]
@@ -85,7 +85,7 @@ pub enum TelescopeError {
         /// serialization.
         source: Option<LettreSmtpError>,
         /// The description of the error.
-        description: String
+        description: String,
     },
 
     #[error(ignore)]
@@ -106,7 +106,7 @@ impl TelescopeError {
     pub fn resource_not_found(header: impl Into<String>, message: impl Into<String>) -> Self {
         Self::ResourceNotFound {
             header: header.into(),
-            message: message.into()
+            message: message.into(),
         }
     }
 
@@ -119,7 +119,7 @@ impl TelescopeError {
     pub fn bad_request(header: impl Into<String>, message: impl Into<String>) -> Self {
         Self::BadRequest {
             header: header.into(),
-            message: message.into()
+            message: message.into(),
         }
     }
 
@@ -132,7 +132,8 @@ impl TelescopeError {
 
         // Get the status code and canonical reason for this response.
         let status_code: u16 = self.status_code().as_u16();
-        let canonical_reason: &'static str = self.status_code()
+        let canonical_reason: &'static str = self
+            .status_code()
             .canonical_reason()
             .unwrap_or("Unknown Error");
 
@@ -141,54 +142,77 @@ impl TelescopeError {
             TelescopeError::PageNotFound => jumbotron::new(
                 format!("{} - Page Not Found", status_code),
                 "We could not find the page you are looking for. If you think this is in \
-                error, please reach out to a coordinator or make an issue on the Github repo."),
+                error, please reach out to a coordinator or make an issue on the Github repo.",
+            ),
 
             TelescopeError::NotImplemented => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
                 "The telescope developers have not finished implementing this page. Please \
-                contact a coordinator AND open a GitHub issue."),
+                contact a coordinator AND open a GitHub issue.",
+            ),
 
-            TelescopeError::ResourceNotFound { header, message} =>
-                jumbotron::new(format!("{} - {}", status_code, header), message),
+            TelescopeError::ResourceNotFound { header, message } => {
+                jumbotron::new(format!("{} - {}", status_code, header), message)
+            }
 
             TelescopeError::FutureCanceled => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
                 "An internal future was canceled unexpectedly. Please try again. If you \
                 keep seeing this error message, contact a coordinator and open an issue on the \
-                Telescope GitHub repository."),
+                Telescope GitHub repository.",
+            ),
 
-            TelescopeError::LettreFileError {description, ..} => jumbotron::new(
+            TelescopeError::LettreFileError { description, .. } => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
-                format!("There was an error saving a server generated email to the local \
+                format!(
+                    "There was an error saving a server generated email to the local \
                 filesystem. Please contact a coordinator and open a GitHub issue. Internal \
-                error description: \"{}\"", description)),
+                error description: \"{}\"",
+                    description
+                ),
+            ),
 
-            TelescopeError::LettreSmtpError {description, ..} => jumbotron::new(
+            TelescopeError::LettreSmtpError { description, .. } => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
-                format!("There was an error sending a server generated email via SMTP. \
+                format!(
+                    "There was an error sending a server generated email via SMTP. \
                 Please contact a coordinator and open a GitHub issue on the Telescope repository. \
-                Internal error description: \"{}\"", description)),
+                Internal error description: \"{}\"",
+                    description
+                ),
+            ),
 
             TelescopeError::NegativeSmtpResponse(response) => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
-                format!("The internal SMTP client received a negative response. Please \
+                format!(
+                    "The internal SMTP client received a negative response. Please \
                 contact a coordinator and create an issue on Telescope's GitHub repo. Error code \
-                {}.", response.code)),
+                {}.",
+                    response.code
+                ),
+            ),
 
             TelescopeError::RenderingError(err) => jumbotron::new(
                 format!("{} - Internal Server Template Error", status_code),
-                format!("{}. Please create an issue on Telescope's GitHub and contact a \
-                coordinator.", err)),
+                format!(
+                    "{}. Please create an issue on Telescope's GitHub and contact a \
+                coordinator.",
+                    err
+                ),
+            ),
 
-            TelescopeError::BadRequest {header, message} =>
-                jumbotron::new(format!("{} - {}", status_code, header), message),
+            TelescopeError::BadRequest { header, message } => {
+                jumbotron::new(format!("{} - {}", status_code, header), message)
+            }
 
             // If there is a variant without an error page implementation,
             // log an error message and render the unimplemented page.
-            other => return {
-                error!("{} does not have an error page implementation.", other);
-                TelescopeError::NotImplemented.render_error_page(req)
-            },
+            other => {
+                return {
+                    error!("{} does not have an error page implementation.", other);
+                    TelescopeError::NotImplemented.render_error_page(req)
+                }
+            }
         };
 
         // Put jumbotron in a page and return the content.
@@ -203,11 +227,13 @@ impl TelescopeError {
 }
 
 impl<E> From<BlockingError<E>> for TelescopeError
-where E: Into<TelescopeError> + fmt::Debug {
+where
+    E: Into<TelescopeError> + fmt::Debug,
+{
     fn from(error: BlockingError<E>) -> TelescopeError {
         match error {
             BlockingError::Canceled => TelescopeError::FutureCanceled,
-            BlockingError::Error(e) => e.into()
+            BlockingError::Error(e) => e.into(),
         }
     }
 }
@@ -228,8 +254,8 @@ impl ResponseError for TelescopeError {
     // Override the default status code (500 - Internal Server Error) here.
     fn status_code(&self) -> StatusCode {
         match self {
-            TelescopeError::BadRequest {..} => StatusCode::BAD_REQUEST,
-            TelescopeError::ResourceNotFound {..} => StatusCode::NOT_FOUND,
+            TelescopeError::BadRequest { .. } => StatusCode::BAD_REQUEST,
+            TelescopeError::ResourceNotFound { .. } => StatusCode::NOT_FOUND,
             TelescopeError::PageNotFound => StatusCode::NOT_FOUND,
             TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
@@ -246,8 +272,8 @@ impl ResponseError for TelescopeError {
         // Since we cannot render the html page here, we serialize
         // it to JSON and let the custom error handling middleware
         // render the HTTP page off of it later.
-        let json_str: String = serde_json::to_string(self)
-            .expect("Could not serialize self to JSON.");
+        let json_str: String =
+            serde_json::to_string(self).expect("Could not serialize self to JSON.");
 
         // Create and return the response with the JSON and the custom
         // content type here.
@@ -275,7 +301,7 @@ struct RenderErrorDef {
     #[serde(skip)]
     #[serde(getter = "Option::None")]
     /// Private field of remote struct. Skipped for serde.
-    cause: Option<Box<dyn Error + Send + Sync + 'static>>
+    cause: Option<Box<dyn Error + Send + Sync + 'static>>,
 }
 
 impl From<RenderErrorDef> for RenderError {
@@ -299,7 +325,6 @@ impl From<LettreFileError> for TelescopeError {
     }
 }
 
-
 impl From<LettreSmtpError> for TelescopeError {
     fn from(err: LettreSmtpError) -> Self {
         let description: String = format!("{}", err);
@@ -310,4 +335,3 @@ impl From<LettreSmtpError> for TelescopeError {
         };
     }
 }
-

@@ -5,19 +5,16 @@ pub mod navbar;
 pub mod page;
 //pub mod profile;
 // pub mod forms;
-pub mod static_pages;
 pub mod jumbotron;
+pub mod static_pages;
 
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
+use actix_web::{HttpRequest, HttpResponse, Responder};
+use futures::future::{ready, Ready};
 use serde::Serialize;
 use serde_json::{Map, Value};
 use std::ops::{Index, IndexMut};
-use crate::app_data::AppData;
-use crate::error::TelescopeError;
-use actix_web::{Responder, HttpRequest, HttpResponse};
-use futures::future::{
-    Ready,
-    ready
-};
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]

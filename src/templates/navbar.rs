@@ -47,7 +47,7 @@ fn with_defaults(req_path: &str) -> Template {
         item(req_path, "Projects", "/projects"),
         item(req_path, "Developers", "/developers"),
         item(req_path, "Sponsors", "/sponsors"),
-        item(req_path, "Blog", "/blog")
+        item(req_path, "Blog", "/blog"),
     ];
 
     // Add items to empty navbar.
@@ -56,13 +56,10 @@ fn with_defaults(req_path: &str) -> Template {
 
 /// Construct a navbar for an anonymous viewer by adding onto the defaults.
 pub fn userless(req_path: &str) -> Template {
-    let right_items = vec![
-        item(req_path, "Login with GitHub", "/login")
-            .field(CLASS, "btn mr-2 mb-2 btn-primary")
-            .field(ICON, "github"),
-    ];
+    let right_items = vec![item(req_path, "Login with GitHub", "/login")
+        .field(CLASS, "btn mr-2 mb-2 btn-primary")
+        .field(ICON, "github")];
 
     // Add items to right side of navbar.
     with_defaults(req_path).field(RIGHT_ITEMS, right_items)
 }
-
