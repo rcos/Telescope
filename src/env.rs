@@ -8,6 +8,7 @@ use std::sync::Arc;
 use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
+use oauth2::{ClientId, ClientSecret};
 
 /// The Tls credentials of a given configuration.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -56,9 +57,9 @@ pub struct SmtpConfig {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GithubOauthConfig {
     /// The GitHub OAuth application client id.
-    pub client_id: String,
+    pub client_id: ClientId,
     /// The GitHub OAuth application client secret.
-    pub client_secret: String,
+    pub client_secret: ClientSecret,
 }
 
 /// The config of the server instance.
