@@ -8,17 +8,12 @@ pub mod page;
 pub mod static_pages;
 pub mod jumbotron;
 
-use handlebars::Handlebars;
 use serde::Serialize;
 use serde_json::{Map, Value};
 use std::ops::{Index, IndexMut};
 use crate::app_data::AppData;
-use std::sync::Arc;
 use crate::error::TelescopeError;
-use actix_web::{Responder, HttpRequest, Error, HttpResponse};
-use actix_web::body::Body;
-use actix_web::web::block;
-use actix_web::rt::blocking::BlockingError;
+use actix_web::{Responder, HttpRequest, HttpResponse};
 use futures::future::{
     Ready,
     ready
@@ -116,7 +111,7 @@ impl Responder for Template {
             .render_template(&self)
             .map(|rendered: String| {
                 HttpResponse::Ok()
-                    .content_type("text/html; charset=UTF-8")
+                    .content_type("text/html;charset=UTF-8")
                     .body(rendered)
             })
             .map_err(TelescopeError::from);

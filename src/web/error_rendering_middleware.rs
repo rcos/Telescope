@@ -2,7 +2,7 @@
 
 use actix_web::dev::{Transform, ServiceRequest, ServiceResponse, Service, HttpResponseBuilder};
 use actix_web::error::Error as ActixError;
-use futures::future::{Ready, ok, BoxFuture};
+use futures::future::{Ready, ok};
 use futures::task::{Context, Poll};
 use std::pin::Pin;
 use crate::error::{TelescopeError, TELESCOPE_ERROR_MIME};
@@ -11,9 +11,7 @@ use actix_web::http::header::CONTENT_TYPE;
 use actix_web::{HttpResponse, ResponseError};
 use actix_web::body::{ResponseBody, Body};
 use futures::TryStreamExt;
-use actix_web::web::Buf;
 use actix_web::HttpRequest;
-use actix_web::http::{HeaderMap, HeaderValue};
 
 /// The factory to create handlers for telescope errors.
 pub struct TelescopeErrorHandler;

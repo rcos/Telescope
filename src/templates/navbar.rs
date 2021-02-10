@@ -1,7 +1,6 @@
 //! Navbar template constants and functions.
 
 use crate::templates::Template;
-use actix_web::HttpRequest;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";

@@ -3,7 +3,6 @@ use crate::templates::navbar;
 use serde_json::Value;
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
-use actix_web::HttpRequest;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";

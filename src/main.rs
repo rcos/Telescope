@@ -24,7 +24,6 @@ mod models;
 mod app_data;
 mod web;
 
-use app_data::AppData;
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::static_pages::{
@@ -34,16 +33,12 @@ use crate::{
         StaticPage
     },
 };
-use std::sync::Arc;
 use actix::prelude::*;
 use actix_files as afs;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
-use std::process::exit;
-use crate::error::TelescopeError;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -61,7 +56,7 @@ fn main() -> std::io::Result<()> {
     config.tls_config.init_tls_acceptor(&mut tls_builder);
 
     // generate a random key to encrypt cookies.
-    let cookie_key = OsRng::default().gen::<[u8; 32]>();
+    //let cookie_key = OsRng::default().gen::<[u8; 32]>();
 
     // Get ports for redirecting HTTP to HTTPS
     let http_port = config

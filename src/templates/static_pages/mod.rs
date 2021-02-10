@@ -1,8 +1,7 @@
 use crate::{
     templates::{page, Template},
 };
-use actix_web::{HttpResponse, HttpRequest};
-use std::marker::PhantomData;
+use actix_web::HttpRequest;
 use crate::error::TelescopeError;
 use futures::future::Ready;
 use futures::future::ready;

@@ -1,6 +1,6 @@
 //! Models pertaining to users and their accounts on the RCOS database.
 
-use chrono::{Date, Utc, DateTime};
+use chrono::{Utc, DateTime};
 
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
