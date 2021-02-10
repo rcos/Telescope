@@ -68,3 +68,5 @@ jsonwebtoken = "~7.2"
 oauth2 = {version = "~3.0", features = ["futures-03"], default_features = false}
 # Fast Concurrent HashMap.
 dashmap = "~4.0"
+# Async methods in traits
+async-trait = "~0.1"

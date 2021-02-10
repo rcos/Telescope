@@ -2766,6 +2766,7 @@ dependencies = [
  "actix-identity",
  "actix-web",
  "actix-web-middleware-redirect-scheme",
+ "async-trait",
  "chrono",
  "dashmap",
  "derive_more",

@@ -100,9 +100,14 @@ pub enum TelescopeError {
     /// Error to send when user accesses something that is not yet implemented.
     NotImplemented,
 
-    #[display(fmt = "Could not save CSRF token")]
-    /// Error saving CSRF Token.
-    CSRFSaveError,
+    #[display(fmt = "Could not extract IP address from HTTP request")]
+    /// Error saving CSRF Token. This should report as an internal server error
+    IpExtractionError,
+
+    #[display(fmt = "Could not find CSRF token")]
+    /// CSRF Token not found. This reports a Not Found status code but should
+    /// usually be caught before reaching the user (if expected).
+    CsrfTokenNotFound,
 }
 
 impl TelescopeError {
@@ -208,9 +213,16 @@ impl TelescopeError {
             TelescopeError::BadRequest { header, message } =>
                 jumbotron::new(format!("{} - {}", status_code, header), message),
 
-            TelescopeError::CSRFSaveError => jumbotron::new(
-                format!("{} - Internal Server CSRF Error", status_code),
-                "Could not save internal CSRF token for this request."
+            TelescopeError::IpExtractionError => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                "Could not determine remote IP address of this request for CSRF purposes. \
+                Please contact a coordinator and create a GitHub issue."
+            ),
+
+            TelescopeError::CsrfTokenNotFound => jumbotron::new(
+                format!("{} - CSRF Token Not Found", status_code),
+                "Could not find the CSRF token for this request. Please try again. If this \
+                error continues, please contact a coordinator and create a GitHub issue."
             ),
 
             // If there is a variant without an error page implementation,
@@ -266,6 +278,7 @@ impl ResponseError for TelescopeError {
             TelescopeError::ResourceNotFound { .. } => StatusCode::NOT_FOUND,
             TelescopeError::PageNotFound => StatusCode::NOT_FOUND,
             TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
+            TelescopeError::CsrfTokenNotFound => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

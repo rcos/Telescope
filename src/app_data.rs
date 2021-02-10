@@ -34,8 +34,6 @@ pub struct AppData {
     use_stub_mailer: bool,
     /// The email sender address.
     mail_sender: Mailbox,
-    /// The OAuth2 client used to interact with GitHub.
-    github_oauth_client: BasicClient
 }
 
 impl AppData {
@@ -57,15 +55,6 @@ impl AppData {
         template_registry.set_strict_mode(true);
         info!("Handlebars templates registered.");
 
-        // Create GitHub OAuth2 client.
-        let github_client = BasicClient::new(
-            config.github_credentials.client_id.clone(),
-            Some(config.github_credentials.client_secret.clone()),
-            AuthUrl::new("https://github.com/login/oauth/authorize".into())
-                .expect("Invalid GitHub Auth URL"),
-            Some(TokenUrl::new("https://github.com/login/oauth/access_token".into())
-                .expect("Invalid GitHub Token URL")));
-
         Self {
             template_registry: Arc::new(template_registry),
             use_stub_mailer: config.email_config.stub,
@@ -75,7 +64,6 @@ impl AppData {
                 name: config.email_config.name.clone(),
                 address: config.email_config.address.to_string(),
             },
-            github_oauth_client: github_client
         }
     }
 
@@ -157,10 +145,5 @@ impl AppData {
     /// Clone the mailbox used to send telescope related email.
     pub fn email_sender(&self) -> Mailbox {
         self.mail_sender.clone()
-    }
-
-    /// Get a reference to the GitHub OAuth2 client.
-    pub fn github_oauth_client(&self) -> &BasicClient {
-        &self.github_oauth_client
     }
 }
