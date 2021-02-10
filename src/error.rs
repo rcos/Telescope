@@ -172,8 +172,18 @@ impl TelescopeError {
                 Internal error description: \"{}\"", description)),
 
             TelescopeError::NegativeSmtpResponse(response) => jumbotron::new(
-                
-            )
+                format!("{} - {}", status_code, canonical_reason),
+                format!("The internal SMTP client received a negative response. Please \
+                contact a coordinator and create an issue on Telescope's GitHub repo. Error code \
+                {}.", response.code)),
+
+            TelescopeError::RenderingError(err) => jumbotron::new(
+                format!("{} - Internal Server Template Error", status_code),
+                format!("{}. Please create an issue on Telescope's GitHub and contact a \
+                coordinator.", err)),
+
+            TelescopeError::BadRequest {header, message} =>
+                jumbotron::new(format!("{} - {}", status_code, header), message),
 
             // If there is a variant without an error page implementation,
             // log an error message and render the unimplemented page.
