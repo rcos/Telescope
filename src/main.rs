@@ -1,7 +1,4 @@
 #[macro_use]
-extern crate actix_web;
-
-#[macro_use]
 extern crate log;
 
 #[macro_use]
@@ -9,9 +6,6 @@ extern crate lazy_static;
 
 #[macro_use]
 extern crate serde;
-
-#[macro_use]
-extern crate async_trait;
 
 #[macro_use]
 extern crate derive_more;
@@ -35,7 +29,6 @@ use actix_files as afs;
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use openssl::ssl::{SslAcceptor, SslMethod};
-use rand::{rngs::OsRng, Rng};
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
