@@ -2,3 +2,4 @@
 
 pub mod error_rendering_middleware;
 pub mod services;
+pub mod identity_providers;

@@ -1,22 +1,33 @@
 :root {
-    --rcos-color: #ff1a1a;
-    --telescope-color: #dd2020;
+    --rcos-red: #ff1a1a;
+    --telescope-red: #dd2020;
+    --rpi-red: #d6001c;
+    --github-blue: #0366d6;
 }
 
 /*
 RCOS themed buttons.
 */
 .btn.btn-rcos {
-    background: var(--rcos-color);
-    color: var(--light);
+    background: var(--rcos-red);
+    color: white;
 }
 
 /*
-RCOS Themed landing page banner
-*/
-.rcos-banner {
+GitHub themed buttons.
+ */
+.btn.btn-github {
+    background: var(--github-blue);
     color: white;
-    background: var(--rcos-color);
+}
+
+/*
+RPI styled buttons.
+ */
+
+.btn.btn-rpi {
+    background: var(--rpi-red);
+    color: white;
 }
 
 /*
