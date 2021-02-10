@@ -31,6 +31,10 @@ use actix_files as afs;
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use openssl::ssl::{SslAcceptor, SslMethod};
+use rand::rngs::OsRng;
+use rand::Rng;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::cookie::SameSite;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -76,15 +80,31 @@ fn main() -> std::io::Result<()> {
         redirect_middleware.replacements(&[(http_port.unwrap(), https_port.unwrap())]);
     }
 
+    // Setup identity middleware.
+    // Create secure random sequence to encrypt cookie identities.
+    let cookie_key: [u8; 32] = OsRng::default().gen::<[u8; 32]>();
+
+    // Construct and start main server instance.
     HttpServer::new(move || {
+        // Create cookie policy.
+        let cookie_policy = CookieIdentityPolicy::new(&cookie_key)
+            // Transmit cookies over HTTPS only.
+            .secure(true)
+            .name("telescope_auth")
+            .same_site(SameSite::Strict)
+            // Cookies expire after a day.
+            .max_age_time(time::Duration::days(1));
+
         App::new()
             // Middleware to render telescope errors into pages
             .wrap(web::error_rendering_middleware::TelescopeErrorHandler)
-            // Compression middleware
-            .wrap(middleware::Compress::default())
             // Redirect to HTTP -> HTTPS middleware.
             .wrap(redirect_middleware.build())
-            // logger middleware
+            // Cookie Identity middleware.
+            .wrap(IdentityService::new(cookie_policy))
+            // Compression middleware.
+            .wrap(middleware::Compress::default())
+            // Logger middleware
             .wrap(middleware::Logger::default())
             // register Services
             .configure(web::services::register)
