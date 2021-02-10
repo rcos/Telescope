@@ -1,23 +1,29 @@
-use crate::env::{ConcreteConfig, CONFIG};
-use actix_web::web::block;
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    PgConnection,
+use crate::{
+    env::{ConcreteConfig, CONFIG},
+    templates::Template,
 };
-use handlebars::Handlebars;
+use actix_web::web::block;
+use handlebars::{Handlebars, RenderError};
 use lettre::{
     stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
 };
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
+use crate::error::TelescopeError;
+use lettre::smtp::response::Response as SmtpResponse;
+
+lazy_static!{
+    /// Lazy Static to store app data at runtime.
+    static ref APP_DATA: Arc<AppData> = {
+        Arc::new(AppData::new())
+    };
+}
 
 /// Struct to store shared app data and objects.
 #[derive(Clone)]
 pub struct AppData {
     /// The handlebars template registry.
-    pub template_registry: Arc<Handlebars<'static>>,
-    /// Database connection pool
-    db_connection_pool: Pool<ConnectionManager<PgConnection>>,
+    template_registry: Arc<Handlebars<'static>>,
     /// SMTP Mailer client config (if in use).
     smtp_client: Option<SmtpClient>,
     /// Path for file mailer if in use.
@@ -25,12 +31,12 @@ pub struct AppData {
     /// Should mail stubs be created?
     use_stub_mailer: bool,
     /// The email sender address.
-    pub mail_sender: Mailbox,
+    mail_sender: Mailbox,
 }
 
 impl AppData {
     /// Create new App Data object using the global static config.
-    pub fn new() -> Self {
+    fn new() -> Self {
         let config: &ConcreteConfig = &*CONFIG;
         // register handlebars templates
         let mut template_registry = Handlebars::new();
@@ -46,24 +52,8 @@ impl AppData {
         template_registry.set_strict_mode(true);
         info!("Handlebars templates registered.");
 
-        // Set up database connection pool.
-        let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
-        let pool = diesel::r2d2::Pool::builder()
-            // max 12 connections at once
-            .max_size(12)
-            // if a connection cannot be pulled from the pool in 20 seconds, timeout
-            .connection_timeout(std::time::Duration::from_secs(20))
-            .build(manager)
-            .map_err(|e| {
-                error!("Could not create database connection pool {}", e);
-                e
-            })
-            .unwrap();
-        info!("Created database connection pool.");
-
         Self {
             template_registry: Arc::new(template_registry),
-            db_connection_pool: pool,
             use_stub_mailer: config.email_config.stub,
             file_mailer_path: config.email_config.file.clone(),
             smtp_client: config.email_config.make_smtp_client(),
@@ -74,10 +64,9 @@ impl AppData {
         }
     }
 
-    /// Get a clone of the database connection pool (which internally uses an Arc,
-    /// so this is just a reference copy).
-    pub fn clone_db_conn_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
-        self.db_connection_pool.clone()
+    /// Get an [`Arc`] reference to the global, lazily generated app-data.
+    pub fn global() -> Arc<AppData> {
+        APP_DATA.clone()
     }
 
     /// Get an SMTP transport if available.
@@ -104,19 +93,18 @@ impl AppData {
     /// Send an email over all available mailer interfaces.
     /// Any errors caught while mailing will be logged and then an `Err`
     /// will be returned.
-    pub async fn send_mail<M>(&self, mail: M) -> Result<(), ()>
+    pub async fn send_mail<M>(&self, mail: M) -> Result<(), TelescopeError>
     where
         M: Into<SendableEmail> + Clone + Send + Sync + 'static,
     {
         if let Some(mut t) = self.get_stub_transport() {
-            t.send(mail.clone().into())?;
+            t.send(mail.clone().into())
+                .expect("Stub Transport Error");
         }
 
         if let Some(mut t) = self.get_file_mail_transport() {
-            t.send(mail.clone().into()).map_err(|e| {
-                error!("Error while mailing to local file system: {}", e);
-                ()
-            })?;
+            t.send(mail.clone().into())
+                .map_err(TelescopeError::from)?;
         }
 
         if let Some(mut t) = self.get_smtp_transport() {
@@ -124,24 +112,34 @@ impl AppData {
             // will or won't block, but it seems to establish a connection to the
             // SMTP server so I'm assuming it does.
 
-            let result = block(move || {
+            let response: SmtpResponse = block(move || {
                 let res = t.send(mail.into());
                 t.close();
                 res
-            })
-            .await;
+            }).await.map_err(TelescopeError::from)?;
 
-            if let Err(e) = result {
-                error!("Could not send mail over SMTP: {}", e);
-                return Err(());
-            } else {
-                let response = result.unwrap();
-                if !response.is_positive() {
-                    return Err(());
-                }
+            // If the response from the SMTP server is negative, return it as an
+            // error.
+            if !response.is_positive() {
+                return Err(TelescopeError::from(response));
             }
         }
 
         Ok(())
+    }
+
+    /// Get an [`Arc`] reference to the template registry.
+    pub fn get_handlebars_registry(&self) -> Arc<Handlebars<'static>> {
+        self.template_registry.clone()
+    }
+
+    /// Render a handlebars template using this object's registry.
+    pub fn render_template(&self, template: &Template) -> Result<String, RenderError> {
+        self.get_handlebars_registry().render(template.handlebars_file, &template)
+    }
+
+    /// Clone the mailbox used to send telescope related email. 
+    pub fn email_sender(&self) -> Mailbox {
+        self.mail_sender.clone()
     }
 }

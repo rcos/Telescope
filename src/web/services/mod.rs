@@ -1,34 +1,10 @@
+//! Web services.
+
+pub mod not_found;
+
 use actix_web::web::ServiceConfig;
 
-pub mod blog;
-pub mod confirm;
-pub mod developers;
-pub mod forgot;
-pub mod recover;
-pub mod login;
-pub mod logout;
-pub mod p404;
-pub mod profile;
-pub mod register;
-
-/// Register services to the actix-web server config.
+/// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {
-    config
-        .service(login::login_get)
-        .service(login::login_post)
-        .service(logout::logout_service)
-        .service(forgot::forgot_page)
-        .service(forgot::recovery_service)
-        .service(recover::recover_form)
-        .service(recover::recovery)
-        .service(register::registration_service)
-        .service(confirm::confirmations_page)
-        .service(confirm::confirm)
-        .service(register::signup_page)
-        .service(profile::profile)
-        .service(profile::settings_page)
-        .service(profile::settings_update)
-        .service(profile::add_email_page)
-        .service(profile::add_email)
-        .service(developers::developers_page);
+    // no services yet.
 }

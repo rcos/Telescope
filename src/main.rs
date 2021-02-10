@@ -11,40 +11,39 @@ extern crate lazy_static;
 extern crate serde;
 
 #[macro_use]
-extern crate diesel;
+extern crate async_trait;
 
+#[macro_use]
+extern crate derive_more;
 
-pub mod util;
-
+// mod web;
+mod env;
+mod templates;
+mod error;
+mod models;
+mod app_data;
 mod web;
 
-mod db_janitor;
-mod env;
-mod models;
-mod schema;
-mod templates;
-
+use app_data::AppData;
 use crate::{
-    db_janitor::DbJanitor,
     env::{ConcreteConfig, CONFIG},
-    models::{emails::Email, password_requirements::PasswordRequirements, users::User},
     templates::static_pages::{
-        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, Static,
+        index::LandingPage,
+        projects::ProjectsPage,
+        sponsors::SponsorsPage,
+        StaticPage
     },
-    web::{app_data::AppData, cookies, services, RequestContext},
 };
-
-//use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
-
+use std::sync::Arc;
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
-use diesel::{Connection, RunQueryDsl};
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::{rngs::OsRng, Rng};
 use std::process::exit;
+use crate::error::TelescopeError;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -54,12 +53,6 @@ fn main() -> std::io::Result<()> {
     // Create the actix runtime.
     let sys = System::new("telescope");
 
-    // Create appdata object.
-    //
-    // Database pool creation and registration of handlebars templates occurs
-    // here.
-    let app_data = AppData::new();
-
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use
     // `openssl req -x509 -newkey rsa:4096 -nodes -keyout tls-ssl/private-key.pem -out tls-ssl/certificate.pem -days 365`
@@ -67,71 +60,8 @@ fn main() -> std::io::Result<()> {
         .expect("Could not create SSL Acceptor.");
     config.tls_config.init_tls_acceptor(&mut tls_builder);
 
-    if config
-        .sysadmin_config
-        .as_ref()
-        .map(|c| c.create)
-        .unwrap_or(false)
-    {
-        let config = config.sysadmin_config.clone().unwrap();
-        let admin_password = config.password.as_str();
-        let admin_email = config.email;
-        let mut user: User = User::new("Telescope admin", admin_password)
-            .map_err(|e: PasswordRequirements| {
-                error!(
-                    "Admin password {} failed to satisfy password requirements.",
-                    admin_password
-                );
-                if !e.not_common_password {
-                    error!(
-                        "Admin password {} is too common. Please choose a different password.",
-                        admin_password
-                    );
-                }
-                if !e.is_min_len {
-                    error!(
-                        "Admin password {} is too short. \
-                        Please choose a password more than {} characters.",
-                        admin_password,
-                        PasswordRequirements::MIN_PASSWORD_LENGTH
-                    )
-                }
-                exit(exitcode::DATAERR)
-            })
-            .unwrap();
-        let email = Email::new_prechecked(user.id, admin_email);
-
-        user.sysadmin = true;
-
-        // I'm pretty sure this has to be written out manually in synchronous
-        // diesel code here, since this is not an async context.
-        let pool = app_data.clone_db_conn_pool();
-        let conn = pool.get().unwrap();
-        conn.transaction::<(), diesel::result::Error, _>(|| {
-            use crate::schema::emails::dsl::emails;
-            use crate::schema::users::dsl::users;
-
-            diesel::insert_into(users).values(&user).execute(&conn)?;
-
-            diesel::insert_into(emails).values(email).execute(&conn)?;
-
-            info!("Successfully added admin user (id: {})", user.id_str());
-            Ok(())
-        })
-        .map_err(|e| {
-            error!("Could not add admin user to database: {}", e);
-            e
-        })
-        .unwrap();
-    }
-
     // generate a random key to encrypt cookies.
     let cookie_key = OsRng::default().gen::<[u8; 32]>();
-
-    /*
-    // memory store for rate limiting.
-    let ratelimit_memstore = MemoryStore::new();
-     */
 
     // Get ports for redirecting HTTP to HTTPS
     let http_port = config
@@ -162,43 +92,32 @@ fn main() -> std::io::Result<()> {
         redirect_middleware.replacements(&[(http_port.unwrap(), https_port.unwrap())]);
     }
 
-    // Database janitor -- This actor runs a few database operations once every
-    // 24 hours to clear out expired database records.
-    let db_pool = app_data.clone_db_conn_pool();
-    DbJanitor::new(db_pool).start();
-
     HttpServer::new(move || {
         App::new()
-            .data(app_data.clone())
+            // Middleware to render telescope errors into pages
+            .wrap(web::error_rendering_middleware::TelescopeErrorHandler)
+            // Compression middleware
+            .wrap(middleware::Compress::default())
             // Identity and authentication middleware.
-            .wrap(IdentityService::new(
-                CookieIdentityPolicy::new(&cookie_key)
-                    .name(cookies::AUTH_TOKEN)
-                    .secure(true)
-                    // Cookies / sessions expire after 24 hours
-                    .max_age_time(time::Duration::hours(24)),
-            ))
-            /*
-            .wrap(
-                RateLimiter::new(MemoryStoreActor::from(ratelimit_memstore.clone()).start())
-                    // rate limit: 100 requests max per minute
-                    .with_interval(std::time::Duration::from_secs(60))
-                    .with_max_requests(100),
-            )
-             */
-            // Redirect to https middleware
+            // .wrap(IdentityService::new(
+            //     CookieIdentityPolicy::new(&cookie_key)
+            //         .name(cookies::AUTH_TOKEN)
+            //         .secure(true)
+            //         // Cookies / sessions expire after 24 hours
+            //         .max_age_time(time::Duration::hours(24)),
+            // ))
+            // Redirect to HTTP -> HTTPS middleware.
             .wrap(redirect_middleware.build())
             // logger middleware
             .wrap(middleware::Logger::default())
-            // register API and Services
-            .configure(web::api::register_apis)
+            // register Services
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
-            .route("/", get().to(Static::<LandingPage>::handle))
-            .route("/projects", get().to(Static::<ProjectsPage>::handle))
-            .route("/sponsors", get().to(Static::<SponsorsPage>::handle))
-            .default_service(aweb::route().to(services::p404::not_found))
+            .route("/", get().to(LandingPage::handle))
+            .route("/projects", get().to(ProjectsPage::handle))
+            .route("/sponsors", get().to(SponsorsPage::handle))
+            .default_service(aweb::to(web::services::not_found::not_found))
     })
     .bind(config.bind_http.clone())
     .expect("Could not bind HTTP/1 (HTTP)")

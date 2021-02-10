@@ -19,13 +19,11 @@ toml = "~0.5"
 # actix actor framework -- system for running server and other tasks.
 actix = "~0.10"
 # actix web server (use exact version)
-actix-web = {version = "~3.3", features = ["openssl"]}
+actix-web = {version = "~3.3", features = ["openssl", "compress"]}
 # static file serving
 actix-files = "~0.5"
 # identity service -- cookie authentication
 actix-identity = "~0.3"
-# ratelimiting (not compatible with actix 3)
-#actix-ratelimit = "~0.2"
 # redirect all traffic over https.
 actix-web-middleware-redirect-scheme = "~3.0"
 # html templating.
@@ -48,10 +46,6 @@ rand = "~0.8"
 lazy_static = "~1.4"
 # utilities for dealing with async futures
 futures = "~0.3"
-# Pasword hashing and verification
-rust-argon2 = "~0.8"
-# Regular expressions
-regex = "~1.4"
 # Markdown - HTML rendering
 pulldown-cmark = "~0.8"
 # Sending emails.
@@ -64,11 +58,13 @@ url = "~2.2"
 # Date and time utilities
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
 time = {version = "~0.2", features = ["serde", "std"]}
-# ORM and query building (to interact with Postgres Database)
-diesel = {version = "~1.4", features = ["uuidv07", "r2d2", "postgres", "chrono"]}
 # Universally unique identifier generation
 uuid = {version = "~0.8", features = ["serde", "v4"]}
-
 # Async functions in traits
-# Add this in when you have time (see src/templates/static_pages)
-# async-trait = "~0.1"
+async-trait = "~0.1"
+# Derive traits like Error and Display
+derive_more = "~0.99"
+# JSON web tokens
+jsonwebtoken = "~7.2"
+# OAuth2 models and flows
+oauth2 = {version = "~3.0", features = ["futures-03"], default_features = false}

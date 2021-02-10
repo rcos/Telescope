@@ -1,146 +1,69 @@
-//! Navbar and navbar links. This file was mostly unchanged in the December 2020
-//! template refactor and it is mostly fine as is at the moment.
+//! Navbar template constants and functions.
 
-use crate::{
-    templates::{forms::login, Template},
-    web::RequestContext,
-};
+use crate::templates::Template;
+use actix_web::HttpRequest;
 
-use uuid::Uuid;
+/// The handlebars key for the links on the left side of the navbar.
+pub const LEFT_ITEMS: &'static str = "left_items";
 
-/// A button that just links to a another part of the site (or another site entirely.)
-/// This is good for most items on the header bar.
-#[derive(Clone, Debug, Serialize)]
-pub struct NavbarLink {
-    /// This is the active (current) page.
-    is_active: bool,
-    /// The location to redirect to.
-    location: String,
-    /// The text of the item. This may not get rendered
-    /// (if using google material design font, for example, this ligatures into a single symbol)
-    text: String,
-    /// CSS classes associated with this link.
-    class: String,
+/// The handlebars key for the links on the right side of the navbar.
+pub const RIGHT_ITEMS: &'static str = "right_items";
+
+/// The handlebars key for denoting whether an item on the navbar is active.
+pub const IS_ACTIVE: &'static str = "is_active";
+
+/// The handlebars key for the URL of a navbar link.
+pub const LOCATION: &'static str = "location";
+
+/// The handlebars key for the CSS class attributes of a link on the navbar.
+pub const CLASS: &'static str = "class";
+
+/// The handlebars key for the text inside a link on the navbar.
+pub const TEXT: &'static str = "text";
+
+/// The handlebars key for an icon next to the text on an item in the navbar.
+pub const ICON: &'static str = "icon";
+
+/// Create an empty navbar template with a reference to the navbar handlebars
+/// file.
+fn empty_navbar() -> Template {
+    Template::new("navbar/navbar")
 }
 
-impl NavbarLink {
-    /// Create a new navbar link button (with default styling).
-    pub fn new(ctx: &RequestContext, location: impl Into<String>, text: impl Into<String>) -> Self {
-        let loc = location.into();
-        Self {
-            is_active: ctx.request().path() == &loc,
-            location: loc.clone(),
-            text: text.into(),
-            class: "nav-link".to_string(),
-        }
-    }
-
-    /// Change the CSS classes of this item.
-    /// Follows the builder pattern.
-    ///
-    /// Default value is 'nav-link'.
-    pub fn class(mut self, new_class: impl Into<String>) -> Self {
-        self.class = new_class.into();
-        self
-    }
+/// Create a navbar item with the given text and location.
+fn item(req_path: &str, text: impl Into<String>, location: impl Into<String>) -> Template {
+    let loc_str: String = location.into();
+    Template::new("navbar/item")
+        .field(TEXT, text.into())
+        .field(LOCATION, loc_str.as_str())
+        .field(IS_ACTIVE, req_path == loc_str.as_str())
+        .field(CLASS, "nav-link")
 }
 
-/// Template for the navigation bar at the top of the page.
-#[derive(Clone, Debug, Serialize)]
-pub struct Navbar {
-    left_items: Vec<NavbarLink>,
-    right_items: Vec<NavbarLink>,
+/// Create an empty navbar and add the default links that should be visible to
+/// everyone at all times.
+fn with_defaults(req_path: &str) -> Template {
+    let left_items = vec![
+        item(req_path, "Home", "/"),
+        item(req_path, "Projects", "/projects"),
+        item(req_path, "Developers", "/developers"),
+        item(req_path, "Sponsors", "/sponsors"),
+        item(req_path, "Blog", "/blog")
+    ];
+
+    // Add items to empty navbar.
+    empty_navbar().field(LEFT_ITEMS, left_items)
 }
 
-impl Navbar {
-    /// The path to the template from the templates directory.
-    const TEMPLATE_NAME: &'static str = "navbar";
+/// Construct a navbar for an anonymous viewer by adding onto the defaults.
+pub fn userless(req_path: &str) -> Template {
+    let right_items = vec![
+        item(req_path, "Login with GitHub", "/login")
+            .field(CLASS, "btn mr-2 mb-2 btn-primary")
+            .field(ICON, "github"),
+    ];
 
-    /// Get an empty navbar object.
-    const fn empty() -> Self {
-        Self {
-            left_items: Vec::new(),
-            right_items: Vec::new(),
-        }
-    }
-
-    fn add_left(mut self, item: NavbarLink) -> Self {
-        self.left_items.push(item);
-        self
-    }
-
-    fn add_right(mut self, item: NavbarLink) -> Self {
-        self.right_items.push(item);
-        self
-    }
-
-    /// Navbar with homepage, achievement page, projects, developers and sponsors
-    fn with_defaults(ctx: &RequestContext) -> Self {
-        Self::empty()
-            .add_left(NavbarLink::new(ctx, "/", "Home"))
-            .add_left(NavbarLink::new(ctx, "/projects", "Projects"))
-            .add_left(NavbarLink::new(ctx, "/developers", "Developers"))
-            .add_left(NavbarLink::new(ctx, "/sponsors", "Sponsors"))
-            .add_left(NavbarLink::new(ctx, "/blog", "Blog"))
-    }
-
-    /// Get a navbar without a user logged in.
-    fn without_user(ctx: &RequestContext) -> Self {
-        let class = "btn btn-secondary mr-2 mb-2";
-
-        // if we are on the login page dont add another layer of redirect
-        let target = if ctx.request().path() == "/login" {
-            login::target_page(ctx)
-        } else {
-            ctx.request().uri().to_string()
-        };
-
-        let login_query = url::form_urlencoded::Serializer::new(String::new())
-            .append_pair(login::REDIRECT_QUERY_VAR, target.as_str())
-            .finish();
-
-        let login_location = format!("/login?{}", login_query);
-
-        Self::with_defaults(ctx)
-            .add_right(NavbarLink::new(ctx, login_location, "Login").class(class))
-            .add_right(NavbarLink::new(ctx, "/register", "Sign Up").class(class))
-    }
-
-    /// Create a navbar based on the page context.
-    pub async fn from_context(ctx: &RequestContext) -> Self {
-        if !(ctx.logged_in().await) {
-            Self::without_user(ctx)
-        } else {
-            ctx.identity()
-                .identity()
-                .and_then(|id: String| Uuid::parse_str(id.as_str()).ok())
-                .map(|uuid| {
-                    let logout_redir = url::form_urlencoded::Serializer::new(String::new())
-                        .append_pair(login::REDIRECT_QUERY_VAR, ctx.request().uri().path())
-                        .finish();
-
-                    Self::with_defaults(ctx)
-                        .add_right(
-                            NavbarLink::new(
-                                ctx,
-                                format!("/profile/{}", uuid.to_hyphenated()),
-                                "Profile",
-                            )
-                            .class("mr-2 mb-2 btn btn-primary"),
-                        )
-                        .add_right(
-                            NavbarLink::new(ctx, format!("/logout?{}", logout_redir), "Logout")
-                                .class("mr-2 mb-2 btn btn-secondary"),
-                        )
-                        // Add API access for users.
-                        .add_left(NavbarLink::new(ctx, "/playground", "API Playground"))
-                })
-                .unwrap()
-        }
-    }
-
-    /// Convert this navbar to a template.
-    pub fn template(&self) -> Template {
-        Template::new(Self::TEMPLATE_NAME).with_fields(self)
-    }
+    // Add items to right side of navbar.
+    with_defaults(req_path).field(RIGHT_ITEMS, right_items)
 }
+

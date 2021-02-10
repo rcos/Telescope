@@ -1,12 +1,4 @@
-pub mod users;
-pub mod emails;
-pub mod confirmations;
-pub mod recoveries;
-pub mod password_requirements;
-pub mod markdown;
-pub mod pagination;
-pub mod attendance_code;
-pub mod attendance_record;
+//! Rust struct models reflecting each of the tables defined
+//! by the migrations in rcos-data.
 
-#[cfg(test)]
-mod password_requirement_tests;
+pub mod users;
