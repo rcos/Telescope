@@ -35,6 +35,7 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::cookie::SameSite;
+use crate::web::csrf::CsrfJanitor;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
@@ -43,6 +44,9 @@ fn main() -> std::io::Result<()> {
 
     // Create the actix runtime.
     let sys = System::new("telescope");
+
+    // Start global CSRF token janitor.
+    CsrfJanitor.start();
 
     // from example at https://actix.rs/docs/http2/
     // to generate a self-signed certificate and private key for testing, use

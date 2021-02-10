@@ -45,7 +45,8 @@ private_key_file = "tls-ssl/private-key.pem"
 # [REQUIRED]
 # The GitHub OAuth application credentials.
 # These can be generated at https://github.com/settings/applications/new.
-# Make sure the redirect URL matches the homepage URL followed by "/auth".
+# Make sure the redirect URL matches the homepage URL followed by
+# "/auth/github".
 [github_credentials]
 # [REQUIRED]
 # The GitHub OAuth application client id.

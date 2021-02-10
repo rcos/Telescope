@@ -99,6 +99,10 @@ pub enum TelescopeError {
     #[display(fmt = "Not Implemented")]
     /// Error to send when user accesses something that is not yet implemented.
     NotImplemented,
+
+    #[display(fmt = "Could not save CSRF token")]
+    /// Error saving CSRF Token.
+    CSRFSaveError,
 }
 
 impl TelescopeError {
@@ -201,9 +205,13 @@ impl TelescopeError {
                 ),
             ),
 
-            TelescopeError::BadRequest { header, message } => {
-                jumbotron::new(format!("{} - {}", status_code, header), message)
-            }
+            TelescopeError::BadRequest { header, message } =>
+                jumbotron::new(format!("{} - {}", status_code, header), message),
+
+            TelescopeError::CSRFSaveError => jumbotron::new(
+                format!("{} - Internal Server CSRF Error", status_code),
+                "Could not save internal CSRF token for this request."
+            ),
 
             // If there is a variant without an error page implementation,
             // log an error message and render the unimplemented page.

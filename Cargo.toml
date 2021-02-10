@@ -66,3 +66,5 @@ derive_more = "~0.99"
 jsonwebtoken = "~7.2"
 # OAuth2 models and flows
 oauth2 = {version = "~3.0", features = ["futures-03"], default_features = false}
+# Fast Concurrent HashMap.
+dashmap = "~4.0"

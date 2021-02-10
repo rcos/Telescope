@@ -16,6 +16,7 @@ pub async fn login(req: HttpRequest) -> Result<HttpResponse, TelescopeError> {
     let redir_url: RedirectUrl = RedirectUrl::new(format!("{}://{}/auth/github", scheme, authority))
         .expect("Could not create GitHub OAuth2 Redirect URL");
 
+    // Construct OAuth2 Authentication request. 
     let auth_req = AppData::global()
         // Get the gloabal GitHub OAuth client.
         .github_oauth_client()
