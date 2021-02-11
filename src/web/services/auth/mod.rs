@@ -1,6 +1,3 @@
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
 use actix_web::{HttpRequest, HttpResponse};
 use actix_web::http::uri::Authority;
 use actix_web::web as aweb;

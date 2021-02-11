@@ -11,8 +11,6 @@ use lettre::{
 };
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
-use oauth2::basic::BasicClient;
-use oauth2::{Client, AuthUrl, TokenUrl};
 
 lazy_static! {
     /// Lazy Static to store app data at runtime.

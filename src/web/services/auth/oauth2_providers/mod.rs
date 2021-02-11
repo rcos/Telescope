@@ -11,13 +11,12 @@ use oauth2::{RedirectUrl, CsrfToken, AuthorizationRequest};
 use std::borrow::Cow;
 use crate::web::csrf;
 use actix_web::http::header::LOCATION;
-use url::Url;
 
 pub mod github;
 
 /// Special trait specifically for OAuth2 Identity providers that implements
 /// certain methods in the IdentityProvider trait automatically.
-trait Oauth2IdentityProvider {
+pub trait Oauth2IdentityProvider {
     /// Name of this identity provider. See the documentation on the
     /// [`IdentityProvider`] trait for requirements.
     const SERVICE_NAME: &'static str;
@@ -33,7 +32,7 @@ trait Oauth2IdentityProvider {
     fn auth_response(redir_url: RedirectUrl, http_req: &HttpRequest) -> Result<HttpResponse, TelescopeError> {
         // Get the client configuration and build out the authentication request parameters.
         let client = Self::get_client();
-        let mut auth_req: AuthorizationRequest = client
+        let auth_req: AuthorizationRequest = client
             // Randomly generate a CSRF token.
             .authorize_url(CsrfToken::new_random)
             // Add the redirect URL.
