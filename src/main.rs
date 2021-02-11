@@ -23,6 +23,7 @@ mod models;
 mod templates;
 mod web;
 
+use crate::web::csrf::CsrfJanitor;
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::static_pages::{
@@ -31,14 +32,13 @@ use crate::{
 };
 use actix::prelude::*;
 use actix_files as afs;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::cookie::SameSite;
 use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use openssl::ssl::{SslAcceptor, SslMethod};
 use rand::rngs::OsRng;
 use rand::Rng;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::cookie::SameSite;
-use crate::web::csrf::CsrfJanitor;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.

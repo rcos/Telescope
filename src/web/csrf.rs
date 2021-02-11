@@ -1,12 +1,12 @@
 //! Cross Site Request Forging protection via a global static DashMap.
 
-use dashmap::DashMap;
-use std::sync::Arc;
-use oauth2::CsrfToken;
-use actix_web::HttpRequest;
 use crate::error::TelescopeError;
-use chrono::{Duration, Utc, DateTime};
-use actix::{Actor, Context, AsyncContext};
+use actix::{Actor, AsyncContext, Context};
+use actix_web::HttpRequest;
+use chrono::{DateTime, Duration, Utc};
+use dashmap::DashMap;
+use oauth2::CsrfToken;
+use std::sync::Arc;
 use std::time::Duration as StdDuration;
 
 /// Extract the remote IP address string from an HTTP request.
@@ -18,7 +18,8 @@ fn extract_ip_addr(req: &HttpRequest) -> Result<String, TelescopeError> {
 }
 
 lazy_static! {
-    static ref GLOBAL_CSRF_MAP: Arc<DashMap<(&'static str, String), (CsrfToken, DateTime<Utc>)>> = Arc::new(DashMap::new());
+    static ref GLOBAL_CSRF_MAP: Arc<DashMap<(&'static str, String), (CsrfToken, DateTime<Utc>)>> =
+        Arc::new(DashMap::new());
 }
 
 /// Get the global lazy static CSRF map.
@@ -39,11 +40,14 @@ pub fn get(idp_name: &'static str, req: &HttpRequest) -> Result<CsrfToken, Teles
         .map(|record| record.value().0.clone())
         // Return an error if the record was not found.
         .ok_or(TelescopeError::CsrfTokenNotFound);
-
 }
 
 /// Save a CSRF token linked to the remote IP of the Http Request that created it.
-pub fn save(idp_name: &'static str, req: &HttpRequest, token: CsrfToken) -> Result<(), TelescopeError> {
+pub fn save(
+    idp_name: &'static str,
+    req: &HttpRequest,
+    token: CsrfToken,
+) -> Result<(), TelescopeError> {
     // Get the remote IP address string.
     let ip_addr: String = extract_ip_addr(req)?;
     // Get the current time and add the expiration duration (10 minutes) to get the
@@ -72,7 +76,8 @@ impl CsrfJanitor {
 
         // Remove all the records necessary from the global CSRF map.
         // Return the number of keys removed.
-        return remove_keys.iter()
+        return remove_keys
+            .iter()
             .map(|key| global_csrf_map().remove(key))
             .filter(Option::is_some)
             .count();

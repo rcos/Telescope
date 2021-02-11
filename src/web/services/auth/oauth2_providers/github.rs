@@ -1,8 +1,8 @@
-use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use std::sync::Arc;
-use oauth2::{AuthorizationRequest, AuthUrl, TokenUrl, Scope};
-use oauth2::basic::BasicClient;
 use crate::env::global_config;
+use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
+use oauth2::basic::BasicClient;
+use oauth2::{AuthUrl, AuthorizationRequest, Scope, TokenUrl};
+use std::sync::Arc;
 
 /// Zero sized typ representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;

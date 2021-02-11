@@ -1,9 +1,9 @@
 //! Templates for users to login and register with.
 
 use crate::templates::Template;
-use crate::web::services::auth::IdentityProvider;
-use serde_json::{Value, Map};
 use crate::web::services::auth::oauth2_providers::github::GitHubOauth;
+use crate::web::services::auth::IdentityProvider;
+use serde_json::{Map, Value};
 
 /// Path to template from template directory root.
 const TEMPLATE_PATH: &'static str = "auth";
@@ -40,8 +40,8 @@ fn item(
     link: String,
     class: &'static str,
     message: impl Into<Value>,
-    icon: Option<&'static str>)
-    -> Map<String, Value> {
+    icon: Option<&'static str>,
+) -> Map<String, Value> {
     // Create map.
     let mut m: Map<String, Value> = Map::new();
     // Insert keys.
@@ -58,35 +58,27 @@ fn item(
 /// Create a template to offer the user options to login.
 pub fn login() -> Template {
     // Make list of identity providers in login configuration.
-    let items: Vec<Map<String, Value>> = vec![
-        item(
-            GitHubOauth::login_path(),
-            "btn-github",
-            "Login using GitHub",
-            Some("github")
-        ),
-    ];
+    let items: Vec<Map<String, Value>> = vec![item(
+        GitHubOauth::login_path(),
+        "btn-github",
+        "Login using GitHub",
+        Some("github"),
+    )];
 
     // Create and return template.
-    return empty()
-        .field(HEADER, "Sign In")
-        .field(ITEMS, items);
+    return empty().field(HEADER, "Sign In").field(ITEMS, items);
 }
 
 /// Create a template to offer the users options to register a new account.
 pub fn register() -> Template {
     // Make list of identity providers in account creation configuration.
-    let items: Vec<Map<String, Value>> = vec![
-        item(
-            GitHubOauth::register_path(),
-            "btn-github",
-            "Register using GitHub",
-            Some("github")
-        ),
-    ];
+    let items: Vec<Map<String, Value>> = vec![item(
+        GitHubOauth::register_path(),
+        "btn-github",
+        "Register using GitHub",
+        Some("github"),
+    )];
 
     // Create and return template.
-    return empty()
-        .field(HEADER, "Create account")
-        .field(ITEMS, items);
+    return empty().field(HEADER, "Create account").field(ITEMS, items);
 }

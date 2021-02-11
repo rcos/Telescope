@@ -1,6 +1,6 @@
-use actix_web::HttpRequest;
-use crate::templates::{Template, auth, page};
 use crate::error::TelescopeError;
+use crate::templates::{auth, page, Template};
+use actix_web::HttpRequest;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the

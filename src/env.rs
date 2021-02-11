@@ -3,12 +3,12 @@ use lettre::smtp::{
     ConnectionReuseParameters, SmtpClient,
 };
 use lettre::EmailAddress;
+use oauth2::{ClientId, ClientSecret};
 use openssl::ssl::{SslAcceptorBuilder, SslFiletype};
 use std::sync::Arc;
 use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
-use oauth2::{ClientId, ClientSecret};
 
 /// The Tls credentials of a given configuration.
 #[derive(Clone, Debug, Serialize, Deserialize)]

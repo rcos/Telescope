@@ -210,19 +210,20 @@ impl TelescopeError {
                 ),
             ),
 
-            TelescopeError::BadRequest { header, message } =>
-                jumbotron::new(format!("{} - {}", status_code, header), message),
+            TelescopeError::BadRequest { header, message } => {
+                jumbotron::new(format!("{} - {}", status_code, header), message)
+            }
 
             TelescopeError::IpExtractionError => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
                 "Could not determine remote IP address of this request for CSRF purposes. \
-                Please contact a coordinator and create a GitHub issue."
+                Please contact a coordinator and create a GitHub issue.",
             ),
 
             TelescopeError::CsrfTokenNotFound => jumbotron::new(
                 format!("{} - CSRF Token Not Found", status_code),
                 "Could not find the CSRF token for this request. Please try again. If this \
-                error continues, please contact a coordinator and create a GitHub issue."
+                error continues, please contact a coordinator and create a GitHub issue.",
             ),
 
             // If there is a variant without an error page implementation,

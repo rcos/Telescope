@@ -1,10 +1,10 @@
-use actix_web::{HttpRequest, HttpResponse};
+use crate::error::TelescopeError;
 use actix_web::http::uri::Authority;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
+use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use oauth2::RedirectUrl;
-use crate::error::TelescopeError;
 use oauth2_providers::github::GitHubOauth;
 
 pub mod oauth2_providers;
@@ -14,15 +14,20 @@ pub mod rpi_cas;
 pub fn register(config: &mut ServiceConfig) {
     // GitHub OAuth2 provider services.
     GitHubOauth::register_services(config);
-
 }
 
 /// Function to create the redirect URL for a given request and identity provider's
 /// redirect path.
 fn make_redirect_url(req: &HttpRequest, redir_path: String) -> RedirectUrl {
     // Get request scheme and authority.
-    let scheme: &str = req.uri().scheme_str().expect("Could not get request scheme string.");
-    let authority: &Authority = req.uri().authority().expect("Could not get request authority.");
+    let scheme: &str = req
+        .uri()
+        .scheme_str()
+        .expect("Could not get request scheme string.");
+    let authority: &Authority = req
+        .uri()
+        .authority()
+        .expect("Could not get request authority.");
     // Create and return redirect URL.
     return RedirectUrl::new(format!("{}://{}{}", scheme, authority, redir_path))
         .expect("Could not create GitHub OAuth2 Redirect URL");
@@ -76,32 +81,46 @@ pub trait IdentityProvider: 'static {
     /// provider.
     fn register_services(config: &mut ServiceConfig) {
         config
-            .route(Self::register_path().as_str(), aweb::get().to(Self::registration_handler))
-            .route(Self::login_path().as_str(), aweb::get().to(Self::login_handler))
-            .route(Self::login_redirect_path().as_str(),
-                   aweb::get().to(Self::login_authenticated_handler))
-            .route(Self::registration_redirect_path().as_str(),
-                   aweb::get().to(Self::registration_authenticated_handler));
+            .route(
+                Self::register_path().as_str(),
+                aweb::get().to(Self::registration_handler),
+            )
+            .route(
+                Self::login_path().as_str(),
+                aweb::get().to(Self::login_handler),
+            )
+            .route(
+                Self::login_redirect_path().as_str(),
+                aweb::get().to(Self::login_authenticated_handler),
+            )
+            .route(
+                Self::registration_redirect_path().as_str(),
+                aweb::get().to(Self::registration_authenticated_handler),
+            );
     }
 
     /// Actix-web handler for the route that redirects to authentication for
     /// account creation (user registration). Guarded by this
     /// trait to GET requests.
-    fn registration_handler(req: HttpRequest) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    fn registration_handler(
+        req: HttpRequest,
+    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     /// Actix-web handler for the route that redirects to authentication for
     /// login. Guarded by this trait to GET requests.
-    fn login_handler(req: HttpRequest) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    fn login_handler(
+        req: HttpRequest,
+    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     /// Actix-web handler for authentication callback to login. Guarded by this
     /// trait to GET requests.
-    fn login_authenticated_handler(req: HttpRequest)
-        -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    fn login_authenticated_handler(
+        req: HttpRequest,
+    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     /// Actix-web handler for authentication callback to account creation.
     /// Guarded by this trait to GET requests.
-    fn registration_authenticated_handler(req: HttpRequest)
-        -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    fn registration_authenticated_handler(
+        req: HttpRequest,
+    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 }
-
-

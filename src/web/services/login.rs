@@ -1,10 +1,6 @@
-use actix_web::HttpRequest;
 use crate::error::TelescopeError;
-use crate::templates::{
-    auth,
-    page,
-    Template
-};
+use crate::templates::{auth, page, Template};
+use actix_web::HttpRequest;
 
 #[get("/login")]
 /// Login page. Users go here and are presented options to login with a variety
