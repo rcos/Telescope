@@ -10,8 +10,8 @@ use oauth2::RedirectUrl;
 use crate::error::TelescopeError;
 use oauth2_providers::github::GitHubOauth;
 
-mod oauth2_providers;
-mod rpi_cas;
+pub mod oauth2_providers;
+pub mod rpi_cas;
 
 /// Register auth services.
 pub fn register(config: &mut ServiceConfig) {
@@ -33,7 +33,7 @@ fn make_redirect_url(req: &HttpRequest, redir_path: String) -> RedirectUrl {
 
 /// Trait for identity providers (GitHub OAuth2, Discord OAuth2, RPI CAS, etc).
 #[async_trait]
-trait IdentityProvider: 'static {
+pub trait IdentityProvider: 'static {
     /// The client configuration type that stores information about the identity
     /// provider including the authorization URL and token URL for OAuth2
     /// providers.
@@ -106,3 +106,5 @@ trait IdentityProvider: 'static {
     fn registration_authenticated_handler(req: HttpRequest)
         -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 }
+
+

@@ -3,7 +3,7 @@
 pub mod not_found;
 mod login;
 mod register;
-mod auth;
+pub mod auth;
 
 use actix_web::web::ServiceConfig;
 

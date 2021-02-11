@@ -1,0 +1,15 @@
+<div class="row justify-content-center no-gutters">
+    <div class="card col-sm-10 col-md-8 col-lg-6 col-xl-4 text-dark">
+        <div class="card-header">
+            <h1> {{header}} </h1>
+        </div>
+        <div class="card-body">
+            {{#each items}}
+                <a href="{{link}}" class="btn w-100 {{class}}" role="button">
+                    {{message}}
+                    {{#if icon}}<i data-feather="{{icon}}"></i>{{/if}}
+                </a>
+            {{/each}}
+        </div>
+    </div>
+</div>

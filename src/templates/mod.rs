@@ -2,7 +2,7 @@ pub mod navbar;
 pub mod page;
 pub mod jumbotron;
 pub mod static_pages;
-pub mod login;
+pub mod auth;
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
