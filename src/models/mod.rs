@@ -2,3 +2,4 @@
 //! by the migrations in rcos-data.
 
 pub mod users;
+pub mod projects;
