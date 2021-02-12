@@ -1,0 +1,12 @@
+on: [push, pull_request]
+
+name: Docker
+
+jobs:
+  build:
+    name: Docker Compose
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Compose Build
+        run: docker-compose build
