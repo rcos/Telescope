@@ -70,3 +70,5 @@ oauth2 = {version = "~3.0", features = ["futures-03"], default_features = false}
 dashmap = "~4.0"
 # Async methods in traits
 async-trait = "~0.1"
+# OpenAPI Spec
+openapi = "~0.1"
