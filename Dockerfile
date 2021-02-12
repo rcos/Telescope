@@ -1,5 +1,5 @@
-# Start at the Rust image
-FROM rust:1-buster
+# Use Rust 1.50 (we use library functions that were stablized in 1.50 and cannot use any previous version)
+FROM rust:1.50-buster
 # Build Dependencies
 WORKDIR /telescope/build
 COPY ./Cargo.* ./
