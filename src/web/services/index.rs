@@ -13,33 +13,14 @@ use actix_web::http::header::ACCEPT;
 use crate::models::projects::Project;
 use std::sync::Arc;
 use serde_json::Value;
+use crate::web::api;
+use openapi::Spec;
 
 /// Service that serves the telescope homepage.
 #[get("/")]
 pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
-    // Get central API URL.
-    let config: Arc<ConcreteConfig> = global_config();
-    let api_url: &str = config.api_url.as_str();
-    // Fetch the project list from API.
-    // Create a client.
-    let client: Client = Client::builder()
-        // We only want JSON formatted results from the API.
-        .header(ACCEPT, "application/json")
-        .finish();
-
-    // Assume that the URL ends with a backslash.
-    let projects = client.get(format!("{}projects", api_url))
-        // Send the request.
-        .send()
-        // Wait for the response.
-        .await
-        // Convert and propagate any errors.
-        .map_err(TelescopeError::api_query_error)?
-        // The body should be JSON. Try to convert it.
-        .json::<Value>()
-        .await
-        // Again, convert and propagate any errors.
-        .map_err(TelescopeError::api_response_error)?;
+    // Get the API schema
+    let schema: Spec = api::unauthenticated_schema().await?;
 
     // Make the homepage template as the content of the landing page.
     let content: Template = homepage::new(

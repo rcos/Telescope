@@ -157,6 +157,7 @@ impl TelescopeError {
 
     /// Convert an error querying the API into a telescope error.
     pub fn api_query_error(err: SendRequestError) -> Self {
+        error!("Error querying API: {}", err);
         Self::SendApiQueryError {
             status_code: err.status_code().as_u16(),
             display: format!("{}", err),
@@ -165,6 +166,7 @@ impl TelescopeError {
 
     /// Convert an error interpreting an API response.
     pub fn api_response_error(err: JsonPayloadError) -> Self {
+        error!("API response was malformed: {}", err);
         Self::ApiResponsePayloadError(format!("{}", err))
     }
 
