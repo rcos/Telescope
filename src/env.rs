@@ -9,6 +9,7 @@ use std::sync::Arc;
 use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
+use url::Url;
 
 /// The Tls credentials of a given configuration.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -84,6 +85,9 @@ struct TelescopeConfig {
     /// The TLS credential config.
     tls_config: Option<TlsConfig>,
 
+    /// The URL of the RCOS central API (in the OpenAPI Spec via RCOS-data).
+    api_url: Option<String>,
+
     /// Profiles. These can be used and specified at runtime to override values
     /// defined globally. Profiles are scoped and can have sub profiles.
     profile: Option<HashMap<String, TelescopeConfig>>,
@@ -108,6 +112,8 @@ pub struct ConcreteConfig {
     pub email_config: EmailSenderConfig,
     /// The GitHub OAuth Application Credentials.
     pub github_credentials: GithubOauthConfig,
+    /// The url of the RCOS API that telescope will read and write to.
+    pub api_url: String,
 }
 
 impl TlsConfig {
@@ -180,6 +186,9 @@ impl TelescopeConfig {
             github_credentials: self
                 .reverse_lookup(profile_slice, |c| c.github_credentials.clone())
                 .expect("Could not resolve GitHub OAuth credentials."),
+            api_url: self
+                .reverse_lookup(profile_slice, |c| c.api_url.clone())
+                .expect("Could not resolve RCOS central API URL."),
         }
     }
 
@@ -230,7 +239,7 @@ struct CommandLine {
     /// What profile (if any) to use from the config file.
     ///
     /// Subprofiles can be specified using a '.' delimiter, e.g.
-    /// 'dev.create_sysadmin'
+    /// 'dev.local'
     #[structopt(short = "p", long = "profile", env)]
     profile: Option<String>,
 }

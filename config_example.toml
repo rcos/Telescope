@@ -31,6 +31,11 @@ bind_https = "localhost:443"
 bind_http  = "localhost:80"
 
 # [REQUIRED]
+# Specify the URL of the RCOS central API. This default value is okay for
+# testing locally in docker but should probably be changed in production.
+api_url = "http://postgrest:3000/#/"
+
+# [REQUIRED]
 # The TLS/SSL configurations. These are specified as the paths of the
 # TLS/SSL credentials generated earlier in the setup (see the readme), or
 # in production environments isssued by a certificate authority.
