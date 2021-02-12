@@ -28,7 +28,7 @@ fn global_csrf_map() -> Arc<DashMap<(&'static str, String), (CsrfToken, DateTime
 }
 
 /// Get the CSRF Token for a request's IP from the global CSRF map.
-pub fn get(idp_name: &'static str, req: &HttpRequest) -> Result<CsrfToken, TelescopeError> {
+fn get(idp_name: &'static str, req: &HttpRequest) -> Result<CsrfToken, TelescopeError> {
     // Extract the IP address from the HTTP Request.
     let ip_addr: String = extract_ip_addr(req)?;
     return global_csrf_map()
@@ -56,6 +56,30 @@ pub fn save(
     // Save the IP Address to the CSRF map and return OK.
     global_csrf_map().insert((idp_name, ip_addr), (token, expiration_time));
     return Ok(());
+}
+
+/// Verify a CSRF token returned from an Identity provider. If there is an issue
+/// return a [`TelescopeError`].
+pub fn verify(
+    idp_name: &'static str,
+    req: &HttpRequest,
+    token: CsrfToken
+) -> Result<(), TelescopeError> {
+    // Get the CSRF token from the global table.
+    let actual_token: CsrfToken = get(idp_name, req)?;
+    // Remove the CSRF record from the global table.
+    // We do this here because it should happen regardless of whether
+    // the tokens match.
+    // Extract the IP first.
+    let ip_addr: String = extract_ip_addr(req)?;
+    // Remove the CSRF record.
+    global_csrf_map().remove(&(idp_name, ip_addr));
+    // Check for a mismatch.
+    return (actual_token.secret() == token.secret())
+        // Return Ok(()) on match.
+        .then(|| ())
+        // And return a mismatch error otherwise.
+        .ok_or(TelescopeError::CsrfTokenMismatch);
 }
 
 /// A zero sized struct to act as an actor and run every hour cleaning up

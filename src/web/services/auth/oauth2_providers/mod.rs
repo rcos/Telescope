@@ -8,8 +8,20 @@ use oauth2::basic::BasicClient;
 use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl};
 use std::borrow::Cow;
 use std::sync::Arc;
+use actix_web::web::Query;
+use actix_web::FromRequest;
 
 pub mod github;
+
+/// Data returned by GitHub OAuth2 Authorization request.
+#[derive(Deserialize)]
+struct AuthResponse {
+    /// The auth code.
+    code: String,
+    /// The CSRF token. This should match the one that I sent them and stored
+    /// in the CSRF table.
+    state: CsrfToken,
+}
 
 /// Special trait specifically for OAuth2 Identity providers that implements
 /// certain methods in the IdentityProvider trait automatically.
@@ -50,6 +62,37 @@ pub trait Oauth2IdentityProvider {
             .header(LOCATION, url.as_str())
             .finish());
     }
+
+    /// Extract the response parameters from the callback request invoked
+    /// by the GitHub authorization page.
+    fn token_exchange(req: &HttpRequest) -> Result<(), TelescopeError> {
+        // Extract the parameters from the request.
+        let params: Query<AuthResponse> = Query::extract(req)
+            // Extract the value out of the immediately ready future.
+            .into_inner()
+            // Propagate any errors that occur.
+            .map_err(|err: actix_web::Error| {
+                // Map all errors getting the query from the request into a bad
+                // request error.
+                TelescopeError::bad_request(
+                    "Bad Authentication Request",
+                    format!("Could not get authentication parameters from request URL. \
+                    Actix-web error: {}", err)
+                )
+            })?;
+
+        // Destructure the parameters.
+        let AuthResponse {code, state} = params.0;
+        // Verify the CSRF token. Propagate any errors including a mismatch
+        // (we expect to verify without issue most of the time).
+        csrf::verify(Self::SERVICE_NAME, req, state)?;
+
+        // Exchange the auth code for a token here.
+        // TODO
+
+        Err(TelescopeError::NotImplemented)
+    }
+
 }
 
 impl<T> IdentityProvider for T
