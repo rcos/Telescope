@@ -33,6 +33,7 @@ bind_http  = "localhost:80"
 # [REQUIRED]
 # Specify the URL of the RCOS central API. This default value is okay for
 # testing locally in docker but should probably be changed in production.
+# This should end with a slash.
 api_url = "http://postgrest:3000/#/"
 
 # [REQUIRED]

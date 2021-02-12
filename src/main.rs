@@ -27,7 +27,7 @@ use crate::web::csrf::CsrfJanitor;
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::static_pages::{
-        index::LandingPage, projects::ProjectsPage, sponsors::SponsorsPage, StaticPage,
+        projects::ProjectsPage, sponsors::SponsorsPage, StaticPage,
     },
 };
 use actix::prelude::*;
