@@ -9,4 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Docker Compose Build
-        run: docker-compose build
+        # Create some empty config files and directories that docker
+        # needs to successfully build telescope
+        run: mkdir tls-ssl && touch config.toml && docker-compose build
