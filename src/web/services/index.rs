@@ -14,13 +14,12 @@ use crate::models::projects::Project;
 use std::sync::Arc;
 use serde_json::Value;
 use crate::web::api;
-use openapi::Spec;
 
 /// Service that serves the telescope homepage.
 #[get("/")]
 pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
     // Get the API schema
-    let schema: Spec = api::unauthenticated_schema().await?;
+    let schema: Value = api::unauthenticated_schema().await?;
 
     // Make the homepage template as the content of the landing page.
     let content: Template = homepage::new(

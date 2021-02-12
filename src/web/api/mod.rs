@@ -1,6 +1,5 @@
 //! API interactions and functionality.
 
-use openapi::Spec;
 use crate::error::TelescopeError;
 use crate::env::{
     ConcreteConfig,
@@ -16,7 +15,7 @@ use serde_json::Value;
 const TELESCOPE_CURRENT_OPENAPI_VERSION: &'static str = "2.0";
 
 /// Query the central RCOS API for its schema and return it.
-pub async fn unauthenticated_schema() -> Result<Spec, TelescopeError> {
+pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
     // Get the global config in order to determine where the schema is hosted.
     let config: Arc<ConcreteConfig> = global_config();
     // Get the API URL from the config.
@@ -44,12 +43,6 @@ pub async fn unauthenticated_schema() -> Result<Spec, TelescopeError> {
         .await
         .map_err(TelescopeError::api_response_error)?;
 
-    let json: String = serde_json::to_string(&schema).unwrap();
-
-    info!("Recieved API spec: {}", json);
-    let converted: Spec = serde_json::value::from_value::<Spec>(schema)
-        .expect("Malformed Schema");
-
-    Ok(converted)
+    Ok(schema)
 }
 
