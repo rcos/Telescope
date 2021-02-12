@@ -87,6 +87,9 @@ struct TelescopeConfig {
     /// The URL of the RCOS central API (in the OpenAPI Spec via RCOS-data).
     api_url: Option<String>,
 
+    /// The JWT secret used to authenticate with the central API.
+    jwt_secret: Option<String>,
+
     /// Profiles. These can be used and specified at runtime to override values
     /// defined globally. Profiles are scoped and can have sub profiles.
     profile: Option<HashMap<String, TelescopeConfig>>,
@@ -113,6 +116,8 @@ pub struct ConcreteConfig {
     pub github_credentials: GithubOauthConfig,
     /// The url of the RCOS API that telescope will read and write to.
     pub api_url: String,
+    /// The JWT secret used to authenticate with the central API.
+    pub jwt_secret: String,
 }
 
 impl TlsConfig {
@@ -188,6 +193,9 @@ impl TelescopeConfig {
             api_url: self
                 .reverse_lookup(profile_slice, |c| c.api_url.clone())
                 .expect("Could not resolve RCOS central API URL."),
+            jwt_secret: self
+                .reverse_lookup(profile_slice, |c| c.jwt_secret.clone())
+                .expect("Could not resolve JWT secret."),
         }
     }
 

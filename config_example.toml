@@ -37,6 +37,11 @@ bind_http  = "localhost:80"
 api_url = "http://postgrest:8000"
 
 # [REQUIRED]
+# The JSON web token (jwt) key used to encode JWTs when authenticating with
+# the central RCOS API. This shcould match the one in the .env file.
+jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [REQUIRED]
 # The TLS/SSL configurations. These are specified as the paths of the
 # TLS/SSL credentials generated earlier in the setup (see the readme), or
 # in production environments isssued by a certificate authority.
