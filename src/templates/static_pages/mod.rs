@@ -4,7 +4,6 @@ use actix_web::HttpRequest;
 use futures::future::ready;
 use futures::future::Ready;
 
-pub mod index;
 pub mod projects;
 pub mod sponsors;
 

@@ -116,25 +116,22 @@
             </div>
             <div class="card bg-light text-dark mt-3 shadow-sm">
                 <h4 class="card-header text-center">Statistics</h4>
-                <!--
-                    Eventually these statistics need to be updated with actual data.
-                -->
                 <ul class="list-group">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Active Projects:
-                        <a class="badge badge-primary" href="/projects">0</a>
+                        {{current_semester}} Projects:
+                        <a class="badge badge-primary" href="/projects">{{active_projects}}</a>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Past Projects:
-                        <a class="badge badge-secondary" href="/projects">0</a>
+                        Total Project Count:
+                        <a class="badge badge-secondary" href="/projects">{{total_projects}}</a>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Developers This Semester:
-                        <a class="badge badge-primary" href="/developers">0</a>
+                        Students active {{current_semester}}:
+                        <a class="badge badge-primary" href="/developers">{{current_students}}</a>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Developers Previous Semesters:
-                        <a class="badge badge-secondary" href="/developers">0</a>
+                        User Count:
+                        <a class="badge badge-secondary" href="/developers">{{total_users}}</a>
                     </li>
                 </ul>
             </div>

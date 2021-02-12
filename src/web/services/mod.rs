@@ -4,6 +4,7 @@ pub mod auth;
 mod login;
 pub mod not_found;
 mod register;
+mod index;
 
 use actix_web::web::ServiceConfig;
 
@@ -13,6 +14,8 @@ pub fn register(config: &mut ServiceConfig) {
     auth::register(config);
 
     config
+        // Homepage.
+        .service(index::index)
         // Login services.
         .service(login::login_page)
         // Account registration services.
