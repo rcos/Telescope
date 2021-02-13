@@ -9,25 +9,15 @@ use std::sync::Arc;
 use actix_web::client::Client;
 use actix_web::http::header::ACCEPT;
 use serde_json::Value;
+use super::auth;
+use super::api_endpoint;
 
 /// Query the central RCOS API for its schema and return it.
 pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
-    // Get the global config in order to determine where the schema is hosted.
-    let config: Arc<ConcreteConfig> = global_config();
-    // Get the API URL from the config.
-    let api_url: &str = config.api_url.as_str();
-
-    // Create an HTTP client to send the request for the schema.
-    let client: Client = Client::builder()
-        // We should only accept JSON. If we don't get JSON from the
-        // API endpoint then it is not in the OpenAPI Spec.
-        .header(ACCEPT, "application/json")
-        .finish();
-
     // Get and return the schema.
-    return client
+    return auth::unauthenticated_client()
         // Create a GET request to the API URL.
-        .get(api_url)
+        .get(api_endpoint())
         // Send the request and wait for a response or an error.
         .send()
         .await
@@ -40,4 +30,8 @@ pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
         .map_err(TelescopeError::api_response_error);
 }
 
-///
+/// Query the central RCOS API for its schema as an authenticated user.
+/// This just adds a JWT with the "role" claim to the request.
+pub async fn authenticated_schema() -> Result<Value, TelescopeError> {
+    unimplemented!()
+}

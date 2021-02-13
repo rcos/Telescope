@@ -304,6 +304,7 @@ fn cli() -> ConcreteConfig {
             e
         })
         .unwrap();
+
     let parsed = toml::from_str::<TelescopeConfig>(confing_file_string.as_str())
         .map_err(|e| {
             eprintln!("Error deserializing config file: {}", e);

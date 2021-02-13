@@ -19,7 +19,7 @@ use crate::web::api;
 #[get("/")]
 pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
     // Get the API schema
-    let schema: Value = api::unauthenticated_schema().await?;
+    // let schema: Value = api::unauthenticated_schema().await?;
 
     // Make the homepage template as the content of the landing page.
     let content: Template = homepage::new(
