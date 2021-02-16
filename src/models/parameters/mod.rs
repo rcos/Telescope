@@ -3,6 +3,7 @@
 use crate::models::parameters::pagination::PaginationParameter;
 use crate::models::parameters::order::OrderParameter;
 use crate::models::parameters::select::SelectParameter;
+use crate::models::parameters::filter::FilterParameter;
 
 pub mod order;
 pub mod pagination;
@@ -24,5 +25,7 @@ pub struct QueryParameters {
     #[serde(flatten)]
     pub select: SelectParameter,
 
-
+    /// Parameter to filter results by value.
+    #[serde(flatten)]
+    pub filter: Option<FilterParameter>
 }
