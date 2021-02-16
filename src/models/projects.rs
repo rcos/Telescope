@@ -6,13 +6,11 @@ use chrono::{DateTime, Utc};
 #[derive(Deserialize, Clone, Debug)]
 pub struct Project {
     /// The project identifier.
-    project_id: i32,
+    project_id: i64,
     /// The name of the project.
     title: String,
     /// The project description in markdown.
     description: String,
-    /// The programming languages used by the project.
-    languages: Vec<String>,
     /// The technologies used by the project.
     stack: Vec<String>,
     /// The Url of the project's cover image or logo.
@@ -23,10 +21,6 @@ pub struct Project {
     repository_urls: Vec<String>,
     /// When the project was created.
     created_at: DateTime<Utc>,
-}
-
-/// Parameters for the API query to get projects.
-#[derive(Clone, Debug, Serialize, Default)]
-pub struct ProjectQuery {
-    
+    /// The ID of an associated external organization if there is one.
+    external_organization_id: Option<i64>,
 }
