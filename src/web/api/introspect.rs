@@ -19,6 +19,9 @@ async fn schema(client: Client) -> Result<Value, TelescopeError> {
         // The response should be a JSON serialization of an OpenAPI Spec.
         // Try to interpret it as one and propagte any errors that occur.
         .json::<Value>()
+        // We have to change this limit here just due to the sheer size of the
+        // schema returned.
+        .limit(1024*1024)
         .await
         .map_err(TelescopeError::api_response_error)
 }
