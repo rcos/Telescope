@@ -7,10 +7,16 @@ use actix_web::http::header::ACCEPT;
 use jsonwebtoken::{Header, EncodingKey, encode};
 
 /// The database role name for authenticated requests.
-const AUTHENTICATED_USER: &'static str = "api_user";
+pub const AUTHENTICATED_USER: &'static str = "api_user";
 
 /// The database role name for unauthenticated requests.
-const ANONYMOUS_USER: &'static str = "web_anon";
+pub const ANONYMOUS_USER: &'static str = "web_anon";
+
+/// Accept responses in JSON format.
+pub const ACCEPT_JSON: &'static str = "application/json";
+
+/// Accept responses in CSV format.
+pub const ACCEPT_CSV: &'static str = "text/csv";
 
 /// JWT Claims used to authenticate with the central RCOS API.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -21,7 +27,7 @@ struct ApiJwtClaims {
 }
 
 /// Create an HTTP client with the given data as the JWT role claim.
-fn client(role: &'static str) -> Client {
+pub fn make_client(role: &'static str, accept: &'static str) -> Client {
     // Get the global config.
     let config: Arc<ConcreteConfig> = global_config();
     // Get the JWT secret from the config.
@@ -34,17 +40,7 @@ fn client(role: &'static str) -> Client {
 
     // Construct and return an HTTP client.
     return Client::builder()
-        .header(ACCEPT, "application/json")
+        .header(ACCEPT, accept)
         .bearer_auth(jwt)
         .finish();
-}
-
-/// Create an HTTP client to send unauthenticated API requests.
-pub fn unauthenticated_client() -> Client {
-    client(ANONYMOUS_USER)
-}
-
-/// Create an HTTP client to send authenticated API requests.
-pub fn authenticated_client() -> Client {
-    client(AUTHENTICATED_USER)
 }

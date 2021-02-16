@@ -3,7 +3,7 @@
 use crate::error::TelescopeError;
 use actix_web::client::Client;
 use serde_json::Value;
-use super::auth;
+use super::auth::*;
 use super::api_endpoint;
 
 /// Function to get a schema using a given client.
@@ -25,11 +25,11 @@ async fn schema(client: Client) -> Result<Value, TelescopeError> {
 
 /// Query the central RCOS API for its schema and return it.
 pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
-    return schema(auth::unauthenticated_client()).await;
+    return schema(make_client(ANONYMOUS_USER, ACCEPT_JSON)).await;
 }
 
 /// Query the central RCOS API for its schema as an authenticated user.
 /// This just adds a JWT with the "role" claim to the request.
 pub async fn authenticated_schema() -> Result<Value, TelescopeError> {
-    return schema(auth::authenticated_client()).await;
+    return schema(make_client(AUTHENTICATED_USER, ACCEPT_JSON)).await;
 }
