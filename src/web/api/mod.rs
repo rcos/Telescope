@@ -6,8 +6,8 @@ use crate::env::global_config;
 mod auth;
 pub use auth::*;
 
-mod introspect;
-mod projects;
+pub mod introspect;
+pub mod projects;
 
 /// Get the URL that the central RCOS API is running at from the global config.
 pub fn api_endpoint() -> String {
