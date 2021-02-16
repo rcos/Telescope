@@ -7,13 +7,6 @@ use crate::templates::{
     page
 };
 use crate::error::TelescopeError;
-use crate::env::{global_config, ConcreteConfig};
-use actix_web::client::Client;
-use actix_web::http::header::ACCEPT;
-use crate::models::projects::Project;
-use std::sync::Arc;
-use serde_json::Value;
-use crate::web::api;
 
 /// Service that serves the telescope homepage.
 #[get("/")]

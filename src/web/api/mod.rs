@@ -1,9 +1,6 @@
 //! API interactions and functionality.
 
-use actix_web::client::Client;
 use crate::env::global_config;
-use serde_json::Value;
-use crate::error::TelescopeError;
 
 // Re-export client generators.
 mod auth;

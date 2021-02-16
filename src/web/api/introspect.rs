@@ -1,13 +1,7 @@
 //! Functionality for inspecting the central RCOS API's schema.
 
 use crate::error::TelescopeError;
-use crate::env::{
-    ConcreteConfig,
-    global_config
-};
-use std::sync::Arc;
 use actix_web::client::Client;
-use actix_web::http::header::ACCEPT;
 use serde_json::Value;
 use super::auth;
 use super::api_endpoint;
