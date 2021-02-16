@@ -12,10 +12,9 @@ use serde_json::Value;
 use super::auth;
 use super::api_endpoint;
 
-/// Query the central RCOS API for its schema and return it.
-pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
-    // Get and return the schema.
-    return auth::unauthenticated_client()
+/// Function to get a schema using a given client.
+async fn schema(client: Client) -> Result<Value, TelescopeError> {
+    client
         // Create a GET request to the API URL.
         .get(api_endpoint())
         // Send the request and wait for a response or an error.
@@ -27,11 +26,16 @@ pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
         // Try to interpret it as one and propagte any errors that occur.
         .json::<Value>()
         .await
-        .map_err(TelescopeError::api_response_error);
+        .map_err(TelescopeError::api_response_error)
+}
+
+/// Query the central RCOS API for its schema and return it.
+pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
+    return schema(auth::unauthenticated_client()).await;
 }
 
 /// Query the central RCOS API for its schema as an authenticated user.
 /// This just adds a JWT with the "role" claim to the request.
 pub async fn authenticated_schema() -> Result<Value, TelescopeError> {
-    unimplemented!()
+    return schema(auth::authenticated_client()).await;
 }
