@@ -5,7 +5,7 @@ use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl, AuthorizationCode, AsyncCodeTokenRequest};
+use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl, AuthorizationCode};
 use std::borrow::Cow;
 use std::sync::Arc;
 use actix_web::web::Query;

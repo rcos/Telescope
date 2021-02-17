@@ -29,3 +29,11 @@ pub struct QueryParameters {
     #[serde(flatten)]
     pub filter: Option<FilterParameter>
 }
+
+impl QueryParameters {
+    /// Serialize this object into a url endcoded string.
+    pub fn url_encoded(&self) -> String {
+        serde_urlencoded::to_string(self)
+            .expect("Could not serialize query parameters")
+    }
+}

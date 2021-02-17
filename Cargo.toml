@@ -40,6 +40,7 @@ env_logger = "~0.8"
 # (de)serialization
 serde = {version = "~1.0", features = ["derive"]}
 serde_json = "~1.0"
+serde_urlencoded = "~0.7"
 # generating QR codes (will be useful later for attendance QR codes perhaps)
 qrcodegen = "~1.6"
 # cryptographically sound random number generation
@@ -74,3 +75,5 @@ reqwest = {version = "~0.11", features = ["json"]}
 dashmap = "~4.0"
 # Async methods in traits
 async-trait = "~0.1"
+# GitHub API models and interactions
+hubcaps = "~0.6"

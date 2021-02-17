@@ -4,11 +4,17 @@ use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
-use oauth2::RedirectUrl;
+use oauth2::{RedirectUrl, AccessToken};
 use oauth2_providers::github::GitHubOauth;
 
 pub mod oauth2_providers;
 pub mod rpi_cas;
+
+/// A [`UserIdentity`] object will be stored in the
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum UserIdentity {
+    GitHubAuthToken(AccessToken),
+}
 
 /// Register auth services.
 pub fn register(config: &mut ServiceConfig) {

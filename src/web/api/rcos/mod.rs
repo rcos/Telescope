@@ -3,11 +3,10 @@
 use crate::env::global_config;
 
 // Re-export client generators.
-mod auth;
-pub use auth::*;
-
+pub mod auth;
 pub mod introspect;
 pub mod projects;
+pub mod users;
 
 /// Get the URL that the central RCOS API is running at from the global config.
 pub fn api_endpoint() -> String {

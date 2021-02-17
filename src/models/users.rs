@@ -26,14 +26,14 @@ pub enum UserAccountType {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct User {
-    username: String,
-    preferred_name: Option<String>,
-    first_name: String,
-    last_name: String,
-    cohort: Option<i32>,
-    role: UserRole,
-    timezone: String,
-    created_at: DateTime<Utc>,
+    pub username: String,
+    pub preferred_name: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
+    pub cohort: Option<i32>,
+    pub role: UserRole,
+    pub timezone: String,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Clone, Deserialize, Debug, Serialize)]

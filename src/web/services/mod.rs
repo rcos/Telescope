@@ -10,7 +10,6 @@ use actix_web::web::{ServiceConfig, Json};
 use serde_json::Value;
 use crate::error::TelescopeError;
 use crate::web::api;
-use actix_web::dev::Service;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {
