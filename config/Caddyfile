@@ -23,3 +23,10 @@ wiki.rcos.io {
 
     reverse_proxy wikijs:3000
 }
+
+gql.rcos.io {
+    encode zstd gzip
+    log { output discard }
+
+    reverse_proxy hasura:8080
+}

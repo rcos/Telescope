@@ -1,22 +1,5 @@
 version: '3'
 services:
-    postgrest:
-        image: postgrest/postgrest:v7.0.1
-        restart: unless-stopped
-        environment:
-            PGRST_DB_SCHEMA: public
-            PGRST_DB_ANON_ROLE: web_anon
-            PGRST_OPENAPI_SERVER_PROXY_URI: https://api.rcos.io
-            PGRST_DB_URI: "${PGRST_DB_URI}"
-            PGRST_JWT_SECRET: "${PGRST_JWT_SECRET}"
-
-    wikijs:
-        image: requarks/wiki:2
-        restart: unless-stopped
-        volumes:
-        - /home/rcos/config/wiki.yml:/wiki/config.yml
-        - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
-
     caddy:
         image: caddy:2
         restart: unless-stopped
@@ -26,6 +9,36 @@ services:
         ports:
         - "80:80"
         - "443:443"
+
+    hasura:
+        image: hasura/graphql-engine
+        restart: unless-stopped
+        environment:
+            # https://hasura.io/docs/1.0/graphql/core/deployment/graphql-engine-flags/reference.html
+            HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "web_anon"
+            HASURA_GRAPHQL_DATABASE_URL: "${RCOS_DB_URI}"
+            HASURA_GRAPHQL_DEV_MODE: "false"
+            HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+            HASURA_GRAPHQL_JWT_SECRET: "${RCOS_JWT_SECRET}"
+            HASURA_GRAPHQL_LOG_LEVEL: "error"
+            HASURA_GRAPHQL_ADMIN_SECRET: "${RCOS_ADMIN_SECRET}"
+
+    postgrest:
+        image: postgrest/postgrest:v7.0.1
+        restart: unless-stopped
+        environment:
+            PGRST_DB_SCHEMA: "public"
+            PGRST_DB_ANON_ROLE: "web_anon"
+            PGRST_OPENAPI_SERVER_PROXY_URI: "https://api.rcos.io"
+            PGRST_DB_URI: "${RCOS_DB_URI}"
+            PGRST_JWT_SECRET: "${RCOS_JWT_SECRET}"
+
+    wikijs:
+        image: requarks/wiki:2
+        restart: unless-stopped
+        volumes:
+        - /home/rcos/config/wiki.yml:/wiki/config.yml
+        - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
 
 volumes:
     caddy_data:
