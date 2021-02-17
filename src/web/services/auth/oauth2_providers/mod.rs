@@ -4,8 +4,8 @@ use crate::web::csrf;
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
-use oauth2::basic::BasicClient;
-use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl};
+use oauth2::basic::{BasicClient, BasicTokenResponse};
+use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl, AuthorizationCode, AsyncCodeTokenRequest};
 use std::borrow::Cow;
 use std::sync::Arc;
 use actix_web::web::Query;
@@ -17,7 +17,7 @@ pub mod github;
 #[derive(Deserialize)]
 struct AuthResponse {
     /// The auth code.
-    code: String,
+    code: AuthorizationCode,
     /// The CSRF token. This should match the one that I sent them and stored
     /// in the CSRF table.
     state: CsrfToken,
@@ -43,7 +43,7 @@ pub trait Oauth2IdentityProvider {
         http_req: &HttpRequest,
     ) -> Result<HttpResponse, TelescopeError> {
         // Get the client configuration and build out the authentication request parameters.
-        let client = Self::get_client();
+        let client: Arc<BasicClient> = Self::get_client();
         let auth_req: AuthorizationRequest = client
             // Randomly generate a CSRF token.
             .authorize_url(CsrfToken::new_random)
@@ -65,7 +65,7 @@ pub trait Oauth2IdentityProvider {
 
     /// Extract the response parameters from the callback request invoked
     /// by the GitHub authorization page.
-    fn token_exchange(req: &HttpRequest) -> Result<(), TelescopeError> {
+    fn token_exchange(req: &HttpRequest) -> Result<BasicTokenResponse, TelescopeError> {
         // Extract the parameters from the request.
         let params: Query<AuthResponse> = Query::extract(req)
             // Extract the value out of the immediately ready future.
@@ -87,12 +87,22 @@ pub trait Oauth2IdentityProvider {
         // (we expect to verify without issue most of the time).
         csrf::verify(Self::SERVICE_NAME, req, state)?;
 
-        // Exchange the auth code for a token here.
-        // TODO
+        // Get the OAuth2 client to exchange the auth code for an access token.
+        let oauth_client: Arc<BasicClient> = Self::get_client();
 
-        Err(TelescopeError::NotImplemented)
+        // Send the exchange request and wait for a response. This happens
+        // synchronously so take care where you call this function from.
+        // Return the response to the calling function.
+        return oauth_client
+            .exchange_code(code)
+            // Send request and wait for response synchronously.
+            .request(oauth2::reqwest::http_client)
+            // Any errors that occur should be reported as internal server errors.
+            .map_err(|e|
+                TelescopeError::ise(format!("OAuth2 token exchange error. If this \
+                persists, please contact a coordinator and file a GitHub issue. Internal error \
+                description: {:?}", e)))
     }
-
 }
 
 impl<T> IdentityProvider for T
@@ -106,9 +116,6 @@ where
     }
 
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
-
-    // The registration handler is almost identical to the login handler but not much can be
-    // factored out unfortunately.
 
     fn registration_handler(
         req: HttpRequest,

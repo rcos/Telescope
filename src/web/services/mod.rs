@@ -33,7 +33,7 @@ pub fn register(config: &mut ServiceConfig) {
 #[get("/authenticated_schema")]
 async fn get_authenticated_api() -> Result<Json<Value>, TelescopeError> {
     // Get the authenticated schema spec.
-    return api::introspect::authenticated_schema()
+    return api::rcos::introspect::authenticated_schema()
         .await
         .map(|v| Json(v));
 }
