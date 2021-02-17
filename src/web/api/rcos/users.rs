@@ -17,16 +17,16 @@ impl User {
     const PATH: &'static str = "users";
 
     /// Store this user on the central database.
-    pub async fn create(self) -> Result<(), TelescopeError> {
+    pub async fn create(&self) -> Result<(), TelescopeError> {
         // Create the http client to communicate with the central RCOS API.
         let http_client: Client = make_client(AUTHENTICATED_USER, ACCEPT_JSON);
 
-        info!("Adding user to database: {}", user.username);
+        info!("Adding user to database: {}", self.username);
 
         // Send the request.
         let response = http_client
-            .post(format!("{}/{}", api_endpoint(), USER_PATH))
-            .send_json(&user)
+            .post(format!("{}/{}", api_endpoint(), Self::PATH))
+            .send_json(self)
             .await
             // Convert and propagate any errors.
             .map_err(TelescopeError::api_query_error)?;
@@ -64,7 +64,7 @@ impl User {
         };
 
         // Format the URL to query.
-        let url: String = format!("{}/{}?{}", api_endpoint(), USER_PATH, params.url_encoded());
+        let url: String = format!("{}/{}?{}", api_endpoint(), Self::PATH, params.url_encoded());
         info!("Querying API at {}", url);
 
         let user: Option<User> = http_client
@@ -92,7 +92,7 @@ impl UserAccount {
     const PATH: &'static str = "user_accounts";
 
     /// Get a user account by a username and type.
-    pub async fn get_by_username_and_type(username: impl Into<String>, ty: UserAccountType) -> Result<Option<Self>, TelescopeError> {
+    pub async fn get_by_username_and_type(username: impl Into<String>, ty: &UserAccountType) -> Result<Option<Self>, TelescopeError> {
         // Create http client.
         let http_client: Client = make_client(AUTHENTICATED_USER, ACCEPT_JSON);
 
@@ -107,7 +107,8 @@ impl UserAccount {
                 FilterParameterRepr::comparison(
                     "type".into(),
                     ComparisonOperator::Equal,
-                    format!("{}", ty)
+                    serde_json::to_string(ty)
+                        .expect("Couldn't serialize user account type")
                 )
             ).into()),
             pagination: Some(PaginationParameter {
