@@ -20,7 +20,8 @@ async fn schema(client: Client) -> Result<Value, TelescopeError> {
         // Try to interpret it as one and propagte any errors that occur.
         .json::<Value>()
         // We have to change this limit here just due to the sheer size of the
-        // schema returned.
+        // schema returned. This limit may also have to grow as the schema
+        // changes.
         .limit(1024*1024)
         .await
         .map_err(TelescopeError::api_response_error)
