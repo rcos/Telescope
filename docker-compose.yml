@@ -10,12 +10,6 @@ services:
             PGRST_DB_URI: "${PGRST_DB_URI}"
             PGRST_JWT_SECRET: "${PGRST_JWT_SECRET}"
 
-    swagger:
-        image: swaggerapi/swagger-ui:v3.40.0
-        restart: unless-stopped
-        environment:
-            URL: https://api.rcos.io
-
     wikijs:
         image: requarks/wiki:2
         restart: unless-stopped
