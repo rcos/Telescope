@@ -16,7 +16,7 @@ services:
         environment:
             # https://hasura.io/docs/1.0/graphql/core/deployment/graphql-engine-flags/reference.html
             HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "web_anon"
-            HASURA_GRAPHQL_DATABASE_URL: "${RCOS_DB_URI}"
+            HASURA_GRAPHQL_DATABASE_URL: "${DATABASE_URL}"
             HASURA_GRAPHQL_DEV_MODE: "false"
             HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
             HASURA_GRAPHQL_JWT_SECRET: "{ \"type\": \"HS256\", \"key\": \"${RCOS_JWT_SECRET}\" }"
