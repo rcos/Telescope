@@ -19,7 +19,7 @@ services:
             HASURA_GRAPHQL_DATABASE_URL: "${RCOS_DB_URI}"
             HASURA_GRAPHQL_DEV_MODE: "false"
             HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
-            HASURA_GRAPHQL_JWT_SECRET: "${RCOS_JWT_SECRET}"
+            HASURA_GRAPHQL_JWT_SECRET: "{ \"type\": \"HS256\", \"key\": \"${RCOS_JWT_SECRET}\" }"
             HASURA_GRAPHQL_LOG_LEVEL: "error"
             HASURA_GRAPHQL_ADMIN_SECRET: "${RCOS_ADMIN_SECRET}"
 
