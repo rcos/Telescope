@@ -14,15 +14,16 @@ as the RCOS website.
         $ sudo apt update
         $ sudo apt install openssl libssl-dev libssl-doc
         ```
-    3. DbMate to run database migrations. See [https://github.com/amacneil/dbmate](https://github.com/amacneil/dbmate) for more info.
+    3. Hasura CLI to run database migrations. See 
+       [the hasura CLI docs](https://hasura.io/docs/1.0/graphql/core/hasura-cli/install-hasura-cli.html#install-hasura-cli) 
+       for more info.
         ```shell
-        $ sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
-        $ sudo chmod +x /usr/local/bin/dbmate
+        $ curl -L https://github.com/hasura/graphql-engine/raw/stable/cli/get.sh | bash
         ```
     4. Docker and docker-compose to run telescope and the database locally. 
        this can be a complicated process, but there are good instructions online 
        [here](https://docs.docker.com/get-docker/).
-       Message me for help.
+       Message me for help if you need it.
        
 2. Clone this repository:
     ```shell script
@@ -54,12 +55,13 @@ as the RCOS website.
     $ docker-compose up -d 
     ```
 
-6. Run the database migrations.
+6. Run the database migrations. Replace the "xx.." in the command with the admin 
+   secret from your `.env` file. 
     ```shell
-    $ dbmate --no-dump-schema --migrations-dir ./rcos-data/db/migrations/ up
+    $ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
     ```
 
-7. At this point Postgrest, the PostgREST API, the Swagger API explorer, and 
+7. At this point Postgres, the Hasura GraphQL API, the Swagger API explorer, and 
    Telescope should all be running on your system. To shut them all down, run
    ```shell
    $ docker-compose down
