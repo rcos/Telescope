@@ -5,6 +5,17 @@
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
+  select_permissions:
+  - role: web_anon
+    permission:
+      columns:
+      - announcement_id
+      - semester_id
+      - title
+      - body_markdown
+      - close_date_time
+      - created_at
+      filter: {}
 - table:
     schema: public
     name: bonus_attendances
@@ -30,6 +41,19 @@
 - table:
     schema: public
     name: coordinators
+  select_permissions:
+  - role: web_anon
+    permission:
+      columns:
+      - semester_id
+      - username
+      - preferred_name
+      - first_name
+      - last_name
+      filter: {}
+- table:
+    schema: public
+    name: duplicate_users
 - table:
     schema: public
     name: enrollments
@@ -157,6 +181,15 @@
 - table:
     schema: public
     name: faculty_advisors
+  select_permissions:
+  - role: web_anon
+    permission:
+      columns:
+      - username
+      - preferred_name
+      - first_name
+      - last_name
+      filter: {}
 - table:
     schema: public
     name: final_grade_appeal
@@ -357,9 +390,45 @@
         table:
           schema: public
           name: small_group_projects
+  select_permissions:
+  - role: web_anon
+    permission:
+      columns:
+      - project_id
+      - description
+      - created_at
+      - repository_urls
+      - title
+      - stack
+      - external_organization_id
+      - homepage_url
+      - cover_image_url
+      filter: {}
 - table:
     schema: public
     name: public_meetings
+  select_permissions:
+  - role: web_anon
+    permission:
+      columns:
+      - meeting_id
+      - semester_id
+      - type
+      - host_username
+      - is_public
+      - start_date_time
+      - end_date_time
+      - title
+      - agenda
+      - presentation_markdown
+      - external_presentation_url
+      - attendance_code
+      - recording_url
+      - is_remote
+      - location
+      - meeting_url
+      - created_at
+      filter: {}
 - table:
     schema: public
     name: semesters
