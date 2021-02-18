@@ -2,13 +2,13 @@
     email rcos.management@gmail.com
 }
 
-rcos.io, www.rcos.io {
-    encode zstd gzip
-    log { output discard }
+# rcos.io, www.rcos.io {
+#     encode zstd gzip
+#     log { output discard }
 
-    # TODO Observatory/Telescope
-    respond "Hello, world!"
-}
+#     # TODO Observatory/Telescope
+#     respond "Hello, world!"
+# }
 
 api.rcos.io {
     encode zstd gzip
@@ -17,16 +17,16 @@ api.rcos.io {
     reverse_proxy postgrest:3000
 }
 
-swagger.rcos.io {
-    encode zstd gzip
-    log { output discard }
-
-    reverse_proxy swagger:8080
-}
-
 wiki.rcos.io {
     encode zstd gzip
     log { output discard }
 
     reverse_proxy wikijs:3000
+}
+
+gql.rcos.io {
+    encode zstd gzip
+    log { output discard }
+
+    reverse_proxy hasura:8080
 }

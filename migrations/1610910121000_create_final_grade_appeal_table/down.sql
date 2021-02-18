@@ -1,0 +1,1 @@
+DROP TABLE final_grade_appeal;
