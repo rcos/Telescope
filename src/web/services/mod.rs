@@ -8,8 +8,6 @@ mod index;
 
 use actix_web::web::{ServiceConfig, Json};
 use serde_json::Value;
-use crate::error::TelescopeError;
-use crate::web::api;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {
@@ -22,17 +20,5 @@ pub fn register(config: &mut ServiceConfig) {
         // Login services.
         .service(login::login_page)
         // Account registration services.
-        .service(register::register_page)
-
-        // Temporarily service the authenticated schema spec
-        .service(get_authenticated_api);
-}
-
-/// Temporary service to inspect the authenticated schema.
-#[get("/authenticated_schema")]
-async fn get_authenticated_api() -> Result<Json<Value>, TelescopeError> {
-    // Get the authenticated schema spec.
-    return api::rcos::introspect::authenticated_schema()
-        .await
-        .map(|v| Json(v));
+        .service(register::register_page);
 }
