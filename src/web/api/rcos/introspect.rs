@@ -29,11 +29,11 @@ async fn schema(client: Client) -> Result<Value, TelescopeError> {
 
 /// Query the central RCOS API for its schema and return it.
 pub async fn unauthenticated_schema() -> Result<Value, TelescopeError> {
-    return schema(make_client(ANONYMOUS_USER, ACCEPT_JSON)).await;
+    return schema(make_api_client(ANONYMOUS_USER, ACCEPT_JSON)).await;
 }
 
 /// Query the central RCOS API for its schema as an authenticated user.
 /// This just adds a JWT with the "role" claim to the request.
 pub async fn authenticated_schema() -> Result<Value, TelescopeError> {
-    return schema(make_client(AUTHENTICATED_USER, ACCEPT_JSON)).await;
+    return schema(make_api_client(AUTHENTICATED_USER, ACCEPT_JSON)).await;
 }

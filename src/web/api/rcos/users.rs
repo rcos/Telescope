@@ -19,7 +19,7 @@ impl User {
     /// Store this user on the central database.
     pub async fn create(&self) -> Result<(), TelescopeError> {
         // Create the http client to communicate with the central RCOS API.
-        let http_client: Client = make_client(None);
+        let http_client: Client = make_api_client(None);
 
         info!("Adding user to database: {}", self.username);
 
@@ -43,7 +43,7 @@ impl User {
     /// Try to get a user from the database by their username
     pub async fn get_by_username(username: impl Into<String>) -> Result<Option<Self>, TelescopeError> {
         // Make an http client.
-        let http_client: Client = make_client(AUTHENTICATED_USER, ACCEPT_JSON);
+        let http_client: Client = make_api_client(AUTHENTICATED_USER, ACCEPT_JSON);
 
         // Convert the username.
         let username: String = username.into();
@@ -94,7 +94,7 @@ impl UserAccount {
     /// Get a user account by a username and type.
     pub async fn get_by_username_and_type(username: impl Into<String>, ty: &UserAccountType) -> Result<Option<Self>, TelescopeError> {
         // Create http client.
-        let http_client: Client = make_client(AUTHENTICATED_USER, ACCEPT_JSON);
+        let http_client: Client = make_api_client(AUTHENTICATED_USER, ACCEPT_JSON);
 
         // Construct query parameters.
         let params: QueryParameters = QueryParameters {

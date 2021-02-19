@@ -77,3 +77,5 @@ dashmap = "~4.0"
 async-trait = "~0.1"
 # GitHub API models and interactions
 hubcaps = "~0.6"
+# GraphQL types.
+async-graphql = {version = "~2.5", features = [], default_features = false}

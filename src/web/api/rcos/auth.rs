@@ -3,7 +3,7 @@
 use actix_web::client::Client;
 use std::sync::Arc;
 use crate::env::{ConcreteConfig, global_config};
-use actix_web::http::header::ACCEPT;
+use actix_web::http::header::{ACCEPT, CONTENT_TYPE};
 use jsonwebtoken::{Header, EncodingKey, encode};
 use chrono::Utc;
 
@@ -11,7 +11,7 @@ use chrono::Utc;
 const AUTHENTICATED_USER: &'static str = "api_user";
 
 /// Accept responses in JSON format.
-const ACCEPT_JSON: &'static str = "application/json";
+const JSON_MIME: &'static str = "application/json";
 
 /// The issuer claim in JWTs issued by telescope.
 const JWT_ISSUER: &'static str = "telescope";
@@ -73,14 +73,16 @@ impl ApiJwtClaims {
     }
 }
 
-/// Create an HTTP client with an optional subject claim in the JWT.
-pub fn make_client(subject: Option<String>) -> Client {
+/// Create an HTTP client with an optional subject claim in the JWT. This will have the proper
+/// Accept and Content-Type headers to send and receive GraphQL data.
+pub fn make_api_client(subject: Option<String>) -> Client {
     // Make JWT.
     let jwt: String = ApiJwtClaims::new(subject);
 
     // Construct and return an HTTP client.
     return Client::builder()
-        .header(ACCEPT, ACCEPT_JSON)
+        .header(ACCEPT, JSON_MIME)
+        .header(CONTENT_TYPE, JSON_MIME)
         .bearer_auth(jwt)
         .finish();
 }
