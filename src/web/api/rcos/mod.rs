@@ -9,6 +9,7 @@ use serde_json::Value;
 mod auth;
 pub mod projects;
 pub mod users;
+pub mod hasura;
 
 /// Re-export client authenticated client constructor.
 pub use auth::make_api_client;

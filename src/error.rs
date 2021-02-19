@@ -290,6 +290,12 @@ impl TelescopeError {
                 contact a coordinator and file a GitHub issue. Internal error description: {}", err)
             ),
 
+            TelescopeError::GraphQLError(_) => jumbotron::new(
+                format!("{} - Internal API Error", status_code),
+                "The central RCOS GraphQL API returned at least one error. Please contact \
+                a coordinator and create an issue on the telescope GitHub."
+            ),
+
             // If there is a variant without an error page implementation,
             // log an error message and render the unimplemented page.
             other => {

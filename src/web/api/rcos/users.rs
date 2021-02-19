@@ -25,6 +25,10 @@ pub enum UserAccountType {
     BitBucket,
 }
 
+pub struct CreateOneUser {
+    // TODO 
+}
+
 //
 // impl User {
 //     /// The path on the API endpoint for the user table.
