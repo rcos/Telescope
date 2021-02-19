@@ -5,42 +5,82 @@ use std::sync::Arc;
 use crate::env::{ConcreteConfig, global_config};
 use actix_web::http::header::ACCEPT;
 use jsonwebtoken::{Header, EncodingKey, encode};
+use chrono::Utc;
 
 /// The database role name for authenticated requests.
-pub const AUTHENTICATED_USER: &'static str = "api_user";
-
-/// The database role name for unauthenticated requests.
-pub const ANONYMOUS_USER: &'static str = "web_anon";
+const AUTHENTICATED_USER: &'static str = "api_user";
 
 /// Accept responses in JSON format.
-pub const ACCEPT_JSON: &'static str = "application/json";
+const ACCEPT_JSON: &'static str = "application/json";
 
-/// Accept responses in CSV format.
-pub const ACCEPT_CSV: &'static str = "text/csv";
+/// The issuer claim in JWTs issued by telescope.
+const JWT_ISSUER: &'static str = "telescope";
 
 /// JWT Claims used to authenticate with the central RCOS API.
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Clone, Debug)]
 struct ApiJwtClaims {
-    /// The role to use when accessing the API. For authenticated requests,
-    /// this will always be "api_user". Otherwise, the default is "web_anon".
-    role: &'static str,
+    /// Who issued the JWY token. This should always be "telescope".
+    iss: &'static str,
+    /// The subject of the JWT. This is the user that the claim is for.
+    /// May be none.
+    sub: Option<String>,
+    /// When the claim was issued. This should be the UNIX time
+    /// (number of seconds since the epoch) when the JWT was issued.
+    iat: i64,
+    /// Claims required by hasura.
+    #[serde(rename = "https://hasura.io/jwt/claims")]
+    hasura_claims: HasuraJwtClaims
 }
 
-/// Create an HTTP client with the given data as the JWT role claim.
-pub fn make_client(role: &'static str, accept: &'static str) -> Client {
-    // Get the global config.
-    let config: Arc<ConcreteConfig> = global_config();
-    // Get the JWT secret from the config.
-    let jwt_secret: &[u8] = config.jwt_secret.as_bytes();
+/// JWT Claims in the Hasura namespace.
+#[derive(Serialize, Clone, Debug)]
+struct HasuraJwtClaims {
+    /// The roles this user is allowed to use.
+    #[serde(rename = "x-hasura-allowed-roles")]
+    allowed_roles: Vec<&'static str>,
+    /// The role that this user should use if no different one is passed in the
+    /// `x-hasura-role` request header.
+    #[serde(rename = "x-hasura-default-role")]
+    default_role: &'static str,
+    /// The user ID. This should match the one in the top level of the JWT token.
+    #[serde(rename = "x-hasura-user-id")]
+    user_id: Option<String>
+}
 
-    // Encode the JWT.
-    let claims: ApiJwtClaims = ApiJwtClaims { role };
-    let jwt: String = encode(&Header::default(), &claims, &EncodingKey::from_secret(jwt_secret))
-        .expect("Could not encode JWT");
+impl ApiJwtClaims {
+    /// Construct and sign a new JWT.
+    fn new(subject: Option<String>) -> String {
+        // Get the global config.
+        let config: Arc<ConcreteConfig> = global_config();
+        // Get the JWT secret from the config.
+        let jwt_secret: &[u8] = config.jwt_secret.as_bytes();
+
+        // Create the JWT.
+        let jwt = ApiJwtClaims {
+            iss: JWT_ISSUER,
+            sub: subject.clone(),
+            iat: Utc::now().timestamp(),
+            hasura_claims: HasuraJwtClaims {
+                default_role: AUTHENTICATED_USER,
+                allowed_roles: vec![AUTHENTICATED_USER],
+                user_id: subject
+            }
+        };
+
+        // Encode and return the JWT
+        return encode(&Header::default(), &jwt, &EncodingKey::from_secret(jwt_secret))
+            .expect("Could not encode JWT");
+    }
+}
+
+/// Create an HTTP client with an optional subject claim in the JWT.
+pub fn make_client(subject: Option<String>) -> Client {
+    // Make JWT.
+    let jwt: String = ApiJwtClaims::new(subject);
 
     // Construct and return an HTTP client.
     return Client::builder()
-        .header(ACCEPT, accept)
+        .header(ACCEPT, ACCEPT_JSON)
         .bearer_auth(jwt)
         .finish();
 }

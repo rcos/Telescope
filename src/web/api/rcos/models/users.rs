@@ -38,9 +38,9 @@ pub struct User {
 
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct UserAccount {
-    username: String,
+    pub username: String,
     #[serde(rename = "type")]
-    ty: UserAccountType,
-    account_id: String,
-    created_at: DateTime<Utc>,
+    pub ty: UserAccountType,
+    pub account_id: String,
+    pub created_at: DateTime<Utc>,
 }

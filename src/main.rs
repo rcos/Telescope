@@ -16,29 +16,29 @@ extern crate derive_more;
 #[macro_use]
 extern crate async_trait;
 
-mod app_data;
-mod env;
-mod error;
-mod models;
-mod templates;
-mod web;
+use actix::prelude::*;
+use actix_files as afs;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::{App, http::Uri, HttpServer, middleware, web as aweb, web::get};
+use actix_web::cookie::SameSite;
+use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
+use openssl::ssl::{SslAcceptor, SslMethod};
+use rand::Rng;
+use rand::rngs::OsRng;
 
-use crate::web::csrf::CsrfJanitor;
 use crate::{
     env::{ConcreteConfig, CONFIG},
     templates::static_pages::{
         projects::ProjectsPage, sponsors::SponsorsPage, StaticPage,
     },
 };
-use actix::prelude::*;
-use actix_files as afs;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::cookie::SameSite;
-use actix_web::{http::Uri, middleware, web as aweb, web::get, App, HttpServer};
-use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
-use openssl::ssl::{SslAcceptor, SslMethod};
-use rand::rngs::OsRng;
-use rand::Rng;
+use crate::web::csrf::CsrfJanitor;
+
+mod app_data;
+mod env;
+mod error;
+mod templates;
+mod web;
 
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
