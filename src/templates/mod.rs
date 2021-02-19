@@ -100,7 +100,7 @@ impl Responder for Template {
     type Error = TelescopeError;
     type Future = Ready<Result<HttpResponse, Self::Error>>;
 
-    fn respond_to(self, req: &HttpRequest) -> Self::Future {
+    fn respond_to(self, _: &HttpRequest) -> Self::Future {
         let result = AppData::global()
             .render_template(&self)
             .map(|rendered: String| {

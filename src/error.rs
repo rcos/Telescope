@@ -14,6 +14,7 @@ use lettre::smtp::response::Response as SmtpResponse;
 use std::error::Error;
 use std::fmt;
 use actix_web::client::{SendRequestError, JsonPayloadError};
+use async_graphql as gql;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -129,8 +130,14 @@ pub enum TelescopeError {
     #[display(fmt = "Error in API response payload: {}", _0)]
     /// API response returned a malformed or otherwise unexpected payload
     /// that could not be converted to the proper type internally.
-    /// This should report as a gateway error.
+    /// This should report as a internal server error.
     ApiResponsePayloadError(String),
+
+    #[error(ignore)]
+    #[display(fmt = "Central RCOS GraphQL API returned error(s)")]
+    /// The central RCOS GraphQL API responded with errors. This should
+    /// report as an internal server error.
+    GraphQLError(Vec<gql::ServerError>)
 }
 
 impl TelescopeError {
@@ -340,7 +347,6 @@ impl ResponseError for TelescopeError {
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
             TelescopeError::SendApiQueryError {status_code, ..} =>
                 StatusCode::from_u16(*status_code).expect("Invalid status code"),
-            TelescopeError::ApiResponsePayloadError(_) => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

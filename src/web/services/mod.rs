@@ -6,8 +6,7 @@ pub mod not_found;
 mod register;
 mod index;
 
-use actix_web::web::{ServiceConfig, Json};
-use serde_json::Value;
+use actix_web::web::ServiceConfig;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {
