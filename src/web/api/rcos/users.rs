@@ -25,8 +25,18 @@ pub enum UserAccountType {
     BitBucket,
 }
 
+/// Type for usernames -- They are currently strings, but may change to UUIDs or
+/// integers in the future.
+pub type Username = String;
+
+/// Data passed to the mutation to create a single user.
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct CreateOneUser {
-    // TODO 
+    username: Username,
+    first_name: String,
+    last_name: String,
+    preferred_name: Option<String>,
+
 }
 
 //
