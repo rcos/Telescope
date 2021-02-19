@@ -33,7 +33,7 @@ bind_http  = "localhost:80"
 # [REQUIRED]
 # Specify the URL of the RCOS central API. This default value is okay for
 # testing locally in docker but should probably be changed in production.
-api_url = "http://hasura:8080"
+api_url = "http://hasura:8080/v1/graphql"
 
 # [REQUIRED]
 # The JSON web token (jwt) key used to encode JWTs when authenticating with
