@@ -36,7 +36,7 @@ pub struct CreateOneUser {
     first_name: String,
     last_name: String,
     preferred_name: Option<String>,
-
+    role: UserRole,
 }
 
 //
