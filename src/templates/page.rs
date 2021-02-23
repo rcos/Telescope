@@ -27,7 +27,8 @@ pub fn of(
     title: impl Into<Value>,
     content: &Template,
 ) -> Result<Template, TelescopeError> {
-    let content_rendered = AppData::global().render_template(content)?;
+    let content_rendered = AppData::global()
+        .render_template(content)?;
     Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
         .field(NAVBAR, navbar::userless(req_path))

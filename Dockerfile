@@ -9,6 +9,7 @@ RUN cargo build --release
 RUN rm -rfv target/release/deps/telescope*
 # Build telescope proper
 COPY ./src ./src
+COPY ./graphql ./graphql
 RUN cargo build --release
 # Copy over remaining files needed to run.
 COPY ./static ./static

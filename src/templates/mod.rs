@@ -76,7 +76,7 @@ impl Template {
     pub fn render(&self) -> Result<String, TelescopeError> {
         AppData::global()
             .render_template(self)
-            .map_err(|e| e.into())
+            .map_err(TelescopeError::RenderingError)
     }
 }
 

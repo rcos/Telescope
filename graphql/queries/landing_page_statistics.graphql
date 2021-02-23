@@ -1,0 +1,37 @@
+query {
+    current_semester: semesters(
+        order_by: {end_date: desc_nulls_last},
+        limit: 1
+    ) {
+        semester_id
+        title
+        start_date
+        end_date
+
+        current_students: enrollments_aggregate {
+            aggregate {
+                count
+            }
+        }
+
+        current_projects: project_pitches_aggregate(
+            where: {is_approved: {_eq: true}}
+        ) {
+            aggregate {
+                count
+            }
+        }
+    }
+
+    total_students: users_aggregate {
+        aggregate {
+            count
+        }
+    }
+
+    total_projects: projects_aggregate {
+        aggregate {
+            count
+        }
+    }
+}

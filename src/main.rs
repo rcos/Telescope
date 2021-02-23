@@ -16,6 +16,9 @@ extern crate derive_more;
 #[macro_use]
 extern crate async_trait;
 
+#[macro_use]
+extern crate graphql_client;
+
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};

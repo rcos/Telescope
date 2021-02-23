@@ -1,7 +1,6 @@
 //! API interactions and functionality.
 
 use crate::env::global_config;
-use async_graphql as gql;
 use actix_web::client::Client;
 use crate::error::TelescopeError;
 use serde_json::Value;
