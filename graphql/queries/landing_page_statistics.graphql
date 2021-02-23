@@ -14,8 +14,8 @@ query {
             }
         }
 
-        current_projects: project_pitches_aggregate(
-            where: {is_approved: {_eq: true}}
+        current_projects: enrollments_aggregate (
+            distinct_on: project_id
         ) {
             aggregate {
                 count
