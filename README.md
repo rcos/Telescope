@@ -2,7 +2,62 @@
 Telescope intends to replace [Observatory](https://github.com/rcos/observatory-server) 
 as the RCOS website.
 
-### Installation:
+## Development Notes
+These are note for Telescope Developers on how to find and update Telescope 
+itself.
+
+#### Project Structure
+Telescope is a large enough project that it may not be immediately obvious where
+certain files are. This section provides a map to this repository.
+- `.github`: This folder holds configuration files related to this repository's 
+    interactions with Github.com. This includes the GitHub issue templates, the 
+    continuous integration workflows, and the Dependabot configuration.
+- `proposals`: This folder contains the project proposal files that Telescope has
+    been submitted under for the Rensselaer Center for Open Source (RCOS).
+- `rcos-data`: This git submodule points to the current telescope version of the
+    repository that contains the migrations for the central RCOS database.  
+- `graphql`: This folder contains the introspected `schema.json` file for the 
+    central RCOS GraphQL API exposed via Hasura over the central RCOS database.
+    This folder also contains GraphQL files for all of the different queries
+    that Telescope will send to the central API.
+- `static`: This folder contains statically served files and assets, including 
+    - Telescope icons
+    - RCOS icons and branding
+    - The global CSS style file
+    - All of Telescopes javascript
+    - Sponsor logos and branding
+- `templates`: This folder contains all of the Handlebars templates used to 
+    render Telescope's frontend. 
+- `src`: This is the main Telescope codebase, written in Rust.
+
+#### Schema Introspection
+When the central RCOS GraphQL API (a Hasura wrapper over the central RCOS Postgres database) 
+gets updated, Telescopes schema needs to get updated to match. After merging whatever changes
+or migrations have been made to the `telescope-dev-version` branch of the `rcos-data` repository,
+update Telescope's git `rcos-data` submodule to point to the newest commit on the 
+`telescope-dev-version` branch. After you have done this and pulled the submodule,
+update the local database using the hasura client. The command should look like this:
+```shell
+$ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
+``` 
+where `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your `.env` file.
+After applying the migrations, go to the hasura console to make sure that all the proper
+tables are being tracked, and all the types and queries are available. 
+If you haven't already, you should install a GraphQL client to introspect the schema. 
+There are several of these that are probably acceptable, but for consistency we use 
+the [`graphql-rust client`](https://github.com/graphql-rust/graphql-client/tree/master/graphql_client_cli). 
+Install this usinf the command from its README.
+```shell
+$ cargo install graphql_client_cli --force
+```
+Finally, regenerate Telescope's `schema.json` file as follows:
+```shell
+$ graphql-client introspect-schema --header 'x-hasura-admin-secret: xxxxxxxxxxxxxxxxxxxxxxxx' --output graphql/schema.json http://localhost:8000/v1/graphql
+```
+again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your `.env` file.
+
+
+## Installation:
 1. Install dependencies:
     1. Rust (see [https://www.rust-lang.org/](https://www.rust-lang.org/) for more info)
         ```shell
@@ -59,7 +114,7 @@ as the RCOS website.
    secret from your `.env` file. 
     ```shell
     $ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
-    ```
+    ``` 
 
 7. At this point Postgres, the Hasura GraphQL API, the Swagger API explorer, and 
    Telescope should all be running on your system. To shut them all down, run
