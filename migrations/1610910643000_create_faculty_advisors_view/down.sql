@@ -1,0 +1,1 @@
+DROP VIEW faculty_advisors;
