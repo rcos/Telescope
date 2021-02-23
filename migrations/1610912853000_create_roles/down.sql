@@ -1,4 +1,4 @@
--- The order of these must be the reverse of above
+-- The order of these must be the reverse of up.sql
 DROP OWNED BY authenticator;
 DROP OWNED BY api_user;
 DROP OWNED BY web_anon;
