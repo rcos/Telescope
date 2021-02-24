@@ -14,10 +14,16 @@ are open-sourced here.
 
 ## API
 
-This database is served by a Postgrest API [here](https://swagger.rcos.io/#/) that
+This database is served by a PostgREST\* and Hasura GraphQL APIs that
 allows access to some resources when unauthenticated for public access, and
 allows full access to all resources when authenticated. RCOS infrastructure
 cannot connect to the database directly and must interact through this API.
+
+\* The REST API may be removed in favor of GraphQL in the future.
+
+## Migrations
+
+Migrations and metadata are managed using the [Hasura CLI](https://hasura.io/docs/1.0/graphql/core/hasura-cli/index.html).
 
 ## Deployment
 
@@ -25,5 +31,3 @@ cannot connect to the database directly and must interact through this API.
    `docker-compose.yml` and the [roles migration
    file](./db/migrations/20210117194733_create_roles.sql) with secure passwords.
 2. Run `docker-compose up -d` to start everything.
-3. Use [DbMate](https://github.com/amacneil/dbmate) to apply the migations
-   `dbmate up`.
