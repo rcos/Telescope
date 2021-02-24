@@ -41,6 +41,9 @@ services:
     ports:
       - "8080:80"
       - "8443:443"
+#    environment:
+#      # See the config section about profiles.
+#      PROFILE: "live"
 
 volumes:
   db_data:

@@ -115,7 +115,7 @@ email = "test@mydomain.test"
 password = "BetterPassword"
 create = true
 
-# Production profile.
-# Use `telescope -p production`
-[profile.production]
-bind_https = "0.0.0.0:443"
+# Live API profile.
+# Use `telescope -p live` or set the PROFILE variable to "live"
+[profile.live]
+api_url = "https://gql.rcos.io/v1/graphql"
