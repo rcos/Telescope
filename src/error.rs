@@ -134,10 +134,10 @@ pub enum TelescopeError {
     ApiResponsePayloadError(String),
 
     #[error(ignore)]
-    #[display(fmt = "Central RCOS GraphQL API returned error: {}", _0)]
+    #[display(fmt = "Central RCOS GraphQL API returned error(s)")]
     /// The central RCOS GraphQL API responded with errors. This should
     /// report as an internal server error.
-    GraphQLError(GraphQlError)
+    GraphQLError(Vec<GraphQlError>)
 }
 
 impl TelescopeError {
@@ -290,11 +290,19 @@ impl TelescopeError {
                 contact a coordinator and file a GitHub issue. Internal error description: {}", err)
             ),
 
-            TelescopeError::GraphQLError(_) => jumbotron::new(
-                format!("{} - Internal API Error", status_code),
-                "The central RCOS GraphQL API returned at least one error. Please contact \
-                a coordinator and create an issue on the telescope GitHub."
-            ),
+            TelescopeError::GraphQLError(errs) => {
+                // Map all errors to their `Display` formatting.
+                let errs: Vec<String> = errs.iter()
+                    .map(|e| format!("{}", e))
+                    .collect();
+
+                jumbotron::new(
+                    format!("{} - Internal API Error", status_code),
+                    format!("The central RCOS GraphQL API returned at least one error. Please \
+                    contact a coordinator and create an issue on the telescope GitHub. Internal error \
+                    description(s): {:?}", errs)
+                )
+            },
 
             // If there is a variant without an error page implementation,
             // log an error message and render the unimplemented page.

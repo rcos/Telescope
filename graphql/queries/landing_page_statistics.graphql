@@ -1,12 +1,9 @@
-query {
+query LandingPageStatistics {
     current_semester: semesters(
         order_by: {end_date: desc_nulls_last},
         limit: 1
     ) {
-        semester_id
         title
-        start_date
-        end_date
 
         current_students: enrollments_aggregate {
             aggregate {

@@ -8,7 +8,7 @@ use jsonwebtoken::{Header, EncodingKey, encode};
 use chrono::Utc;
 
 /// The database role name for authenticated requests.
-const AUTHENTICATED_USER: &'static str = "api_user";
+const AUTHENTICATED_USER: &'static str = "admin";
 
 /// Accept responses in JSON format.
 const JSON_MIME: &'static str = "application/json";
@@ -44,6 +44,7 @@ struct HasuraJwtClaims {
     default_role: &'static str,
     /// The user ID. This should match the one in the top level of the JWT token.
     #[serde(rename = "x-hasura-user-id")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     user_id: Option<String>
 }
 
