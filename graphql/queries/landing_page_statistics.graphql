@@ -12,7 +12,8 @@ query LandingPageStatistics {
         }
 
         current_projects: enrollments_aggregate (
-            distinct_on: project_id
+            distinct_on: project_id,
+            where: { project_id: {_is_null: false} }
         ) {
             aggregate {
                 count
