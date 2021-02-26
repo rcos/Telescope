@@ -304,14 +304,11 @@ impl TelescopeError {
                 )
             },
 
-            // If there is a variant without an error page implementation,
-            // log an error message and render the unimplemented page.
-            other => {
-                return {
-                    error!("{} does not have an error page implementation.", other);
-                    TelescopeError::NotImplemented.render_error_page(req)
-                }
-            }
+            TelescopeError::InternalServerError(message) => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                format!("Telescope had an internal server error. Please contact a \
+                coordinator and file a GitHub issue. Error description: {}", message)
+            )
         };
 
         // Put jumbotron in a page and return the content.
