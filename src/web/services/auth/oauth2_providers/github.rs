@@ -42,12 +42,13 @@ impl Oauth2IdentityProvider for GitHubOauth {
         GITHUB_CLIENT.clone()
     }
 
-    fn add_scopes(auth_req: AuthorizationRequest) -> AuthorizationRequest {
-        auth_req
+    fn scopes() -> Vec<Scope> {
+        vec![
             // Scope to read user's public profile information.
-            .add_scope(Scope::new("read:user".into()))
+            Scope::new("read:user".into()),
             // Scope to read user's email address.
-            .add_scope(Scope::new("user:email".into()))
+            //Scope::new("user:email".into()),
+        ]
     }
 
     fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie {

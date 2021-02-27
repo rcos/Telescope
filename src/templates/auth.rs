@@ -72,6 +72,8 @@ pub fn login() -> Template {
             DiscordOAuth::login_path(),
             "btn-discord",
             "Login using Discord",
+            // This is manually coded for in the template file and is not
+            // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord")
         )
     ];
@@ -94,6 +96,8 @@ pub fn register() -> Template {
             DiscordOAuth::register_path(),
             "btn-discord",
             "Register using Discord",
+            // This is manually coded for in the template file and is not
+            // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord")
         )
     ];

@@ -5,7 +5,7 @@ use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl, AuthorizationCode};
+use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl, AuthorizationCode, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
 use actix_web::web::Query;
@@ -39,7 +39,7 @@ pub trait Oauth2IdentityProvider {
     fn get_client() -> Arc<BasicClient>;
 
     /// Add the appropriate scopes for the OAuth authentication request.
-    fn add_scopes(auth_req: AuthorizationRequest) -> AuthorizationRequest;
+    fn scopes() -> Vec<Scope>;
 
     /// Create a user identity struct from an auth token response to save
     /// in the user's cookies and identify them in future requests.
@@ -53,7 +53,7 @@ pub trait Oauth2IdentityProvider {
     ) -> Result<HttpResponse, TelescopeError> {
         // Get the client configuration and build out the authentication request parameters.
         let client: Arc<BasicClient> = Self::get_client();
-        let auth_req: AuthorizationRequest = client
+        let mut auth_req: AuthorizationRequest = client
             // Randomly generate a CSRF token.
             .authorize_url(CsrfToken::new_random)
             // Add the redirect URL.
@@ -61,7 +61,10 @@ pub trait Oauth2IdentityProvider {
 
         // Add the scopes defined by this Identity provider and convert the
         // request into the target URL and assocated CSRF token.
-        let (url, csrf_token) = Self::add_scopes(auth_req).url();
+        for scope in Self::scopes() {
+            auth_req = auth_req.add_scope(scope);
+        }
+        let (url, csrf_token) = auth_req.url();
 
         // Save CSRF token.
         csrf::save(Self::SERVICE_NAME, http_req, csrf_token)?;
