@@ -97,6 +97,7 @@ again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your
    a certificate signed by a trusted certificate authority. See 
    [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
    for more details.
+
 4. Copy the configuration templates as follows:
     - `config_example.toml` -> `config.toml`
     - `.env.example` -> `.env`
