@@ -1,9 +1,10 @@
 //! Module for Landing Page statistics query and data extraction.
 
+/// GraphQL Query for landing page statistics.
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/schema.json",
-    query_path = "graphql/queries/landing_page_statistics.graphql",
+    query_path = "graphql/stats/landing_page.graphql",
 )]
 pub struct LandingPageStatistics;
 
