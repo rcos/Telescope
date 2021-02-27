@@ -10,8 +10,13 @@ use std::borrow::Cow;
 use std::sync::Arc;
 use actix_web::web::Query;
 use actix_web::FromRequest;
+use std::future::Future;
+use serde::Serialize;
+use serde::de::DeserializeOwned;
+use crate::web::services::auth::identity::IdentityCookie;
 
 pub mod github;
+pub mod discord;
 
 /// Data returned by GitHub OAuth2 Authorization request.
 #[derive(Deserialize)]
@@ -35,6 +40,10 @@ pub trait Oauth2IdentityProvider {
 
     /// Add the appropriate scopes for the OAuth authentication request.
     fn add_scopes(auth_req: AuthorizationRequest) -> AuthorizationRequest;
+
+    /// Create a user identity struct from an auth token response to save
+    /// in the user's cookies and identify them in future requests.
+    fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie;
 
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
@@ -64,7 +73,7 @@ pub trait Oauth2IdentityProvider {
     }
 
     /// Extract the response parameters from the callback request invoked
-    /// by the GitHub authorization page.
+    /// by the provider's authorization page.
     fn token_exchange(req: &HttpRequest) -> Result<BasicTokenResponse, TelescopeError> {
         // Extract the parameters from the request.
         let params: Query<AuthResponse> = Query::extract(req)
@@ -117,9 +126,21 @@ where
 
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
 
-    fn registration_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
+    type LoginFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+
+    fn login_handler(req: HttpRequest) -> Self::LoginFut {
+        return Box::pin(async move {
+            // Get the redirect URL.
+            let redir_url: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
+            // Redirect the user.
+            return Self::auth_response(redir_url, &req);
+        });
+    }
+
+    fn registration_handler(req: HttpRequest) -> Self::RegistrationFut {
         return Box::pin(async move {
             // Get the redirect URL.
             let redir_url: RedirectUrl =
@@ -129,26 +150,19 @@ where
         });
     }
 
-    fn login_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
+    fn login_authenticated_handler(req: HttpRequest) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
-            // Get the redirect URL.
-            let redir_url: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
-            // Redirect the user.
-            return Self::auth_response(redir_url, &req);
+            // Get the API access token.
+            let token_response: BasicTokenResponse = Self::token_exchange(&req)?;
+            let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+
+            Err::<HttpResponse, TelescopeError>(TelescopeError::NotImplemented)
         });
     }
 
-    fn login_authenticated_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
-        return Box::pin(async move { Err(TelescopeError::NotImplemented) });
-    }
-
-    fn registration_authenticated_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
-        return Box::pin(async move { Err(TelescopeError::NotImplemented) });
+    fn registration_authenticated_handler(req: HttpRequest) -> Self::RegistrationAuthenticatedFut {
+        return Box::pin(async move {
+            Err(TelescopeError::NotImplemented)
+        });
     }
 }

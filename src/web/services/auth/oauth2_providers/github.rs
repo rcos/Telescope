@@ -1,11 +1,20 @@
 use crate::env::global_config;
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use oauth2::basic::BasicClient;
-use oauth2::{AuthUrl, AuthorizationRequest, Scope, TokenUrl};
+use oauth2::basic::{BasicClient, BasicTokenResponse};
+use oauth2::{AuthUrl, AuthorizationRequest, Scope, TokenUrl, TokenResponse, AccessToken};
 use std::sync::Arc;
+use crate::web::services::auth::identity::IdentityCookie;
 
-/// Zero sized typ representing the GitHub OAuth2 identity provider.
+/// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
+
+/// The identity object stored in the user's cookies for users signed in via
+/// GitHub.
+#[derive(Serialize, Deserialize)]
+pub struct GitHubIdentity {
+    /// The OAuth2 Access token granted by GitHub.
+    pub access_token: AccessToken
+}
 
 // Lazy static github client object.
 lazy_static! {
@@ -39,5 +48,12 @@ impl Oauth2IdentityProvider for GitHubOauth {
             .add_scope(Scope::new("read:user".into()))
             // Scope to read user's email address.
             .add_scope(Scope::new("user:email".into()))
+    }
+
+    fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie {
+        // Extract the identity and build the identity cookie.
+        IdentityCookie::Github(GitHubIdentity {
+            access_token: token_response.access_token().clone()
+        })
     }
 }

@@ -3,18 +3,14 @@ use actix_web::http::uri::Authority;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::{HttpRequest, HttpResponse};
-use futures::future::LocalBoxFuture;
-use oauth2::{RedirectUrl, AccessToken};
+use oauth2::{RedirectUrl, AccessToken, RefreshToken};
 use oauth2_providers::github::GitHubOauth;
+use std::future::Future;
+use chrono::{DateTime, Utc};
 
 pub mod oauth2_providers;
 pub mod rpi_cas;
-
-/// A [`UserIdentity`] object will be stored in the
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum UserIdentity {
-    GitHubAuthToken(AccessToken),
-}
+pub mod identity;
 
 /// Register auth services.
 pub fn register(config: &mut ServiceConfig) {
@@ -83,6 +79,18 @@ pub trait IdentityProvider: 'static {
         format!("/auth/{}/register", Self::SERVICE_NAME)
     }
 
+    /// The type of future returned by the login handler.
+    type LoginFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+
+    /// The type of the future returned by the registration handler.
+    type RegistrationFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+
+    /// The type of future returned by the login authenticated response handler.
+    type LoginAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+
+    /// The type of future returned by the registration authenticated response handler.
+    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+
     /// Register the necessary actix services to support this identity
     /// provider.
     fn register_services(config: &mut ServiceConfig) {
@@ -106,27 +114,19 @@ pub trait IdentityProvider: 'static {
     }
 
     /// Actix-web handler for the route that redirects to authentication for
-    /// account creation (user registration). Guarded by this
-    /// trait to GET requests.
-    fn registration_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    /// login. Guarded by this trait to GET requests.
+    fn login_handler(req: HttpRequest) -> Self::LoginFut;
 
     /// Actix-web handler for the route that redirects to authentication for
-    /// login. Guarded by this trait to GET requests.
-    fn login_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    /// account creation (user registration). Guarded by this
+    /// trait to GET requests.
+    fn registration_handler(req: HttpRequest) -> Self::RegistrationFut;
 
     /// Actix-web handler for authentication callback to login. Guarded by this
     /// trait to GET requests.
-    fn login_authenticated_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    fn login_authenticated_handler(req: HttpRequest) -> Self::LoginAuthenticatedFut;
 
     /// Actix-web handler for authentication callback to account creation.
     /// Guarded by this trait to GET requests.
-    fn registration_authenticated_handler(
-        req: HttpRequest,
-    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    fn registration_authenticated_handler(req: HttpRequest) -> Self::RegistrationAuthenticatedFut;
 }

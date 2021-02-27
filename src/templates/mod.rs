@@ -4,6 +4,7 @@ pub mod navbar;
 pub mod page;
 pub mod static_pages;
 pub mod homepage;
+pub mod forms;
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;

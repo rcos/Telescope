@@ -62,6 +62,17 @@ pub struct GithubOauthConfig {
     pub client_secret: ClientSecret,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DiscordConfig {
+    /// The Discord OAuth2 application client id.
+    pub client_id: ClientId,
+    /// The Discord OAuth2 application client secret.
+    pub client_secret: ClientSecret,
+    /// The bot token granted by discord used to authenticate with the discord
+    /// bot API.
+    pub bot_token: String,
+}
+
 /// The config of the server instance.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 struct TelescopeConfig {
@@ -77,6 +88,9 @@ struct TelescopeConfig {
 
     /// GitHub OAuth application credentials.
     github_credentials: Option<GithubOauthConfig>,
+
+    /// Discord application config and credentials.
+    discord_config: Option<DiscordConfig>,
 
     /// The configuration of email senders.
     email_config: Option<EmailSenderConfig>,
@@ -114,6 +128,8 @@ pub struct ConcreteConfig {
     pub email_config: EmailSenderConfig,
     /// The GitHub OAuth Application Credentials.
     pub github_credentials: GithubOauthConfig,
+    /// The Discord Config and Credentials.
+    pub discord_config: DiscordConfig,
     /// The url of the RCOS API that telescope will read and write to.
     pub api_url: String,
     /// The JWT secret used to authenticate with the central API.
@@ -190,6 +206,9 @@ impl TelescopeConfig {
             github_credentials: self
                 .reverse_lookup(profile_slice, |c| c.github_credentials.clone())
                 .expect("Could not resolve GitHub OAuth credentials."),
+            discord_config: self
+                .reverse_lookup(profile_slice, |c| c.discord_config.clone())
+                .expect("Could not resolve Discord credentials"),
             api_url: self
                 .reverse_lookup(profile_slice, |c| c.api_url.clone())
                 .expect("Could not resolve RCOS central API URL."),
