@@ -74,7 +74,7 @@ pub trait Oauth2IdentityProvider {
 
     /// Extract the response parameters from the callback request invoked
     /// by the provider's authorization page.
-    fn token_exchange(req: &HttpRequest) -> Result<BasicTokenResponse, TelescopeError> {
+    fn token_exchange(redirect_uri: RedirectUrl, req: &HttpRequest) -> Result<BasicTokenResponse, TelescopeError> {
         // Extract the parameters from the request.
         let params: Query<AuthResponse> = Query::extract(req)
             // Extract the value out of the immediately ready future.
@@ -104,6 +104,7 @@ pub trait Oauth2IdentityProvider {
         // Return the response to the calling function.
         return oauth_client
             .exchange_code(code)
+            .add_extra_param("redirect_uri", redirect_uri.as_str())
             // Send request and wait for response synchronously.
             .request(oauth2::reqwest::http_client)
             // Any errors that occur should be reported as internal server errors.
@@ -143,8 +144,7 @@ where
     fn registration_handler(req: HttpRequest) -> Self::RegistrationFut {
         return Box::pin(async move {
             // Get the redirect URL.
-            let redir_url: RedirectUrl =
-                make_redirect_url(&req, Self::registration_redirect_path());
+            let redir_url: RedirectUrl = make_redirect_url(&req, Self::registration_redirect_path());
             // Redirect the user.
             return Self::auth_response(redir_url, &req);
         });
@@ -152,16 +152,24 @@ where
 
     fn login_authenticated_handler(req: HttpRequest) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
+            // Get the redirect URL.
+            let redir_uri: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
             // Get the API access token.
-            let token_response: BasicTokenResponse = Self::token_exchange(&req)?;
+            let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
 
-            Err::<HttpResponse, TelescopeError>(TelescopeError::NotImplemented)
+            Err(TelescopeError::NotImplemented)
         });
     }
 
     fn registration_authenticated_handler(req: HttpRequest) -> Self::RegistrationAuthenticatedFut {
         return Box::pin(async move {
+            // Get the redirect URL.
+            let redir_uri: RedirectUrl = make_redirect_url(&req, Self::registration_redirect_path());
+            // Get the API access token.
+            let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
+            let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+
             Err(TelescopeError::NotImplemented)
         });
     }

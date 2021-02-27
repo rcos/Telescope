@@ -6,6 +6,8 @@ use std::sync::Arc;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use chrono::{DateTime, Utc, Duration};
 use crate::web::services::auth::identity::IdentityCookie;
+use crate::env::global_config;
+use oauth2::{AuthUrl, TokenUrl};
 
 /// Zero-sized type used to represent Discord based identity verification.
 pub struct DiscordOAuth;
@@ -21,11 +23,30 @@ pub struct DiscordIdentity {
     refresh_token: RefreshToken,
 }
 
+lazy_static!{
+    static ref DISCORD_CLIENT: Arc<BasicClient> = {
+        // Get the global config.
+        let config = global_config();
+
+        // Create GitHub OAuth2 client.
+        let client = BasicClient::new(
+            config.discord_config.client_id.clone(),
+            Some(config.discord_config.client_secret.clone()),
+            AuthUrl::new("https://discord.com/api/oauth2/authorize".into())
+                .expect("Invalid Discord Auth URL"),
+            Some(TokenUrl::new("https://discord.com/api/oauth2/token".into())
+                .expect("Invalid Discord Token URL")));
+
+        // Return the client config wrapped in an Arc.
+        Arc::new(client)
+    };
+}
+
 impl Oauth2IdentityProvider for DiscordOAuth {
     const SERVICE_NAME: &'static str = "discord";
 
     fn get_client() -> Arc<BasicClient> {
-        unimplemented!()
+        DISCORD_CLIENT.clone()
     }
 
     fn add_scopes(auth_req: AuthorizationRequest) -> AuthorizationRequest {

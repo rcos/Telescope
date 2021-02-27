@@ -1,7 +1,10 @@
 //! Templates for users to login and register with.
 
 use crate::templates::Template;
-use crate::web::services::auth::oauth2_providers::github::GitHubOauth;
+use crate::web::services::auth::oauth2_providers::{
+    github::GitHubOauth,
+    discord::DiscordOAuth
+};
 use crate::web::services::auth::IdentityProvider;
 use serde_json::{Map, Value};
 
@@ -58,12 +61,20 @@ fn item(
 /// Create a template to offer the user options to login.
 pub fn login() -> Template {
     // Make list of identity providers in login configuration.
-    let items: Vec<Map<String, Value>> = vec![item(
-        GitHubOauth::login_path(),
-        "btn-github",
-        "Login using GitHub",
-        Some("github"),
-    )];
+    let items: Vec<Map<String, Value>> = vec![
+        item(
+            GitHubOauth::login_path(),
+            "btn-github mb-2",
+            "Login using GitHub",
+            Some("github")
+        ),
+        item(
+            DiscordOAuth::login_path(),
+            "btn-discord",
+            "Login using Discord",
+            None
+        )
+    ];
 
     // Create and return template.
     return empty().field(HEADER, "Sign In").field(ITEMS, items);
@@ -72,12 +83,20 @@ pub fn login() -> Template {
 /// Create a template to offer the users options to register a new account.
 pub fn register() -> Template {
     // Make list of identity providers in account creation configuration.
-    let items: Vec<Map<String, Value>> = vec![item(
-        GitHubOauth::register_path(),
-        "btn-github",
-        "Register using GitHub",
-        Some("github"),
-    )];
+    let items: Vec<Map<String, Value>> = vec![
+        item(
+            GitHubOauth::register_path(),
+            "btn-github mb-2",
+            "Register using GitHub",
+            Some("github")
+        ),
+        item(
+            DiscordOAuth::register_path(),
+            "btn-discord",
+            "Register using Discord",
+            None
+        )
+    ];
 
     // Create and return template.
     return empty().field(HEADER, "Create account").field(ITEMS, items);

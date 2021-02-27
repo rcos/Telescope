@@ -3,6 +3,12 @@
     --telescope-red: #dd2020;
     --rpi-red: #d6001c;
     --github-blue: #0366d6;
+    --discord-blurple: #7289da;
+    --discord-white: #ffffff;
+    --discord-greyple: #99aab5;
+    --discord-dark: #2c2f33;
+    --discord-darker: #23272a;
+    --discord-black: #000000;
 }
 
 /*
@@ -27,6 +33,11 @@ RPI styled buttons.
 
 .btn.btn-rpi {
     background: var(--rpi-red);
+    color: white;
+}
+
+.btn.btn-discord {
+    background: var(--discord-blurple);
     color: white;
 }
 

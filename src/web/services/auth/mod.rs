@@ -7,6 +7,7 @@ use oauth2::{RedirectUrl, AccessToken, RefreshToken};
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
 use chrono::{DateTime, Utc};
+use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 
 pub mod oauth2_providers;
 pub mod rpi_cas;
@@ -16,6 +17,9 @@ pub mod identity;
 pub fn register(config: &mut ServiceConfig) {
     // GitHub OAuth2 provider services.
     GitHubOauth::register_services(config);
+
+    // Discord OAuth2 provider services.
+    DiscordOAuth::register_services(config);
 }
 
 /// Function to create the redirect URL for a given request and identity provider's
@@ -32,7 +36,7 @@ fn make_redirect_url(req: &HttpRequest, redir_path: String) -> RedirectUrl {
         .expect("Could not get request authority.");
     // Create and return redirect URL.
     return RedirectUrl::new(format!("{}://{}{}", scheme, authority, redir_path))
-        .expect("Could not create GitHub OAuth2 Redirect URL");
+        .expect("Could not create redirect URL");
 }
 
 /// Trait for identity providers (GitHub OAuth2, Discord OAuth2, RPI CAS, etc).
