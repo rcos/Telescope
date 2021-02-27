@@ -6,9 +6,7 @@ use actix_web::client::Client;
 use crate::error::TelescopeError;
 
 mod auth;
-pub mod projects;
 pub mod users;
-pub mod hasura;
 pub mod landing_page_stats;
 
 /// Re-export client authenticated client constructor.
