@@ -41,6 +41,9 @@ RPI styled buttons.
     color: white;
 }
 
+.btn.btn-discord:hover {
+    color: var(--discord-black);
+}
 /*
 Below is a set of rules to keep the footer at the bottom of the page.
 */

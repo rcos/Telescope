@@ -72,7 +72,7 @@ pub fn login() -> Template {
             DiscordOAuth::login_path(),
             "btn-discord",
             "Login using Discord",
-            None
+            Some("discord")
         )
     ];
 
@@ -94,7 +94,7 @@ pub fn register() -> Template {
             DiscordOAuth::register_path(),
             "btn-discord",
             "Register using Discord",
-            None
+            Some("discord")
         )
     ];
 
