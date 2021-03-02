@@ -11,4 +11,4 @@ jobs:
       - name: Docker Compose Build
         # Create some empty config files and directories that docker
         # needs to successfully build telescope
-        run: mkdir tls-ssl && touch config.toml && docker-compose build
+        run: touch config.toml && docker-compose build
