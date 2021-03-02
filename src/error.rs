@@ -137,7 +137,13 @@ pub enum TelescopeError {
     #[display(fmt = "Central RCOS GraphQL API returned error(s)")]
     /// The central RCOS GraphQL API responded with errors. This should
     /// report as an internal server error.
-    GraphQLError(Vec<GraphQlError>)
+    GraphQLError(Vec<GraphQlError>),
+
+    #[error(ignore)]
+    #[display("GitHub API error: {}", _0)]
+    /// Error querying the GitHub API. This should be reported as an upstream
+    /// gateway error in general.
+    HubcapsError(String),
 }
 
 impl TelescopeError {
@@ -308,6 +314,12 @@ impl TelescopeError {
                 format!("{} - {}", status_code, canonical_reason),
                 format!("Telescope had an internal server error. Please contact a \
                 coordinator and file a GitHub issue. Error description: {}", message)
+            ),
+
+            TelescopeError::HubcapsError(err) => jumbotron::new(
+                format!("{} - Error querying Github API", status_code),
+                format!("Could not query the Github API. Please contact a coordinator and \
+                file an issue on the Telescope GitHub. Internal error message: {}", err)
             )
         };
 
@@ -358,6 +370,7 @@ impl ResponseError for TelescopeError {
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
             TelescopeError::SendApiQueryError {status_code, ..} =>
                 StatusCode::from_u16(*status_code).expect("Invalid status code"),
+            TelescopeError::HubcapsError(_) => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -433,5 +446,11 @@ impl From<LettreSmtpError> for TelescopeError {
             source: Some(err),
             description,
         };
+    }
+}
+
+impl From<hubcaps::Error> for TelescopeError {
+    fn from(err: hubcaps::Error) -> Self {
+        return TelescopeError::HubcapsError(err.to_string());
     }
 }

@@ -14,6 +14,9 @@ use std::future::Future;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::api::rcos::{make_api_client, send_query, users::accounts::reverse_lookup};
+use actix_web::client::Client;
 
 pub mod github;
 pub mod discord;
@@ -157,9 +160,23 @@ where
         return Box::pin(async move {
             // Get the redirect URL.
             let redir_uri: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
-            // Get the API access token.
+            // Get the API access token (in an identity cookie).
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+
+
+            // // Look for an account on this platform in the central RCOS API.
+            // // Create client
+            // let api_client: Client = make_api_client(None);
+            // // Make variables.
+            // let variables = reverse_lookup::reverse_lookup::Variables {
+            //     id: "".to_owned(),
+            //     platform: Self::PLATFORM,
+            // };
+            // let username: Option<String> = send_query::<reverse_lookup::ReverseLookup>(&api_client, variables)
+            //     .await?
+            //     .username();
+
 
             Err(TelescopeError::NotImplemented)
         });

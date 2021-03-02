@@ -4,6 +4,11 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthUrl, AuthorizationRequest, Scope, TokenUrl, TokenResponse, AccessToken};
 use std::sync::Arc;
 use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::telescope_ua;
+use hubcaps::{Github, Credentials};
+use crate::error::TelescopeError;
+use hubcaps::users::AuthenticatedUser;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -56,5 +61,25 @@ impl Oauth2IdentityProvider for GitHubOauth {
         IdentityCookie::Github(GitHubIdentity {
             access_token: token_response.access_token().clone()
         })
+    }
+}
+
+impl GitHubIdentity {
+    /// Get the authenticated user for this access token.
+    async fn get_authenticated_user(&self) -> Result<AuthenticatedUser, TelescopeError> {
+        // Get a reference to the string storing the telescope user agent.
+        let agent: &str = telescope_ua();
+
+        // Create a github API client via hubcaps.
+        let github_client = Github::new(agent, Credentials::Token(self.access_token.secret().clone()))?;
+
+        // Get the authenticated user.
+        return github_client.users().authenticated().await.map_err(TelescopeError::from);
+    }
+
+    /// Get the github account id of the user associated with this access token.
+    pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
+        // Get the authenticated user and convert their id to a string.
+        self.get_authenticated_user().await.map(|u| u.id.to_string())
     }
 }

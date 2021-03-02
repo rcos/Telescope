@@ -9,6 +9,7 @@ use crate::web::services::auth::identity::IdentityCookie;
 use crate::env::global_config;
 use oauth2::{AuthUrl, TokenUrl};
 use crate::error::TelescopeError;
+use crate::web::api::rcos::users::UserAccountType;
 
 /// Zero-sized type used to represent Discord based identity verification.
 pub struct DiscordOAuth;
@@ -106,5 +107,12 @@ impl DiscordIdentity {
             // We don't need to refresh -- return self.
             return Ok(self);
         }
+    }
+
+    /// Get the user authenticated in association with this access token. Assume this token has been
+    /// refreshed recently enough.
+    async fn authenticated_user(&self) -> Result<(), TelescopeError> {
+        // TODO: Find way to get user information
+        unimplemented!()
     }
 }
