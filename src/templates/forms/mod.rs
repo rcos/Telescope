@@ -3,12 +3,7 @@
 //! a special type of template commonly used in Telescope, and therefore have
 //! their own traits.
 
-use actix_web::{HttpRequest, HttpResponse};
-use futures::future::LocalBoxFuture;
-use crate::error::TelescopeError;
 use serde::de::DeserializeOwned;
-use actix_web::web::Form as ActixForm;
-use std::future::Future;
 
 pub mod common;
 

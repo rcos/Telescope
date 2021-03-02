@@ -22,18 +22,17 @@ extern crate graphql_client;
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{App, http::Uri, HttpServer, middleware, web as aweb, web::get};
+use actix_web::{App, HttpServer, middleware, web as aweb, web::get};
 use actix_web::cookie::SameSite;
 use rand::Rng;
 use rand::rngs::OsRng;
 
 use crate::{
-    env::{ConcreteConfig, CONFIG},
+    web::csrf::CsrfJanitor,
     templates::static_pages::{
         projects::ProjectsPage, sponsors::SponsorsPage, StaticPage,
-    },
+    }
 };
-use crate::web::csrf::CsrfJanitor;
 
 mod app_data;
 mod env;
@@ -44,7 +43,6 @@ mod web;
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
-    let config: &ConcreteConfig = &*CONFIG;
 
     // Create the actix runtime.
     let sys = System::new("telescope");

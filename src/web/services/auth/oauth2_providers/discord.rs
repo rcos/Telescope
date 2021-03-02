@@ -1,7 +1,7 @@
 //! Discord OAuth2 flow.
 
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use oauth2::{AuthorizationRequest, AccessToken, RefreshToken, TokenResponse, Scope, RedirectUrl};
+use oauth2::{AccessToken, RefreshToken, TokenResponse, Scope};
 use std::sync::Arc;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use chrono::{DateTime, Utc, Duration};
@@ -9,10 +9,8 @@ use crate::web::services::auth::identity::IdentityCookie;
 use crate::env::global_config;
 use oauth2::{AuthUrl, TokenUrl};
 use crate::error::TelescopeError;
-use crate::web::api::rcos::users::UserAccountType;
 use actix_web::http::header::ACCEPT;
 use serenity::model::user::CurrentUser;
-use actix_web::dev::Service;
 use crate::web::services::auth::IdentityProvider;
 
 /// The Discord API endpoint to query for user data.
@@ -89,7 +87,7 @@ impl DiscordIdentity {
     }
 
     /// Refresh this access token if necessary.
-    pub fn refresh(mut self) -> Result<Self, TelescopeError> {
+    pub fn refresh(self) -> Result<Self, TelescopeError> {
         // If this token has expired
         if self.expiration < Utc::now() {
             // Get a discord client and make a refresh token request.

@@ -1,10 +1,9 @@
 use crate::env::global_config;
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AuthUrl, AuthorizationRequest, Scope, TokenUrl, TokenResponse, AccessToken};
+use oauth2::{AuthUrl, Scope, TokenUrl, TokenResponse, AccessToken};
 use std::sync::Arc;
 use crate::web::services::auth::identity::IdentityCookie;
-use crate::web::api::rcos::users::UserAccountType;
 use crate::web::telescope_ua;
 use hubcaps::{Github, Credentials};
 use crate::error::TelescopeError;

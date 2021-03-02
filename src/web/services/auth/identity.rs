@@ -1,17 +1,14 @@
 //! Trait for types stored in the user's identity cookie.
 
 use serde::Serialize;
-use serde::de::DeserializeOwned;
 use crate::web::services::auth::oauth2_providers::{
     github::GitHubIdentity,
     discord::DiscordIdentity
 };
-use chrono::Utc;
 use crate::error::TelescopeError;
-use oauth2::RedirectUrl;
 use crate::web::api::rcos::users::UserAccountType;
 use actix_identity::Identity as ActixIdentity;
-use actix_web::{FromRequest, HttpRequest, Error};
+use actix_web::{FromRequest, HttpRequest};
 use actix_web::dev::{PayloadStream, Payload};
 use futures::future::{Ready, ready};
 
