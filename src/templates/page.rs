@@ -1,4 +1,3 @@
-use crate::app_data::AppData;
 use crate::error::TelescopeError;
 use crate::templates::navbar;
 use crate::templates::Template;
@@ -27,7 +26,10 @@ pub fn of(
     title: impl Into<Value>,
     content: &Template,
 ) -> Result<Template, TelescopeError> {
-    let content_rendered = AppData::global().render_template(content)?;
+    // Render the content of this page
+    let content_rendered: String = content.render()?;
+
+    // Build the rest of the page
     Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
         .field(NAVBAR, navbar::userless(req_path))

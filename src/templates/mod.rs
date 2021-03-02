@@ -19,7 +19,7 @@ use std::ops::{Index, IndexMut};
 pub struct Template {
     /// The file to use to render this template.
     #[serde(skip)]
-    pub handlebars_file: &'static str,
+    handlebars_file: &'static str,
 
     /// The fields to render.
     #[serde(flatten)]
@@ -50,33 +50,14 @@ impl Template {
         self.fields.insert(key.into(), serialized_val);
     }
 
-    /// Append fields from another object.
-    /// This will panic if there is an error converting the
-    /// other object into a JSON value or if the JSON value
-    /// is not a JSON Object.
-    pub fn append_fields(&mut self, other: impl Serialize) {
-        // Convert the other object to JSON values.
-        let converted: Value =
-            serde_json::to_value(other).expect("Could not convert object to JSON value");
-
-        // Get the internal JSON object.
-        if let Value::Object(mut obj) = converted {
-            self.fields.append(&mut obj);
-        } else {
-            panic!("The other object did not convert to a JSON object.");
-        }
-    }
-
-    /// Builder pattern version of [Self::append_fields].
-    pub fn with_fields(mut self, from: impl Serialize) -> Self {
-        self.append_fields(from);
-        self
-    }
-
     /// Render this template using the global handlebars registry.
     pub fn render(&self) -> Result<String, TelescopeError> {
         AppData::global()
-            .render_template(self)
+            // Get the global handlebars registry
+            .get_handlebars_registry()
+            // Render this template's file with this template's data
+            .render(self.handlebars_file, self)
+            // Convert any rendering errors that occur.
             .map_err(TelescopeError::RenderingError)
     }
 }
@@ -102,14 +83,17 @@ impl Responder for Template {
     type Future = Ready<Result<HttpResponse, Self::Error>>;
 
     fn respond_to(self, _: &HttpRequest) -> Self::Future {
-        let result = AppData::global()
-            .render_template(&self)
+        let result = self
+            // Render this template
+            .render()
+            // Convert the rendered string into am HTML type response.
             .map(|rendered: String| {
                 HttpResponse::Ok()
                     .content_type("text/html;charset=UTF-8")
                     .body(rendered)
-            })
-            .map_err(TelescopeError::from);
-        ready(result)
+            });
+
+        // return immediately ready future
+        return ready(result);
     }
 }

@@ -188,6 +188,9 @@ impl TelescopeConfig {
                 .unwrap()
                 .get(&profile_slice[0])
                 .unwrap();
+            // Recursively call the reverse lookup into the child profile.
+            // This will resolve the deepest profile first, down to the
+            // shallowest one.
             child
                 .reverse_lookup(child_path, extractor)
                 .or(extractor(self))

@@ -1,10 +1,9 @@
 use crate::error::TelescopeError;
 use crate::{
     env::{ConcreteConfig, CONFIG},
-    templates::Template,
 };
 use actix_web::web::block;
-use handlebars::{Handlebars, RenderError};
+use handlebars::Handlebars;
 use lettre::smtp::response::Response as SmtpResponse;
 use lettre::{
     stub::StubTransport, FileTransport, SendableEmail, SmtpClient, SmtpTransport, Transport,
@@ -132,12 +131,6 @@ impl AppData {
     /// Get an [`Arc`] reference to the template registry.
     pub fn get_handlebars_registry(&self) -> Arc<Handlebars<'static>> {
         self.template_registry.clone()
-    }
-
-    /// Render a handlebars template using this object's registry.
-    pub fn render_template(&self, template: &Template) -> Result<String, RenderError> {
-        self.get_handlebars_registry()
-            .render(template.handlebars_file, &template)
     }
 
     /// Clone the mailbox used to send telescope related email.
