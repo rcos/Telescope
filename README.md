@@ -102,8 +102,10 @@ again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your
     $ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
     ``` 
 
-7. At this point Postgres, the Hasura GraphQL API, the Swagger API explorer, and 
-   Telescope should all be running on your system. To shut them all down, run
+7. At this point Postgres, the Hasura GraphQL API, Caddy, and Telescope should 
+   all be running on your system in individual docker containers. Docker/Caddy 
+   exposes the Hasura console at https://localhost:8000, and telescope is 
+   exposed at https://localhost:8443. To shut them all down, run
    ```shell
    $ docker-compose down
    ```
