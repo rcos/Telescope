@@ -1,17 +1,17 @@
 //! Discord OAuth2 flow.
 
-use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use oauth2::{AccessToken, RefreshToken, TokenResponse, Scope};
-use std::sync::Arc;
-use oauth2::basic::{BasicClient, BasicTokenResponse};
-use chrono::{DateTime, Utc, Duration};
-use crate::web::services::auth::identity::IdentityCookie;
 use crate::env::global_config;
-use oauth2::{AuthUrl, TokenUrl};
 use crate::error::TelescopeError;
-use actix_web::http::header::ACCEPT;
-use serenity::model::user::CurrentUser;
+use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;
+use actix_web::http::header::ACCEPT;
+use chrono::{DateTime, Duration, Utc};
+use oauth2::basic::{BasicClient, BasicTokenResponse};
+use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
+use oauth2::{AuthUrl, TokenUrl};
+use serenity::model::user::CurrentUser;
+use std::sync::Arc;
 
 /// The Discord API endpoint to query for user data.
 const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -30,7 +30,7 @@ pub struct DiscordIdentity {
     refresh_token: RefreshToken,
 }
 
-lazy_static!{
+lazy_static! {
     static ref DISCORD_CLIENT: Arc<BasicClient> = {
         // Get the global config.
         let config = global_config();
@@ -59,7 +59,7 @@ impl Oauth2IdentityProvider for DiscordOAuth {
     fn scopes() -> Vec<Scope> {
         vec![
             // Scope required for us to get the users identity.
-            Scope::new("identify".to_owned())
+            Scope::new("identify".to_owned()),
         ]
     }
 
@@ -71,18 +71,20 @@ impl Oauth2IdentityProvider for DiscordOAuth {
 impl DiscordIdentity {
     fn from_response(token_response: &BasicTokenResponse) -> Self {
         // Unwrap the token duration.
-        let token_duration = token_response.expires_in()
+        let token_duration = token_response
+            .expires_in()
             .expect("Discord did not return token duration.");
         // Convert the token duration to a chrono duration.
-        let chrono_duration = Duration::from_std(token_duration)
-            .expect("Token duration out of range.");
+        let chrono_duration =
+            Duration::from_std(token_duration).expect("Token duration out of range.");
 
         DiscordIdentity {
             access_token: token_response.access_token().clone(),
             expiration: Utc::now() + chrono_duration,
-            refresh_token: token_response.refresh_token()
+            refresh_token: token_response
+                .refresh_token()
                 .expect("Discord did not return refresh token.")
-                .clone()
+                .clone(),
         }
     }
 
@@ -104,9 +106,12 @@ impl DiscordIdentity {
                 // Send the request. (This is synchronous -- be careful).
                 .request(oauth2::reqwest::http_client)
                 // Handle and propagate the error.
-                .map_err(|err|
-                    TelescopeError::ise(format!("Could not refresh Discord OAuth2 token. Error: {}", err))
-                )?;
+                .map_err(|err| {
+                    TelescopeError::ise(format!(
+                        "Could not refresh Discord OAuth2 token. Error: {}",
+                        err
+                    ))
+                })?;
 
             // Make and return the new token.
             return Ok(Self::from_response(&response));
@@ -126,14 +131,14 @@ impl DiscordIdentity {
             .finish();
 
         // Send the GET request to the discord API.
-        return client.get(format!("{}/users/@me", DISCORD_API_ENDPOINT))
+        return client
+            .get(format!("{}/users/@me", DISCORD_API_ENDPOINT))
             .send()
             .await
             .map_err(TelescopeError::api_query_error)?
             .json::<CurrentUser>()
             .await
             .map_err(TelescopeError::api_response_error);
-
     }
 
     /// Get the authenticated Discord account's ID.

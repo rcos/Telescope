@@ -1,16 +1,15 @@
 //! Trait for types stored in the user's identity cookie.
 
-use serde::Serialize;
-use crate::web::services::auth::oauth2_providers::{
-    github::GitHubIdentity,
-    discord::DiscordIdentity
-};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::users::UserAccountType;
+use crate::web::services::auth::oauth2_providers::{
+    discord::DiscordIdentity, github::GitHubIdentity,
+};
 use actix_identity::Identity as ActixIdentity;
+use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
-use actix_web::dev::{PayloadStream, Payload};
-use futures::future::{Ready, ready};
+use futures::future::{ready, Ready};
+use serde::Serialize;
 
 /// The top level enum stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
@@ -22,14 +21,14 @@ pub enum IdentityCookie {
     Discord(DiscordIdentity),
 }
 
-
 impl IdentityCookie {
     /// If necessary, refresh an identity cookie. This could include getting a
     /// new access token from an OAuth API for example.
     pub fn refresh(self) -> Result<Self, TelescopeError> {
         // Destructure on discord identity.
         if let IdentityCookie::Discord(discord_identity) = self {
-            return discord_identity.refresh()
+            return discord_identity
+                .refresh()
                 // wrap discord identity
                 .map(IdentityCookie::Discord);
         }
@@ -56,7 +55,6 @@ impl IdentityCookie {
     }
 }
 
-
 /// The identity of a user accessing telescope.
 #[derive(Clone)]
 pub struct Identity {
@@ -72,14 +70,21 @@ impl FromRequest for Identity {
 
     fn from_request(req: &HttpRequest, _: &mut Payload<PayloadStream>) -> Self::Future {
         // Extract the actix identity and convert any errors
-        ready(ActixIdentity::extract(req)
-            // Unwrap the ready future
-            .into_inner()
-            // Normalize the error as an ISE
-            .map_err(|e| TelescopeError::ise(format!("Could not extract identity \
-            object from request. Internal error: {}", e)))
-            // Wrap the extracted identity.
-            .map(|inner| Self { inner }))
+        ready(
+            ActixIdentity::extract(req)
+                // Unwrap the ready future
+                .into_inner()
+                // Normalize the error as an ISE
+                .map_err(|e| {
+                    TelescopeError::ise(format!(
+                        "Could not extract identity \
+            object from request. Internal error: {}",
+                        e
+                    ))
+                })
+                // Wrap the extracted identity.
+                .map(|inner| Self { inner }),
+        )
     }
 }
 
@@ -92,8 +97,8 @@ impl Identity {
     /// Save an identity object to the client's cookies.
     pub fn save(&self, identity: &IdentityCookie) {
         // Serialize the cookie to JSON first. This serialization should not fail.
-        let cookie: String = serde_json::to_string(identity)
-            .expect("Could not serialize identity cookie");
+        let cookie: String =
+            serde_json::to_string(identity).expect("Could not serialize identity cookie");
 
         // Remember cookie.
         self.inner.remember(cookie)

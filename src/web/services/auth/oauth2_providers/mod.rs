@@ -1,21 +1,21 @@
 use super::{make_redirect_url, IdentityProvider};
 use crate::error::TelescopeError;
+use crate::web::api::rcos::{make_api_client, send_query, users::accounts::reverse_lookup};
 use crate::web::csrf;
+use crate::web::services::auth::identity::{Identity, IdentityCookie};
+use actix_web::client::Client;
 use actix_web::http::header::LOCATION;
+use actix_web::web::Query;
+use actix_web::FromRequest;
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AuthorizationRequest, CsrfToken, RedirectUrl, AuthorizationCode, Scope};
+use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
-use actix_web::web::Query;
-use actix_web::FromRequest;
-use crate::web::services::auth::identity::{IdentityCookie, Identity};
-use crate::web::api::rcos::{make_api_client, send_query, users::accounts::reverse_lookup};
-use actix_web::client::Client;
 
-pub mod github;
 pub mod discord;
+pub mod github;
 
 /// Data returned by GitHub OAuth2 Authorization request.
 #[derive(Deserialize)]
@@ -76,7 +76,10 @@ pub trait Oauth2IdentityProvider {
 
     /// Extract the response parameters from the callback request invoked
     /// by the provider's authorization page.
-    fn token_exchange(redirect_uri: RedirectUrl, req: &HttpRequest) -> Result<BasicTokenResponse, TelescopeError> {
+    fn token_exchange(
+        redirect_uri: RedirectUrl,
+        req: &HttpRequest,
+    ) -> Result<BasicTokenResponse, TelescopeError> {
         // Extract the parameters from the request.
         let params: Query<AuthResponse> = Query::extract(req)
             // Extract the value out of the immediately ready future.
@@ -87,13 +90,16 @@ pub trait Oauth2IdentityProvider {
                 // request error.
                 TelescopeError::bad_request(
                     "Bad Authentication Request",
-                    format!("Could not get authentication parameters from request URL. \
-                    Actix-web error: {}", err)
+                    format!(
+                        "Could not get authentication parameters from request URL. \
+                    Actix-web error: {}",
+                        err
+                    ),
                 )
             })?;
 
         // Destructure the parameters.
-        let AuthResponse {code, state} = params.0;
+        let AuthResponse { code, state } = params.0;
         // Verify the CSRF token. Propagate any errors including a mismatch
         // (we expect to verify without issue most of the time).
         csrf::verify(Self::SERVICE_NAME, req, state)?;
@@ -110,10 +116,14 @@ pub trait Oauth2IdentityProvider {
             // Send request and wait for response synchronously.
             .request(oauth2::reqwest::http_client)
             // Any errors that occur should be reported as internal server errors.
-            .map_err(|e|
-                TelescopeError::ise(format!("OAuth2 token exchange error. If this \
+            .map_err(|e| {
+                TelescopeError::ise(format!(
+                    "OAuth2 token exchange error. If this \
                 persists, please contact a coordinator and file a GitHub issue. Internal error \
-                description: {:?}", e)))
+                description: {:?}",
+                    e
+                ))
+            });
     }
 }
 
@@ -132,7 +142,8 @@ where
     type LoginFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
-    type RegistrationAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationAuthenticatedFut =
+        LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     fn login_handler(req: HttpRequest) -> Self::LoginFut {
         return Box::pin(async move {
@@ -146,13 +157,16 @@ where
     fn registration_handler(req: HttpRequest) -> Self::RegistrationFut {
         return Box::pin(async move {
             // Get the redirect URL.
-            let redir_url: RedirectUrl = make_redirect_url(&req, Self::registration_redirect_path());
+            let redir_url: RedirectUrl =
+                make_redirect_url(&req, Self::registration_redirect_path());
             // Redirect the user.
             return Self::auth_response(redir_url, &req);
         });
     }
 
-    fn login_authenticated_handler(req: HttpRequest) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
+    fn login_authenticated_handler(
+        req: HttpRequest,
+    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
             // Get the redirect URL.
             let redir_uri: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
@@ -171,19 +185,22 @@ where
                 platform: cookie_identity.user_account_type(),
             };
             // Send API query.
-            let username: Option<String> = send_query::<reverse_lookup::ReverseLookup>(&api_client, variables)
-                .await?
-                .username();
+            let username: Option<String> =
+                send_query::<reverse_lookup::ReverseLookup>(&api_client, variables)
+                    .await?
+                    .username();
 
             // If there is no user, return a not-found error.
             let username: String = username.ok_or(TelescopeError::resource_not_found(
                 "Could not find associated user account.",
-                format!("Could not find user account associated with this {} account. \
-                Please create an account or sign in using another method.", Self::SERVICE_NAME)
+                format!(
+                    "Could not find user account associated with this {} account. \
+                Please create an account or sign in using another method.",
+                    Self::SERVICE_NAME
+                ),
             ))?;
 
             // Otherwise, store the identity in the user's cookies and redirect to their profile.
-
 
             Err(TelescopeError::NotImplemented)
         });
@@ -192,7 +209,8 @@ where
     fn registration_authenticated_handler(req: HttpRequest) -> Self::RegistrationAuthenticatedFut {
         return Box::pin(async move {
             // Get the redirect URL.
-            let redir_uri: RedirectUrl = make_redirect_url(&req, Self::registration_redirect_path());
+            let redir_uri: RedirectUrl =
+                make_redirect_url(&req, Self::registration_redirect_path());
             // Get the object to store in the user's cookie.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             let cookie_identity: IdentityCookie = Self::make_identity(&token_response);

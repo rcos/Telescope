@@ -1,10 +1,7 @@
 //! Templates for users to login and register with.
 
 use crate::templates::Template;
-use crate::web::services::auth::oauth2_providers::{
-    github::GitHubOauth,
-    discord::DiscordOAuth
-};
+use crate::web::services::auth::oauth2_providers::{discord::DiscordOAuth, github::GitHubOauth};
 use crate::web::services::auth::IdentityProvider;
 use serde_json::{Map, Value};
 
@@ -66,7 +63,7 @@ pub fn login() -> Template {
             GitHubOauth::login_path(),
             "btn-github mb-2",
             "Login using GitHub",
-            Some("github")
+            Some("github"),
         ),
         item(
             DiscordOAuth::login_path(),
@@ -74,8 +71,8 @@ pub fn login() -> Template {
             "Login using Discord",
             // This is manually coded for in the template file and is not
             // a Feather icon. Do not use it in other places, as it won't work.
-            Some("discord")
-        )
+            Some("discord"),
+        ),
     ];
 
     // Create and return template.
@@ -90,7 +87,7 @@ pub fn register() -> Template {
             GitHubOauth::register_path(),
             "btn-github mb-2",
             "Register using GitHub",
-            Some("github")
+            Some("github"),
         ),
         item(
             DiscordOAuth::register_path(),
@@ -98,8 +95,8 @@ pub fn register() -> Template {
             "Register using Discord",
             // This is manually coded for in the template file and is not
             // a Feather icon. Do not use it in other places, as it won't work.
-            Some("discord")
-        )
+            Some("discord"),
+        ),
     ];
 
     // Create and return template.

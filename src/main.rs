@@ -22,16 +22,14 @@ extern crate graphql_client;
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{App, HttpServer, middleware, web as aweb, web::get};
 use actix_web::cookie::SameSite;
-use rand::Rng;
+use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
 use rand::rngs::OsRng;
+use rand::Rng;
 
 use crate::{
+    templates::static_pages::{projects::ProjectsPage, sponsors::SponsorsPage, StaticPage},
     web::csrf::CsrfJanitor,
-    templates::static_pages::{
-        projects::ProjectsPage, sponsors::SponsorsPage, StaticPage,
-    }
 };
 
 mod app_data;

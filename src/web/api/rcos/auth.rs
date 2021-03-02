@@ -1,11 +1,11 @@
 //! Authentication for the central RCOS API.
 
+use crate::env::{global_config, ConcreteConfig};
 use actix_web::client::Client;
-use std::sync::Arc;
-use crate::env::{ConcreteConfig, global_config};
 use actix_web::http::header::{ACCEPT, CONTENT_TYPE};
-use jsonwebtoken::{Header, EncodingKey, encode};
 use chrono::Utc;
+use jsonwebtoken::{encode, EncodingKey, Header};
+use std::sync::Arc;
 
 /// The database role name for authenticated requests.
 const AUTHENTICATED_USER: &'static str = "admin";
@@ -29,7 +29,7 @@ struct ApiJwtClaims {
     iat: i64,
     /// Claims required by hasura.
     #[serde(rename = "https://hasura.io/jwt/claims")]
-    hasura_claims: HasuraJwtClaims
+    hasura_claims: HasuraJwtClaims,
 }
 
 /// JWT Claims in the Hasura namespace.
@@ -45,7 +45,7 @@ struct HasuraJwtClaims {
     /// The user ID. This should match the one in the top level of the JWT token.
     #[serde(rename = "x-hasura-user-id")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    user_id: Option<String>
+    user_id: Option<String>,
 }
 
 impl ApiJwtClaims {
@@ -64,13 +64,17 @@ impl ApiJwtClaims {
             hasura_claims: HasuraJwtClaims {
                 default_role: AUTHENTICATED_USER,
                 allowed_roles: vec![AUTHENTICATED_USER],
-                user_id: subject
-            }
+                user_id: subject,
+            },
         };
 
         // Encode and return the JWT
-        return encode(&Header::default(), &jwt, &EncodingKey::from_secret(jwt_secret))
-            .expect("Could not encode JWT");
+        return encode(
+            &Header::default(),
+            &jwt,
+            &EncodingKey::from_secret(jwt_secret),
+        )
+        .expect("Could not encode JWT");
     }
 }
 

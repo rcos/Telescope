@@ -63,7 +63,7 @@ pub fn save(
 pub fn verify(
     idp_name: &'static str,
     req: &HttpRequest,
-    token: CsrfToken
+    token: CsrfToken,
 ) -> Result<(), TelescopeError> {
     // Get the CSRF token from the global table.
     let actual_token: CsrfToken = get(idp_name, req)?;

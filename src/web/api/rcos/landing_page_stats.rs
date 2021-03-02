@@ -4,29 +4,24 @@
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/schema.json",
-    query_path = "graphql/stats/landing_page.graphql",
+    query_path = "graphql/stats/landing_page.graphql"
 )]
 pub struct LandingPageStatistics;
 
 // Re-export variable and response types.
 pub use self::landing_page_statistics::{
-    Variables as LandingPageStatsVars,
-    ResponseData as LandingPageStatsResponse
+    ResponseData as LandingPageStatsResponse, Variables as LandingPageStatsVars,
 };
 
 impl LandingPageStatsResponse {
     /// Extract the total number of students from the GraphQL response.
     pub fn total_students(&self) -> Option<i64> {
-        self.total_students
-            .aggregate.as_ref()?
-            .count
+        self.total_students.aggregate.as_ref()?.count
     }
 
     /// Extract the total number of projects from the GraphQL response.
     pub fn total_projects(&self) -> Option<i64> {
-        self.total_projects
-            .aggregate.as_ref()?
-            .count
+        self.total_projects.aggregate.as_ref()?.count
     }
 
     /// Extract the current semester title from the GraphQL response.
@@ -42,7 +37,8 @@ impl LandingPageStatsResponse {
         self.current_semester
             .first()?
             .current_students
-            .aggregate.as_ref()?
+            .aggregate
+            .as_ref()?
             .count
     }
 
@@ -51,7 +47,8 @@ impl LandingPageStatsResponse {
         self.current_semester
             .first()?
             .current_projects
-            .aggregate.as_ref()?
+            .aggregate
+            .as_ref()?
             .count
     }
 }

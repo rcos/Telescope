@@ -1,7 +1,7 @@
 //! Homepage template. Holds Handlebars keys for homepage stats.
 
-use std::fmt::Display;
 use crate::templates::Template;
+use std::fmt::Display;
 
 /// Path to the Handlebars file from the templates directory.
 const TEMPLATE_PATH: &'static str = "index";

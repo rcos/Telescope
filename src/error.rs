@@ -1,20 +1,20 @@
 //! Error handling.
 
 use crate::templates::{jumbotron, page, Template};
+use actix_web::client::{JsonPayloadError, SendRequestError};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;
 use actix_web::http::StatusCode;
 use actix_web::rt::blocking::BlockingError;
 use actix_web::{HttpRequest, HttpResponse, ResponseError};
+use graphql_client::Error as GraphQlError;
 use handlebars::RenderError;
 use lettre::file::error::Error as LettreFileError;
 use lettre::smtp::error::Error as LettreSmtpError;
 use lettre::smtp::response::Response as SmtpResponse;
 use std::error::Error;
 use std::fmt;
-use actix_web::client::{SendRequestError, JsonPayloadError};
-use graphql_client::Error as GraphQlError;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -121,10 +121,7 @@ pub enum TelescopeError {
     /// Error sending request to query API. This reports as internal server
     /// error because we could not query the API, the API did not return an
     /// error.
-    SendApiQueryError {
-        status_code: u16,
-        display: String,
-    },
+    SendApiQueryError { status_code: u16, display: String },
 
     #[error(ignore)]
     #[display(fmt = "Error in API response payload: {}", _0)]
@@ -281,26 +278,30 @@ impl TelescopeError {
                 format!("{} - Bad CSRF Token", status_code),
                 "The CSRF token supplied to the server by this request does not match the \
                 one the server generated for this identity provider for this IP. If you believe \
-                this is in error, please contact a coordinator and file a GitHUb issue."
+                this is in error, please contact a coordinator and file a GitHUb issue.",
             ),
 
-            TelescopeError::SendApiQueryError {display, ..} => jumbotron::new(
+            TelescopeError::SendApiQueryError { display, .. } => jumbotron::new(
                 format!("{} - Internal API Query Error", status_code),
-                format!("Could not send query to the central API. Please contact a \
-                coordinator and file a GitHub issue. Internal error description: {}", display)
+                format!(
+                    "Could not send query to the central API. Please contact a \
+                coordinator and file a GitHub issue. Internal error description: {}",
+                    display
+                ),
             ),
 
             TelescopeError::ApiResponsePayloadError(err) => jumbotron::new(
                 format!("{} - API Payload Error", status_code),
-                format!("The API returned an unexpected or malformed response. Please \
-                contact a coordinator and file a GitHub issue. Internal error description: {}", err)
+                format!(
+                    "The API returned an unexpected or malformed response. Please \
+                contact a coordinator and file a GitHub issue. Internal error description: {}",
+                    err
+                ),
             ),
 
             TelescopeError::GraphQLError(errs) => {
                 // Map all errors to their `Display` formatting.
-                let errs: Vec<String> = errs.iter()
-                    .map(|e| format!("{}", e))
-                    .collect();
+                let errs: Vec<String> = errs.iter().map(|e| format!("{}", e)).collect();
 
                 jumbotron::new(
                     format!("{} - Internal API Error", status_code),
@@ -308,19 +309,25 @@ impl TelescopeError {
                     contact a coordinator and create an issue on the telescope GitHub. Internal error \
                     description(s): {:?}", errs)
                 )
-            },
+            }
 
             TelescopeError::InternalServerError(message) => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
-                format!("Telescope had an internal server error. Please contact a \
-                coordinator and file a GitHub issue. Error description: {}", message)
+                format!(
+                    "Telescope had an internal server error. Please contact a \
+                coordinator and file a GitHub issue. Error description: {}",
+                    message
+                ),
             ),
 
             TelescopeError::HubcapsError(err) => jumbotron::new(
                 format!("{} - Error querying Github API", status_code),
-                format!("Could not query the Github API. Please contact a coordinator and \
-                file an issue on the Telescope GitHub. Internal error message: {}", err)
-            )
+                format!(
+                    "Could not query the Github API. Please contact a coordinator and \
+                file an issue on the Telescope GitHub. Internal error message: {}",
+                    err
+                ),
+            ),
         };
 
         // Put jumbotron in a page and return the content.
@@ -368,8 +375,9 @@ impl ResponseError for TelescopeError {
             TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
             TelescopeError::CsrfTokenNotFound => StatusCode::NOT_FOUND,
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
-            TelescopeError::SendApiQueryError {status_code, ..} =>
-                StatusCode::from_u16(*status_code).expect("Invalid status code"),
+            TelescopeError::SendApiQueryError { status_code, .. } => {
+                StatusCode::from_u16(*status_code).expect("Invalid status code")
+            }
             TelescopeError::HubcapsError(_) => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }

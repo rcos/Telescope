@@ -7,7 +7,7 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/schema.json",
-    query_path = "graphql/users/accounts/lookup.graphql",
+    query_path = "graphql/users/accounts/lookup.graphql"
 )]
 pub struct AccountLookup;
 

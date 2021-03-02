@@ -1,13 +1,13 @@
 use crate::env::global_config;
-use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AuthUrl, Scope, TokenUrl, TokenResponse, AccessToken};
-use std::sync::Arc;
-use crate::web::services::auth::identity::IdentityCookie;
-use crate::web::telescope_ua;
-use hubcaps::{Github, Credentials};
 use crate::error::TelescopeError;
+use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
+use crate::web::telescope_ua;
 use hubcaps::users::AuthenticatedUser;
+use hubcaps::{Credentials, Github};
+use oauth2::basic::{BasicClient, BasicTokenResponse};
+use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
+use std::sync::Arc;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -17,7 +17,7 @@ pub struct GitHubOauth;
 #[derive(Serialize, Deserialize)]
 pub struct GitHubIdentity {
     /// The OAuth2 Access token granted by GitHub.
-    pub access_token: AccessToken
+    pub access_token: AccessToken,
 }
 
 // Lazy static github client object.
@@ -58,7 +58,7 @@ impl Oauth2IdentityProvider for GitHubOauth {
     fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie {
         // Extract the identity and build the identity cookie.
         IdentityCookie::Github(GitHubIdentity {
-            access_token: token_response.access_token().clone()
+            access_token: token_response.access_token().clone(),
         })
     }
 }
@@ -70,15 +70,24 @@ impl GitHubIdentity {
         let agent: &str = telescope_ua();
 
         // Create a github API client via hubcaps.
-        let github_client = Github::new(agent, Credentials::Token(self.access_token.secret().clone()))?;
+        let github_client = Github::new(
+            agent,
+            Credentials::Token(self.access_token.secret().clone()),
+        )?;
 
         // Get the authenticated user.
-        return github_client.users().authenticated().await.map_err(TelescopeError::from);
+        return github_client
+            .users()
+            .authenticated()
+            .await
+            .map_err(TelescopeError::from);
     }
 
     /// Get the github account id of the user associated with this access token.
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
         // Get the authenticated user and convert their id to a string.
-        self.get_authenticated_user().await.map(|u| u.id.to_string())
+        self.get_authenticated_user()
+            .await
+            .map(|u| u.id.to_string())
     }
 }

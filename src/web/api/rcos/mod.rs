@@ -1,20 +1,20 @@
 //! API interactions and functionality.
 
 use crate::env::global_config;
-use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
-use actix_web::client::Client;
 use crate::error::TelescopeError;
+use actix_web::client::Client;
+use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
 
 mod auth;
-pub mod users;
 pub mod landing_page_stats;
+pub mod users;
 
 /// Re-export client authenticated client constructor.
 pub use auth::make_api_client;
 
 /// The max size of the API response body in bytes. Any responses larger than this
 /// will error on deconstruction.
-const RESPONSE_BODY_LIMIT: usize = 1024*1024;
+const RESPONSE_BODY_LIMIT: usize = 1024 * 1024;
 
 /// Get the URL that the central RCOS API is running at from the global config.
 fn api_endpoint() -> String {
@@ -22,9 +22,10 @@ fn api_endpoint() -> String {
 }
 
 /// Send a GraphQL query to the central RCOS API using a given client.
-pub async fn send_query<T: GraphQLQuery>(client: &Client, variables: T::Variables)
-    -> Result<T::ResponseData, TelescopeError>
-{
+pub async fn send_query<T: GraphQLQuery>(
+    client: &Client,
+    variables: T::Variables,
+) -> Result<T::ResponseData, TelescopeError> {
     // Build the GraphQL query
     let query = T::build_query(variables);
 
@@ -51,7 +52,7 @@ pub async fn send_query<T: GraphQLQuery>(client: &Client, variables: T::Variable
             // If errors and data are both non-null
             GraphQlResponse {
                 errors: Some(errs),
-                data: Some(rdata)
+                data: Some(rdata),
             } => {
                 if errs.is_empty() {
                     // If there are no errors return the data.
@@ -60,13 +61,19 @@ pub async fn send_query<T: GraphQLQuery>(client: &Client, variables: T::Variable
                     // If there are errors, return those.
                     Err(TelescopeError::GraphQLError(errs))
                 }
-            },
+            }
 
             // If no errors, return the data.
-            GraphQlResponse {errors: None, data: Some(rdata)} => Ok(rdata),
+            GraphQlResponse {
+                errors: None,
+                data: Some(rdata),
+            } => Ok(rdata),
 
             // If just errors, return those.
-            GraphQlResponse {errors: Some(errs), data: None} => {
+            GraphQlResponse {
+                errors: Some(errs),
+                data: None,
+            } => {
                 if errs.is_empty() {
                     panic!("Central GraphQL API returned a response with no errors or data.");
                 } else {
@@ -75,7 +82,9 @@ pub async fn send_query<T: GraphQLQuery>(client: &Client, variables: T::Variable
             }
 
             // Panic on None of either.
-            GraphQlResponse {errors: None, data: None} =>
-                panic!("Central GraphQL API responded with no errors or data.")
+            GraphQlResponse {
+                errors: None,
+                data: None,
+            } => panic!("Central GraphQL API responded with no errors or data."),
         });
 }

@@ -1,16 +1,16 @@
 use crate::error::TelescopeError;
+use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
+use actix_web::http::header::HOST;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::{HttpRequest, HttpResponse};
 use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
-use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
-use actix_web::http::header::HOST;
 
+pub mod identity;
 pub mod oauth2_providers;
 pub mod rpi_cas;
-pub mod identity;
 
 /// Register auth services.
 pub fn register(config: &mut ServiceConfig) {
@@ -93,7 +93,8 @@ pub trait IdentityProvider: 'static {
     type LoginAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
 
     /// The type of future returned by the registration authenticated response handler.
-    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>>
+        + 'static;
 
     /// Register the necessary actix services to support this identity
     /// provider.

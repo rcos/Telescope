@@ -1,10 +1,10 @@
 //! Web services.
 
 pub mod auth;
+mod index;
 mod login;
 pub mod not_found;
 mod register;
-mod index;
 
 use actix_web::web::ServiceConfig;
 
