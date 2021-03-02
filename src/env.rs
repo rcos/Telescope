@@ -4,22 +4,10 @@ use lettre::smtp::{
 };
 use lettre::EmailAddress;
 use oauth2::{ClientId, ClientSecret};
-use openssl::ssl::{SslAcceptorBuilder, SslFiletype};
 use std::sync::Arc;
 use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
-
-/// The Tls credentials of a given configuration.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct TlsConfig {
-    /// The TLS certificate. See the readme for instructions to generate your
-    /// own.
-    cert_file: PathBuf,
-    /// The TLS private key file. See the readme for instructions to generate
-    /// your own.
-    private_key_file: PathBuf,
-}
 
 /// Configuration of email senders for the telescope webapp.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -80,12 +68,6 @@ struct TelescopeConfig {
     /// See https://docs.rs/env_logger/0.8.1/env_logger/ for reference.
     log_level: Option<String>,
 
-    /// Set the URL to bind the running server to under HTTP/2.
-    bind_https: Option<String>,
-
-    /// Set the URL to bind the running server to under HTTP/1.
-    bind_http: Option<String>,
-
     /// GitHub OAuth application credentials.
     github_credentials: Option<GithubOauthConfig>,
 
@@ -94,9 +76,6 @@ struct TelescopeConfig {
 
     /// The configuration of email senders.
     email_config: Option<EmailSenderConfig>,
-
-    /// The TLS credential config.
-    tls_config: Option<TlsConfig>,
 
     /// The URL of the RCOS central API (in the OpenAPI Spec via RCOS-data).
     api_url: Option<String>,
@@ -116,14 +95,8 @@ struct TelescopeConfig {
 /// TelescopeConfig struct.
 #[derive(Serialize, Debug)]
 pub struct ConcreteConfig {
-    /// The tls configuration.
-    pub tls_config: TlsConfig,
     /// The log level. Private because the logger is initialized in this module.
     log_level: String,
-    /// The location to bind services under HTTP/2 (HTTPS).
-    pub bind_https: String,
-    /// The location to bind services under HTTP/1 (HTTP).
-    pub bind_http: String,
     /// The email configuration.
     pub email_config: EmailSenderConfig,
     /// The GitHub OAuth Application Credentials.
@@ -134,16 +107,6 @@ pub struct ConcreteConfig {
     pub api_url: String,
     /// The JWT secret used to authenticate with the central API.
     pub jwt_secret: String,
-}
-
-impl TlsConfig {
-    /// Initialize
-    pub fn init_tls_acceptor(&self, b: &mut SslAcceptorBuilder) {
-        b.set_private_key_file(&self.private_key_file, SslFiletype::PEM)
-            .expect("Could not set TLS Private Key.");
-        b.set_certificate_chain_file(&self.cert_file)
-            .expect("Could not set TLS Certificate.")
-    }
 }
 
 impl EmailSenderConfig {
@@ -188,18 +151,9 @@ impl TelescopeConfig {
 
         let profile_slice = &profile[..];
         ConcreteConfig {
-            tls_config: self
-                .reverse_lookup(profile_slice, |c| c.tls_config.clone())
-                .expect("Could not resolve TLS config."),
             log_level: self
                 .reverse_lookup(profile_slice, |c| c.log_level.clone())
                 .expect("Could not resolve log level."),
-            bind_https: self
-                .reverse_lookup(profile_slice, |c| c.bind_https.clone())
-                .expect("Could not resolve binding URL (HTTP/2, HTTPS)."),
-            bind_http: self
-                .reverse_lookup(profile_slice, |c| c.bind_http.clone())
-                .expect("Could not resolve binding URL (HTTP/1)."),
             email_config: self
                 .reverse_lookup(profile_slice, |c| c.email_config.clone())
                 .expect("Could not resolve email config."),

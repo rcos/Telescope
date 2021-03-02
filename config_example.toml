@@ -23,14 +23,6 @@
 log_level = "info"
 
 # [REQUIRED]
-# Specify the location to bind the running server.
-# HTTP traffic will be rediected to HTTPS.
-# These default ports work with Docker but may need to be changed to work
-# outside of docker.
-bind_https = "localhost:443"
-bind_http  = "localhost:80"
-
-# [REQUIRED]
 # Specify the URL of the RCOS central API. This default value is okay for
 # testing locally in docker but should probably be changed in production.
 api_url = "http://hasura:8080/v1/graphql"
@@ -39,18 +31,6 @@ api_url = "http://hasura:8080/v1/graphql"
 # The JSON web token (jwt) key used to encode JWTs when authenticating with
 # the central RCOS API. This shcould match the one in the .env file.
 jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-# [REQUIRED]
-# The TLS/SSL configurations. These are specified as the paths of the
-# TLS/SSL credentials generated earlier in the setup (see the readme), or
-# in production environments isssued by a certificate authority.
-[tls_config]
-# [REQUIRED]
-# The TLS/SSL certification file.
-cert_file = "tls-ssl/certificate.pem"
-# [REQUIRED]
-# The TLS/SSL private key chain file.
-private_key_file = "tls-ssl/private-key.pem"
 
 # [REQUIRED]
 # The GitHub OAuth application credentials.
@@ -99,6 +79,7 @@ stub = true
 # [OPTIONAL]
 # specify a path to save generated emails in text files.
 file = "/tmp"
+
 # [OPTIONAL]
 # Send the emails to users from an email account using SMTP.
 [email_config.smtp]
@@ -116,21 +97,11 @@ username = "telescope"
 # The password to use to sign into the SMTP server.
 password = "password"
 
-
 # Development Profile
 # These options will override the global ones when telescope is run using
 # `telescope -p dev`
 [profile.dev]
 log_level = "info,telescope=trace"
-
-# Sysadmin development subprofile.
-# This uses all the options specified in the dev profile and
-# also overrides the sysadmin config.
-# Use `telescope -p dev.create_sysadmin`
-[profile.dev.profile.create_sysadmin.sysadmin_config]
-email = "test@mydomain.test"
-password = "BetterPassword"
-create = true
 
 # Live API profile.
 # Use `telescope -p live` or set the PROFILE variable to "live"

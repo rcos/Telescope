@@ -14,7 +14,6 @@ RUN cargo build --release
 # Copy over remaining files needed to run.
 COPY ./static ./static
 COPY ./templates ./templates
-COPY ./tls-ssl ./tls-ssl
 # Do not copy .env file to the Telescope docker container.
 # Any environment variables that need to be set should be put in the config.toml
 # if possible, or passed to the telescope container using the docker-compose
@@ -23,6 +22,5 @@ COPY ./tls-ssl ./tls-ssl
 COPY ./config.toml .
 # Expose telescope's ports
 EXPOSE 80
-EXPOSE 443
 # Run telescope
 CMD ["cargo", "run", "--release"]

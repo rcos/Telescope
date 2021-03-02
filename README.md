@@ -64,18 +64,13 @@ again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your
         $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
         $ source ~/.cargo/env
         ```
-    2. OpenSSL and libssl (see [https://www.openssl.org/](https://www.openssl.org/) for more info)
-        ```shell
-        $ sudo apt update
-        $ sudo apt install openssl libssl-dev libssl-doc
-        ```
-    3. Hasura CLI to run database migrations. See 
+    2. Hasura CLI to run database migrations. See 
        [the hasura CLI docs](https://hasura.io/docs/1.0/graphql/core/hasura-cli/install-hasura-cli.html#install-hasura-cli) 
        for more info.
         ```shell
         $ curl -L https://github.com/hasura/graphql-engine/raw/stable/cli/get.sh | bash
         ```
-    4. Docker and docker-compose to run telescope and the database locally. 
+    3. Docker and docker-compose to run telescope and the database locally. 
        this can be a complicated process, but there are good instructions online 
        [here](https://docs.docker.com/get-docker/).
        Message me for help if you need it.
@@ -87,16 +82,6 @@ again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your
    You need to make sure you get all of the submodules here using 
    `--recurse-submodules` otherwise you won't have any of the RCOS branding
    logos or icons, or any of the database migrations and setup.
-   
-3. Generate self-signed TLS/SSL certificate and keys for testing: 
-    ```shell script
-    $ mkdir tls-ssl
-    $ openssl req -x509 -newkey rsa:4096 -nodes -keyout tls-ssl/private-key.pem -out tls-ssl/certificate.pem -days 365
-    ```
-   If you are running this in production, do not do this. Instead, you should use
-   a certificate signed by a trusted certificate authority. See 
-   [https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs](https://phoenixnap.com/kb/openssl-tutorial-ssl-certificates-private-keys-csrs)
-   for more details.
 
 4. Copy the configuration templates as follows:
     - `config_example.toml` -> `config.toml`

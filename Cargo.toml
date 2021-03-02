@@ -21,17 +21,13 @@ tokio = {version = "~1.2", features = ["full"]}
 # actix actor framework -- system for running server and other tasks.
 actix = "~0.10"
 # actix web server (use exact version)
-actix-web = {version = "~3.3", features = ["openssl", "compress"]}
+actix-web = "~3.3"
 # static file serving
 actix-files = "~0.5"
 # identity service -- cookie authentication
 actix-identity = "~0.3"
-# redirect all traffic over https.
-actix-web-middleware-redirect-scheme = "~3.0"
 # html templating.
 handlebars = {version = "~3.5", features = ["dir_source"]}
-# tls/ssl certification.
-openssl = {version = "~0.10", features = ["vendored"]}
 # exit code standardization
 exitcode = "~1.1"
 # logging

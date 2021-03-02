@@ -8,6 +8,7 @@ use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
 use chrono::{DateTime, Utc};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
+use actix_web::http::header::HOST;
 
 pub mod oauth2_providers;
 pub mod rpi_cas;
@@ -25,17 +26,18 @@ pub fn register(config: &mut ServiceConfig) {
 /// Function to create the redirect URL for a given request and identity provider's
 /// redirect path.
 fn make_redirect_url(req: &HttpRequest, redir_path: String) -> RedirectUrl {
-    // Get request scheme and authority.
-    let scheme: &str = req
-        .uri()
-        .scheme_str()
-        .expect("Could not get request scheme string.");
-    let authority: &Authority = req
-        .uri()
-        .authority()
-        .expect("Could not get request authority.");
+    // Get the host header to determine where to redirect the user to.
+    // This should be the base for one of the identity provider's redirect
+    // paths.
+    let address: &str = req
+        .headers()
+        .get(HOST)
+        .expect("Could not get host header from request.")
+        .to_str()
+        .expect("Host request header is not ascii characters");
+
     // Create and return redirect URL.
-    return RedirectUrl::new(format!("{}://{}{}", scheme, authority, redir_path))
+    return RedirectUrl::new(format!("https://{}{}", address, redir_path))
         .expect("Could not create redirect URL");
 }
 

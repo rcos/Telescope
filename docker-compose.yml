@@ -29,8 +29,17 @@ services:
       HASURA_GRAPHQL_JWT_SECRET: "{ \"type\": \"HS256\", \"key\": \"${RCOS_JWT_SECRET}\" }"
       HASURA_GRAPHQL_LOG_LEVEL: "info"
       HASURA_GRAPHQL_ADMIN_SECRET: "${HASURA_GRAPHQL_ADMIN_SECRET}"
+
+  # Use caddy for reverse proxy and TLS/SSL certs.
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    volumes:
+      - "caddy_data:/data"
+      - "${PWD}/Caddyfile:/etc/caddy/Caddyfile"
     ports:
-      - "8000:8080"
+      - "8000:8000"
+      - "8443:443"
 
   # Telescope itself
   telescope:
@@ -38,12 +47,10 @@ services:
     image: telescope:latest
     depends_on:
       - hasura
-    ports:
-      - "8080:80"
-      - "8443:443"
 #    environment:
 #      # See the config section about profiles.
 #      PROFILE: "live"
 
 volumes:
   db_data:
+  caddy_data:
