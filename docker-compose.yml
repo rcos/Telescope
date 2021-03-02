@@ -47,6 +47,8 @@ services:
     image: telescope:latest
     depends_on:
       - hasura
+    volumes:
+      - "${PWD}/config.toml:/telescope/config.toml"
 #    environment:
 #      # See the config section about profiles.
 #      PROFILE: "live"
