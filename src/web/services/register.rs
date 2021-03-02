@@ -11,3 +11,4 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
     // Put it in a page template and return it.
     return page::of(req.path(), "Create RCOS Account", &content);
 }
+

@@ -13,7 +13,7 @@ use actix_web::FromRequest;
 use std::future::Future;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
-use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::identity::{IdentityCookie, Identity};
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::{make_api_client, send_query, users::accounts::reverse_lookup};
 use actix_web::client::Client;
@@ -163,19 +163,30 @@ where
             // Get the API access token (in an identity cookie).
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+            // Get the on-platform ID of the user's identity.
+            let platform_id: String = cookie_identity.get_account_identity().await?;
 
+            // Look for an account on this platform in the central RCOS API.
+            // Create client
+            let api_client: Client = make_api_client(None);
+            // Make variables.
+            let variables = reverse_lookup::reverse_lookup::Variables {
+                id: platform_id,
+                platform: cookie_identity.user_account_type(),
+            };
+            // Send API query.
+            let username: Option<String> = send_query::<reverse_lookup::ReverseLookup>(&api_client, variables)
+                .await?
+                .username();
 
-            // // Look for an account on this platform in the central RCOS API.
-            // // Create client
-            // let api_client: Client = make_api_client(None);
-            // // Make variables.
-            // let variables = reverse_lookup::reverse_lookup::Variables {
-            //     id: "".to_owned(),
-            //     platform: Self::PLATFORM,
-            // };
-            // let username: Option<String> = send_query::<reverse_lookup::ReverseLookup>(&api_client, variables)
-            //     .await?
-            //     .username();
+            // If there is no user, return a not-found error.
+            let username: String = username.ok_or(TelescopeError::resource_not_found(
+                "Could not find associated user account.",
+                format!("Could not find user account associated with this {} account. \
+                Please create an account or sign in using another method.", Self::SERVICE_NAME)
+            ))?;
+
+            // Otherwise, store the identity in the user's cookies and redirect to their profile.
 
 
             Err(TelescopeError::NotImplemented)
@@ -186,11 +197,17 @@ where
         return Box::pin(async move {
             // Get the redirect URL.
             let redir_uri: RedirectUrl = make_redirect_url(&req, Self::registration_redirect_path());
-            // Get the API access token.
+            // Get the object to store in the user's cookie.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+            // Extract the identity object from the request and store the cookie in it.
+            let identity: Identity = Identity::extract(&req).await?;
+            identity.save(&cookie_identity);
 
-            Err(TelescopeError::NotImplemented)
+            // Success! Redirect the user to finish the registration process.
+            Ok(HttpResponse::Found()
+                .header(LOCATION, "/register/finish")
+                .finish())
         });
     }
 }

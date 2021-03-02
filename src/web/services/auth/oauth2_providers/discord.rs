@@ -10,6 +10,13 @@ use crate::env::global_config;
 use oauth2::{AuthUrl, TokenUrl};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::users::UserAccountType;
+use actix_web::http::header::ACCEPT;
+use serenity::model::user::CurrentUser;
+use actix_web::dev::Service;
+use crate::web::services::auth::IdentityProvider;
+
+/// The Discord API endpoint to query for user data.
+const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
 
 /// Zero-sized type used to represent Discord based identity verification.
 pub struct DiscordOAuth;
@@ -82,18 +89,20 @@ impl DiscordIdentity {
     }
 
     /// Refresh this access token if necessary.
-    pub fn refresh(mut self, redirect_uri: &RedirectUrl) -> Result<Self, TelescopeError> {
+    pub fn refresh(mut self) -> Result<Self, TelescopeError> {
         // If this token has expired
         if self.expiration < Utc::now() {
             // Get a discord client and make a refresh token request.
-            let client: Arc<BasicClient> = DiscordOAuth::get_client();
+            let client: Arc<BasicClient> = <DiscordOAuth as Oauth2IdentityProvider>::get_client();
             let mut refresh_token_request = client.exchange_refresh_token(&self.refresh_token);
             // Add scopes.
             for scope in DiscordOAuth::scopes() {
                 refresh_token_request = refresh_token_request.add_scope(scope);
             }
-            // Add redirect URI.
-            let response = refresh_token_request.add_extra_param("redirect_uri", redirect_uri.as_str())
+            // Create refresh response
+            let response = refresh_token_request
+                // Add login redirect path.
+                .add_extra_param("redirect_uri", DiscordOAuth::login_redirect_path().as_str())
                 // Send the request. (This is synchronous -- be careful).
                 .request(oauth2::reqwest::http_client)
                 // Handle and propagate the error.
@@ -111,8 +120,26 @@ impl DiscordIdentity {
 
     /// Get the user authenticated in association with this access token. Assume this token has been
     /// refreshed recently enough.
-    async fn authenticated_user(&self) -> Result<(), TelescopeError> {
-        // TODO: Find way to get user information
-        unimplemented!()
+    async fn authenticated_user(&self) -> Result<CurrentUser, TelescopeError> {
+        // Make a web client to request the user's identity from the discord API.
+        let client = actix_web::client::Client::builder()
+            .bearer_auth(self.access_token.secret())
+            .header(ACCEPT, "application/json")
+            .finish();
+
+        // Send the GET request to the discord API.
+        return client.get(format!("{}/users/@me", DISCORD_API_ENDPOINT))
+            .send()
+            .await
+            .map_err(TelescopeError::api_query_error)?
+            .json::<CurrentUser>()
+            .await
+            .map_err(TelescopeError::api_response_error);
+
+    }
+
+    /// Get the authenticated Discord account's ID.
+    pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
+        self.authenticated_user().await.map(|u| u.id.to_string())
     }
 }
