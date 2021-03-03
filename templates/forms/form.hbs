@@ -1,0 +1,22 @@
+<div class="card text-dark">
+    <div class="card-header">
+        {{form_title}}
+    </div>
+    <div class="card-body">
+        {{! All telescope forms are POST-only }}
+        <form method="post">
+            {{#each fields}}
+                {{! If this field is a text field}}
+                {{#if text_field}}
+                    {{> forms/common/text_field text_field}}
+                {{/if}}
+            {{/each}}
+            <div class="form-group d-block float-right">
+                <button class="btn btn-spinner {{#if submit_button_class}} {{submit_button_class}} {{else}} btn-primary {{/if}}"
+                        type="submit">
+                    {{submit_button_text}}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
