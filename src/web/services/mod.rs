@@ -19,5 +19,7 @@ pub fn register(config: &mut ServiceConfig) {
         // Login services.
         .service(login::login_page)
         // Account registration services.
-        .service(register::register_page);
+        .service(register::register_page)
+        .service(register::finish_registration)
+        .service(register::submit_registration);
 }
