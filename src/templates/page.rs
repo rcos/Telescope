@@ -28,11 +28,20 @@ pub fn of(
 ) -> Result<Template, TelescopeError> {
     // Render the content of this page
     let content_rendered: String = content.render()?;
+    // Create the page.
+    return with_content(req_path, title, content_rendered.as_str());
+}
 
+/// Create a template with a content string rather than another template.
+pub fn with_content(
+    req_path: &str,
+    title: impl Into<Value>,
+    content: &str,
+) -> Result<Template, TelescopeError> {
     // Build the rest of the page
     Ok(Template::new(TEMPLATE_PATH)
         .field(TITLE, title.into())
         .field(NAVBAR, navbar::userless(req_path))
-        .field(CONTENT, content_rendered)
+        .field(CONTENT, content)
         .field(VERSION, env!("CARGO_PKG_VERSION")))
 }

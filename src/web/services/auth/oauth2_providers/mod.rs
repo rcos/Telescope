@@ -201,8 +201,11 @@ where
             ))?;
 
             // Otherwise, store the identity in the user's cookies and redirect to their profile.
-
-            Err(TelescopeError::NotImplemented)
+            let identity: Identity = Identity::extract(&req).await?;
+            identity.save(&cookie_identity);
+            Ok(HttpResponse::Found()
+                .header(LOCATION, format!("/user/{}", username))
+                .finish())
         });
     }
 
