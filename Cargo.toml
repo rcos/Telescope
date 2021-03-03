@@ -21,7 +21,7 @@ tokio = {version = "~1.2", features = ["full"]}
 # actix actor framework -- system for running server and other tasks.
 actix = "~0.10"
 # actix web server (use exact version)
-actix-web = "~3.3"
+actix-web = {version = "~3.3", features = ["rustls"]}
 # static file serving
 actix-files = "~0.5"
 # identity service -- cookie authentication

@@ -6,14 +6,22 @@
         <form method="post">
             {{! Github/Discord account info}}
             {{#if discord_account}}
+                <div class="row">
 
+                </div>
             {{/if}}
             {{#if github_account}}
 
             {{/if}}
             {{! form fields}}
-            {{> forms/common/text_field fields.first_name.text_field placeholder="John" id="fname" label="First Name" type="text"}}
-            {{> forms/common/text_field fields.last_name.text_field placeholder="Appleseed" id="lname" label="Last Name" type="text"}}
+            {{#with form_fields}}
+                {{#with first_name.text_field}}
+                    {{> forms/common/text_field name=name value=value error=error success=success placeholder="John" id="fname" label="First Name" type="text"}}
+                {{/with}}
+                {{#with last_name.text_field}}
+                    {{> forms/common/text_field name=name value=value error=error success=success placeholder="Appleseed" id="lname" label="Last Name" type="text"}}
+                {{/with}}
+            {{/with}}
             <div class="form-group d-block float-right">
                 {{> forms/common/submit_button submit_button}}
             </div>
