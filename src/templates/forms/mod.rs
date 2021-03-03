@@ -61,7 +61,7 @@ impl Form {
     }
 
     /// Render this form.
-    fn render(&self) -> Result<String, TelescopeError> {
+    pub(crate) fn render(&self) -> Result<String, TelescopeError> {
         AppData::global()
             // Get the global handlebars registry
             .get_handlebars_registry()

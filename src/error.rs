@@ -16,6 +16,7 @@ use lettre::smtp::response::Response as SmtpResponse;
 use std::error::Error;
 use std::fmt;
 use crate::templates::forms::Form;
+use serde_json::Value;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -147,7 +148,9 @@ pub enum TelescopeError {
     #[display("Invalid form submission")]
     /// The user submitted invalid data to a form. This should be reported as a
     /// bad request and the form should be displayed for the user to try again.
-    InvalidForm(Form)
+    /// The value here is the serde serialization of the form, since the [`Form`]
+    /// type does not implement debug
+    InvalidForm(Value)
 }
 
 impl TelescopeError {
@@ -335,6 +338,23 @@ impl TelescopeError {
                     err
                 ),
             ),
+
+            TelescopeError::InvalidForm(form) => {
+                // Render the form.
+                // Start with a conversion.
+                let form: Form = serde_json::from_value(form.clone())
+                    // This should not fail.
+                    .expect("Form serialization error.");
+
+                // Render the form.
+                let page_content: String = form.render()?;
+                // Put it in a page.
+                return page::with_content(path, form.page_title, page_content.as_str())?
+                    // Render Page
+                    .render()
+                    // Convert errors as necessary.
+                    .map_err(ActixError::from);
+            }
         };
 
         // Put jumbotron in a page and return the content.
@@ -386,6 +406,7 @@ impl ResponseError for TelescopeError {
                 StatusCode::from_u16(*status_code).expect("Invalid status code")
             }
             TelescopeError::HubcapsError(_) => StatusCode::BAD_GATEWAY,
+            TelescopeError::InvalidForm(_) => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
