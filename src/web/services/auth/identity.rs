@@ -88,6 +88,23 @@ impl FromRequest for Identity {
     }
 }
 
+impl FromRequest for IdentityCookie {
+    type Error = TelescopeError;
+    type Future = Ready<Result<Self, Self::Error>>;
+    type Config = ();
+
+    fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
+        // Extract the telescope-identity from the request
+        ready(Identity::from_request(req, payload)
+            // Unwrap the immediate future
+            .into_inner()
+            // Extract the identity or return an error telling the user to
+            // authenticate.
+            .and_then(|identity| identity.identity()
+                .ok_or(TelescopeError::NotAuthenticated)))
+    }
+}
+
 impl Identity {
     /// Forget the user's identity if it exists.
     pub fn forget(&self) {

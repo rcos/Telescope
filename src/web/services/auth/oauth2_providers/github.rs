@@ -65,7 +65,7 @@ impl Oauth2IdentityProvider for GitHubOauth {
 
 impl GitHubIdentity {
     /// Get the authenticated user for this access token.
-    async fn get_authenticated_user(&self) -> Result<AuthenticatedUser, TelescopeError> {
+    pub async fn get_authenticated_user(&self) -> Result<AuthenticatedUser, TelescopeError> {
         // Get a reference to the string storing the telescope user agent.
         let agent: &str = telescope_ua();
 

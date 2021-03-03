@@ -11,16 +11,16 @@ use hubcaps::users::AuthenticatedUser;
 const TEMPLATE_PATH: &'static str = "forms/register";
 
 /// Text field for the user's first name.
-pub const FNAME_FIELD: &'static str = "first_name";
+const FNAME_FIELD: &'static str = "first_name";
 
 /// Text field for the user's last name.
-pub const LNAME_FIELD: &'static str = "last_name";
+const LNAME_FIELD: &'static str = "last_name";
 
 /// Template key for the user's discord, if it exists.
-pub const DISCORD_KEY: &'static str = "discord_account";
+const DISCORD_KEY: &'static str = "discord_account";
 
 /// Template key for the user's github account if it exists.
-pub const GITHUB_KEY: &'static str = "github_account";
+const GITHUB_KEY: &'static str = "github_account";
 
 /// Create a first or last name field that validates on all non-empty strings.
 fn make_name_field(name: impl Into<String>) -> TextField {

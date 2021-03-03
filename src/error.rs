@@ -150,7 +150,12 @@ pub enum TelescopeError {
     /// bad request and the form should be displayed for the user to try again.
     /// The value here is the serde serialization of the form, since the [`Form`]
     /// type does not implement debug
-    InvalidForm(Value)
+    InvalidForm(Value),
+
+    #[display("Request not properly authenticated")]
+    /// An unauthenticated user is trying to access a page that requires
+    /// authentication. Report as unauthorized and direct them to try again.
+    NotAuthenticated,
 }
 
 impl TelescopeError {
@@ -354,7 +359,14 @@ impl TelescopeError {
                     .render()
                     // Convert errors as necessary.
                     .map_err(ActixError::from);
-            }
+            },
+
+            TelescopeError::NotAuthenticated => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                "You need to sign in to access this page. If you are trying to create an \
+                account, please restart. Otherwise please sign in. If you have logged in, and this \
+                page is unexpected, please contact a coordinator and create a GitHub issue."
+            )
         };
 
         // Put jumbotron in a page and return the content.
@@ -407,6 +419,7 @@ impl ResponseError for TelescopeError {
             }
             TelescopeError::HubcapsError(_) => StatusCode::BAD_GATEWAY,
             TelescopeError::InvalidForm(_) => StatusCode::BAD_REQUEST,
+            TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

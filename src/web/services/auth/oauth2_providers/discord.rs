@@ -123,7 +123,7 @@ impl DiscordIdentity {
 
     /// Get the user authenticated in association with this access token. Assume this token has been
     /// refreshed recently enough.
-    async fn authenticated_user(&self) -> Result<CurrentUser, TelescopeError> {
+    pub async fn authenticated_user(&self) -> Result<CurrentUser, TelescopeError> {
         // Make a web client to request the user's identity from the discord API.
         let client = actix_web::client::Client::builder()
             .bearer_auth(self.access_token.secret())

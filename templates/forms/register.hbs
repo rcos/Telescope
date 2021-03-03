@@ -4,7 +4,16 @@
     </h1>
     <div class="card-body">
         <form method="post">
+            {{! Github/Discord account info}}
+            {{#if discord_account}}
 
+            {{/if}}
+            {{#if github_account}}
+
+            {{/if}}
+            {{! form fields}}
+            {{> forms/common/text_field fields.first_name.text_field placeholder="John" id="fname" label="First Name" type="text"}}
+            {{> forms/common/text_field fields.last_name.text_field placeholder="Appleseed" id="lname" label="Last Name" type="text"}}
             <div class="form-group d-block float-right">
                 {{> forms/common/submit_button submit_button}}
             </div>
