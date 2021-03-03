@@ -72,6 +72,24 @@ impl Form {
             .map_err(TelescopeError::RenderingError)
     }
 
+    /// Add a non-form field key to the form.
+    pub fn add_other_key(&mut self, key: impl Into<String>, value: impl Serialize) -> &mut Self {
+        // Serialize the value.
+        let serialized = serde_json::to_value(value)
+            .expect("Serialization error");
+
+        // Add it to this form/template
+        self.other.insert(key.into(), serialized);
+
+        return self;
+    }
+
+    /// Builder style function to add a non-form-field key to a template.
+    pub fn with_other_key(mut self, key: impl Into<String>, value: impl Serialize) -> Self {
+        self.add_other_key(key, value);
+        self
+    }
+
     /// Try to validate this form using the input in the HTTP request. Return an error if the request
     /// is malformed or if the form fails to validate.
     async fn validate_input(req: &HttpRequest) -> Result<HashMap<String, String>, TelescopeError> {

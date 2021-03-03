@@ -12,25 +12,37 @@ pub struct TextField {
     name: String,
 
     /// The value to pre-fill the form field with.
-    value: Option<String>,
+    pub value: Option<String>,
 
     /// If there was an error with this form field, display this error message.
-    error: Option<String>,
+    pub error: Option<String>,
 
     /// If this form field did not error, display this success message.
-    success: Option<String>,
+    pub success: Option<String>,
 
     /// Function to validate an input and return this field. This should set the
     /// `is_valid` field of this object.
     #[serde(skip)]
-    validator: Option<Box<dyn Fn(Option<String>) -> Self>>,
+    validator: Option<Box<dyn FnOnce(Option<String>) -> Self + 'static>>,
 
     /// Flag for the validator to set to indicate if a form is valid.
     #[serde(skip)]
-    is_valid: Option<bool>,
+    pub is_valid: Option<bool>,
 }
 
 impl TextField {
+    /// Create a new text field.
+    pub fn new(name: impl Into<String>, validator: impl FnOnce(Option<String>) -> Self + 'static) -> Self {
+        Self {
+            name: name.into(),
+            value: None,
+            error: None,
+            success: None,
+            validator: Some(Box::new(validator)),
+            is_valid: None
+        }
+    }
+
     /// Validate this field for a given input. Panic if there is no validator
     /// function.
     pub fn validate(self, value: Option<String>) -> Self {
@@ -49,7 +61,7 @@ impl TextField {
 
 impl Form {
     /// Add a text field to a form. Panic on trying to overwrite an existing field.
-    fn add_text_field(&mut self, text_field: TextField) -> &mut Form {
+    pub fn add_text_field(&mut self, text_field: TextField) -> &mut Form {
         if self.form_fields.contains_key(text_field.name.as_str()) {
             panic!("Cannot overwrite existing field in form");
         } else {
