@@ -135,10 +135,16 @@ impl DiscordIdentity {
             .get(format!("{}/users/@me", DISCORD_API_ENDPOINT))
             .send()
             .await
-            .map_err(TelescopeError::api_query_error)?
+            .map_err(|e| {
+                TelescopeError::ise(format!("Could not send identification query to central \
+                Discord API. Internal error: {}", e))
+            })?
             .json::<CurrentUser>()
             .await
-            .map_err(TelescopeError::api_response_error);
+            .map_err(|e| {
+                TelescopeError::ise(format!("Error with response from central Discord API. \
+                Internal error: {}", e))
+            });
     }
 
     /// Get the authenticated Discord account's ID.
