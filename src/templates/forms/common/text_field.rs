@@ -50,10 +50,10 @@ impl TextField {
 impl Form {
     /// Add a text field to a form. Panic on trying to overwrite an existing field.
     fn add_text_field(&mut self, text_field: TextField) -> &mut Form {
-        if self.fields.contains_key(text_field.name.as_str()) {
+        if self.form_fields.contains_key(text_field.name.as_str()) {
             panic!("Cannot overwrite existing field in form");
         } else {
-            self.fields.insert(text_field.name.clone(), FormField::TextField(text_field));
+            self.form_fields.insert(text_field.name.clone(), FormField::TextField(text_field));
             self
         }
     }

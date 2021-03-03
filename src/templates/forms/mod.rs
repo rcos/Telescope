@@ -18,6 +18,7 @@ use serde_json::{Map, Value};
 use actix_web::web::Form as ActixForm;
 
 pub mod common;
+pub mod register;
 
 /// A field in a form.
 #[derive(Serialize, Deserialize)]
@@ -36,7 +37,7 @@ pub struct Form {
     /// The page title.
     pub page_title: String,
     /// The fields of this form. Keys are `name` attributes.
-    fields: HashMap<String, FormField>,
+    form_fields: HashMap<String, FormField>,
     /// The button component at the bottom of this form to submit it.
     pub submit_button: SubmitButton,
     /// Any other handlebars fields needed to render this form. These should
@@ -51,7 +52,7 @@ impl Form {
         Self {
             template_path: path.into(),
             page_title: page_title.into(),
-            fields: HashMap::new(),
+            form_fields: HashMap::new(),
             submit_button: SubmitButton {
                 text: "Submit".into(),
                 class: None
@@ -61,7 +62,7 @@ impl Form {
     }
 
     /// Render this form.
-    pub(crate) fn render(&self) -> Result<String, TelescopeError> {
+    pub fn render(&self) -> Result<String, TelescopeError> {
         AppData::global()
             // Get the global handlebars registry
             .get_handlebars_registry()

@@ -1,0 +1,36 @@
+mutation CreateOneUser(
+    $username: String!,
+    $first_name: String!,
+    $last_name: String!,
+    $role: user_role!,
+    $platform: user_account!,
+    $platform_id: String!,
+) {
+    insert_users_one(
+        object: {
+            username: $username,
+            first_name: $first_name,
+            last_name: $last_name,
+            role: $role,
+            user_accounts: {
+                data: [
+                    {
+                        type: $platform,
+                        account_id: $platform_id,
+                    }
+                ]
+            }
+        }) {
+        username
+        first_name
+        last_name
+        created_at
+        role
+        user_accounts {
+            account_id
+            type
+            created_at
+            username
+        }
+    }
+}
