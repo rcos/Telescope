@@ -5,39 +5,14 @@ use crate::templates::forms::{Form, FormField};
 /// Path to the
 const TEMPLATE_PATH: &'static str = "forms/common/text_field";
 
-/// The type attribute of a text field in a form.
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum TextFieldType {
-    Email,
-    Password,
-    Text,
-    Url,
-    /// Telephone number.
-    Tel,
-}
-
 /// Form fields.
 #[derive(Serialize, Deserialize)]
 pub struct TextField {
-    /// The HTML element id of this form item.
-    id: String,
-
-    /// The label that appears next to this text field.
-    label: String,
-
     /// The name of this field in the submitted form object.
     name: String,
 
-    /// The type attribute of this form field.
-    #[serde(rename = "type")]
-    ty: TextFieldType,
-
     /// The value to pre-fill the form field with.
     value: Option<String>,
-
-    /// The place-holder to put in the form field on on value.
-    placeholder: Option<String>,
 
     /// If there was an error with this form field, display this error message.
     error: Option<String>,

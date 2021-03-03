@@ -12,10 +12,7 @@
                 {{/if}}
             {{/each}}
             <div class="form-group d-block float-right">
-                <button class="btn btn-spinner {{#if submit_button_class}} {{submit_button_class}} {{else}} btn-primary {{/if}}"
-                        type="submit">
-                    {{submit_button_text}}
-                </button>
+                {{> forms/common/submit_button submit_button}}
             </div>
         </form>
     </div>

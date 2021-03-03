@@ -6,18 +6,18 @@
 use serde::Serialize;
 use common::text_field::TextField;
 use std::collections::HashMap;
-use actix_web::{Responder, HttpRequest, Error, HttpResponse};
+use actix_web::{Responder, HttpRequest, Error, HttpResponse, FromRequest};
 use actix_web::body::Body;
 use crate::error::TelescopeError;
 use futures::future::{Ready, ready};
 use crate::app_data::AppData;
 use crate::templates::{page, Template};
 use actix_web::http::header::CONTENT_TYPE;
+use crate::templates::forms::common::submit_button::SubmitButton;
+use serde_json::{Map, Value};
+use actix_web::web::Form as ActixForm;
 
 pub mod common;
-
-/// Path from the template root to the form template file.
-const TEMPLATE_PATH: &'static str = "forms/form";
 
 /// A field in a form.
 #[derive(Serialize, Deserialize)]
@@ -31,30 +31,32 @@ enum FormField {
 /// the URL they are served at.
 #[derive(Serialize, Deserialize)]
 pub struct Form {
+    /// The path from the template root to this form's handlebars template.
+    template_path: String,
     /// The page title.
     pub page_title: String,
-    /// The title that will appear above the form.
-    pub form_title: String,
     /// The fields of this form. Keys are `name` attributes.
     fields: HashMap<String, FormField>,
-    /// The text on the submit button.
-    pub submit_button_text: String,
-    /// Any css classes to add to the submit button.
-    /// When `None`, the default is `btn-primary`)
-    /// All submit buttons have `btn` and `btn-spinner` already.
-    pub submit_button_class: Option<String>,
+    /// The button component at the bottom of this form to submit it.
+    pub submit_button: SubmitButton,
+    /// Any other handlebars fields needed to render this form. These should
+    /// not be form fields.
+    #[serde(flatten)]
+    other: Map<String, Value>
 }
 
 impl Form {
     /// Create a new empty form.
-    fn empty(title: impl Into<String>) -> Self {
-        let title = title.into();
+    pub fn new(path: impl Into<String>, page_title: impl Into<String>) -> Self {
         Self {
-            page_title: title.clone(),
-            form_title: title,
+            template_path: path.into(),
+            page_title: page_title.into(),
             fields: HashMap::new(),
-            submit_button_text: "Submit".into(),
-            submit_button_class: None
+            submit_button: SubmitButton {
+                text: "Submit".into(),
+                class: None
+            },
+            other: Map::new()
         }
     }
 
@@ -64,14 +66,22 @@ impl Form {
             // Get the global handlebars registry
             .get_handlebars_registry()
             // Render the form object
-            .render(TEMPLATE_PATH, self)
+            .render(self.template_path.as_str(), self)
             // Convert and propagate any errors.
             .map_err(TelescopeError::RenderingError)
     }
 
-    /// Try to validate this form. Return an error if the request is malformed
-    /// or if the form fails to validate.
-    fn validate_input() -> Result<HashMap<String, String>, TelescopeError> {
+    /// Try to validate this form using the input in the HTTP request. Return an error if the request
+    /// is malformed or if the form fails to validate.
+    async fn validate_input(req: &HttpRequest) -> Result<HashMap<String, String>, TelescopeError> {
+        // Deserialize the form fields from the request into a hash map.
+        let form_input: HashMap<String, String> = ActixForm::<HashMap<String, String>>::extract(req)
+            .await
+            // Convert and propagate errors as necessary.
+            .map_err(|e| TelescopeError::bad_request(
+                "Malformed Form Data",
+                format!("Could not deserialize form data. Internal error: {}", e)))?.0;
+
         unimplemented!()
     }
 }

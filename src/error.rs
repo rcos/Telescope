@@ -15,6 +15,7 @@ use lettre::smtp::error::Error as LettreSmtpError;
 use lettre::smtp::response::Response as SmtpResponse;
 use std::error::Error;
 use std::fmt;
+use crate::templates::forms::Form;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -141,6 +142,12 @@ pub enum TelescopeError {
     /// Error querying the GitHub API. This should be reported as an upstream
     /// gateway error in general.
     HubcapsError(String),
+
+    #[error(ignore)]
+    #[display("Invalid form submission")]
+    /// The user submitted invalid data to a form. This should be reported as a
+    /// bad request and the form should be displayed for the user to try again.
+    InvalidForm(Form)
 }
 
 impl TelescopeError {
