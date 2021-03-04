@@ -23,7 +23,7 @@ pub struct TextField {
     /// Function to validate an input and return this field. This should set the
     /// `is_valid` field of this object.
     #[serde(skip)]
-    validator: Option<Box<dyn FnOnce(Option<String>) -> Self + 'static>>,
+    validator: Option<Box<dyn FnOnce(Option<&String>) -> Self + 'static>>,
 
     /// Flag for the validator to set to indicate if a form is valid.
     #[serde(skip)]
@@ -32,7 +32,7 @@ pub struct TextField {
 
 impl TextField {
     /// Create a new text field.
-    pub fn new(name: impl Into<String>, validator: impl FnOnce(Option<String>) -> Self + 'static) -> Self {
+    pub fn new(name: impl Into<String>, validator: impl FnOnce(Option<&String>) -> Self + 'static) -> Self {
         Self {
             name: name.into(),
             value: None,
@@ -45,28 +45,19 @@ impl TextField {
 
     /// Validate this field for a given input. Panic if there is no validator
     /// function.
-    pub fn validate(self, value: Option<String>) -> Self {
+    pub fn validate(self, value: Option<&String>) -> Self {
         // Get the validation function
         let validator = self.validator
             .expect("Text field validator missing");
         // Call and return the validation function.
         return validator(value);
     }
-
-    /// Check the output of the validator function. This
-    pub fn validator_errored(&self) -> bool {
-        self.is_valid.expect("Validator has not set validity field")
-    }
 }
 
 impl Form {
     /// Add a text field to a form. Panic on trying to overwrite an existing field.
     pub fn add_text_field(&mut self, text_field: TextField) -> &mut Form {
-        if self.form_fields.contains_key(text_field.name.as_str()) {
-            panic!("Cannot overwrite existing field in form");
-        } else {
-            self.form_fields.insert(text_field.name.clone(), FormField::TextField(text_field));
-            self
-        }
+        self.form_fields.insert(text_field.name.clone(), FormField::TextField(text_field));
+        self
     }
 }

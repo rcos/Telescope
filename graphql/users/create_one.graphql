@@ -22,15 +22,5 @@ mutation CreateOneUser(
             }
         }) {
         username
-        first_name
-        last_name
-        created_at
-        role
-        user_accounts {
-            account_id
-            type
-            created_at
-            username
-        }
     }
 }

@@ -6,6 +6,7 @@ use crate::templates::forms::{
     Form,
     register
 };
+use std::collections::HashMap;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -29,6 +30,14 @@ pub async fn finish_registration(req: HttpRequest, identity_cookie: IdentityCook
 #[post("/register/finish")]
 /// Endpoint to which users submit their forms. Argument extractor will error if user is not
 /// authenticated.
-pub async fn submit_registration(req: HttpRequest, cookie: IdentityCookie) -> Result<HttpResponse, TelescopeError> {
+pub async fn submit_registration(req: HttpRequest, identity_cookie: IdentityCookie) -> Result<HttpResponse, TelescopeError> {
+    // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
+    // valid input.
+    let valid_form_input: HashMap<String, String> = register::for_identity(identity_cookie)
+        .await?
+        .validate_input(&req)
+        .await?;
+
+    // TODO
     Err(TelescopeError::NotImplemented)
 }

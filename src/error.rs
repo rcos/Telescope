@@ -195,6 +195,17 @@ impl TelescopeError {
         Self::ApiResponsePayloadError(format!("{}", err))
     }
 
+    /// Serialize an invalid form to send back to the user.
+    pub fn invalid_form(form: &Form) -> Self {
+        // Convert the form to a JSON value.
+        let value = serde_json::to_value(form)
+            // Form should serialize without issue.
+            .expect("Could not serialize form");
+
+        // Construct and return the variant.
+        return TelescopeError::InvalidForm(value);
+    }
+
     /// Function that should only be used by the middleware to render a
     /// telescope error into an error page.
     pub fn render_error_page(&self, req: &HttpRequest) -> Result<String, ActixError> {

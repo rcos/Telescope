@@ -28,6 +28,28 @@ enum FormField {
     TextField(TextField)
 }
 
+impl FormField {
+    /// Validate a form field for a given input. Update the value of this field
+    /// with any validation issues. Return if the field is valid for the input.
+    fn validate(self, input: Option<&String>) -> Self {
+        match self {
+            // Text fields cary their own validator
+            FormField::TextField(text_field) =>
+                FormField::TextField(text_field.validate(input))
+        }
+    }
+
+    /// If this field of the form valid?
+    fn is_valid(&self) -> bool {
+        match self {
+            // Text fields have a validity field
+            FormField::TextField(text_field) => text_field.is_valid
+                // The validity field should be set by all validators
+                .expect("This form field has not been validated.")
+        }
+    }
+}
+
 /// A form that the user must fill out. All forms submit by `POST` to
 /// the URL they are served at.
 #[derive(Serialize, Deserialize)]
@@ -92,7 +114,7 @@ impl Form {
 
     /// Try to validate this form using the input in the HTTP request. Return an error if the request
     /// is malformed or if the form fails to validate.
-    async fn validate_input(req: &HttpRequest) -> Result<HashMap<String, String>, TelescopeError> {
+    pub async fn validate_input(&mut self, req: &HttpRequest) -> Result<HashMap<String, String>, TelescopeError> {
         // Deserialize the form fields from the request into a hash map.
         let form_input: HashMap<String, String> = ActixForm::<HashMap<String, String>>::extract(req)
             .await
@@ -101,7 +123,31 @@ impl Form {
                 "Malformed Form Data",
                 format!("Could not deserialize form data. Internal error: {}", e)))?.0;
 
-        unimplemented!()
+        // Create map to put validated fields in
+        let mut validated_fields: HashMap<String, FormField> = HashMap::with_capacity(self.form_fields.len());
+        let mut form_valid: bool = true;
+
+        // For each field in this form, validate that field against the submitted input.
+        for (name, field) in self.form_fields.drain() {
+            // Get field input
+            let input: Option<&String> = form_input.get(name.as_str());
+
+            // Add the validated field to the new form field map. Update form
+            // validity flag.
+            let validated: FormField = field.validate(input);
+            form_valid &= validated.is_valid();
+            validated_fields.insert(name, validated);
+        }
+
+        // Replace this forms fields with the validated ones.
+        self.form_fields = validated_fields;
+        // If the form was invalid, return it to the user in an error.
+        if !form_valid {
+            Err(TelescopeError::invalid_form(self))
+        } else {
+            // Otherwise return the validated field values.
+            return Ok(form_input);
+        }
     }
 }
 

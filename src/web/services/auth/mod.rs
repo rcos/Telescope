@@ -63,7 +63,7 @@ pub trait IdentityProvider: 'static {
 
     /// Get the registration path of this service. This is the route in actix that
     /// will redirect to the authorization page using the handler also defined by
-    /// this trait. This is similar to [`login_path`] but is for account
+    /// this trait. This is similar to [`Self::login_path`] but is for account
     /// registration rather than sign in.
     fn register_path() -> String {
         format!("/register/{}", Self::SERVICE_NAME)

@@ -12,10 +12,10 @@ use crate::web::services::auth::identity::IdentityCookie;
 const TEMPLATE_PATH: &'static str = "forms/register";
 
 /// Text field for the user's first name.
-const FNAME_FIELD: &'static str = "first_name";
+pub const FNAME_FIELD: &'static str = "first_name";
 
 /// Text field for the user's last name.
-const LNAME_FIELD: &'static str = "last_name";
+pub const LNAME_FIELD: &'static str = "last_name";
 
 /// Template key for the icon string for the platform that the user
 /// authenticated on.
@@ -30,12 +30,12 @@ fn make_name_field(name: impl Into<String>) -> TextField {
     // the closure constructor.
     let name_str: String = name.into();
 
-    TextField::new(name_str.clone(), |input: Option<String>| -> TextField {
+    TextField::new(name_str.clone(), |input: Option<&String>| -> TextField {
         // Create the resultant text field (with this same validator function).
         let mut result: TextField = make_name_field(name_str);
 
         // First/last name has to exits, and be longer than zero bytes.
-        if let Some(name_str) = input.as_ref() {
+        if let Some(name_str) = input {
             if !name_str.is_empty() {
                 // The name field is not empty, and is therefore valid!
                 result.value = Some(name_str.clone());
@@ -62,6 +62,9 @@ fn userless() -> Form {
     // Add them to the form
     form.add_text_field(first_name)
         .add_text_field(last_name);
+
+    form.submit_button.text = "Create Account".into();
+    form.submit_button.class = Some("btn-success".into());
 
     return form;
 }

@@ -1,6 +1,7 @@
 //! API interactions for RCOS users from the central RCOS API.
 
 pub mod accounts;
+pub mod create;
 
 /// The valid user roles for all users in the RCOS database.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
