@@ -6,6 +6,7 @@ use actix_web::HttpRequest;
 use crate::error::TelescopeError;
 use serenity::model::user::CurrentUser;
 use hubcaps::users::AuthenticatedUser;
+use crate::web::services::auth::identity::IdentityCookie;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "forms/register";
@@ -16,11 +17,12 @@ const FNAME_FIELD: &'static str = "first_name";
 /// Text field for the user's last name.
 const LNAME_FIELD: &'static str = "last_name";
 
-/// Template key for the user's discord, if it exists.
-const DISCORD_KEY: &'static str = "discord_account";
+/// Template key for the icon string for the platform that the user
+/// authenticated on.
+const ICON: &'static str = "icon";
 
-/// Template key for the user's github account if it exists.
-const GITHUB_KEY: &'static str = "github_account";
+/// Template key for the user's info.
+const INFO: &'static str = "info";
 
 /// Create a first or last name field that validates on all non-empty strings.
 fn make_name_field(name: impl Into<String>) -> TextField {
@@ -64,30 +66,40 @@ fn userless() -> Form {
     return form;
 }
 
-/// Create a registration form for an authenticated discord user.
-pub fn with_discord(discord: &CurrentUser) -> Form {
-    userless().with_other_key(DISCORD_KEY, discord)
-}
-
-// FIXME: when hubcaps gets a version above 0.6.2, remove this.
-/// Serializable struct to store necessary information from the user's github.
-/// This is a work-around for the lack of support for serializing this structure
-/// in hubcaps.
+/// Serializable struct to store necessary information from the user's authenticated info.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct GitHubUserInfo {
+struct UserInfo {
     avatar_url: String,
-    login: String,
-    html_url: String,
+    username: String,
+    profile_url: Option<String>,
 }
 
-/// Create a registration for an authenticated GitHub user.
-pub fn with_github(github: &AuthenticatedUser) -> Form {
-    // Get a serializable version of the data.
-    let value = GitHubUserInfo {
-        avatar_url: github.avatar_url.clone(),
-        login: github.login.clone(),
-        html_url: github.html_url.clone()
-    };
+/// Create a registration page with the appropriate information depending on
+/// the user's identity.
+pub async fn for_identity(cookie: IdentityCookie) -> Result<Form, TelescopeError> {
+    match cookie {
+        // Get authenticated discord user
+        IdentityCookie::Discord(ref d) => d.authenticated_user()
+            .await
+            // Convert into form
+            .map(|discord_user| userless()
+                .with_other_key(ICON, cookie.user_account_type())
+                .with_other_key(INFO, UserInfo {
+                    username: discord_user.tag(),
+                    avatar_url: discord_user.face(),
+                    profile_url: None
+                })),
 
-    userless().with_other_key(GITHUB_KEY, value)
+        // Get authenticated GitHub user
+        IdentityCookie::Github(ref g) => g.get_authenticated_user()
+            .await
+            // Convert user info
+            .map(|gh_user| userless()
+                .with_other_key(ICON, cookie.user_account_type())
+                .with_other_key(INFO, UserInfo {
+                    avatar_url: gh_user.avatar_url.clone(),
+                    profile_url: Some(gh_user.html_url.clone()),
+                    username: gh_user.login.clone()
+                }))
+    }
 }

@@ -22,24 +22,8 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// the necessary records in the RCOS database via the central API. Argument extractors will error
 /// if the identity is not authenticated.
 pub async fn finish_registration(req: HttpRequest, identity_cookie: IdentityCookie) -> Result<Form, TelescopeError> {
-    // Create a form depending on which provider authenticated the user's cookie.
-    match identity_cookie {
-        // For github identities
-        IdentityCookie::Github(gh) => {
-            // Get the authenticated user
-            let authed_user = gh.get_authenticated_user().await?;
-            // Return the github form
-            return Ok(register::with_github(&authed_user));
-        },
-
-        // For Discord identities
-        IdentityCookie::Discord(discord) => {
-            // Get the authenticated current user from discord.
-            let authed_user = discord.authenticated_user().await?;
-            // Return the discord form
-            return Ok(register::with_discord(&authed_user));
-        }
-    }
+    // Create a form for the authenticated the user's cookie.
+    register::for_identity(identity_cookie).await
 }
 
 #[post("/register/finish")]

@@ -57,9 +57,10 @@ fn main() -> std::io::Result<()> {
         // Create cookie policy.
         let cookie_policy = CookieIdentityPolicy::new(&cookie_key)
             // Transmit cookies over HTTPS only.
-            .secure(false)
+            .secure(true)
             .name("telescope_auth")
-            .same_site(SameSite::None)
+            // Same-Site needs to be Lax because of the caddy proxy it seems?
+            .same_site(SameSite::Lax)
             // Cookies expire after a day.
             .max_age_time(time::Duration::days(1));
 
