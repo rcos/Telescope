@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use actix_web::{Responder, HttpRequest, Error, HttpResponse, FromRequest, HttpMessage};
 use actix_web::body::Body;
 use crate::error::TelescopeError;
-use futures::future::{Ready, ready};
+use futures::future::{Ready, ready, LocalBoxFuture};
 use crate::app_data::AppData;
 use crate::templates::{page, Template};
 use actix_web::http::header::CONTENT_TYPE;
@@ -149,24 +149,27 @@ impl Form {
 
 impl Responder for Form {
     type Error = TelescopeError;
-    type Future = Ready<Result<HttpResponse, Self::Error>>;
+    type Future = LocalBoxFuture<'static, Result<HttpResponse, Self::Error>>;
 
     fn respond_to(self, req: &HttpRequest) -> Self::Future {
-        // Render this form
-        ready(self.render()
-            // Put this form in a page.
-            .and_then(|rendered| page::with_content(
-                // With the request path
-                req.path(),
-                // The page title
-                self.page_title,
-                // And the rendered form
-                rendered.as_str()))
-            // Render the page to HTML
-            .and_then(|page| page.render())
-            // Use the rendered page as the body of the response
-            .map(|rendered| HttpResponse::Ok()
-                .header(CONTENT_TYPE, "text/html;charset=UTF-8")
-                .body(rendered)))
+        // Clone the request to satisfy lifetime constraints. This won't cause
+        // issues, since the request is a wrapper around a shared pointer.
+        let req = req.clone();
+
+        return Box::pin(async move {
+            // Render this form.
+            let rendered: String = self.render()?;
+
+            // Put it in a page.
+            page::with_content(&req, self.page_title, rendered.as_str())
+                // Wait for the page to resolve the username etc
+                .await?
+                // Render the page to HTML
+                .render()
+                // Use the rendered page as the body of the response
+                .map(|rendered| HttpResponse::Ok()
+                    .header(CONTENT_TYPE, "text/html;charset=UTF-8")
+                    .body(rendered))
+        });
     }
 }

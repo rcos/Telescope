@@ -13,6 +13,14 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 pub struct ReverseLookup;
 
 use reverse_lookup::ResponseData;
+use reverse_lookup::Variables;
+
+impl ReverseLookup {
+    /// Make the variables for a reverse account lookup.
+    pub fn make_vars(platform: user_account, platform_id: String) -> Variables {
+        Variables { platform, id: platform_id }
+    }
+}
 
 impl ResponseData {
     /// Get the username of a user (if they exist) via their

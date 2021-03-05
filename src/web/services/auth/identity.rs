@@ -10,6 +10,9 @@ use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, Ready};
 use serde::Serialize;
+use crate::web::api::rcos::{make_api_client, send_query};
+use actix_web::client::Client;
+use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 
 /// The top level enum stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
@@ -60,6 +63,24 @@ impl IdentityCookie {
             IdentityCookie::Github(i) => Ok(i.get_authenticated_user().await?.login.clone()),
             IdentityCookie::Discord(i) => Ok(i.authenticated_user().await?.tag())
         }
+    }
+
+    /// Get the RCOS username of an authenticated user.
+    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+        // Extract the platform info to look up the user.
+        let platform: UserAccountType = self.user_account_type();
+        let platform_id: String = self.get_account_identity().await?;
+
+        // Create an API client to lookup the username (we don't have a subject at this point).
+        let client: Client = make_api_client(None);
+
+        // Make the query variables
+        let query_vars = ReverseLookup::make_vars(platform, platform_id);
+
+        // Send the query and await and return the username.
+        return Ok(send_query::<ReverseLookup>(&client, query_vars)
+            .await?
+            .username());
     }
 }
 

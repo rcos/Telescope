@@ -17,7 +17,7 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
     // Make the create account page template.
     let content: Template = auth::register();
     // Put it in a page template and return it.
-    return page::of(req.path(), "Create RCOS Account", &content);
+    return page::of(&req, "Create RCOS Account", &content).await;
 }
 
 #[get("/register/finish")]

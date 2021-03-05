@@ -99,7 +99,7 @@ where
             // Get a reference to the original request.
             let req: &HttpRequest = service_response.request();
             // Render the error page to a string
-            let rendered: String = err.render_error_page(req)?;
+            let rendered: String = err.render_error_page(req).await?;
             // Convert the rendered page into a response with the right headers and status code.
             let intermediate_response: HttpResponse = HttpResponseBuilder::new(err.status_code())
                 .header(CONTENT_TYPE, "text/html;charset=UTF-8")

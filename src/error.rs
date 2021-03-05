@@ -208,11 +208,7 @@ impl TelescopeError {
 
     /// Function that should only be used by the middleware to render a
     /// telescope error into an error page.
-    pub fn render_error_page(&self, req: &HttpRequest) -> Result<String, ActixError> {
-        // Extract the path from the request for constructing the
-        // page template later.
-        let path = req.path();
-
+    pub async fn render_error_page(&self, req: &HttpRequest) -> Result<String, ActixError> {
         // Get the status code and canonical reason for this response.
         let status_code: u16 = self.status_code().as_u16();
         let canonical_reason: &'static str = self
@@ -365,7 +361,8 @@ impl TelescopeError {
                 // Render the form.
                 let page_content: String = form.render()?;
                 // Put it in a page.
-                return page::with_content(path, form.page_title, page_content.as_str())?
+                return page::with_content(req, form.page_title, page_content.as_str())
+                    .await?
                     // Render Page
                     .render()
                     // Convert errors as necessary.
@@ -381,7 +378,7 @@ impl TelescopeError {
         };
 
         // Put jumbotron in a page and return the content.
-        return page::of(path, "RCOS - Error", &inner_template)
+        return page::of(req, "RCOS - Error", &inner_template).await
             // Convert and handle jumbotron rendering errors.
             .map_err(ActixError::from)?
             // Render the page.

@@ -1,6 +1,11 @@
 //! Navbar template constants and functions.
 
 use crate::templates::Template;
+use actix_web::HttpRequest;
+use crate::web::services::auth::identity::Identity;
+use actix_web::FromRequest;
+use crate::error::TelescopeError;
+use crate::web::api::rcos::users::UserAccountType;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";
@@ -55,7 +60,7 @@ fn with_defaults(req_path: &str) -> Template {
 }
 
 /// Construct a navbar for an anonymous viewer by adding onto the defaults.
-pub fn userless(req_path: &str) -> Template {
+fn userless(req_path: &str) -> Template {
     let right_items = vec![
         item(req_path, "Sign Up", "/register").field(CLASS, "btn mr-2 mb-2 btn-primary"),
         item(req_path, "Sign In", "/login").field(CLASS, "btn mr-2 mb-2 btn-primary"),
@@ -63,4 +68,34 @@ pub fn userless(req_path: &str) -> Template {
 
     // Add items to right side of navbar.
     with_defaults(req_path).field(RIGHT_ITEMS, right_items)
+}
+
+/// Construct a navbar for a given username
+fn for_user(req_path: &str, username: &str) -> Template {
+    let right_items = vec![
+        item(req_path, "Profile", format!("/users/{}", username)).field(CLASS, "btn mr-2 mb-2 btn-primary"),
+        item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary")
+    ];
+
+    // Add items to right side of navbar
+    with_defaults(req_path).field(RIGHT_ITEMS, right_items)
+}
+
+/// Create a navbar template for
+pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
+    // Extract the identity from the request.
+    let identity: Identity = Identity::extract(req).await?;
+
+    // Check if there is an identity
+    if let Some(cookie) = identity.identity() {
+        // Check if there exists a username for this cookie
+        if let Some(username) = cookie.get_rcos_username().await? {
+            // If there is make a navbar with the username.
+            return Ok(for_user(req.path(), username.as_str()));
+        }
+    }
+
+    // If there is no cookie, or no RCOS user associated with the cookie,
+    // return a userless navbar.
+    return Ok(userless(req.path()));
 }

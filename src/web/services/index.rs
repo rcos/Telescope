@@ -28,5 +28,5 @@ pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
     );
 
     // Return a page with the homepage content.
-    return page::of(req.path(), "RCOS", &content);
+    return page::of(&req, "RCOS", &content).await;
 }
