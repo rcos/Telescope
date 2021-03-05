@@ -79,10 +79,10 @@ struct UserInfo {
 
 /// Create a registration page with the appropriate information depending on
 /// the user's identity.
-pub async fn for_identity(cookie: IdentityCookie) -> Result<Form, TelescopeError> {
+pub async fn for_identity(cookie: &IdentityCookie) -> Result<Form, TelescopeError> {
     match cookie {
         // Get authenticated discord user
-        IdentityCookie::Discord(ref d) => d.authenticated_user()
+        IdentityCookie::Discord(d) => d.authenticated_user()
             .await
             // Convert into form
             .map(|discord_user| userless()
@@ -94,7 +94,7 @@ pub async fn for_identity(cookie: IdentityCookie) -> Result<Form, TelescopeError
                 })),
 
         // Get authenticated GitHub user
-        IdentityCookie::Github(ref g) => g.get_authenticated_user()
+        IdentityCookie::Github(g) => g.get_authenticated_user()
             .await
             // Convert user info
             .map(|gh_user| userless()

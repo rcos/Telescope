@@ -53,6 +53,14 @@ impl IdentityCookie {
             IdentityCookie::Discord(i) => i.get_user_id().await,
         }
     }
+
+    /// Get the on-platform username of the user associated with this identity.
+    pub async fn get_username_string(&self) -> Result<String, TelescopeError> {
+        match self {
+            IdentityCookie::Github(i) => Ok(i.get_authenticated_user().await?.login.clone()),
+            IdentityCookie::Discord(i) => Ok(i.authenticated_user().await?.tag())
+        }
+    }
 }
 
 /// The identity of a user accessing telescope.
