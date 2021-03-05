@@ -6,7 +6,7 @@
 use serde::Serialize;
 use common::text_field::TextField;
 use std::collections::HashMap;
-use actix_web::{Responder, HttpRequest, Error, HttpResponse, FromRequest};
+use actix_web::{Responder, HttpRequest, Error, HttpResponse, FromRequest, HttpMessage};
 use actix_web::body::Body;
 use crate::error::TelescopeError;
 use futures::future::{Ready, ready};
@@ -49,6 +49,10 @@ impl FormField {
         }
     }
 }
+
+/// Form input type that can be extracted from HTTP requests and is passed to
+/// the telescope form validation system.
+pub type FormInput = ActixForm<HashMap<String, String>>;
 
 /// A form that the user must fill out. All forms submit by `POST` to
 /// the URL they are served at.
@@ -112,17 +116,9 @@ impl Form {
         self
     }
 
-    /// Try to validate this form using the input in the HTTP request. Return an error if the request
-    /// is malformed or if the form fails to validate.
-    pub async fn validate_input(&mut self, req: &HttpRequest) -> Result<HashMap<String, String>, TelescopeError> {
-        // Deserialize the form fields from the request into a hash map.
-        let form_input: HashMap<String, String> = ActixForm::<HashMap<String, String>>::extract(req)
-            .await
-            // Convert and propagate errors as necessary.
-            .map_err(|e| TelescopeError::bad_request(
-                "Malformed Form Data",
-                format!("Could not deserialize form data. Internal error: {}", e)))?.0;
-
+    /// Try to validate this form using the form input extracted from the request. Return an error
+    /// if the form fails to validate.
+    pub async fn validate_input(&mut self, form_input: ActixForm<HashMap<String, String>>) -> Result<HashMap<String, String>, TelescopeError> {
         // Create map to put validated fields in
         let mut validated_fields: HashMap<String, FormField> = HashMap::with_capacity(self.form_fields.len());
         let mut form_valid: bool = true;
@@ -146,7 +142,7 @@ impl Form {
             Err(TelescopeError::invalid_form(self))
         } else {
             // Otherwise return the validated field values.
-            return Ok(form_input);
+            return Ok(form_input.0);
         }
     }
 }

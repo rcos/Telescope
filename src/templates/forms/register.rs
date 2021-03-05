@@ -47,7 +47,7 @@ fn make_name_field(name: impl Into<String>) -> TextField {
         // On no/empty name, return invalid.
         result.error = Some("Cannot be empty".into());
         result.is_valid = Some(false);
-        return result;
+        result
     })
 }
 

@@ -2,10 +2,7 @@ use crate::error::TelescopeError;
 use crate::templates::{auth, page, Template};
 use actix_web::{HttpRequest, HttpResponse};
 use crate::web::services::auth::identity::{Identity, IdentityCookie};
-use crate::templates::forms::{
-    Form,
-    register
-};
+use crate::templates::forms::{Form, register, FormInput};
 use std::collections::HashMap;
 use crate::web::api::rcos::users::create::CreateOneUser;
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
@@ -27,7 +24,7 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// Users finish the registration process by supplying their first and last name. Telescope creates
 /// the necessary records in the RCOS database via the central API. Argument extractors will error
 /// if the identity is not authenticated.
-pub async fn finish_registration(req: HttpRequest, identity_cookie: IdentityCookie) -> Result<Form, TelescopeError> {
+pub async fn finish_registration(identity_cookie: IdentityCookie) -> Result<Form, TelescopeError> {
     // Create a form for the authenticated the user's cookie.
     register::for_identity(&identity_cookie).await
 }
@@ -35,12 +32,12 @@ pub async fn finish_registration(req: HttpRequest, identity_cookie: IdentityCook
 #[post("/register/finish")]
 /// Endpoint to which users submit their forms. Argument extractor will error if user is not
 /// authenticated.
-pub async fn submit_registration(req: HttpRequest, identity_cookie: IdentityCookie) -> Result<HttpResponse, TelescopeError> {
+pub async fn submit_registration(identity_cookie: IdentityCookie, form_input: FormInput) -> Result<HttpResponse, TelescopeError> {
     // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
     // valid input.
     let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie)
         .await?
-        .validate_input(&req)
+        .validate_input(form_input)
         .await?;
 
     // Extract the first and last name from the validated form input
