@@ -5,7 +5,6 @@ use actix_web::HttpRequest;
 use crate::web::services::auth::identity::Identity;
 use actix_web::FromRequest;
 use crate::error::TelescopeError;
-use crate::web::api::rcos::users::UserAccountType;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";

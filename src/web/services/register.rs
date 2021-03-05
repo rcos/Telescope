@@ -1,7 +1,7 @@
 use crate::error::TelescopeError;
 use crate::templates::{auth, page, Template};
 use actix_web::{HttpRequest, HttpResponse};
-use crate::web::services::auth::identity::{Identity, IdentityCookie};
+use crate::web::services::auth::identity::IdentityCookie;
 use crate::templates::forms::{Form, register, FormInput};
 use std::collections::HashMap;
 use crate::web::api::rcos::users::create::CreateOneUser;

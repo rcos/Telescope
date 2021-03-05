@@ -6,12 +6,11 @@
 use serde::Serialize;
 use common::text_field::TextField;
 use std::collections::HashMap;
-use actix_web::{Responder, HttpRequest, Error, HttpResponse, FromRequest, HttpMessage};
-use actix_web::body::Body;
+use actix_web::{Responder, HttpRequest, HttpResponse};
 use crate::error::TelescopeError;
-use futures::future::{Ready, ready, LocalBoxFuture};
+use futures::future::LocalBoxFuture;
 use crate::app_data::AppData;
-use crate::templates::{page, Template};
+use crate::templates::page;
 use actix_web::http::header::CONTENT_TYPE;
 use crate::templates::forms::common::submit_button::SubmitButton;
 use serde_json::{Map, Value};

@@ -1,8 +1,7 @@
 use crate::error::TelescopeError;
 use crate::templates::{page, Template};
 use actix_web::HttpRequest;
-use futures::future::{ready, LocalBoxFuture};
-use futures::future::Ready;
+use futures::future::LocalBoxFuture;
 
 pub mod projects;
 pub mod sponsors;

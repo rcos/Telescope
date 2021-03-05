@@ -2,10 +2,7 @@
 
 use crate::templates::forms::Form;
 use crate::templates::forms::common::text_field::TextField;
-use actix_web::HttpRequest;
 use crate::error::TelescopeError;
-use serenity::model::user::CurrentUser;
-use hubcaps::users::AuthenticatedUser;
 use crate::web::services::auth::identity::IdentityCookie;
 
 /// The path from the templates directory to the registration template.
