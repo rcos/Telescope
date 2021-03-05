@@ -18,7 +18,8 @@ fn extract_ip_addr(req: &HttpRequest) -> Result<String, TelescopeError> {
         // Get the remote IP from the header.
         .map(|header_value| {
             // Convert the header value to a string.
-            header_value.to_str()
+            header_value
+                .to_str()
                 // This should be ASCII, and should not error.
                 .expect("XFF header should be ASCII")
                 // Split on commas, as defined at

@@ -136,14 +136,20 @@ impl DiscordIdentity {
             .send()
             .await
             .map_err(|e| {
-                TelescopeError::ise(format!("Could not send identification query to Discord \
-                API. Internal error: {}", e))
+                TelescopeError::ise(format!(
+                    "Could not send identification query to Discord \
+                API. Internal error: {}",
+                    e
+                ))
             })?
             .json::<CurrentUser>()
             .await
             .map_err(|e| {
-                TelescopeError::ise(format!("Error with identification response from Discord \
-                API. Internal error: {}", e))
+                TelescopeError::ise(format!(
+                    "Error with identification response from Discord \
+                API. Internal error: {}",
+                    e
+                ))
             });
     }
 

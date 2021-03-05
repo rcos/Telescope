@@ -1,10 +1,10 @@
 //! Navbar template constants and functions.
 
+use crate::error::TelescopeError;
 use crate::templates::Template;
-use actix_web::HttpRequest;
 use crate::web::services::auth::identity::Identity;
 use actix_web::FromRequest;
-use crate::error::TelescopeError;
+use actix_web::HttpRequest;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";
@@ -72,8 +72,9 @@ fn userless(req_path: &str) -> Template {
 /// Construct a navbar for a given username
 fn for_user(req_path: &str, username: &str) -> Template {
     let right_items = vec![
-        item(req_path, "Profile", format!("/users/{}", username)).field(CLASS, "btn mr-2 mb-2 btn-primary"),
-        item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary")
+        item(req_path, "Profile", format!("/users/{}", username))
+            .field(CLASS, "btn mr-2 mb-2 btn-primary"),
+        item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
     ];
 
     // Add items to right side of navbar

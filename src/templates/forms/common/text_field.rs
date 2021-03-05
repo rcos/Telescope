@@ -32,14 +32,17 @@ pub struct TextField {
 
 impl TextField {
     /// Create a new text field.
-    pub fn new(name: impl Into<String>, validator: impl FnOnce(Option<&String>) -> Self + 'static) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        validator: impl FnOnce(Option<&String>) -> Self + 'static,
+    ) -> Self {
         Self {
             name: name.into(),
             value: None,
             error: None,
             success: None,
             validator: Some(Box::new(validator)),
-            is_valid: None
+            is_valid: None,
         }
     }
 
@@ -47,8 +50,7 @@ impl TextField {
     /// function.
     pub fn validate(self, value: Option<&String>) -> Self {
         // Get the validation function
-        let validator = self.validator
-            .expect("Text field validator missing");
+        let validator = self.validator.expect("Text field validator missing");
         // Call and return the validation function.
         return validator(value);
     }
@@ -57,7 +59,8 @@ impl TextField {
 impl Form {
     /// Add a text field to a form. Panic on trying to overwrite an existing field.
     pub fn add_text_field(&mut self, text_field: TextField) -> &mut Form {
-        self.form_fields.insert(text_field.name.clone(), FormField::TextField(text_field));
+        self.form_fields
+            .insert(text_field.name.clone(), FormField::TextField(text_field));
         self
     }
 }

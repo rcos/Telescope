@@ -1,14 +1,14 @@
 use crate::error::TelescopeError;
+use crate::templates::forms::{register, Form, FormInput};
 use crate::templates::{auth, page, Template};
-use actix_web::{HttpRequest, HttpResponse};
-use crate::web::services::auth::identity::IdentityCookie;
-use crate::templates::forms::{Form, register, FormInput};
-use std::collections::HashMap;
 use crate::web::api::rcos::users::create::CreateOneUser;
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::api::rcos::{send_query, make_api_client};
+use crate::web::api::rcos::{make_api_client, send_query};
+use crate::web::services::auth::identity::IdentityCookie;
 use actix_web::client::Client;
 use actix_web::http::header::LOCATION;
+use actix_web::{HttpRequest, HttpResponse};
+use std::collections::HashMap;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -32,7 +32,10 @@ pub async fn finish_registration(identity_cookie: IdentityCookie) -> Result<Form
 #[post("/register/finish")]
 /// Endpoint to which users submit their forms. Argument extractor will error if user is not
 /// authenticated.
-pub async fn submit_registration(identity_cookie: IdentityCookie, form_input: FormInput) -> Result<HttpResponse, TelescopeError> {
+pub async fn submit_registration(
+    identity_cookie: IdentityCookie,
+    form_input: FormInput,
+) -> Result<HttpResponse, TelescopeError> {
     // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
     // valid input.
     let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie)
@@ -41,10 +44,12 @@ pub async fn submit_registration(identity_cookie: IdentityCookie, form_input: Fo
         .await?;
 
     // Extract the first and last name from the validated form input
-    let first_name: String = valid_form_input.get(register::FNAME_FIELD)
+    let first_name: String = valid_form_input
+        .get(register::FNAME_FIELD)
         .expect("Form should have validated first name.")
         .clone();
-    let last_name: String= valid_form_input.get(register::LNAME_FIELD)
+    let last_name: String = valid_form_input
+        .get(register::LNAME_FIELD)
         .expect("Form should have validated last name.")
         .clone();
 
@@ -61,7 +66,7 @@ pub async fn submit_registration(identity_cookie: IdentityCookie, form_input: Fo
         // All users are marked as external until linking an RPI CAS account.
         UserRole::External,
         platform,
-        platform_id
+        platform_id,
     );
 
     // Make central RCOS API client.
@@ -72,8 +77,12 @@ pub async fn submit_registration(identity_cookie: IdentityCookie, form_input: Fo
     let created_username: String = send_query::<CreateOneUser>(&api_client, vars)
         .await?
         .username()
-        .ok_or(TelescopeError::ise("Create User mutation did not return username"))?;
+        .ok_or(TelescopeError::ise(
+            "Create User mutation did not return username",
+        ))?;
 
     // Redirect the user to the account we created for them
-    Ok(HttpResponse::Found().header(LOCATION, format!("/users/{}", created_username)).finish())
+    Ok(HttpResponse::Found()
+        .header(LOCATION, format!("/users/{}", created_username))
+        .finish())
 }

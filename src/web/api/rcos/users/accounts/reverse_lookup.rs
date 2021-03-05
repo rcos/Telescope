@@ -18,7 +18,10 @@ use reverse_lookup::Variables;
 impl ReverseLookup {
     /// Make the variables for a reverse account lookup.
     pub fn make_vars(platform: user_account, platform_id: String) -> Variables {
-        Variables { platform, id: platform_id }
+        Variables {
+            platform,
+            id: platform_id,
+        }
     }
 }
 

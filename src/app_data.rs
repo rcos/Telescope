@@ -1,7 +1,5 @@
+use crate::env::{ConcreteConfig, CONFIG};
 use crate::error::TelescopeError;
-use crate::{
-    env::{ConcreteConfig, CONFIG},
-};
 use actix_web::web::block;
 use handlebars::Handlebars;
 use lettre::smtp::response::Response as SmtpResponse;

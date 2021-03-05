@@ -1,10 +1,7 @@
 //! RCOS API mutation to create a user record and user_account record with it.
 
 // Import and rename for GraphQL macro
-use crate::web::api::rcos::users::{
-    UserAccountType as user_account,
-    UserRole as user_role
-};
+use crate::web::api::rcos::users::{UserAccountType as user_account, UserRole as user_role};
 
 /// Type representing GraphQL mutation to create a user and a user account.
 #[derive(GraphQLQuery)]
@@ -14,10 +11,7 @@ use crate::web::api::rcos::users::{
 )]
 pub struct CreateOneUser;
 
-use create_one_user::{
-    ResponseData,
-    Variables
-};
+use create_one_user::{ResponseData, Variables};
 
 impl CreateOneUser {
     /// Make the input variables object for a user creation mutation.
@@ -27,8 +21,16 @@ impl CreateOneUser {
         last_name: String,
         role: user_role,
         platform: user_account,
-        platform_id: String) -> Variables {
-        Variables { username, first_name, last_name, role, platform, platform_id }
+        platform_id: String,
+    ) -> Variables {
+        Variables {
+            username,
+            first_name,
+            last_name,
+            role,
+            platform,
+            platform_id,
+        }
     }
 }
 

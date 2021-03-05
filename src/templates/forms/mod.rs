@@ -3,18 +3,18 @@
 //! a special type of template commonly used in Telescope, and therefore have
 //! their own traits.
 
-use serde::Serialize;
-use common::text_field::TextField;
-use std::collections::HashMap;
-use actix_web::{Responder, HttpRequest, HttpResponse};
-use crate::error::TelescopeError;
-use futures::future::LocalBoxFuture;
 use crate::app_data::AppData;
+use crate::error::TelescopeError;
+use crate::templates::forms::common::submit_button::SubmitButton;
 use crate::templates::page;
 use actix_web::http::header::CONTENT_TYPE;
-use crate::templates::forms::common::submit_button::SubmitButton;
-use serde_json::{Map, Value};
 use actix_web::web::Form as ActixForm;
+use actix_web::{HttpRequest, HttpResponse, Responder};
+use common::text_field::TextField;
+use futures::future::LocalBoxFuture;
+use serde::Serialize;
+use serde_json::{Map, Value};
+use std::collections::HashMap;
 
 pub mod common;
 pub mod register;
@@ -24,7 +24,7 @@ pub mod register;
 #[serde(rename_all = "snake_case")]
 enum FormField {
     /// A text field in a form.
-    TextField(TextField)
+    TextField(TextField),
 }
 
 impl FormField {
@@ -33,8 +33,7 @@ impl FormField {
     fn validate(self, input: Option<&String>) -> Self {
         match self {
             // Text fields cary their own validator
-            FormField::TextField(text_field) =>
-                FormField::TextField(text_field.validate(input))
+            FormField::TextField(text_field) => FormField::TextField(text_field.validate(input)),
         }
     }
 
@@ -42,9 +41,10 @@ impl FormField {
     fn is_valid(&self) -> bool {
         match self {
             // Text fields have a validity field
-            FormField::TextField(text_field) => text_field.is_valid
+            FormField::TextField(text_field) => text_field
+                .is_valid
                 // The validity field should be set by all validators
-                .expect("This form field has not been validated.")
+                .expect("This form field has not been validated."),
         }
     }
 }
@@ -68,7 +68,7 @@ pub struct Form {
     /// Any other handlebars fields needed to render this form. These should
     /// not be form fields.
     #[serde(flatten)]
-    other: Map<String, Value>
+    other: Map<String, Value>,
 }
 
 impl Form {
@@ -80,9 +80,9 @@ impl Form {
             form_fields: HashMap::new(),
             submit_button: SubmitButton {
                 text: "Submit".into(),
-                class: None
+                class: None,
             },
-            other: Map::new()
+            other: Map::new(),
         }
     }
 
@@ -100,8 +100,7 @@ impl Form {
     /// Add a non-form field key to the form.
     pub fn add_other_key(&mut self, key: impl Into<String>, value: impl Serialize) -> &mut Self {
         // Serialize the value.
-        let serialized = serde_json::to_value(value)
-            .expect("Serialization error");
+        let serialized = serde_json::to_value(value).expect("Serialization error");
 
         // Add it to this form/template
         self.other.insert(key.into(), serialized);
@@ -117,9 +116,13 @@ impl Form {
 
     /// Try to validate this form using the form input extracted from the request. Return an error
     /// if the form fails to validate.
-    pub async fn validate_input(&mut self, form_input: ActixForm<HashMap<String, String>>) -> Result<HashMap<String, String>, TelescopeError> {
+    pub async fn validate_input(
+        &mut self,
+        form_input: ActixForm<HashMap<String, String>>,
+    ) -> Result<HashMap<String, String>, TelescopeError> {
         // Create map to put validated fields in
-        let mut validated_fields: HashMap<String, FormField> = HashMap::with_capacity(self.form_fields.len());
+        let mut validated_fields: HashMap<String, FormField> =
+            HashMap::with_capacity(self.form_fields.len());
         let mut form_valid: bool = true;
 
         // For each field in this form, validate that field against the submitted input.
@@ -166,9 +169,11 @@ impl Responder for Form {
                 // Render the page to HTML
                 .render()
                 // Use the rendered page as the body of the response
-                .map(|rendered| HttpResponse::Ok()
-                    .header(CONTENT_TYPE, "text/html;charset=UTF-8")
-                    .body(rendered))
+                .map(|rendered| {
+                    HttpResponse::Ok()
+                        .header(CONTENT_TYPE, "text/html;charset=UTF-8")
+                        .body(rendered)
+                })
         });
     }
 }

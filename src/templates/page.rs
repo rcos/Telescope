@@ -1,8 +1,8 @@
 use crate::error::TelescopeError;
 use crate::templates::navbar;
 use crate::templates::Template;
-use serde_json::Value;
 use actix_web::HttpRequest;
+use serde_json::Value;
 
 /// The path to the page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "page";

@@ -1,8 +1,8 @@
 //! Registration form and constants.
 
-use crate::templates::forms::Form;
-use crate::templates::forms::common::text_field::TextField;
 use crate::error::TelescopeError;
+use crate::templates::forms::common::text_field::TextField;
+use crate::templates::forms::Form;
 use crate::web::services::auth::identity::IdentityCookie;
 
 /// The path from the templates directory to the registration template.
@@ -57,8 +57,7 @@ fn userless() -> Form {
     let first_name: TextField = make_name_field(FNAME_FIELD);
     let last_name: TextField = make_name_field(LNAME_FIELD);
     // Add them to the form
-    form.add_text_field(first_name)
-        .add_text_field(last_name);
+    form.add_text_field(first_name).add_text_field(last_name);
 
     form.submit_button.text = "Create Account".into();
     form.submit_button.class = Some("btn-success".into());
@@ -79,27 +78,39 @@ struct UserInfo {
 pub async fn for_identity(cookie: &IdentityCookie) -> Result<Form, TelescopeError> {
     match cookie {
         // Get authenticated discord user
-        IdentityCookie::Discord(d) => d.authenticated_user()
+        IdentityCookie::Discord(d) => d
+            .authenticated_user()
             .await
             // Convert into form
-            .map(|discord_user| userless()
-                .with_other_key(ICON, cookie.user_account_type())
-                .with_other_key(INFO, UserInfo {
-                    username: discord_user.tag(),
-                    avatar_url: discord_user.face(),
-                    profile_url: None
-                })),
+            .map(|discord_user| {
+                userless()
+                    .with_other_key(ICON, cookie.user_account_type())
+                    .with_other_key(
+                        INFO,
+                        UserInfo {
+                            username: discord_user.tag(),
+                            avatar_url: discord_user.face(),
+                            profile_url: None,
+                        },
+                    )
+            }),
 
         // Get authenticated GitHub user
-        IdentityCookie::Github(g) => g.get_authenticated_user()
+        IdentityCookie::Github(g) => g
+            .get_authenticated_user()
             .await
             // Convert user info
-            .map(|gh_user| userless()
-                .with_other_key(ICON, cookie.user_account_type())
-                .with_other_key(INFO, UserInfo {
-                    avatar_url: gh_user.avatar_url.clone(),
-                    profile_url: Some(gh_user.html_url.clone()),
-                    username: gh_user.login.clone()
-                }))
+            .map(|gh_user| {
+                userless()
+                    .with_other_key(ICON, cookie.user_account_type())
+                    .with_other_key(
+                        INFO,
+                        UserInfo {
+                            avatar_url: gh_user.avatar_url.clone(),
+                            profile_url: Some(gh_user.html_url.clone()),
+                            username: gh_user.login.clone(),
+                        },
+                    )
+            }),
     }
 }

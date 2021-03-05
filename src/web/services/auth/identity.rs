@@ -1,18 +1,18 @@
 //! Trait for types stored in the user's identity cookie.
 
 use crate::error::TelescopeError;
+use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
+use crate::web::api::rcos::{make_api_client, send_query};
 use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
 };
 use actix_identity::Identity as ActixIdentity;
+use actix_web::client::Client;
 use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, Ready};
 use serde::Serialize;
-use crate::web::api::rcos::{make_api_client, send_query};
-use actix_web::client::Client;
-use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 
 /// The top level enum stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
@@ -61,7 +61,7 @@ impl IdentityCookie {
     pub async fn get_username_string(&self) -> Result<String, TelescopeError> {
         match self {
             IdentityCookie::Github(i) => Ok(i.get_authenticated_user().await?.login.clone()),
-            IdentityCookie::Discord(i) => Ok(i.authenticated_user().await?.tag())
+            IdentityCookie::Discord(i) => Ok(i.authenticated_user().await?.tag()),
         }
     }
 
@@ -124,13 +124,14 @@ impl FromRequest for IdentityCookie {
 
     fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
         // Extract the telescope-identity from the request
-        ready(Identity::from_request(req, payload)
-            // Unwrap the immediate future
-            .into_inner()
-            // Extract the identity or return an error telling the user to
-            // authenticate.
-            .and_then(|identity| identity.identity()
-                .ok_or(TelescopeError::NotAuthenticated)))
+        ready(
+            Identity::from_request(req, payload)
+                // Unwrap the immediate future
+                .into_inner()
+                // Extract the identity or return an error telling the user to
+                // authenticate.
+                .and_then(|identity| identity.identity().ok_or(TelescopeError::NotAuthenticated)),
+        )
     }
 }
 

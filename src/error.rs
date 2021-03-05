@@ -1,5 +1,6 @@
 //! Error handling.
 
+use crate::templates::forms::Form;
 use crate::templates::{jumbotron, page, Template};
 use actix_web::client::{JsonPayloadError, SendRequestError};
 use actix_web::dev::HttpResponseBuilder;
@@ -13,10 +14,9 @@ use handlebars::RenderError;
 use lettre::file::error::Error as LettreFileError;
 use lettre::smtp::error::Error as LettreSmtpError;
 use lettre::smtp::response::Response as SmtpResponse;
+use serde_json::Value;
 use std::error::Error;
 use std::fmt;
-use crate::templates::forms::Form;
-use serde_json::Value;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -367,18 +367,19 @@ impl TelescopeError {
                     .render()
                     // Convert errors as necessary.
                     .map_err(ActixError::from);
-            },
+            }
 
             TelescopeError::NotAuthenticated => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
                 "You need to sign in to access this page. If you are trying to create an \
                 account, please restart. Otherwise please sign in. If you have logged in, and this \
-                page is unexpected, please contact a coordinator and create a GitHub issue."
-            )
+                page is unexpected, please contact a coordinator and create a GitHub issue.",
+            ),
         };
 
         // Put jumbotron in a page and return the content.
-        return page::of(req, "RCOS - Error", &inner_template).await
+        return page::of(req, "RCOS - Error", &inner_template)
+            .await
             // Convert and handle jumbotron rendering errors.
             .map_err(ActixError::from)?
             // Render the page.
