@@ -40,5 +40,13 @@ services:
         - /home/rcos/config/wiki.yml:/wiki/config.yml
         - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
 
+    telescope:
+        build: ./Telescope
+        image: telescope:latest
+        depends_on:
+            - hasura
+        volumes:
+          - "/home/rcos/telescope-config.toml:/telescope/config.toml"
+
 volumes:
     caddy_data:
