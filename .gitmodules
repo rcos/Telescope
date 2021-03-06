@@ -1,0 +1,4 @@
+[submodule "Telescope"]
+	path = Telescope
+	url = https://github.com/rcos/Telescope.git
+	branch = production-version
