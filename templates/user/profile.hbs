@@ -12,44 +12,20 @@
                     Edit Profile
                 </a>
             {{/if}}
-            {{#if own_profile}}
-                <!-- Button to add email. This is currently separate from the
-                User Settings Form -->
-                <a href="/profile/{{user.id}}/add_email" class="btn btn-secondary mt-1">
-                    Add Email
-                </a>
-            {{/if}}
         </div>
         <div class="card text-dark mt-2">
             <span class="h4 card-header text-muted">
                 Contact
             </span>
-
-            {{!-- Show emails --}}
-            {{#each public_emails}}
-                <div class="p-1">
-                    <i data-feather="mail"></i>
-                    <a href="mailto:{{email}}">{{email}}</a>
-                </div>
-            {{else}}
-                <div class="p-1">
-                    <i data-feather="mail"></i>
-                    No public emails.
-                </div>
-            {{/each}}
-
-            {{!-- Show GitHub link --}}
-            {{#if user.github_link}}
-                <div class="p-1">
-                    <i data-feather="github"></i>
+            {{!-- Show GitHub account --}}
+            <div class="p-1">
+                <i data-feather="github"></i>
+                {{#if user.github_link}}
                     <a href="{{user.github_link}}">{{user.github_link}}</a>
-                </div>
-            {{else}}
-                <div class="p-1">
-                    <i data-feather="github"></i>
+                {{else}}
                     GitHub not linked.
-                </div>
-            {{/if}}
+                {{/if}}
+            </div>
         </div>
     </div>
     <div class="col-md-9 container px-2">
