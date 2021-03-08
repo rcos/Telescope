@@ -1,6 +1,6 @@
 [package]
 name = "telescope"
-version = "0.2.2"
+version = "0.2.3"
 authors = [
     "Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"
 ]
