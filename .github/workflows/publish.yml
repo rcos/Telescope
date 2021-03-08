@@ -7,10 +7,11 @@ jobs:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
       - name: Push to GitHub Packages
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v1
         with:
-          push: true
-          tags: rcos/telescope:latest 
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: rcos/telescope/telescope
+          tag_with_ref: true
