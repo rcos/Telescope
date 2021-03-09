@@ -1,9 +1,9 @@
 use crate::error::TelescopeError;
 use crate::templates::forms::{register, Form, FormInput};
 use crate::templates::{auth, page, Template};
+use crate::web::api::rcos::send_query;
 use crate::web::api::rcos::users::create::CreateOneUser;
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::api::rcos::send_query;
 use crate::web::services::auth::identity::IdentityCookie;
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};

@@ -1,9 +1,9 @@
 //! Trait for types stored in the user's identity cookie.
 
 use crate::error::TelescopeError;
+use crate::web::api::rcos::send_query;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
-use crate::web::api::rcos::send_query;
 use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
 };
@@ -184,7 +184,7 @@ impl Identity {
     pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
         match self.identity() {
             None => Ok(None),
-            Some(cookie) => cookie.get_rcos_username().await
+            Some(cookie) => cookie.get_rcos_username().await,
         }
     }
 }

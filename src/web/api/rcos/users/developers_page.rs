@@ -14,8 +14,8 @@ use super::UserRole as user_role;
 )]
 pub struct Developers;
 
-use developers::Variables;
 use developers::users_order_by;
+use developers::Variables;
 use regex::Regex;
 use std::borrow::Cow;
 
@@ -39,7 +39,12 @@ impl Developers {
     /// - `offset`: The offset into the user data.
     /// - `search`: Case insensitive string to match against user's first name,
     ///     last name, or username. This gets escaped before being sent.
-    pub fn make_variables(limit: u32, offset: u32, search: Option<String>, order_by: users_order_by) -> Variables {
+    pub fn make_variables(
+        limit: u32,
+        offset: u32,
+        search: Option<String>,
+        order_by: users_order_by,
+    ) -> Variables {
         Variables {
             limit: limit as i64,
             offset: offset as i64,
@@ -50,7 +55,7 @@ impl Developers {
                 // Default to match any user on no search string.
                 .unwrap_or("%".into()),
             // In practice, we usually only have one order-by parameter.
-            order_by: vec![order_by]
+            order_by: vec![order_by],
         }
     }
 }
@@ -79,7 +84,7 @@ impl Default for users_order_by {
             timezone: None,
             user_accounts_aggregate: None,
             workshop_proposals_aggregate: None,
-            workshop_proposals_by_reviewer_username_aggregate: None
+            workshop_proposals_by_reviewer_username_aggregate: None,
         }
     }
 }

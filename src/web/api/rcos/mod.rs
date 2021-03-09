@@ -2,13 +2,9 @@
 
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
-use reqwest::{
-    Client,
-    header::ACCEPT,
-    header::HeaderValue,
-};
 use crate::web::api::rcos::auth::ApiJwtClaims;
+use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
+use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 
 mod auth;
 pub mod landing_page_stats;

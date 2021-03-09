@@ -1,11 +1,11 @@
 pub mod auth;
+pub mod developers;
 pub mod forms;
 pub mod homepage;
 pub mod jumbotron;
 pub mod navbar;
 pub mod page;
 pub mod static_pages;
-pub mod developers;
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;

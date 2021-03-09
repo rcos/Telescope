@@ -3,11 +3,11 @@
 use crate::error::TelescopeError;
 use crate::templates::{homepage, page, Template};
 use crate::web::api::rcos::{
-    send_query,
     landing_page_stats::{LandingPageStatistics, LandingPageStatsVars},
+    send_query,
 };
-use actix_web::HttpRequest;
 use crate::web::services::auth::identity::Identity;
+use actix_web::HttpRequest;
 
 /// Service that serves the telescope homepage.
 #[get("/")]

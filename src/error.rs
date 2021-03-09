@@ -13,10 +13,10 @@ use handlebars::RenderError;
 use lettre::file::error::Error as LettreFileError;
 use lettre::smtp::error::Error as LettreSmtpError;
 use lettre::smtp::response::Response as SmtpResponse;
+use reqwest::Error as ReqwestError;
 use serde_json::Value;
 use std::error::Error;
 use std::fmt;
-use reqwest::Error as ReqwestError;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
