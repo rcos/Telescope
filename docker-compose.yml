@@ -41,8 +41,7 @@ services:
         - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
 
     telescope:
-        build: ./Telescope
-        image: telescope:latest
+        image: docker.pkg.github.com/rcos/telescope/telescope:latest
         depends_on:
             - hasura
         volumes:
