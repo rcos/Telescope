@@ -15,7 +15,8 @@ pub const PROFILE_PICTURE: &'static str = "pfp";
 /// The handlebars key for a user's username.
 pub const USERNAME: &'static str = "username";
 
-/// The handlebars key for a user's
+/// The handlebars key for a user's first name.
 pub const FNAME: &'static str = "first_name";
 
+/// The handlebars key for a user's last name.
 pub const LNAME: &'static str = "last_name";
