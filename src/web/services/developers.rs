@@ -5,7 +5,7 @@ use crate::templates::Template;
 use crate::web::api::rcos::{
     send_query,
     users::developers_page::{
-        developers::{order_by, users_order_by},
+        developers::{order_by, users_order_by, DevelopersUsers},
         Developers,
     },
 };
