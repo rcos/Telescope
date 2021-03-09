@@ -17,6 +17,7 @@ use lettre::smtp::response::Response as SmtpResponse;
 use serde_json::Value;
 use std::error::Error;
 use std::fmt;
+use reqwest::Error as ReqwestError;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.
@@ -119,18 +120,10 @@ pub enum TelescopeError {
     CsrfTokenMismatch,
 
     #[error(ignore)]
-    #[display(fmt = "Error sending API query: {}", display)]
-    /// Error sending request to query API. This reports as internal server
-    /// error because we could not query the API, the API did not return an
-    /// error.
-    SendApiQueryError { status_code: u16, display: String },
-
-    #[error(ignore)]
-    #[display(fmt = "Error in API response payload: {}", _0)]
-    /// API response returned a malformed or otherwise unexpected payload
-    /// that could not be converted to the proper type internally.
-    /// This should report as a internal server error.
-    ApiResponsePayloadError(String),
+    #[display(fmt = "Error interacting with RCOS API: {}", _0)]
+    /// Error interacting with RCOS central API. This is a wrapper around a
+    /// reqwest error. This should generally report as an ISE.
+    RcosApiError(String),
 
     #[error(ignore)]
     #[display(fmt = "Central RCOS GraphQL API returned error(s)")]
@@ -180,19 +173,10 @@ impl TelescopeError {
         }
     }
 
-    /// Convert an error querying the API into a telescope error.
-    pub fn api_query_error(err: SendRequestError) -> Self {
-        error!("Error querying API: {}", err);
-        Self::SendApiQueryError {
-            status_code: err.status_code().as_u16(),
-            display: format!("{}", err),
-        }
-    }
-
-    /// Convert an error interpreting an API response.
-    pub fn api_response_error(err: JsonPayloadError) -> Self {
-        error!("API response was malformed: {}", err);
-        Self::ApiResponsePayloadError(format!("{}", err))
+    /// Convert a reqwest error into a telescope error.
+    pub fn rcos_api_error(err: ReqwestError) -> Self {
+        error!("Error Querying RCOS API: {}", err);
+        Self::RcosApiError(err.to_string())
     }
 
     /// Serialize an invalid form to send back to the user.
@@ -303,20 +287,11 @@ impl TelescopeError {
                 this is in error, please contact a coordinator and file a GitHUb issue.",
             ),
 
-            TelescopeError::SendApiQueryError { display, .. } => jumbotron::new(
+            TelescopeError::RcosApiError(err) => jumbotron::new(
                 format!("{} - Internal API Query Error", status_code),
                 format!(
                     "Could not send query to the central API. Please contact a \
                 coordinator and file a GitHub issue. Internal error description: {}",
-                    display
-                ),
-            ),
-
-            TelescopeError::ApiResponsePayloadError(err) => jumbotron::new(
-                format!("{} - API Payload Error", status_code),
-                format!(
-                    "The API returned an unexpected or malformed response. Please \
-                contact a coordinator and file a GitHub issue. Internal error description: {}",
                     err
                 ),
             ),
@@ -423,9 +398,6 @@ impl ResponseError for TelescopeError {
             TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
             TelescopeError::CsrfTokenNotFound => StatusCode::NOT_FOUND,
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
-            TelescopeError::SendApiQueryError { status_code, .. } => {
-                StatusCode::from_u16(*status_code).expect("Invalid status code")
-            }
             TelescopeError::HubcapsError(_) => StatusCode::BAD_GATEWAY,
             TelescopeError::InvalidForm(_) => StatusCode::BAD_REQUEST,
             TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,

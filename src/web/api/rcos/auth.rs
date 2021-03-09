@@ -1,8 +1,6 @@
 //! Authentication for the central RCOS API.
 
 use crate::env::{global_config, ConcreteConfig};
-use actix_web::client::Client;
-use actix_web::http::header::{ACCEPT, CONTENT_TYPE};
 use chrono::Utc;
 use jsonwebtoken::{encode, EncodingKey, Header};
 use std::sync::Arc;
@@ -10,15 +8,12 @@ use std::sync::Arc;
 /// The database role name for authenticated requests.
 const AUTHENTICATED_USER: &'static str = "admin";
 
-/// Accept responses in JSON format.
-const JSON_MIME: &'static str = "application/json";
-
 /// The issuer claim in JWTs issued by telescope.
 const JWT_ISSUER: &'static str = "telescope";
 
 /// JWT Claims used to authenticate with the central RCOS API.
 #[derive(Serialize, Clone, Debug)]
-struct ApiJwtClaims {
+pub struct ApiJwtClaims {
     /// Who issued the JWY token. This should always be "telescope".
     iss: &'static str,
     /// The subject of the JWT. This is the user that the claim is for.
@@ -50,7 +45,7 @@ struct HasuraJwtClaims {
 
 impl ApiJwtClaims {
     /// Construct and sign a new JWT.
-    fn new(subject: Option<String>) -> String {
+    pub fn new(subject: Option<String>) -> String {
         // Get the global config.
         let config: Arc<ConcreteConfig> = global_config();
         // Get the JWT secret from the config.
@@ -76,18 +71,4 @@ impl ApiJwtClaims {
         )
         .expect("Could not encode JWT");
     }
-}
-
-/// Create an HTTP client with an optional subject claim in the JWT. This will have the proper
-/// Accept and Content-Type headers to send and receive GraphQL data.
-pub fn make_api_client(subject: Option<String>) -> Client {
-    // Make JWT.
-    let jwt: String = ApiJwtClaims::new(subject);
-
-    // Construct and return an HTTP client.
-    return Client::builder()
-        .header(ACCEPT, JSON_MIME)
-        .header(CONTENT_TYPE, JSON_MIME)
-        .bearer_auth(jwt)
-        .finish();
 }

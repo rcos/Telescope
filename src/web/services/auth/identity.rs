@@ -72,7 +72,7 @@ impl IdentityCookie {
         let platform_id: String = self.get_account_identity().await?;
 
         // Create an API client to lookup the username (we don't have a subject at this point).
-        let client: Client = make_api_client(None);
+        let client = make_api_client(None);
 
         // Make the query variables
         let query_vars = ReverseLookup::make_vars(platform, platform_id);

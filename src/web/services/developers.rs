@@ -5,7 +5,6 @@ use crate::error::TelescopeError;
 use actix_web::web::Query;
 use crate::web::services::auth::identity::Identity;
 use crate::web::api::rcos::{
-    make_api_client,
     send_query,
     users::developers_page::{
         Developers,
@@ -15,6 +14,7 @@ use crate::web::api::rcos::{
         },
     }
 };
+use actix_web::client::Client;
 
 /// The default value for the number of users per page.
 fn twenty() -> u32 { 20 }
@@ -62,31 +62,22 @@ impl Into<order_by> for OrderBy {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DevelopersPageQuery {
     /// What page number to go to. Default to 0.
-    #[serde(rename = "p")]
     #[serde(default)]
     pub page: u32,
 
     /// How many per page. Default to 20.
-    #[serde(rename = "n")]
     #[serde(default = "twenty")]
     pub per_page: u32,
 
     /// Filter for users if their first name, last name, or username contains
     /// this string case independently (via ILIKE).
-    #[serde(rename = "q")]
     pub search: Option<String>,
 
-    /// Filter the semester in which the user was enrolled. This should be a semester ID.
-    #[serde(rename = "semester")]
-    pub filter_semester: Option<String>,
-
     /// Order the developers by a given field.
-    #[serde(rename = "order_by")]
     #[serde(default)]
     order_by: OrderByField,
 
     /// Ascending or descending order.
-    #[serde(rename = "order")]
     #[serde(default)]
     order: OrderBy
 }
@@ -97,7 +88,6 @@ impl Default for DevelopersPageQuery {
             page: 0,
             per_page: twenty(),
             search: None,
-            filter_semester: None,
             order_by: OrderByField::FirstName,
             order: OrderBy::Ascending
         }
@@ -106,7 +96,7 @@ impl Default for DevelopersPageQuery {
 
 impl DevelopersPageQuery {
     /// Convert this structure's order parameters to an order_by query.
-    pub fn order_by_param(&self) -> users_order_by {
+    fn order_by_param(&self) -> users_order_by {
         match self.order_by {
             OrderByField::FirstName => users_order_by {
                 first_name: Some(self.order.into()),
@@ -124,12 +114,33 @@ impl DevelopersPageQuery {
 /// The developer catalogue. This page displays all of the users in the
 /// RCOS database.
 #[get("/developers")]
-pub async fn developers_page(Query(query): Query<DevelopersPageQuery>) -> Result<Template, TelescopeError> {
+pub async fn developers_page(identity: Identity, Query(query): Query<DevelopersPageQuery>) -> Result<Template, TelescopeError> {
     // Extract the number of users to retrieve.
     let limit: u32 = query.per_page;
     // Extract the offset into the user data for the API query.
     let offset: u32 = query.per_page * query.page;
-    // Extract the remaining fields
+    // Extract the the ordering parameter
+    let order_by_param: users_order_by = query.order_by_param();
+    // Clone the search text.
+    let search_text: Option<String> = query.search.clone();
+
+    // Build the query variables for the GraphQL request.
+    let variables = Developers::make_variables(limit, offset, search_text, order_by_param);
+
+    // Extract the user identity for the query subject header (if it exists.)
+    let subject: Option<String> = match identity.identity() {
+        // No user is authenticated, so no subject.
+        None => None,
+        // User authenticated, get their RCOS username if possible.
+        Some(cookie) => cookie.get_rcos_username().await?
+    };
+
+    // Build API client to send query
+    let api_client: Client = make_api_client(subject);
+    // Send the query and wait for a response.
+    let query_response = send_query(&api_client, variables).await?;
+
+
 
     Err(TelescopeError::NotImplemented)
 }

@@ -3,7 +3,7 @@ use crate::templates::forms::{register, Form, FormInput};
 use crate::templates::{auth, page, Template};
 use crate::web::api::rcos::users::create::CreateOneUser;
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::api::rcos::{make_api_client, send_query};
+use crate::web::api::rcos::send_query;
 use crate::web::services::auth::identity::IdentityCookie;
 use actix_web::client::Client;
 use actix_web::http::header::LOCATION;
@@ -69,12 +69,9 @@ pub async fn submit_registration(
         platform_id,
     );
 
-    // Make central RCOS API client.
-    // We have no subject header yet, since the user account hasn't been created at this point.
-    let api_client: Client = make_api_client(None);
-
     // Create the account!
-    let created_username: String = send_query::<CreateOneUser>(&api_client, vars)
+    // We have no subject field since the account isn't created until this request resolves
+    let created_username: String = send_query::<CreateOneUser>(None, vars)
         .await?
         .username()
         .ok_or(TelescopeError::ise(
