@@ -1,5 +1,21 @@
-query Developers {
-    users {
+query Developers(
+    $limit: Int!,
+    $offset: Int!,
+    $search: String!,
+    $order_by: [users_order_by!]!,
+) {
+    users(
+        limit: $limit,
+        offset: $offset,
+        where: {
+            _or: {
+                first_name: {_ilike: $search},
+                last_name: {_ilike: $search},
+                username: {_ilike: $search}
+            }
+        },
+        order_by: $order_by
+    ) {
         username
         first_name
         last_name

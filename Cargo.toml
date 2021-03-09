@@ -76,4 +76,6 @@ hubcaps = "~0.6"
 # Discord API and integration
 serenity = "~0.10"
 # GraphQL client and queries
-graphql_client = "0.9.0"
+graphql_client = "~0.9"
+# Regular expressions
+regex = "1"
