@@ -14,7 +14,6 @@ use crate::web::api::rcos::{
         },
     }
 };
-use actix_web::client::Client;
 
 /// The default value for the number of users per page.
 fn twenty() -> u32 { 20 }

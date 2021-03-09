@@ -2,7 +2,6 @@
 
 use crate::templates::forms::Form;
 use crate::templates::{jumbotron, page, Template};
-use actix_web::client::{JsonPayloadError, SendRequestError};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;

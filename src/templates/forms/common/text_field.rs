@@ -2,7 +2,7 @@
 
 use crate::templates::forms::{Form, FormField};
 
-/// Path to the
+/// Path to the text field template
 const TEMPLATE_PATH: &'static str = "forms/common/text_field";
 
 /// Form fields.

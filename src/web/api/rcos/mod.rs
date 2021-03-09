@@ -14,10 +14,6 @@ mod auth;
 pub mod landing_page_stats;
 pub mod users;
 
-/// The max size of the API response body in bytes. Any responses larger than this
-/// will error on deconstruction.
-const RESPONSE_BODY_LIMIT: usize = 1024 * 1024;
-
 /// Send a GraphQL query to the central RCOS API for a given subject (or anonymously).
 pub async fn send_query<T: GraphQLQuery>(
     subject: Option<String>,

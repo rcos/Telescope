@@ -6,7 +6,6 @@ use crate::web::api::rcos::{
     send_query,
     landing_page_stats::{LandingPageStatistics, LandingPageStatsVars},
 };
-use actix_web::client::Client;
 use actix_web::HttpRequest;
 use crate::web::services::auth::identity::Identity;
 

@@ -3,7 +3,6 @@ use crate::error::TelescopeError;
 use crate::web::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::web::csrf;
 use crate::web::services::auth::identity::{Identity, IdentityCookie};
-use actix_web::client::Client;
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
 use actix_web::FromRequest;

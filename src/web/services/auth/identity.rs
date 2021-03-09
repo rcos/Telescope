@@ -8,7 +8,6 @@ use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
 };
 use actix_identity::Identity as ActixIdentity;
-use actix_web::client::Client;
 use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, Ready};
