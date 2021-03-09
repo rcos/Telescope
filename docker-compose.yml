@@ -42,9 +42,13 @@ services:
 
     telescope:
         image: docker.pkg.github.com/rcos/telescope/telescope:latest
+        restart: unless-stopped
         depends_on:
             - hasura
         volumes:
+          # The redacted telescope config file is included in this repo. 
+          # Full dockumentation of all of the options is available at 
+          # https://github.com/rcos/Telescope/blob/master/config_example.toml.
           - "/home/rcos/telescope-config.toml:/telescope/config.toml"
 
 volumes:
