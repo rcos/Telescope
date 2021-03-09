@@ -54,8 +54,7 @@ impl Developers {
                 .map(|s| format!("%{}%", escape_search_string(s.as_str())))
                 // Default to match any user on no search string.
                 .unwrap_or("%".into()),
-            // In practice, we usually only have one order-by parameter.
-            order_by: vec![order_by],
+            order_by,
         }
     }
 }
