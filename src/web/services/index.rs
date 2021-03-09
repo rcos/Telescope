@@ -3,18 +3,20 @@
 use crate::error::TelescopeError;
 use crate::templates::{homepage, page, Template};
 use crate::web::api::rcos::{
-    self,
+    send_query,
     landing_page_stats::{LandingPageStatistics, LandingPageStatsVars},
 };
 use actix_web::client::Client;
 use actix_web::HttpRequest;
+use crate::web::services::auth::identity::Identity;
 
 /// Service that serves the telescope homepage.
 #[get("/")]
-pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
+pub async fn index(identity: Identity, req: HttpRequest) -> Result<Template, TelescopeError> {
+    // Determine the subject (if they exist) making the stats request.
+    let subject: Option<String> = identity.get_rcos_username().await?;
     // Get the statistics.
-    let client: Client = rcos::make_api_client(None);
-    let stats = rcos::send_query::<LandingPageStatistics>(&client, LandingPageStatsVars).await?;
+    let stats = send_query::<LandingPageStatistics>(subject, LandingPageStatsVars).await?;
 
     // Make the homepage template as the content of the landing page.
     let content: Template = homepage::new(

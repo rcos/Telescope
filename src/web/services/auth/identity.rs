@@ -3,7 +3,7 @@
 use crate::error::TelescopeError;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
-use crate::web::api::rcos::{make_api_client, send_query};
+use crate::web::api::rcos::send_query;
 use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
 };
@@ -71,14 +71,11 @@ impl IdentityCookie {
         let platform: UserAccountType = self.user_account_type();
         let platform_id: String = self.get_account_identity().await?;
 
-        // Create an API client to lookup the username (we don't have a subject at this point).
-        let client = make_api_client(None);
-
         // Make the query variables
         let query_vars = ReverseLookup::make_vars(platform, platform_id);
 
         // Send the query and await and return the username.
-        return Ok(send_query::<ReverseLookup>(&client, query_vars)
+        return Ok(send_query::<ReverseLookup>(None, query_vars)
             .await?
             .username());
     }
@@ -180,6 +177,15 @@ impl Identity {
                 self.forget();
                 return None;
             }
+        }
+    }
+
+    /// Attempt to get the RCOS username of this user if they are authenticated
+    /// and one exists.
+    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+        match self.identity() {
+            None => Ok(None),
+            Some(cookie) => cookie.get_rcos_username().await
         }
     }
 }

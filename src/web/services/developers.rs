@@ -128,19 +128,9 @@ pub async fn developers_page(identity: Identity, Query(query): Query<DevelopersP
     let variables = Developers::make_variables(limit, offset, search_text, order_by_param);
 
     // Extract the user identity for the query subject header (if it exists.)
-    let subject: Option<String> = match identity.identity() {
-        // No user is authenticated, so no subject.
-        None => None,
-        // User authenticated, get their RCOS username if possible.
-        Some(cookie) => cookie.get_rcos_username().await?
-    };
-
-    // Build API client to send query
-    let api_client: Client = make_api_client(subject);
+    let subject: Option<String> = identity.get_rcos_username().await?;
     // Send the query and wait for a response.
-    let query_response = send_query(&api_client, variables).await?;
-
-
+    let query_response = send_query::<Developers>(subject, variables).await?;
 
     Err(TelescopeError::NotImplemented)
 }

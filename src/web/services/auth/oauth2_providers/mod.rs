@@ -1,6 +1,6 @@
 use super::{make_redirect_url, IdentityProvider};
 use crate::error::TelescopeError;
-use crate::web::api::rcos::{make_api_client, send_query, users::accounts::reverse_lookup};
+use crate::web::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::web::csrf;
 use crate::web::services::auth::identity::{Identity, IdentityCookie};
 use actix_web::client::Client;
@@ -176,9 +176,6 @@ where
             // Get the on-platform ID of the user's identity.
             let platform_id: String = cookie_identity.get_account_identity().await?;
 
-            // Look for an account on this platform in the central RCOS API.
-            // Create client
-            let api_client: Client = make_api_client(None);
             // Make variables.
             let variables = reverse_lookup::reverse_lookup::Variables {
                 id: platform_id,
@@ -186,7 +183,7 @@ where
             };
             // Send API query.
             let username: Option<String> =
-                send_query::<reverse_lookup::ReverseLookup>(&api_client, variables)
+                send_query::<reverse_lookup::ReverseLookup>(None, variables)
                     .await?
                     .username();
 
