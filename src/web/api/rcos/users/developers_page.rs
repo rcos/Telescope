@@ -39,6 +39,7 @@ impl Developers {
     /// - `offset`: The offset into the user data.
     /// - `search`: Case insensitive string to match against user's first name,
     ///     last name, or username. This gets escaped before being sent.
+    /// - `order_by`: How to order the users requested.
     pub fn make_variables(
         limit: u32,
         offset: u32,

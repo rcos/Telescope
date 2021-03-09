@@ -27,7 +27,7 @@ enum OrderByField {
 
 impl Default for OrderByField {
     fn default() -> Self {
-        OrderByField::FirstName
+        OrderByField::LastName
     }
 }
 
@@ -86,8 +86,8 @@ impl Default for DevelopersPageQuery {
             page: 0,
             per_page: twenty(),
             search: None,
-            order_by: OrderByField::FirstName,
-            order: OrderBy::Ascending,
+            order_by: OrderByField::default(),
+            order: OrderBy::default(),
         }
     }
 }
