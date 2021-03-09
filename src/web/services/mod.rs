@@ -5,6 +5,7 @@ mod index;
 mod login;
 pub mod not_found;
 mod register;
+mod developers;
 
 use actix_web::web::ServiceConfig;
 
@@ -21,5 +22,7 @@ pub fn register(config: &mut ServiceConfig) {
         // Account registration services.
         .service(register::register_page)
         .service(register::finish_registration)
-        .service(register::submit_registration);
+        .service(register::submit_registration)
+        // Developers Page
+        .service(developers::developers_page);
 }
