@@ -44,7 +44,7 @@ update Telescope's git `rcos-data` submodule to point to the newest commit on th
 `telescope-dev-version` branch. After you have done this and pulled the submodule,
 update the local database using the hasura client. The command should look like this:
 ```shell
-$ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
+$ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint  https://localhost:8000 --insecure-skip-tls-verify apply
 ``` 
 where `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your `.env` file.
 After applying the migrations, go to the hasura console to make sure that all the proper
@@ -58,7 +58,7 @@ $ cargo install graphql_client_cli --force
 ```
 Finally, regenerate Telescope's `schema.json` file as follows:
 ```shell
-$ graphql-client introspect-schema --header 'x-hasura-admin-secret: xxxxxxxxxxxxxxxxxxxxxxxx' --output graphql/schema.json http://localhost:8000/v1/graphql
+$ graphql-client introspect-schema --header 'x-hasura-admin-secret: xxxxxxxxxxxxxxxxxxxxxxxx' --output graphql/schema.json https://localhost:8000/v1/graphql
 ```
 again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your `.env` file.
 
