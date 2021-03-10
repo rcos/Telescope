@@ -16,3 +16,8 @@ ALTER TABLE user_accounts ALTER COLUMN user_id SET NOT NULL;
 
 -- Constrain user_account's user_ids to reference a user's id.
 ALTER TABLE user_accounts ADD FOREIGN KEY (user_id) REFERENCES users(id);
+
+-- Add unique constraint for user accounts
+ALTER TABLE user_accounts
+ADD CONSTRAINT user_accounts_unique_user_id_type
+UNIQUE (user_id, type);
