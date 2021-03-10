@@ -109,9 +109,10 @@ again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your
     ``` 
 
 7. At this point Postgres, the Hasura GraphQL API, Caddy, and Telescope should 
-   all be running on your system in individual docker containers. Docker/Caddy 
-   exposes the Hasura console at https://localhost:8000, and telescope is 
-   exposed at https://localhost:8443. To shut them all down, run
+   all be running on your system in individual docker containers. Docker 
+   exposes the Hasura console at http://localhost:8000, and Caddy exposes a 
+   secured version at https://localhost:8001. Caddy exposes Telescope at 
+   https://localhost:8443. To shut them all down, run
    ```shell
    $ docker-compose down
    ```
