@@ -1,7 +1,7 @@
 -- Add user_id column and constraints to meeting attendance.
 
--- Add column
-ALTER TABLE meeting_attendances ADD COLUMN user_id UUID;
+-- Add column and constraint
+ALTER TABLE meeting_attendances ADD COLUMN user_id UUID REFERENCES users(id);
 
 -- Set values
 UPDATE meeting_attendances
@@ -11,9 +11,6 @@ WHERE meeting_attendances.username = users.username;
 
 -- Add not null constraint
 ALTER TABLE meeting_attendances ALTER user_id SET NOT NULL;
-
--- Add foreign key constraint
-ALTER TABLE meeting_attendances ADD FOREIGN KEY (user_id) REFERENCES users(id);
 
 -- Add unique constraint
 ALTER TABLE meeting_attendances

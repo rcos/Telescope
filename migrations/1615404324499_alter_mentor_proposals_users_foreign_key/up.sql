@@ -1,7 +1,7 @@
 -- Add user_id column and foreign key constraint to mentor_proposals table
 
 -- Add column
-ALTER TABLE mentor_proposals ADD COLUMN user_id UUID;
+ALTER TABLE mentor_proposals ADD COLUMN user_id UUID REFERENCES users(id);
 
 -- Set values
 UPDATE mentor_proposals
@@ -11,9 +11,6 @@ WHERE mentor_proposals.username = users.username;
 
 -- Add not null constraint
 ALTER TABLE mentor_proposals ALTER user_id SET NOT NULL;
-
--- Add foreign key to users table
-ALTER TABLE mentor_proposals ADD FOREIGN KEY (user_id) REFERENCES users(id);
 
 -- Add unique constraint
 ALTER TABLE mentor_proposals

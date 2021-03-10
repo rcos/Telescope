@@ -1,7 +1,7 @@
 -- Add user_id column and constraints to pay_requests table
 
 -- Add column
-ALTER TABLE pay_requests ADD COLUMN user_id UUID;
+ALTER TABLE pay_requests ADD COLUMN user_id UUID REFERENCES users(id);
 
 -- Set values
 UPDATE pay_requests
@@ -11,9 +11,6 @@ WHERE pay_requests.username = users.username;
 
 -- Add not null constraint
 ALTER TABLE pay_requests ALTER COLUMN user_id SET NOT NULL;
-
--- Add users table foreign key constraint
-ALTER TABLE pay_requests ADD FOREIGN KEY (user_id) REFERENCES users(id);
 
 -- Add unique constraint
 ALTER TABLE pay_requests
