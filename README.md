@@ -52,7 +52,7 @@ tables are being tracked, and all the types and queries are available.
 If you haven't already, you should install a GraphQL client to introspect the schema. 
 There are several of these that are probably acceptable, but for consistency we use 
 the [`graphql-rust client`](https://github.com/graphql-rust/graphql-client/tree/master/graphql_client_cli). 
-Install this usinf the command from its README.
+Install this using the command from its README.
 ```shell
 $ cargo install graphql_client_cli --force
 ```
