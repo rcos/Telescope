@@ -1,4 +1,4 @@
-localhost:8000 {
+http://localhost:8000, https://localhost:8000 {
     encode zstd gzip
     reverse_proxy hasura:8080
 }
