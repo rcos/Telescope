@@ -3537,7 +3537,6 @@ dependencies = [
  "structopt",
  "time 0.2.25",
  "toml",
- "url 2.2.1",
 ]
 
 [[package]]
@@ -3628,7 +3627,6 @@ checksum = "1195b046942c221454c2539395f85413b33383a067449d78aab2b7b052a142f7"
 dependencies = [
  "const_fn",
  "libc",
- "serde",
  "standback",
  "stdweb",
  "time-macros",
