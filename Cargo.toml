@@ -6,7 +6,6 @@ description = "The RCOS webapp"
 edition = "2018"
 
 [dependencies]
-# Configuration and env variables
 # command line argument parser
 structopt = "~0.3"
 # environment variable reading through dotenv (.env files)
@@ -14,10 +13,9 @@ dotenv = "~0.15"
 # config file reading
 toml = "~0.5"
 
-# The main web-app framework
 # actix actor framework -- system for running server and other tasks.
 actix = "~0.10"
-# actix web server (use exact version)
+# actix web server
 actix-web = {version = "~3.3", features = ["rustls"]}
 # static file serving
 actix-files = "~0.5"
@@ -25,12 +23,9 @@ actix-files = "~0.5"
 actix-identity = "~0.3"
 
 # Handlebars for HTML rendering and templating.
-# html templating.
 handlebars = {version = "~3.5", features = ["dir_source"]}
 
-# exit code standardization
-exitcode = "1.1.2"
-# logging
+# Logging utilities
 log = "~0.4"
 env_logger = "~0.8"
 
@@ -48,15 +43,9 @@ lazy_static = "~1.4"
 # utilities for dealing with async futures
 futures = "0.3"
 
-# Markdown - HTML rendering
-pulldown-cmark = "~0.8"
-
 # Sending emails.
 lettre = {version = "~0.9", features = ["serde-impls"]}
 lettre_email = "~0.9"
-
-# MD5 hashing to use to talk to Gravatar.
-md5 = "~0.7"
 
 # Date and time utilities
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
