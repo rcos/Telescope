@@ -40,7 +40,6 @@ fn make_redirect_url(req: &HttpRequest, redir_path: String) -> RedirectUrl {
 }
 
 /// Trait for identity providers (GitHub OAuth2, Discord OAuth2, RPI CAS, etc).
-#[async_trait]
 pub trait IdentityProvider: 'static {
     /// The client configuration type that stores information about the identity
     /// provider including the authorization URL and token URL for OAuth2

@@ -1847,19 +1847,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hyper-tls"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
-dependencies = [
- "bytes 1.0.1",
- "hyper 0.14.4",
- "native-tls",
- "tokio 1.2.0",
- "tokio-native-tls",
-]
-
-[[package]]
 name = "hyperx"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2033,7 +2020,7 @@ dependencies = [
  "lettre",
  "mime",
  "time 0.1.43",
- "uuid 0.7.4",
+ "uuid",
 ]
 
 [[package]]
@@ -2657,12 +2644,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "qrcodegen"
-version = "1.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d24ea38b2345f15533e6668104bec0136883404287e095f15f9ea2522e2b4b6c"
-
-[[package]]
 name = "quick-error"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2964,7 +2945,7 @@ dependencies = [
  "tokio-threadpool",
  "tokio-timer",
  "url 1.7.2",
- "uuid 0.7.4",
+ "uuid",
  "winreg 0.6.2",
 ]
 
@@ -2993,6 +2974,7 @@ dependencies = [
  "percent-encoding 2.1.0",
  "pin-project-lite 0.2.4",
  "serde",
+ "serde_json",
  "serde_urlencoded 0.7.0",
  "tokio 0.2.25",
  "tokio-tls",
@@ -3018,14 +3000,12 @@ dependencies = [
  "http-body 0.4.0",
  "hyper 0.14.4",
  "hyper-rustls",
- "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
  "lazy_static",
  "log",
  "mime",
  "mime_guess",
- "native-tls",
  "percent-encoding 2.1.0",
  "pin-project-lite 0.2.4",
  "rustls 0.19.0",
@@ -3033,7 +3013,6 @@ dependencies = [
  "serde_json",
  "serde_urlencoded 0.7.0",
  "tokio 1.2.0",
- "tokio-native-tls",
  "tokio-rustls 0.22.0",
  "url 2.2.1",
  "wasm-bindgen",
@@ -3530,7 +3509,6 @@ dependencies = [
  "actix-files",
  "actix-identity",
  "actix-web",
- "async-trait",
  "chrono",
  "dashmap",
  "derive_more",
@@ -3549,10 +3527,9 @@ dependencies = [
  "md5",
  "oauth2",
  "pulldown-cmark",
- "qrcodegen",
  "rand 0.8.3",
  "regex",
- "reqwest 0.11.1",
+ "reqwest 0.10.10",
  "serde",
  "serde_json",
  "serde_urlencoded 0.7.0",
@@ -3561,7 +3538,6 @@ dependencies = [
  "time 0.2.25",
  "toml",
  "url 2.2.1",
- "uuid 0.8.2",
 ]
 
 [[package]]
@@ -3805,16 +3781,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "tokio-native-tls"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
-dependencies = [
- "native-tls",
- "tokio 1.2.0",
 ]
 
 [[package]]
@@ -4207,16 +4173,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90dbc611eb48397705a6b0f6e917da23ae517e4d127123d2cf7674206627d32a"
 dependencies = [
  "rand 0.6.5",
-]
-
-[[package]]
-name = "uuid"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
-dependencies = [
- "getrandom 0.2.2",
- "serde",
 ]
 
 [[package]]
