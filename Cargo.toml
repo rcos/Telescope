@@ -1,15 +1,12 @@
 [package]
 name = "telescope"
 version = "0.3.0"
-authors = [
-    "Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"
-]
+authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
-
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
+# Configuration and env variables
 # command line argument parser
 structopt = "~0.3"
 # environment variable reading through dotenv (.env files)
@@ -17,6 +14,7 @@ dotenv = "~0.15"
 # config file reading
 toml = "~0.5"
 
+# The main web-app framework
 # actix actor framework -- system for running server and other tasks.
 actix = "~0.10"
 # actix web server (use exact version)
@@ -26,6 +24,7 @@ actix-files = "~0.5"
 # identity service -- cookie authentication
 actix-identity = "~0.3"
 
+# Handlebars for HTML rendering and templating.
 # html templating.
 handlebars = {version = "~3.5", features = ["dir_source"]}
 
