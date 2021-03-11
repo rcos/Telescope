@@ -16,8 +16,6 @@ structopt = "~0.3"
 dotenv = "~0.15"
 # config file reading
 toml = "~0.5"
-# Tokio async IO runtime
-tokio = {version = "~1.2", features = ["full"]}
 # actix actor framework -- system for running server and other tasks.
 actix = "~0.10"
 # actix web server (use exact version)
