@@ -10,7 +10,7 @@ use super::UserRole as user_role;
 #[graphql(
     schema_path = "graphql/schema.json",
     query_path = "graphql/users/developers.graphql",
-    response_derives = "Debug,Clone"
+    response_derives = "Debug,Clone,Serialize"
 )]
 pub struct Developers;
 
@@ -88,12 +88,6 @@ impl Default for users_order_by {
     }
 }
 
-/// Current semester object from response data.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct CurrentSemester {
-    semester_id: String,
-    title: String,
-}
 
 impl ResponseData {
     /// Extract the current semester from the Developers query.
