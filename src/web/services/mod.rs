@@ -1,7 +1,7 @@
 //! Web services.
 
 pub mod auth;
-mod developers;
+pub mod developers;
 mod index;
 mod login;
 pub mod not_found;

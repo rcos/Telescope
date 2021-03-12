@@ -1,5 +1,9 @@
 //! Developers page template fields and functions
 
+use crate::web::services::developers::DevelopersPageQuery;
+use crate::web::api::rcos::users::developers_page::DevelopersResponse;
+use crate::templates::Template;
+
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "developers";
 
@@ -9,15 +13,20 @@ pub const USERS: &'static str = "users";
 /// The handlebars key for the query parameters.
 pub const QUERY: &'static str = "query";
 
-/// The handlebars key for a user's profile picture.
-pub const PROFILE_PICTURE: &'static str = "pfp";
+// /// The handlebars key for a user's profile picture.
+// pub const PROFILE_PICTURE: &'static str = "pfp";
+//
+// /// The handlebars key for a user's username.
+// pub const USERNAME: &'static str = "username";
+//
+// /// The handlebars key for a user's first name.
+// pub const FNAME: &'static str = "first_name";
+//
+// /// The handlebars key for a user's last name.
+// pub const LNAME: &'static str = "last_name";
 
-/// The handlebars key for a user's username.
-pub const USERNAME: &'static str = "username";
-
-/// The handlebars key for a user's first name.
-pub const FNAME: &'static str = "first_name";
-
-/// The handlebars key for a user's last name.
-pub const LNAME: &'static str = "last_name";
-
+/// Create the developers page template
+pub async fn developers(query: &DevelopersPageQuery, response_data: &DevelopersResponse) -> Template {
+    Template::new(TEMPLATE_PATH)
+        .field(QUERY, query)
+}

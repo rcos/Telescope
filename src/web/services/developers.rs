@@ -11,6 +11,7 @@ use crate::web::api::rcos::{
 };
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
+use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 
 /// The default value for the number of users per page.
 fn twenty() -> u32 {
@@ -20,7 +21,7 @@ fn twenty() -> u32 {
 /// Which field should users be ordered by.
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-enum OrderByField {
+pub enum OrderByField {
     FirstName,
     LastName,
 }
@@ -33,7 +34,7 @@ impl Default for OrderByField {
 
 /// What order to use.
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
-enum OrderBy {
+pub enum OrderBy {
     #[serde(rename = "asc")]
     Ascending,
     #[serde(rename = "desc")]
@@ -73,11 +74,11 @@ pub struct DevelopersPageQuery {
 
     /// Order the developers by a given field.
     #[serde(default)]
-    order_by: OrderByField,
+    pub order_by: OrderByField,
 
     /// Ascending or descending order.
     #[serde(default)]
-    order: OrderBy,
+    pub order: OrderBy,
 }
 
 impl Default for DevelopersPageQuery {
@@ -131,7 +132,8 @@ pub async fn developers_page(
     // Extract the user identity for the query subject header (if it exists.)
     let subject: Option<String> = identity.get_rcos_username().await?;
     // Send the query and wait for a response.
-    let query_response = send_query::<Developers>(subject, variables).await?;
+    let query_response: DevelopersResponse = send_query::<Developers>(subject, variables).await?.simplify();
+
 
     Err(TelescopeError::NotImplemented)
 }

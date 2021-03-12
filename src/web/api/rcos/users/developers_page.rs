@@ -205,5 +205,3 @@ impl ResponseData {
         }
     }
 }
-
-
