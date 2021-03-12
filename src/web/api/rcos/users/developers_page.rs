@@ -14,7 +14,15 @@ use super::UserRole as user_role;
 )]
 pub struct Developers;
 
-use developers::{Variables, ResponseData, users_order_by, DevelopersCurrentSemester};
+use developers::{
+    Variables,
+    ResponseData,
+    users_order_by,
+    DevelopersCurrentSemester,
+    DevelopersUsersUserAccounts,
+    DevelopersUsersNewestEnrollment,
+    DevelopersUsers
+};
 use regex::Regex;
 use std::borrow::Cow;
 
@@ -88,6 +96,86 @@ impl Default for users_order_by {
     }
 }
 
+/// A user thumbnail on the developers page.
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct DevelopersPageUser {
+    /// The user's username
+    pub username: String,
+    /// The user's first name
+    pub first_name: String,
+    /// The user's last name
+    pub last_name: String,
+    /// The platforms the user has linked.
+    pub user_accounts: Vec<DevelopersUsersUserAccounts>,
+    /// Is the user a coordinator this semester?
+    pub is_current_coordinator: bool,
+    /// The small group this user mentors, if any.
+    pub small_group_id: Option<i64>
+}
+
+impl DevelopersUsers {
+    /// Resolve the semester data on a user to be current or not.
+    fn resolve(self, current_semester_id: Option<&String>) -> DevelopersPageUser {
+        // Destructure self.
+        let DevelopersUsers {
+            username,
+            first_name,
+            last_name,
+            user_accounts,
+            newest_enrollment,
+            small_group_mentors,
+        } = self;
+
+        // There should be at most one enrollment
+        let newest_enrollment = newest_enrollment.first();
+        // And at most one small group
+        let small_group_mentored: Option<_> = small_group_mentors
+            // Get the first small_group_mentors object
+            .first()
+            // take a reference to the inner small_group object.
+            .map(|o| &o.small_group);
+
+
+        DevelopersPageUser {
+            // inherit trivial fields
+            username, first_name, last_name, user_accounts,
+            // compute remaining fields
+            is_current_coordinator: current_semester_id
+                // Map the semester if it exists.
+                .and_then(|semester_id| {
+                    newest_enrollment
+                        // Check that the enrollment if for the current semester
+                        .filter(|enrollment| enrollment.semester_id == semester_id.as_str())
+                        // Map it to the is_coordinator field
+                        .map(|enrollment| enrollment.is_coordinator)
+                        // Flatten the double option to Option<bool>
+                        .flatten()
+                })
+                // If there is no semester or an internal field is null,
+                // the user is not a coordinator.
+                .unwrap_or(false),
+
+            small_group_id: current_semester_id
+                // Map the current semester if it exists.
+                .and_then(|semester_id| {
+                    small_group_mentored
+                        // Filter for the same semester
+                        .filter(|small_group| small_group.semester_id == semester_id.as_str())
+                        // Map to the small group id
+                        .map(|small_group| small_group.small_group_id)
+                })
+        }
+    }
+}
+
+/// Simplified structure reflecting response data from developers query.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DevelopersResponse {
+    /// The title of the current semester
+    pub current_semester_title: Option<String>,
+    /// The users to display on the developers page.
+    pub users: Vec<DevelopersPageUser>,
+}
 
 impl ResponseData {
     /// Extract the current semester from the Developers query.
@@ -95,4 +183,27 @@ impl ResponseData {
         self.current_semester.first()
     }
 
+    /// Convert this response into a simplified
+    pub fn simplify(self) -> DevelopersResponse {
+        // Extract the current semester
+        let current_semester = self.current_semester();
+        // Extract and clone the semester title
+        let current_semester_title: Option<String> = current_semester.map(|s| s.title.clone());
+        // Extract and clone the semester id
+        let current_semester_id: Option<String> = current_semester.map(|s| s.semester_id.clone());
+
+        // Build and return a simplified response
+        DevelopersResponse {
+            current_semester_title,
+            users: self.users
+                // Convert the user list to an iterator
+                .into_iter()
+                // and resolve each user's titles for the current semester.
+                .map(|u| u.resolve(current_semester_id.as_ref()))
+                // Collect into vector.
+                .collect()
+        }
+    }
 }
+
+
