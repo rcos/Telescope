@@ -28,7 +28,6 @@ query Developers(
         username
         first_name
         last_name
-        role
 
         # What accounts are associated
         user_accounts {
@@ -37,7 +36,7 @@ query Developers(
         }
 
         # Are they a coordinator the most recent semester
-        enrollments(
+        newest_enrollment: enrollments(
             limit: 1,
             order_by: {semester: {start_date: desc_nulls_last}}
         ) {
