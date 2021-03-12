@@ -20,3 +20,4 @@ pub const FNAME: &'static str = "first_name";
 
 /// The handlebars key for a user's last name.
 pub const LNAME: &'static str = "last_name";
+

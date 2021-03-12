@@ -4,6 +4,15 @@ query Developers(
     $search: String!,
     $order_by: users_order_by!,
 ) {
+    # Get the current semester
+    current_semsester: semesters(
+        limit: 1,
+        order_by: {start_date: desc_nulls_last}
+    ) {
+        semester_id
+        title
+    }
+
     users(
         limit: $limit,
         offset: $offset,
@@ -20,9 +29,36 @@ query Developers(
         first_name
         last_name
         role
+
+        # What accounts are associated
         user_accounts {
             account_id
             type
+        }
+
+        # Are they a coordinator the most recent semester
+        enrollments(
+            limit: 1,
+            order_by: {semester: {start_date: desc_nulls_last}}
+        ) {
+            is_coordinator
+            semester_id
+        }
+
+        # Is this user a mentor for the
+        # most recent semester?
+        small_group_mentors(
+            limit: 1,
+            order_by: {
+                small_group: {
+                    semester: {start_date: desc_nulls_last}}},
+        ) {
+            small_group {
+                small_group_id
+                semester {
+                    semester_id
+                }
+            }
         }
     }
 }

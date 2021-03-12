@@ -27,7 +27,7 @@ enum OrderByField {
 
 impl Default for OrderByField {
     fn default() -> Self {
-        OrderByField::LastName
+        OrderByField::FirstName
     }
 }
 
