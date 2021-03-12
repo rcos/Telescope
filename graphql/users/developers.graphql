@@ -5,7 +5,7 @@ query Developers(
     $order_by: users_order_by!,
 ) {
     # Get the current semester
-    current_semsester: semesters(
+    current_semester: semesters(
         limit: 1,
         order_by: {start_date: desc_nulls_last}
     ) {

@@ -10,12 +10,11 @@ use super::UserRole as user_role;
 #[graphql(
     schema_path = "graphql/schema.json",
     query_path = "graphql/users/developers.graphql",
-    response_derives = "Debug"
+    response_derives = "Debug,Clone"
 )]
 pub struct Developers;
 
-use developers::users_order_by;
-use developers::Variables;
+use developers::{Variables, ResponseData, users_order_by, DevelopersCurrentSemester};
 use regex::Regex;
 use std::borrow::Cow;
 
@@ -87,4 +86,19 @@ impl Default for users_order_by {
             workshop_proposals_by_reviewer_username_aggregate: None,
         }
     }
+}
+
+/// Current semester object from response data.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct CurrentSemester {
+    semester_id: String,
+    title: String,
+}
+
+impl ResponseData {
+    /// Extract the current semester from the Developers query.
+    fn current_semester(&self) -> Option<&DevelopersCurrentSemester> {
+        self.current_semester.first()
+    }
+
 }
