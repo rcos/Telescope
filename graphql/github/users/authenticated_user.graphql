@@ -3,5 +3,6 @@ query AuthenticatedUser {
         id
         login
         avatarUrl
+        url
     }
 }

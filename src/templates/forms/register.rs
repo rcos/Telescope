@@ -106,8 +106,8 @@ pub async fn for_identity(cookie: &IdentityCookie) -> Result<Form, TelescopeErro
                     .with_other_key(
                         INFO,
                         UserInfo {
-                            avatar_url: gh_user.avatar_url.clone(),
-                            profile_url: Some(gh_user.html_url.clone()),
+                            avatar_url: gh_user.avatar_url.to_string(),
+                            profile_url: Some(gh_user.url.to_string()),
                             username: gh_user.login.clone(),
                         },
                     )

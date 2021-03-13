@@ -2,9 +2,19 @@ use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::IdentityCookie;
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use crate::web::telescope_ua;
-use hubcaps::users::AuthenticatedUser;
 use hubcaps::{Credentials, Github};
+use crate::web::api::github::{
+    send_query,
+    users::{
+        authenticated_user::{
+            AuthenticatedUser,
+            authenticated_user::{
+                AuthenticatedUserViewer,
+                Variables
+            }
+        },
+    },
+};
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
@@ -65,29 +75,20 @@ impl Oauth2IdentityProvider for GitHubOauth {
 
 impl GitHubIdentity {
     /// Get the authenticated user for this access token.
-    pub async fn get_authenticated_user(&self) -> Result<AuthenticatedUser, TelescopeError> {
-        // Get a reference to the string storing the telescope user agent.
-        let agent: &str = telescope_ua();
-
-        // Create a github API client via hubcaps.
-        let github_client = Github::new(
-            agent,
-            Credentials::Token(self.access_token.secret().clone()),
-        )?;
-
-        // Get the authenticated user.
-        return github_client
-            .users()
-            .authenticated()
+    pub async fn get_authenticated_user(&self) -> Result<AuthenticatedUserViewer, TelescopeError> {
+        // Query the GitHub GraphQL API.
+        send_query::<AuthenticatedUser>(&self.access_token, Variables {})
+            // Wait for the response
             .await
-            .map_err(TelescopeError::from);
+            // Get the viewer from the response
+            .map(|response| response.viewer)
     }
 
     /// Get the github account id of the user associated with this access token.
+    /// Note that this is the GitHub GraphQL node ID, and is only compatible with the
+    /// GitHub V4 API.
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
         // Get the authenticated user and convert their id to a string.
-        self.get_authenticated_user()
-            .await
-            .map(|u| u.id.to_string())
+        self.get_authenticated_user().await.map(|u| u.id.to_string())
     }
 }
