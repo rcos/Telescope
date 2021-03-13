@@ -1,0 +1,7 @@
+query AuthenticatedUser {
+    viewer {
+        id
+        login
+        avatarUrl
+    }
+}
