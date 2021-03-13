@@ -3507,6 +3507,7 @@ dependencies = [
  "structopt",
  "time 0.2.25",
  "toml",
+ "url 2.2.1",
 ]
 
 [[package]]
@@ -4117,6 +4118,7 @@ dependencies = [
  "idna 0.2.0",
  "matches",
  "percent-encoding 2.1.0",
+ "serde",
 ]
 
 [[package]]

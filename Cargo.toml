@@ -47,9 +47,12 @@ futures = "0.3"
 lettre = {version = "~0.9", features = ["serde-impls"]}
 lettre_email = "~0.9"
 
-# Date and time utilities
+# Date and time utilities and formats
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
 time = "~0.2"
+
+# URL formatting
+url = {version = "2", features = ["serde"]}
 
 # Derive traits like Error and Display
 derive_more = "~0.99"
