@@ -6,8 +6,8 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 /// GraphQL query to lookup a user account by type and username.
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
-    query_path = "graphql/users/accounts/lookup.graphql"
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/users/accounts/lookup.graphql"
 )]
 pub struct AccountLookup;
 

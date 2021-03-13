@@ -6,8 +6,8 @@ use crate::web::api::rcos::users::{UserAccountType as user_account, UserRole as 
 /// Type representing GraphQL mutation to create a user and a user account.
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
-    query_path = "graphql/users/create_one.graphql"
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/users/create_one.graphql"
 )]
 pub struct CreateOneUser;
 

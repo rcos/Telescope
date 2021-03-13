@@ -8,8 +8,8 @@ use super::UserRole as user_role;
 /// account associations.
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
-    query_path = "graphql/users/developers.graphql",
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/users/developers.graphql",
     response_derives = "Debug,Clone,Serialize"
 )]
 pub struct Developers;

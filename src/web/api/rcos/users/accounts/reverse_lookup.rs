@@ -7,8 +7,8 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 /// platform.
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
-    query_path = "graphql/users/accounts/reverse_lookup.graphql"
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/users/accounts/reverse_lookup.graphql"
 )]
 pub struct ReverseLookup;
 

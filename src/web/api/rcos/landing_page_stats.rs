@@ -3,8 +3,8 @@
 /// GraphQL Query for landing page statistics.
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
-    query_path = "graphql/stats/landing_page.graphql"
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/stats/landing_page.graphql"
 )]
 pub struct LandingPageStatistics;
 

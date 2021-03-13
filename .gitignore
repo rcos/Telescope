@@ -9,5 +9,7 @@ config.toml
 
 # The Clion GraphQL Plugin config file in the GraphQL folder may contain
 # secrets, and should be ignored.
-graphql/.graphqlconfig
-graphql/schema.graphql
+graphql/rcos/.graphqlconfig
+graphql/rcos/schema.graphql
+graphql/github/schema.graphql
+graphql/github/.graphqlconfig
