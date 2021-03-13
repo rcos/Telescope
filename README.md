@@ -58,10 +58,18 @@ $ cargo install graphql_client_cli --force
 ```
 Finally, regenerate Telescope's `schema.json` file as follows:
 ```shell
-$ graphql-client introspect-schema --header 'x-hasura-admin-secret: xxxxxxxxxxxxxxxxxxxxxxxx' --output graphql/schema.json http://localhost:8000/v1/graphql
+$ graphql-client introspect-schema --header 'x-hasura-admin-secret: xxxxxxxxxxxxxxxxxxxxxxxx' --output graphql/rcos/schema.json http://localhost:8000/v1/graphql
 ```
 again, `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your `.env` file.
 
+You may also have to introspect the GitHub V4 API schema, since we also keep a 
+copy of that in telescope. This requires a GitHub Personal Access Token (PAT) 
+which you can generate [here](https://github.com/settings/tokens). Once you have
+generated your PAT, you can introspect/update the local GitHub Schema using
+```shell 
+$ graphql-client introspect-schema --output graphql/github/schema.json --authorization "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" https://api.github.com/graphql
+```
+where `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` is replaced by your PAT.
 
 ## Installation:
 1. Install dependencies:
