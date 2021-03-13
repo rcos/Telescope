@@ -7,6 +7,7 @@ use actix_web::{HttpRequest, HttpResponse};
 use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
+use crate::web::services::auth::rpi_cas::RpiCas;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -19,6 +20,9 @@ pub fn register(config: &mut ServiceConfig) {
 
     // Discord OAuth2 provider services.
     DiscordOAuth::register_services(config);
+
+    // RPI CAS provider services.
+    RpiCas::register_services(config);
 }
 
 /// Function to create the redirect URL for a given request and identity provider's
