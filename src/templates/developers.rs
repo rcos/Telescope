@@ -47,6 +47,7 @@ async fn get_pfp_url_github(github_user_id: String) -> Result<String, TelescopeE
     // Use the GitHub client to get the user's profile picture.
     // FIXME: Figure out how to get github users by ID or find other workaround.
     // github_client.users().get()
+    unimplemented!()
 }
 
 /// Create the developers page template
