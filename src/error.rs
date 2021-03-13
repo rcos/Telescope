@@ -120,15 +120,26 @@ pub enum TelescopeError {
 
     #[error(ignore)]
     #[display(fmt = "Error interacting with RCOS API: {}", _0)]
-    /// Error interacting with RCOS central API. This is a wrapper around a
-    /// reqwest error. This should generally report as an ISE.
+    /// Error interacting with RCOS central API.
+    /// This should generally report as an ISE.
     RcosApiError(String),
 
     #[error(ignore)]
-    #[display(fmt = "Central RCOS GraphQL API returned error(s)")]
-    /// The central RCOS GraphQL API responded with errors. This should
+    #[display(fmt = "Error interacting with GitHub API: {}", _0)]
+    /// Error interacting with GitHub's GraphQL API. This should generally
+    /// report as an ISE.
+    GitHubApiError(String),
+
+    #[error(ignore)]
+    #[display(fmt = "{} returned error(s) :{:?}", platform, errors)]
+    /// A GraphQL API responded with errors. This should
     /// report as an internal server error.
-    GraphQLError(Vec<GraphQlError>),
+    GraphQLError {
+        /// The API platform
+        platform: String,
+        /// The errors that were returned.
+        errors: Vec<GraphQlError>
+    },
 
     #[error(ignore)]
     #[display("GitHub API error: {}", _0)]
@@ -172,10 +183,16 @@ impl TelescopeError {
         }
     }
 
-    /// Convert a reqwest error into a telescope error.
+    /// Convert a reqwest error from the RCOS API into a telescope error.
     pub fn rcos_api_error(err: ReqwestError) -> Self {
         error!("Error Querying RCOS API: {}", err);
         Self::RcosApiError(err.to_string())
+    }
+
+    /// Convert a reqwest error from the GitHub API into a telescope error.
+    pub fn github_api_error(err: ReqwestError) -> Self {
+        error!("Error Querying GitHub API: {}", err);
+        Self::GitHubApiError(err.to_string())
     }
 
     /// Serialize an invalid form to send back to the user.
@@ -289,21 +306,25 @@ impl TelescopeError {
             TelescopeError::RcosApiError(err) => jumbotron::new(
                 format!("{} - Internal API Query Error", status_code),
                 format!(
-                    "Could not send query to the central API. Please contact a \
-                coordinator and file a GitHub issue. Internal error description: {}",
-                    err
-                ),
+                    "Could not query the central RCOS API. Please contact a coordinator and file a \
+                    GitHub issue. Internal error description: {}", err),
             ),
 
-            TelescopeError::GraphQLError(errs) => {
+            TelescopeError::GitHubApiError(err) => jumbotron::new(
+                format!("{} - GitHub API V4 Query Error", status_code),
+                format!("Could not query the GitHub API. Please contact a coordinator and \
+                file a GitHub issue on the Telescope repository. Internal error description: {}", err)
+            ),
+
+            TelescopeError::GraphQLError { platform, errors} => {
                 // Map all errors to their `Display` formatting.
-                let errs: Vec<String> = errs.iter().map(|e| format!("{}", e)).collect();
+                let errs: Vec<String> = errors.iter().map(|e| format!("{}", e)).collect();
 
                 jumbotron::new(
-                    format!("{} - Internal API Error", status_code),
-                    format!("The central RCOS GraphQL API returned at least one error. Please \
+                    format!("{} - {} Error", status_code, platform),
+                    format!("The {} returned at least one error. Please \
                     contact a coordinator and create an issue on the telescope GitHub. Internal error \
-                    description(s): {:?}", errs)
+                    description(s): {:?}", platform, errs)
                 )
             }
 
