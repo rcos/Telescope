@@ -14,6 +14,7 @@ use std::borrow::Cow;
 use std::sync::Arc;
 use std::future::Future;
 use actix_web::body::Body;
+use actix_web::dev::Service;
 
 pub mod discord;
 pub mod github;
@@ -163,9 +164,14 @@ where T: Oauth2IdentityProvider + 'static
         return Box::pin(async move {
             // Check that the user is already authenticated with another service
             // and exists.
-
-            // Make the redirect url
-            let redir_url: RedirectUrl = make_redirect_url(&req, )
+            if ident.identity().await.is_some() {
+                // If so, make the redirect url and send the user there.
+                let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
+                return Self::auth_response(redir_url, &req);
+            } else {
+                // If not, respond with a NotAuthenticated error.
+                return Err(TelescopeError::NotAuthenticated);
+            }
         });
     }
 

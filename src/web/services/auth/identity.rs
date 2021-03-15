@@ -17,10 +17,10 @@ use serde::Serialize;
 #[derive(Serialize, Deserialize)]
 pub struct IdentityCookie {
     /// A GitHub access token.
-    github: Option<GitHubIdentity>,
+    pub github: Option<GitHubIdentity>,
 
     /// A Discord access and refresh token.
-    discord: Option<DiscordIdentity>,
+    pub discord: Option<DiscordIdentity>,
 }
 
 impl IdentityCookie {
@@ -40,36 +40,33 @@ impl IdentityCookie {
         return Ok(self);
     }
 
-    /// Get the platform's identity of the user who logged in to produce
-    /// this access token.
-    pub async fn get_account_identity(&self) -> Result<String, TelescopeError> {
-        match self {
-            IdentityCookie::Github(i) => i.get_user_id().await,
-            IdentityCookie::Discord(i) => i.get_user_id().await,
-        }
-    }
-
-    /// Get the on-platform username of the user associated with this identity.
-    pub async fn get_username_string(&self) -> Result<String, TelescopeError> {
-        match self {
-            IdentityCookie::Github(i) => Ok(i.get_authenticated_user().await?.login.clone()),
-            IdentityCookie::Discord(i) => Ok(i.authenticated_user().await?.tag()),
-        }
+    /// This identity is only valid if it is authenticated with at least one
+    /// identity provider.
+    pub fn is_valid(&self) -> bool {
+        self.discord.is_some() || self.github.is_some()
     }
 
     /// Get the RCOS username of an authenticated user.
     pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
-        // Extract the platform info to look up the user.
-        let platform: UserAccountType = self.user_account_type();
-        let platform_id: String = self.get_account_identity().await?;
+        // Try first to get a username via the discord identity.
+        if let Some(discord) = self.discord.as_ref() {
+            let rcos_username: Option<String> = discord.get_rcos_username().await?;
+            if rcos_username.is_some() {
+                return Ok(rcos_username);
+            }
+        }
 
-        // Make the query variables
-        let query_vars = ReverseLookup::make_vars(platform, platform_id);
+        // If there is no discord identity (or it's not linked) try with the
+        // github identity.
+        if let Some(github) = self.github.as_ref() {
+            let rcos_username: Option<String> = github.get_rcos_username().await?;
+            if rcos_username.is_some() {
+                return Ok(rcos_username);
+            }
+        }
 
-        // Send the query and await and return the username.
-        return Ok(send_query::<ReverseLookup>(None, query_vars)
-            .await?
-            .username());
+        // If neither worked out, return none.
+        return Ok(None);
     }
 }
 
@@ -148,10 +145,19 @@ impl Identity {
         match serde_json::from_str::<IdentityCookie>(id.as_str()) {
             // On okay, refresh the identity cookie if needed
             Ok(id) => match id.refresh().await {
-                // If this succeeds, save and return the new identity.
+                // If this succeeds
                 Ok(id) => {
-                    self.save(&id);
-                    return Some(id);
+                    // Check that this identity us authenticated with at least
+                    // one provider.
+                    if id.is_valid() {
+                        // If so, save and return it.
+                        self.save(&id);
+                        return Some(id);
+                    } else {
+                        // If not forget it.
+                        self.forget();
+                        return None;
+                    }
                 }
 
                 // If it fails to refresh, we have no identity. Send a warning
@@ -169,15 +175,6 @@ impl Identity {
                 self.forget();
                 return None;
             }
-        }
-    }
-
-    /// Attempt to get the RCOS username of this user if they are authenticated
-    /// and one exists.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
-        match self.identity() {
-            None => Ok(None),
-            Some(cookie) => cookie.get_rcos_username().await,
         }
     }
 }

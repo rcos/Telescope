@@ -12,6 +12,9 @@ use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
 use serenity::model::user::CurrentUser;
 use std::sync::Arc;
+use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::api::rcos::send_query;
 
 /// The Discord API endpoint to query for user data.
 const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -156,5 +159,18 @@ impl DiscordIdentity {
     /// Get the authenticated Discord account's ID.
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
         self.authenticated_user().await.map(|u| u.id.to_string())
+    }
+
+    /// Get the RCOS username of the account associated with the authenticated
+    /// discord user if one exists.
+    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+        // Get the authenticated user id.
+        let platform_id: String = self.get_user_id().await?;
+        // Build the query variables for a reverse lookup query to the central RCOS API
+        let variables = ReverseLookup::make_vars(UserAccountType::Discord, platform_id);
+        // Send the query and await the response
+        return send_query::<ReverseLookup>(None, variables)
+            .await
+            .map(|response| response.username());
     }
 }

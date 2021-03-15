@@ -3,21 +3,26 @@ use crate::error::TelescopeError;
 use crate::web::services::auth::identity::IdentityCookie;
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use hubcaps::{Credentials, Github};
-use crate::web::api::github::{
-    send_query,
-    users::{
-        authenticated_user::{
-            AuthenticatedUser,
+use crate::web::api::{
+    rcos,
+    github::{
+        self,
+        users::{
             authenticated_user::{
-                AuthenticatedUserViewer,
-                Variables
-            }
+                AuthenticatedUser,
+                authenticated_user::{
+                    AuthenticatedUserViewer,
+                    Variables
+                }
+            },
         },
-    },
+    }
 };
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
+use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
+use crate::web::api::rcos::users::UserAccountType;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -77,7 +82,7 @@ impl GitHubIdentity {
     /// Get the authenticated user for this access token.
     pub async fn get_authenticated_user(&self) -> Result<AuthenticatedUserViewer, TelescopeError> {
         // Query the GitHub GraphQL API.
-        send_query::<AuthenticatedUser>(&self.access_token, Variables {})
+        github::send_query::<AuthenticatedUser>(&self.access_token, Variables {})
             // Wait for the response
             .await
             // Get the viewer from the response
@@ -90,5 +95,18 @@ impl GitHubIdentity {
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
         // Get the authenticated user and convert their id to a string.
         self.get_authenticated_user().await.map(|u| u.id.to_string())
+    }
+
+    /// Get the RCOS username associated with this github auth token if it exists.
+    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+        // Get the on platform id of this user.
+        let platform_id: String = self.get_user_id().await?;
+        // Build the variables for a reverse lookup query to the central RCOS API.
+        let query_variables = ReverseLookup::make_vars(UserAccountType::GitHub, platform_id);
+        // Send the query to the central RCOS API and await response (we have no subject for this
+        // request since we are requesting something that would be the subject field)
+        return rcos::send_query::<ReverseLookup>(None, query_variables)
+            .await
+            .map(|response| response.username());
     }
 }
