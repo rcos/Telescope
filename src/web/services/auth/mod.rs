@@ -8,6 +8,7 @@ use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
 use crate::web::services::auth::rpi_cas::RpiCas;
+use crate::web::services::auth::identity::Identity;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -45,14 +46,6 @@ fn make_redirect_url(req: &HttpRequest, redir_path: String) -> RedirectUrl {
 
 /// Trait for identity providers (GitHub OAuth2, Discord OAuth2, RPI CAS, etc).
 pub trait IdentityProvider: 'static {
-    /// The client configuration type that stores information about the identity
-    /// provider including the authorization URL and token URL for OAuth2
-    /// providers.
-    type Client;
-
-    /// Function to get the client configuration used by this provider.
-    fn get_client() -> Self::Client;
-
     /// The lowercase, one word name of the service. This is used in generating
     /// redirect paths and registering the service with actix. It must be unique.
     const SERVICE_NAME: &'static str;
@@ -72,6 +65,10 @@ pub trait IdentityProvider: 'static {
         format!("/register/{}", Self::SERVICE_NAME)
     }
 
+    /// The path to link this identity service. This is similar to the other two,
+    /// but is intended to be used to link an existing account.
+    fn link_path() -> String { format!("/link/{}", Self::SERVICE_NAME) }
+
     /// The path for the identity provider to redirect back to after authenticating
     /// a user for login. This path is also registered under actix with the
     /// authentication callback handler defined by this trait.
@@ -86,31 +83,35 @@ pub trait IdentityProvider: 'static {
         format!("/auth/{}/register", Self::SERVICE_NAME)
     }
 
+    /// The path to redirect back to after account linking success. This is
+    /// similar to the login and registration authenticated redirect paths.
+    fn link_redirect_path() -> String { format!("/auth/{}/link", Self::SERVICE_NAME) }
+
     /// The type of future returned by the login handler.
     type LoginFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
 
     /// The type of the future returned by the registration handler.
     type RegistrationFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
 
+    /// The type of the future returned by the account linking handler.
+    type LinkFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+
     /// The type of future returned by the login authenticated response handler.
     type LoginAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
 
     /// The type of future returned by the registration authenticated response handler.
-    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>>
-        + 'static;
+    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+
+    /// The type of future returned by the registration authenticated response handler.
+    type LinkAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
 
     /// Register the necessary actix services to support this identity
     /// provider.
     fn register_services(config: &mut ServiceConfig) {
         config
-            .route(
-                Self::register_path().as_str(),
-                aweb::get().to(Self::registration_handler),
-            )
-            .route(
-                Self::login_path().as_str(),
-                aweb::get().to(Self::login_handler),
-            )
+            .route(Self::register_path().as_str(), aweb::get().to(Self::registration_handler))
+            .route(Self::login_path().as_str(), aweb::get().to(Self::login_handler))
+            .route(Self::link_path().as_str(), aweb::get().to(Self::link_handler))
             .route(
                 Self::login_redirect_path().as_str(),
                 aweb::get().to(Self::login_authenticated_handler),
@@ -118,7 +119,10 @@ pub trait IdentityProvider: 'static {
             .route(
                 Self::registration_redirect_path().as_str(),
                 aweb::get().to(Self::registration_authenticated_handler),
-            );
+            )
+            .route(
+                Self::link_redirect_path().as_str(),
+                aweb::get().to(Self::linking_authenticated_handler));
     }
 
     /// Actix-web handler for the route that redirects to authentication for
@@ -130,6 +134,10 @@ pub trait IdentityProvider: 'static {
     /// trait to GET requests.
     fn registration_handler(req: HttpRequest) -> Self::RegistrationFut;
 
+    /// Actix-web handler for the route that redirects to the authentication provider
+    /// to link an account.
+    fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut;
+
     /// Actix-web handler for authentication callback to login. Guarded by this
     /// trait to GET requests.
     fn login_authenticated_handler(req: HttpRequest) -> Self::LoginAuthenticatedFut;
@@ -137,4 +145,7 @@ pub trait IdentityProvider: 'static {
     /// Actix-web handler for authentication callback to account creation.
     /// Guarded by this trait to GET requests.
     fn registration_authenticated_handler(req: HttpRequest) -> Self::RegistrationAuthenticatedFut;
+
+    /// Actix-web handler
+    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut;
 }

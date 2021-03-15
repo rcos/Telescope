@@ -89,7 +89,7 @@ impl DiscordIdentity {
     }
 
     /// Refresh this access token if necessary.
-    pub fn refresh(self) -> Result<Self, TelescopeError> {
+    pub async fn refresh(self) -> Result<Self, TelescopeError> {
         // If this token has expired
         if self.expiration < Utc::now() {
             // Get a discord client and make a refresh token request.
@@ -103,7 +103,7 @@ impl DiscordIdentity {
             let response = refresh_token_request
                 // Add login redirect path.
                 .add_extra_param("redirect_uri", DiscordOAuth::login_redirect_path().as_str())
-                // Send the request. (This is synchronous -- be careful).
+                // Send the request.
                 .request(oauth2::reqwest::http_client)
                 // Handle and propagate the error.
                 .map_err(|err| {

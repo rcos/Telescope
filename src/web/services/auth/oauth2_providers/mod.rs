@@ -12,6 +12,8 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
+use std::future::Future;
+use actix_web::body::Body;
 
 pub mod discord;
 pub mod github;
@@ -127,22 +129,16 @@ pub trait Oauth2IdentityProvider {
 }
 
 impl<T> IdentityProvider for T
-where
-    T: Oauth2IdentityProvider + 'static,
+where T: Oauth2IdentityProvider + 'static
 {
-    type Client = Arc<BasicClient>;
-
-    fn get_client() -> Self::Client {
-        <Self as Oauth2IdentityProvider>::get_client()
-    }
-
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
 
     type LoginFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type LinkFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
-    type RegistrationAuthenticatedFut =
-        LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type LinkAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     fn login_handler(req: HttpRequest) -> Self::LoginFut {
         return Box::pin(async move {
@@ -160,6 +156,16 @@ where
                 make_redirect_url(&req, Self::registration_redirect_path());
             // Redirect the user.
             return Self::auth_response(redir_url, &req);
+        });
+    }
+
+    fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut {
+        return Box::pin(async move {
+            // Check that the user is already authenticated with another service
+            // and exists.
+
+            // Make the redirect url
+            let redir_url: RedirectUrl = make_redirect_url(&req, )
         });
     }
 
@@ -222,5 +228,9 @@ where
                 .header(LOCATION, "/register/finish")
                 .finish())
         });
+    }
+
+    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut {
+        unimplemented!()
     }
 }

@@ -13,38 +13,31 @@ use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, Ready};
 use serde::Serialize;
 
-/// The top level enum stored in the identity cookie.
+/// The top level object stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
-pub enum IdentityCookie {
+pub struct IdentityCookie {
     /// A GitHub access token.
-    Github(GitHubIdentity),
+    github: Option<GitHubIdentity>,
 
     /// A Discord access and refresh token.
-    Discord(DiscordIdentity),
+    discord: Option<DiscordIdentity>,
 }
 
 impl IdentityCookie {
     /// If necessary, refresh an identity cookie. This could include getting a
     /// new access token from an OAuth API for example.
-    pub fn refresh(self) -> Result<Self, TelescopeError> {
-        // Destructure on discord identity.
-        if let IdentityCookie::Discord(discord_identity) = self {
-            return discord_identity
-                .refresh()
-                // wrap discord identity
-                .map(IdentityCookie::Discord);
+    pub async fn refresh(mut self) -> Result<Self, TelescopeError> {
+        // When there is a discord identity.
+        if let Some(discord_identity) = self.discord {
+            // Refresh the discord identity
+            let refreshed = discord_identity.refresh().await?;
+            // Store back and return self.
+            self.discord = Some(refreshed);
+            return Ok(self);
         }
 
-        // Otherwise return self -- Github does not need to be refreshed.
+        // Otherwise return self
         return Ok(self);
-    }
-
-    /// Get the central RCOS API value representing this identity provider.
-    pub fn user_account_type(&self) -> UserAccountType {
-        match self {
-            IdentityCookie::Discord(_) => UserAccountType::Discord,
-            IdentityCookie::Github(_) => UserAccountType::GitHub,
-        }
     }
 
     /// Get the platform's identity of the user who logged in to produce
@@ -148,13 +141,13 @@ impl Identity {
     }
 
     /// Get the user's identity. Refresh it if necessary.
-    pub fn identity(&self) -> Option<IdentityCookie> {
+    pub async fn identity(&self) -> Option<IdentityCookie> {
         // Get the inner identity as a String.
         let id: String = self.inner.identity()?;
         // try to deserialize it
         match serde_json::from_str::<IdentityCookie>(id.as_str()) {
             // On okay, refresh the identity cookie if needed
-            Ok(id) => match id.refresh() {
+            Ok(id) => match id.refresh().await {
                 // If this succeeds, save and return the new identity.
                 Ok(id) => {
                     self.save(&id);
