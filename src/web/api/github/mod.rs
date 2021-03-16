@@ -1,6 +1,6 @@
 //! GitHub API V4 queries and mutations.
 
-use graphql_client::{GraphQLQuery, Response as GraphQLResponse};
+use graphql_client::{GraphQLQuery, Response as GraphQLResponse, QueryBody};
 use oauth2::AccessToken;
 use crate::error::TelescopeError;
 use reqwest::Client;
@@ -20,12 +20,14 @@ const API_NAME: &'static str = "GitHub API V4";
 /// Send a GraphQL query to the GitHub API.
 pub async fn send_query<T: GraphQLQuery>(auth_token: &AccessToken, variables: T::Variables) -> Result<T::ResponseData, TelescopeError> {
     // Build GraphQL request
-    let request = T::build_query(variables);
+    let query = T::build_query(variables);
 
     // Make a client, send the request, and return the result.
     return Client::new()
         // POST request to the GitHub GraphQL API endpoint
         .post(GITHUB_API_ENDPOINT)
+        // With the JSON of the GraphQL query
+        .json(&query)
         // With the user's access token
         .bearer_auth(auth_token.secret())
         // And required headers

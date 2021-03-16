@@ -3,7 +3,7 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::api::rcos::auth::ApiJwtClaims;
-use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
+use graphql_client::{GraphQLQuery, Response as GraphQlResponse, QueryBody};
 use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 use crate::web::api::handle_graphql_response;
 use serde_json::Value;
@@ -43,7 +43,7 @@ pub async fn send_query<T: GraphQLQuery>(
         .await
         // Convert and propagate any errors.
         .map_err(TelescopeError::rcos_api_error)?
-        // Wait for the body to recieve as a string
+        // Wait for the body to receive as a string
         .text()
         .await
         // Convert and propagate any errors on deserializing the response body.
