@@ -3,7 +3,7 @@
 use crate::error::TelescopeError;
 use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::Form;
-use crate::web::services::auth::identity::AuthenticatedIdentities;
+use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::services::auth::oauth2_providers::discord::DiscordIdentity;
 
@@ -76,32 +76,16 @@ struct UserInfo {
 }
 
 /// Create a registration page with the appropriate information depending on
-/// the user's identity. The identity cookie should only be defined for one
-/// provider.
-pub async fn for_identity(cookie: &AuthenticatedIdentities) -> Result<Form, TelescopeError> {
-    // If the cookie is for a discord
-    if let Some(d) = cookie.discord.as_ref() {
-        // Get authenticated user, convert into registration form.
-        return d.get_authenticated_user().await
-            .map(|discord_user| {
-                userless()
-                    .with_other_key(ICON, UserAccountType::Discord)
-                    .with_other_key(
-                        INFO,
-                        UserInfo {
-                            username: discord_user.tag(),
-                            avatar_url: discord_user.face(),
-                            profile_url: None,
-                        },
-                    )
-            });
-    }
-
-
-    // If cookie is for github
-    if let Some(g) = cookie.github.as_ref() {
-        // Get the authenticated github user and convert their info to a registration form.
-        return g.get_authenticated_user().await
+/// the user's identity.
+pub async fn for_identity(cookie: &RootIdentity) -> Result<Form, TelescopeError> {
+    match cookie {
+        // On authenticated github
+        RootIdentity::GitHub(gh) => gh
+            // Get the authenticated github user account
+            .get_authenticated_user()
+            // Wait for API call to resolve
+            .await
+            // Convert to form
             .map(|gh_user| {
                 userless()
                     .with_other_key(ICON, UserAccountType::GitHub)
@@ -113,11 +97,26 @@ pub async fn for_identity(cookie: &AuthenticatedIdentities) -> Result<Form, Tele
                             username: gh_user.login.clone(),
                         },
                     )
-            });
-    }
+            }),
 
-    // If neither identity matches at this point, Panic. We could also throw
-    // an error here, but panicking seems more appropriate since the
-    // precondition of this function was failed.
-    panic!("No identity defined");
+        // On authenticated Discord
+        RootIdentity::Discord(d) => d
+            // Get authenticated user
+            .get_authenticated_user()
+            // Wait for API call to resolve
+            .await
+            // Convert to form.
+            .map(|discord_user| {
+                userless()
+                    .with_other_key(ICON, UserAccountType::Discord)
+                    .with_other_key(
+                        INFO,
+                        UserInfo {
+                            username: discord_user.tag(),
+                            avatar_url: discord_user.face(),
+                            profile_url: None,
+                        },
+                    )
+            })
+    }
 }

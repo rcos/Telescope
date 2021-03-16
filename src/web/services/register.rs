@@ -25,7 +25,7 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// if the identity is not authenticated.
 pub async fn finish_registration(identity_cookie: AuthenticatedIdentities) -> Result<Form, TelescopeError> {
     // Create a form for the authenticated the user's cookie.
-    register::for_identity(&identity_cookie).await
+    register::for_identity(&identity_cookie.root).await
 }
 
 #[post("/register/finish")]
@@ -37,7 +37,7 @@ pub async fn submit_registration(
 ) -> Result<HttpResponse, TelescopeError> {
     // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
     // valid input.
-    let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie)
+    let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie.root)
         .await?
         .validate_input(form_input)
         .await?;
