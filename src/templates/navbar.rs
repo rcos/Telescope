@@ -48,10 +48,11 @@ fn item(req_path: &str, text: impl Into<String>, location: impl Into<String>) ->
 fn with_defaults(req_path: &str) -> Template {
     let left_items = vec![
         item(req_path, "Home", "/"),
-        item(req_path, "Projects", "/projects"),
-        item(req_path, "Developers", "/developers"),
+        // item(req_path, "Projects", "/projects"),
+        // item(req_path, "Developers", "/developers"),
         item(req_path, "Sponsors", "/sponsors"),
-        item(req_path, "Blog", "/blog"),
+        // item(req_path, "Blog", "/blog"),
+        // item(req_path, "Calendar", "/calendar")
     ];
 
     // Add items to empty navbar.
