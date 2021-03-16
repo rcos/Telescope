@@ -59,7 +59,7 @@ pub async fn submit_registration(
 
     // Check for discord identity first.
     if let Some(discord) = identity_cookie.discord {
-        let user = discord.authenticated_user().await?;
+        let user = discord.get_authenticated_user().await?;
         platform = UserAccountType::Discord;
         username = user.tag();
         platform_id = user.id.to_string();

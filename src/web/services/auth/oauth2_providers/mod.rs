@@ -37,9 +37,6 @@ pub trait Oauth2IdentityProvider {
     /// [`IdentityProvider`] trait for requirements.
     const SERVICE_NAME: &'static str;
 
-    /// The type of user account associated with accounts authenticated using this identity.
-    const USER_ACCOUNT_TYPE: UserAccountType;
-
     /// Get the client configuration for this Identity Provider.
     fn get_client() -> Arc<BasicClient>;
 
@@ -49,6 +46,8 @@ pub trait Oauth2IdentityProvider {
     /// Create a user identity struct from an auth token response to save
     /// in the user's cookies and identify them in future requests.
     fn make_identity(token_response: &BasicTokenResponse) -> AuthenticatedIdentities;
+
+    fn get_platform_id()
 
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
@@ -189,12 +188,12 @@ where T: Oauth2IdentityProvider + 'static
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             let cookie_identity: AuthenticatedIdentities = Self::make_identity(&token_response);
             // Get the on-platform ID of the user's identity.
-            let platform_id: String = cookie_identity.get_account_identity().await?;
+            let platform_id: String = cookie_identity.get().await?;
 
             // Make variables.
             let variables = reverse_lookup::reverse_lookup::Variables {
                 id: platform_id,
-                platform: cookie_identity.user_account_type(),
+                platform: Self::USER_ACCOUNT_TYPE,
             };
             // Send API query.
             let username: Option<String> =

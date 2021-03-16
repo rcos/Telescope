@@ -2,7 +2,7 @@
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::services::auth::identity::Identity;
+use crate::web::services::auth::identity::{Identity, AuthenticatedIdentities};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
 
@@ -83,16 +83,18 @@ fn for_user(req_path: &str, username: &str) -> Template {
 
 /// Create a navbar template for
 pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
-    // Extract the identity from the request.
-    let identity: Identity = Identity::extract(req).await?;
+    // Extract the authenticated identities from the request.
+    let identity: Option<AuthenticatedIdentities> = Identity::extract(req).await?.identity().await;
 
-    // Check if there is an authenticated RCOS account
-    if let Some(username) = identity.get_rcos_username().await? {
-        // If there is make a navbar with the username.
-        return Ok(for_user(req.path(), username.as_str()));
+    // If the user is authenticated.
+    if let Some(authenticated) = identity {
+        // Check if there is an authenticated RCOS account
+        if let Some(username) = authenticated.get_rcos_username().await? {
+            // If there is make a navbar with the username.
+            return Ok(for_user(req.path(), username.as_str()));
+        }
     }
 
-    // If there is no cookie, or no RCOS user associated with the cookie,
-    // return a user-less navbar.
+    // If the user is not authenticated or there is no username, return a user-less navbar.
     return Ok(userless(req.path()));
 }

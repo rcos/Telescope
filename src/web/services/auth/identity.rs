@@ -16,33 +16,14 @@ use crate::web::services::auth::IdentityProvider;
 use std::future::Future;
 use std::any::Any;
 
-/// Trait for all identities stored in the top-level identity cookie.
-pub trait AuthenticatedIdentity: Any {
-    /// The type of user account associated with this identity cookie.
-    const USER_ACCOUNT_TYPE: UserAccountType;
-
-    /// The type representing an authenticated user on this platform.
-    type AuthenticatedUser;
-
-    /// The future type returned by the function to get this platform's authenticated user.
-    type AuthenticatedUserFuture: Future<Output = Result<Self::AuthenticatedUser, TelescopeError>>;
-
-    /// Get the user object that is authenticated on this platform with this cookie.
-    fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture;
-
-    /// Get the username of the RCOS user associated with the authenticated account
-    /// if one exists.
-    fn get_rcos_username(&self) -> LocalBoxFuture<Result<Option<String>, TelescopeError>>;
-}
-
 /// The top level object stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
 pub struct AuthenticatedIdentities {
     /// A GitHub access token.
-    github: Option<GitHubIdentity>,
+    pub github: Option<GitHubIdentity>,
 
     /// A Discord access and refresh token.
-    discord: Option<DiscordIdentity>,
+    pub discord: Option<DiscordIdentity>,
 }
 
 impl AuthenticatedIdentities {
@@ -89,15 +70,6 @@ impl AuthenticatedIdentities {
 
         // If neither worked out, return none.
         return Ok(None);
-    }
-
-    /// Try to get a specific type of authenticated identity from this cookie.
-    pub fn get<T: AuthenticatedIdentity>(&self) -> Option<&T> {
-        match T::USER_ACCOUNT_TYPE {
-            UserAccountType::GitHub => self.github.as_ref(),
-            UserAccountType::Discord => self.discord.as_ref(),
-            _ => unimplemented!()
-        }
     }
 }
 
@@ -224,4 +196,3 @@ impl Identity {
         }
     }
 }
-

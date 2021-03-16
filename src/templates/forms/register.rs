@@ -3,7 +3,7 @@
 use crate::error::TelescopeError;
 use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::Form;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, AuthenticatedIdentity};
+use crate::web::services::auth::identity::AuthenticatedIdentities;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::services::auth::oauth2_providers::discord::DiscordIdentity;
 
@@ -80,7 +80,7 @@ struct UserInfo {
 /// provider.
 pub async fn for_identity(cookie: &AuthenticatedIdentities) -> Result<Form, TelescopeError> {
     // If the cookie is for a discord
-    if let Some(d) = cookie.get::<DiscordIdentity>() {
+    if let Some(d) = cookie.discord.as_ref() {
         // Get authenticated user, convert into registration form.
         return d.get_authenticated_user().await
             .map(|discord_user| {
