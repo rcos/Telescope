@@ -43,19 +43,17 @@ pub async fn send_query<T: GraphQLQuery>(
         .await
         // Convert and propagate any errors.
         .map_err(TelescopeError::rcos_api_error)?
-        // The body of the response should be deserialized as JSON.
-        .json::<Value>()
-        // Wait for the body to deconstruct.
+        // Wait for the body to recieve as a string
+        .text()
         .await
         // Convert and propagate any errors on deserializing the response body.
         .map_err(TelescopeError::rcos_api_error)
-        // Convert the JSON value into the GraphQL response type.
-        .and_then(|json_value| serde_json::from_value::<GraphQlResponse<T::ResponseData>>(json_value.clone())
+        // Convert the body into the GraphQL response type.
+        .and_then(|body| serde_json::from_str::<GraphQlResponse<T::ResponseData>>(body.as_str())
             // Map Serde errors into telescope errors
             .map_err(|err| {
                 // Log the error and response body.
-                error!("Error querying RCOS API: {}\nresponse body: {}",
-                    err, serde_json::to_string_pretty(&json_value).expect("Could not display response body."));
+                error!("Error querying RCOS API: {}\nresponse body: {}", err, body.as_str());
                 // Convert the error
                 TelescopeError::RcosApiError(err.to_string())
             }))
