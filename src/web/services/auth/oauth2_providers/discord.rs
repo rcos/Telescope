@@ -2,7 +2,7 @@
 
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::AuthenticatedIdentities;
+use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;
@@ -68,8 +68,8 @@ impl Oauth2IdentityProvider for DiscordOAuth {
         ]
     }
 
-    fn make_identity(token_response: &BasicTokenResponse) -> AuthenticatedIdentities {
-        AuthenticatedIdentities::Discord(DiscordIdentity::from_response(token_response))
+    fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
+        RootIdentity::Discord(DiscordIdentity::from_response(token_response))
     }
 }
 

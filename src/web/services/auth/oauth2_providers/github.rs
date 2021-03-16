@@ -1,6 +1,6 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::AuthenticatedIdentities;
+use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use hubcaps::{Credentials, Github};
 use crate::web::api::{
@@ -73,12 +73,9 @@ impl Oauth2IdentityProvider for GitHubOauth {
         ]
     }
 
-    fn make_identity(token_response: &BasicTokenResponse) -> AuthenticatedIdentities {
+    fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
         // Extract the identity and build the identity cookie.
-        AuthenticatedIdentities {
-            github: Some(GitHubIdentity { access_token: token_response.access_token().clone() }),
-            discord: None
-        }
+        RootIdentity::GitHub(GitHubIdentity { access_token: token_response.access_token().clone() })
     }
 }
 

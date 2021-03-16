@@ -16,13 +16,72 @@ use crate::web::services::auth::IdentityProvider;
 use std::future::Future;
 use std::any::Any;
 
+/// The root identity that this user is authenticated with.
+#[derive(Serialize, Deserialize)]
+pub enum RootIdentity {
+    /// Github access token
+    GitHub(GitHubIdentity),
+
+    /// Discord access and refresh tokens.
+    Discord(DiscordIdentity)
+}
+
+impl RootIdentity {
+    /// Refresh this identity token if necessary.
+    pub async fn refresh(mut self) -> Result<Self, TelescopeError> {
+        // If this is a discord-based identity, refresh it and construct the refreshed root identity.
+        if let RootIdentity::Discord(discord) = self {
+            return discord.refresh().await.map(RootIdentity::Discord);
+        }
+        // Otherwise no-op.
+        return Ok(self);
+    }
+
+    /// Get the user account variant representing the authenticated platform.
+    pub fn get_user_account_type(&self) -> UserAccountType {
+        match self {
+            RootIdentity::GitHub(_) => UserAccountType::GitHub,
+            RootIdentity::Discord(_) => UserAccountType::Discord,
+        }
+    }
+
+    /// Get the string representing the unique user identifier on this platform.
+    pub async fn get_platform_id(&self) -> Result<String, TelescopeError> {
+        match self {
+            RootIdentity::GitHub(gh) => gh.get_user_id().await,
+            RootIdentity::Discord(d) => d.get_user_id().await,
+        }
+    }
+
+    /// Get the username of the RCOS account associated with the account
+    /// authenticated with this access token (if one exists).
+    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+        match self {
+            RootIdentity::GitHub(gh) => gh.get_rcos_username().await,
+            RootIdentity::Discord(d) => d.get_rcos_username().await
+        }
+    }
+
+    /// Put this root in a top level identity cookie.
+    pub fn make_authenticated_cookie(self) -> AuthenticatedIdentities {
+        AuthenticatedIdentities {
+            root: self,
+            github: None,
+            discord: None,
+        }
+    }
+}
+
 /// The top level object stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
 pub struct AuthenticatedIdentities {
-    /// A GitHub access token.
+    /// The root authenticated identity. This identity must always exist.
+    pub root: RootIdentity,
+
+    /// An optional GitHub access token.
     pub github: Option<GitHubIdentity>,
 
-    /// A Discord access and refresh token.
+    /// An optional Discord access and refresh token.
     pub discord: Option<DiscordIdentity>,
 }
 
@@ -30,7 +89,10 @@ impl AuthenticatedIdentities {
     /// If necessary, refresh an identity cookie. This could include getting a
     /// new access token from an OAuth API for example.
     pub async fn refresh(mut self) -> Result<Self, TelescopeError> {
-        // When there is a discord identity.
+        // Refresh the root identity
+        self.root = self.root.refresh().await?;
+
+        // When there is an additional discord identity.
         if let Some(discord_identity) = self.discord {
             // Refresh the discord identity
             let refreshed = discord_identity.refresh().await?;
@@ -43,33 +105,10 @@ impl AuthenticatedIdentities {
         return Ok(self);
     }
 
-    /// This identity is only valid if it is authenticated with at least one
-    /// identity provider.
-    pub fn is_valid(&self) -> bool {
-        self.discord.is_some() || self.github.is_some()
-    }
-
-    /// Get the RCOS username of an authenticated user.
+    /// Get the RCOS username of an authenticated user. This is the same as just getting the
+    /// RCOS username of the root identity.
     pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
-        // Try first to get a username via the discord identity.
-        if let Some(discord) = self.discord.as_ref() {
-            let rcos_username: Option<String> = discord.get_rcos_username().await?;
-            if rcos_username.is_some() {
-                return Ok(rcos_username);
-            }
-        }
-
-        // If there is no discord identity (or it's not linked) try with the
-        // github identity.
-        if let Some(github) = self.github.as_ref() {
-            let rcos_username: Option<String> = github.get_rcos_username().await?;
-            if rcos_username.is_some() {
-                return Ok(rcos_username);
-            }
-        }
-
-        // If neither worked out, return none.
-        return Ok(None);
+        self.root.get_rcos_username().await
     }
 }
 
@@ -154,17 +193,9 @@ impl Identity {
             Ok(id) => match id.refresh().await {
                 // If this succeeds
                 Ok(id) => {
-                    // Check that this identity us authenticated with at least
-                    // one provider.
-                    if id.is_valid() {
-                        // If so, save and return it.
-                        self.save(&id);
-                        return Some(id);
-                    } else {
-                        // If not forget it.
-                        self.forget();
-                        return None;
-                    }
+                    // Save and return the authenticated identity
+                    self.save(&id);
+                    return Some(id);
                 }
 
                 // If it fails to refresh, we have no identity. Send a warning
