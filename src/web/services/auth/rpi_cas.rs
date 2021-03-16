@@ -4,7 +4,7 @@ use crate::web::services::auth::{
     IdentityProvider,
     make_redirect_url
 };
-use actix_web::{HttpRequest, HttpResponse, Responder};
+use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use actix_web::http::header::LOCATION;
 use futures::future::{ready, Ready};

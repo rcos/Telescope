@@ -5,14 +5,13 @@ use crate::web::{csrf, profile_for};
 use crate::web::services::auth::identity::{Identity, RootIdentity};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
-use actix_web::{FromRequest, Responder};
+use actix_web::FromRequest;
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
-use url::Url;
 
 pub mod discord;
 pub mod github;
