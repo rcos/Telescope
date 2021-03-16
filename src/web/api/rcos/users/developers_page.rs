@@ -144,8 +144,6 @@ impl DevelopersUsers {
                         .filter(|enrollment| enrollment.semester_id == semester_id.as_str())
                         // Map it to the is_coordinator field
                         .map(|enrollment| enrollment.is_coordinator)
-                        // Flatten the double option to Option<bool>
-                        .flatten()
                 })
                 // If there is no semester or an internal field is null,
                 // the user is not a coordinator.
