@@ -1,5 +1,7 @@
 use crate::error::TelescopeError;
+use crate::web::services::auth::identity::Identity;
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
+use crate::web::services::auth::rpi_cas::RpiCas;
 use actix_web::http::header::HOST;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
@@ -7,8 +9,6 @@ use actix_web::{HttpRequest, HttpResponse};
 use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
-use crate::web::services::auth::rpi_cas::RpiCas;
-use crate::web::services::auth::identity::Identity;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -67,7 +67,9 @@ pub trait IdentityProvider: 'static {
 
     /// The path to link this identity service. This is similar to the other two,
     /// but is intended to be used to link an existing account.
-    fn link_path() -> String { format!("/link/{}", Self::SERVICE_NAME) }
+    fn link_path() -> String {
+        format!("/link/{}", Self::SERVICE_NAME)
+    }
 
     /// The path for the identity provider to redirect back to after authenticating
     /// a user for login. This path is also registered under actix with the
@@ -85,7 +87,9 @@ pub trait IdentityProvider: 'static {
 
     /// The path to redirect back to after account linking success. This is
     /// similar to the login and registration authenticated redirect paths.
-    fn link_redirect_path() -> String { format!("/auth/{}/link", Self::SERVICE_NAME) }
+    fn link_redirect_path() -> String {
+        format!("/auth/{}/link", Self::SERVICE_NAME)
+    }
 
     /// The type of future returned by the login handler.
     type LoginFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
@@ -100,7 +104,8 @@ pub trait IdentityProvider: 'static {
     type LoginAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
 
     /// The type of future returned by the registration authenticated response handler.
-    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+    type RegistrationAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>>
+        + 'static;
 
     /// The type of future returned by the registration authenticated response handler.
     type LinkAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
@@ -109,9 +114,18 @@ pub trait IdentityProvider: 'static {
     /// provider.
     fn register_services(config: &mut ServiceConfig) {
         config
-            .route(Self::register_path().as_str(), aweb::get().to(Self::registration_handler))
-            .route(Self::login_path().as_str(), aweb::get().to(Self::login_handler))
-            .route(Self::link_path().as_str(), aweb::get().to(Self::link_handler))
+            .route(
+                Self::register_path().as_str(),
+                aweb::get().to(Self::registration_handler),
+            )
+            .route(
+                Self::login_path().as_str(),
+                aweb::get().to(Self::login_handler),
+            )
+            .route(
+                Self::link_path().as_str(),
+                aweb::get().to(Self::link_handler),
+            )
             .route(
                 Self::login_redirect_path().as_str(),
                 aweb::get().to(Self::login_authenticated_handler),
@@ -122,7 +136,8 @@ pub trait IdentityProvider: 'static {
             )
             .route(
                 Self::link_redirect_path().as_str(),
-                aweb::get().to(Self::linking_authenticated_handler));
+                aweb::get().to(Self::linking_authenticated_handler),
+            );
     }
 
     /// Actix-web handler for the route that redirects to authentication for
@@ -147,5 +162,8 @@ pub trait IdentityProvider: 'static {
     fn registration_authenticated_handler(req: HttpRequest) -> Self::RegistrationAuthenticatedFut;
 
     /// Actix-web handler
-    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut;
+    fn linking_authenticated_handler(
+        req: HttpRequest,
+        ident: Identity,
+    ) -> Self::LinkAuthenticatedFut;
 }

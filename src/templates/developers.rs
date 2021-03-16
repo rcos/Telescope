@@ -1,8 +1,8 @@
 //! Developers page template fields and functions
 
-use crate::web::services::developers::DevelopersPageQuery;
-use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 use crate::templates::Template;
+use crate::web::api::rcos::users::developers_page::DevelopersResponse;
+use crate::web::services::developers::DevelopersPageQuery;
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "developers";
@@ -27,7 +27,8 @@ pub const LNAME: &'static str = "last_name";
 
 /// Default URL for user's profile pics when there is not an existing one for that user. We use the
 /// Gravatar mystery-person.
-pub const DEFAULT_PFP_URL: &'static str = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&r=g";
+pub const DEFAULT_PFP_URL: &'static str =
+    "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&r=g";
 
 // /// Get a user's github profile picture.
 // async fn get_pfp_url_github(github_user_id: String) -> Result<String, TelescopeError> {
@@ -42,7 +43,9 @@ pub const DEFAULT_PFP_URL: &'static str = "https://www.gravatar.com/avatar/00000
 // }
 
 /// Create the developers page template
-pub async fn developers(query: &DevelopersPageQuery, response_data: &DevelopersResponse) -> Template {
-    Template::new(TEMPLATE_PATH)
-        .field(QUERY, query)
+pub async fn developers(
+    query: &DevelopersPageQuery,
+    response_data: &DevelopersResponse,
+) -> Template {
+    Template::new(TEMPLATE_PATH).field(QUERY, query)
 }

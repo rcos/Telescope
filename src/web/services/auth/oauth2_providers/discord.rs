@@ -2,20 +2,20 @@
 
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity, Identity};
+use crate::web::api::rcos::send_query;
+use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::services::auth::identity::{AuthenticatedIdentities, Identity, RootIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;
 use chrono::{DateTime, Duration, Utc};
+use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
 use serenity::model::user::CurrentUser;
 use std::sync::Arc;
-use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
-use crate::web::api::rcos::users::UserAccountType;
-use crate::web::api::rcos::send_query;
-use futures::future::LocalBoxFuture;
 
 /// The Discord API endpoint to query for user data.
 const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -71,12 +71,16 @@ impl Oauth2IdentityProvider for DiscordOAuth {
         RootIdentity::Discord(DiscordIdentity::from_response(token_response))
     }
 
-    fn add_to_identity<'a>(token_response: &'a BasicTokenResponse, identity: &'a mut Identity) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
+    fn add_to_identity<'a>(
+        token_response: &'a BasicTokenResponse,
+        identity: &'a mut Identity,
+    ) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
         return Box::pin(async move {
             //  Make the discord access token.
             let access_token: DiscordIdentity = DiscordIdentity::from_response(token_response);
             // Get the authenticated identity cookie or produce an error
-            let authenticated: AuthenticatedIdentities = identity.identity()
+            let authenticated: AuthenticatedIdentities = identity
+                .identity()
                 .await
                 .ok_or(TelescopeError::NotAuthenticated)?;
 
@@ -140,7 +144,9 @@ impl DiscordIdentity {
 
     /// Get the authenticated Discord account's ID.
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
-        self.get_authenticated_user().await.map(|u| u.id.to_string())
+        self.get_authenticated_user()
+            .await
+            .map(|u| u.id.to_string())
     }
 
     /// Get the RCOS username of the account associated with the authenticated

@@ -1,7 +1,7 @@
 use crate::error::TelescopeError;
-use actix_web::{HttpRequest, HttpResponse};
-use crate::web::services::auth::IdentityProvider;
 use crate::web::services::auth::identity::Identity;
+use crate::web::services::auth::IdentityProvider;
+use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 
 /// The URL of the RPI CAS server.
@@ -16,7 +16,8 @@ impl IdentityProvider for RpiCas {
     type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LinkFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
-    type RegistrationAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationAuthenticatedFut =
+        LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LinkAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     fn login_handler(req: HttpRequest) -> Self::LoginFut {
@@ -39,7 +40,10 @@ impl IdentityProvider for RpiCas {
         unimplemented!()
     }
 
-    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut {
+    fn linking_authenticated_handler(
+        req: HttpRequest,
+        ident: Identity,
+    ) -> Self::LinkAuthenticatedFut {
         unimplemented!()
     }
 }

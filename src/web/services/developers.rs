@@ -2,6 +2,7 @@
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
+use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 use crate::web::api::rcos::{
     send_query,
     users::developers_page::{
@@ -11,7 +12,6 @@ use crate::web::api::rcos::{
 };
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
-use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 
 /// The default value for the number of users per page.
 fn twenty() -> u32 {
@@ -132,8 +132,9 @@ pub async fn developers_page(
     // Extract the user identity for the query subject header (if it exists.)
     let subject: Option<String> = identity.get_rcos_username().await?;
     // Send the query and wait for a response.
-    let query_response: DevelopersResponse = send_query::<Developers>(subject, variables).await?.simplify();
-
+    let query_response: DevelopersResponse = send_query::<Developers>(subject, variables)
+        .await?
+        .simplify();
 
     Err(TelescopeError::NotImplemented)
 }

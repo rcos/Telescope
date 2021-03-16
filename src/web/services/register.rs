@@ -1,21 +1,17 @@
 use crate::error::TelescopeError;
 use crate::templates::forms::{register, Form, FormInput};
 use crate::templates::{auth, page, Template};
+use crate::web::api::github::users::authenticated_user::authenticated_user::AuthenticatedUserViewer;
 use crate::web::api::rcos::send_query;
 use crate::web::api::rcos::users::create::{
-    CreateOneUser,
-    create_one_user::Variables as CreateOneUserVariables
+    create_one_user::Variables as CreateOneUserVariables, CreateOneUser,
 };
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::api::github::users::authenticated_user::authenticated_user::AuthenticatedUserViewer;
-use crate::web::services::auth::identity::{
-    AuthenticatedIdentities,
-    RootIdentity
-};
+use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
-use std::collections::HashMap;
 use serenity::model::user::CurrentUser;
+use std::collections::HashMap;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -31,7 +27,9 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// Users finish the registration process by supplying their first and last name. Telescope creates
 /// the necessary records in the RCOS database via the central API. Argument extractors will error
 /// if the identity is not authenticated.
-pub async fn finish_registration(identity_cookie: AuthenticatedIdentities) -> Result<Form, TelescopeError> {
+pub async fn finish_registration(
+    identity_cookie: AuthenticatedIdentities,
+) -> Result<Form, TelescopeError> {
     // Create a form for the authenticated the user's cookie.
     register::for_identity(&identity_cookie.root).await
 }
@@ -75,7 +73,8 @@ pub async fn submit_registration(
                 last_name,
                 UserRole::External,
                 UserAccountType::GitHub,
-                id)
+                id,
+            )
         }
 
         // On Discord authenticated identity.
@@ -89,7 +88,8 @@ pub async fn submit_registration(
                 last_name,
                 UserRole::External,
                 UserAccountType::Discord,
-                authenticated_user.id.to_string())
+                authenticated_user.id.to_string(),
+            )
         }
     };
 

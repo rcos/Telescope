@@ -8,7 +8,7 @@ use crate::web::services::auth::oauth2_providers::{
 use actix_identity::Identity as ActixIdentity;
 use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
-use futures::future::{ready, Ready, LocalBoxFuture};
+use futures::future::{ready, LocalBoxFuture, Ready};
 use serde::Serialize;
 
 /// The root identity that this user is authenticated with.
@@ -18,7 +18,7 @@ pub enum RootIdentity {
     GitHub(GitHubIdentity),
 
     /// Discord access and refresh tokens.
-    Discord(DiscordIdentity)
+    Discord(DiscordIdentity),
 }
 
 impl RootIdentity {
@@ -53,7 +53,7 @@ impl RootIdentity {
     pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
         match self {
             RootIdentity::GitHub(gh) => gh.get_rcos_username().await,
-            RootIdentity::Discord(d) => d.get_rcos_username().await
+            RootIdentity::Discord(d) => d.get_rcos_username().await,
         }
     }
 

@@ -2,7 +2,7 @@
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::services::auth::identity::{Identity, AuthenticatedIdentities};
+use crate::web::services::auth::identity::{AuthenticatedIdentities, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
 

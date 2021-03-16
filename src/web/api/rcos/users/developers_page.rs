@@ -14,12 +14,8 @@ use super::UserAccountType as user_account;
 pub struct Developers;
 
 use developers::{
-    Variables,
-    ResponseData,
-    users_order_by,
-    DevelopersCurrentSemester,
-    DevelopersUsersUserAccounts,
-    DevelopersUsers
+    users_order_by, DevelopersCurrentSemester, DevelopersUsers, DevelopersUsersUserAccounts,
+    ResponseData, Variables,
 };
 use regex::Regex;
 use std::borrow::Cow;
@@ -108,7 +104,7 @@ pub struct DevelopersPageUser {
     /// Is the user a coordinator this semester?
     pub is_current_coordinator: bool,
     /// The small group this user mentors, if any.
-    pub small_group_id: Option<i64>
+    pub small_group_id: Option<i64>,
 }
 
 impl DevelopersUsers {
@@ -133,10 +129,12 @@ impl DevelopersUsers {
             // take a reference to the inner small_group object.
             .map(|o| &o.small_group);
 
-
         DevelopersPageUser {
             // inherit trivial fields
-            username, first_name, last_name, user_accounts,
+            username,
+            first_name,
+            last_name,
+            user_accounts,
             // compute remaining fields
             is_current_coordinator: current_semester_id
                 // Map the semester if it exists.
@@ -161,7 +159,7 @@ impl DevelopersUsers {
                         .filter(|small_group| small_group.semester_id == semester_id.as_str())
                         // Map to the small group id
                         .map(|small_group| small_group.small_group_id)
-                })
+                }),
         }
     }
 }
@@ -193,13 +191,14 @@ impl ResponseData {
         // Build and return a simplified response
         DevelopersResponse {
             current_semester_title,
-            users: self.users
+            users: self
+                .users
                 // Convert the user list to an iterator
                 .into_iter()
                 // and resolve each user's titles for the current semester.
                 .map(|u| u.resolve(current_semester_id.as_ref()))
                 // Collect into vector.
-                .collect()
+                .collect(),
         }
     }
 }

@@ -44,7 +44,10 @@ pub trait Oauth2IdentityProvider {
     fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity;
 
     /// Add the authenticated identity to a user's token.
-    fn add_to_identity<'a>(token_response: &'a BasicTokenResponse, identity: &'a mut Identity) -> LocalBoxFuture<'a, Result<(), TelescopeError>>;
+    fn add_to_identity<'a>(
+        token_response: &'a BasicTokenResponse,
+        identity: &'a mut Identity,
+    ) -> LocalBoxFuture<'a, Result<(), TelescopeError>>;
 
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
@@ -130,7 +133,8 @@ pub trait Oauth2IdentityProvider {
 }
 
 impl<T> IdentityProvider for T
-where T: Oauth2IdentityProvider + 'static
+where
+    T: Oauth2IdentityProvider + 'static,
 {
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
 
@@ -138,7 +142,8 @@ where T: Oauth2IdentityProvider + 'static
     type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LinkFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
-    type RegistrationAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationAuthenticatedFut =
+        LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LinkAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     fn login_handler(req: HttpRequest) -> Self::LoginFut {
@@ -235,7 +240,10 @@ where T: Oauth2IdentityProvider + 'static
         });
     }
 
-    fn linking_authenticated_handler(req: HttpRequest, mut ident: Identity) -> Self::LinkAuthenticatedFut {
+    fn linking_authenticated_handler(
+        req: HttpRequest,
+        mut ident: Identity,
+    ) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
             // Get the redirect url.
             let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
@@ -246,7 +254,8 @@ where T: Oauth2IdentityProvider + 'static
 
             // Redirect the user to their profile page
             // Get the RCOS username
-            let username: String = ident.get_rcos_username()
+            let username: String = ident
+                .get_rcos_username()
                 .await?
                 // Or respond with a not authenticated error.
                 .ok_or(TelescopeError::NotAuthenticated)?;

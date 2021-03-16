@@ -1,28 +1,23 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{RootIdentity, Identity};
-use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
+use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
+use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::{
-    rcos,
     github::{
         self,
-        users::{
-            authenticated_user::{
-                AuthenticatedUser,
-                authenticated_user::{
-                    AuthenticatedUserViewer,
-                    Variables
-                }
-            },
+        users::authenticated_user::{
+            authenticated_user::{AuthenticatedUserViewer, Variables},
+            AuthenticatedUser,
         },
-    }
+    },
+    rcos,
 };
+use crate::web::services::auth::identity::{Identity, RootIdentity};
+use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
+use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
-use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
-use crate::web::api::rcos::users::UserAccountType;
-use futures::future::LocalBoxFuture;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -72,10 +67,15 @@ impl Oauth2IdentityProvider for GitHubOauth {
 
     fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
         // Extract the identity and build the identity cookie.
-        RootIdentity::GitHub(GitHubIdentity { access_token: token_response.access_token().clone() })
+        RootIdentity::GitHub(GitHubIdentity {
+            access_token: token_response.access_token().clone(),
+        })
     }
 
-    fn add_to_identity<'a>(token_response: &'a BasicTokenResponse, identity: &'a mut Identity) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
+    fn add_to_identity<'a>(
+        token_response: &'a BasicTokenResponse,
+        identity: &'a mut Identity,
+    ) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
         unimplemented!()
     }
 }
@@ -86,7 +86,9 @@ impl GitHubIdentity {
     /// GitHub V4 API.
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
         // Get the authenticated user and convert their id to a string.
-        self.get_authenticated_user().await.map(|u| u.id.to_string())
+        self.get_authenticated_user()
+            .await
+            .map(|u| u.id.to_string())
     }
 
     /// Get the authenticated GitHub user.

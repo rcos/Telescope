@@ -138,7 +138,7 @@ pub enum TelescopeError {
         /// The API platform
         platform: String,
         /// The errors that were returned.
-        errors: Vec<GraphQlError>
+        errors: Vec<GraphQlError>,
     },
 
     #[error(ignore)]
@@ -306,11 +306,14 @@ impl TelescopeError {
 
             TelescopeError::GitHubApiError(err) => jumbotron::new(
                 format!("{} - GitHub API V4 Query Error", status_code),
-                format!("Could not query the GitHub API. Please contact a coordinator and \
-                file a GitHub issue on the Telescope repository. Internal error description: {}", err)
+                format!(
+                    "Could not query the GitHub API. Please contact a coordinator and \
+                file a GitHub issue on the Telescope repository. Internal error description: {}",
+                    err
+                ),
             ),
 
-            TelescopeError::GraphQLError { platform, errors} => {
+            TelescopeError::GraphQLError { platform, errors } => {
                 // Map all errors to their `Display` formatting.
                 let errs: Vec<String> = errors.iter().map(|e| format!("{}", e)).collect();
 
@@ -482,4 +485,3 @@ impl From<LettreSmtpError> for TelescopeError {
         };
     }
 }
-
