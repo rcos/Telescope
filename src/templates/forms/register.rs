@@ -34,9 +34,12 @@ fn make_name_field(name: impl Into<String>) -> TextField {
 
         // First/last name has to exits, and be longer than zero bytes.
         if let Some(name_str) = input {
+            // Trim unicode whitespace off of the name
+            let name_str = name_str.trim();
+            // If it's not empty it's valid.
             if !name_str.is_empty() {
                 // The name field is not empty, and is therefore valid!
-                result.value = Some(name_str.clone());
+                result.value = Some(name_str.to_string());
                 result.success = Some("Looks Good!".into());
                 result.is_valid = Some(true);
                 return result;
