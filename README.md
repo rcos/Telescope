@@ -104,6 +104,8 @@ where `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` is replaced by your PAT.
     Then modify them to match your environment. You may need to generate the 
     GitHub related credentials. Go [here](https://github.com/settings/applications/new)
     to register a new GitHub OAuth application or get a new client secret.
+    You will also have to create a discord OAuth app and bot token. Instructions
+    can be found in `config_example.toml`.  
    
 5. Build and start the docker images.
     ```shell

@@ -2,7 +2,7 @@ use super::{make_redirect_url, IdentityProvider};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::web::csrf;
-use crate::web::services::auth::identity::{Identity, IdentityCookie};
+use crate::web::services::auth::identity::{Identity, AuthenticatedIdentities, RootIdentity};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
 use actix_web::FromRequest;
@@ -12,6 +12,10 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
+use std::future::Future;
+use actix_web::body::Body;
+use actix_web::dev::Service;
+use crate::web::api::rcos::users::UserAccountType;
 
 pub mod discord;
 pub mod github;
@@ -41,7 +45,7 @@ pub trait Oauth2IdentityProvider {
 
     /// Create a user identity struct from an auth token response to save
     /// in the user's cookies and identify them in future requests.
-    fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie;
+    fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity;
 
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
@@ -127,22 +131,16 @@ pub trait Oauth2IdentityProvider {
 }
 
 impl<T> IdentityProvider for T
-where
-    T: Oauth2IdentityProvider + 'static,
+where T: Oauth2IdentityProvider + 'static
 {
-    type Client = Arc<BasicClient>;
-
-    fn get_client() -> Self::Client {
-        <Self as Oauth2IdentityProvider>::get_client()
-    }
-
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
 
     type LoginFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type LinkFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
-    type RegistrationAuthenticatedFut =
-        LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type RegistrationAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+    type LinkAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
 
     fn login_handler(req: HttpRequest) -> Self::LoginFut {
         return Box::pin(async move {
@@ -163,6 +161,21 @@ where
         });
     }
 
+    fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut {
+        return Box::pin(async move {
+            // Check that the user is already authenticated with another service
+            // and exists.
+            if ident.identity().await.is_some() {
+                // If so, make the redirect url and send the user there.
+                let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
+                return Self::auth_response(redir_url, &req);
+            } else {
+                // If not, respond with a NotAuthenticated error.
+                return Err(TelescopeError::NotAuthenticated);
+            }
+        });
+    }
+
     fn login_authenticated_handler(
         req: HttpRequest,
     ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
@@ -171,14 +184,14 @@ where
             let redir_uri: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
             // Get the API access token (in an identity cookie).
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+            let root: RootIdentity = Self::make_identity(&token_response);
             // Get the on-platform ID of the user's identity.
-            let platform_id: String = cookie_identity.get_account_identity().await?;
+            let platform_id: String = root.get_platform_id().await?;
 
             // Make variables.
             let variables = reverse_lookup::reverse_lookup::Variables {
                 id: platform_id,
-                platform: cookie_identity.user_account_type(),
+                platform: root.get_user_account_type(),
             };
             // Send API query.
             let username: Option<String> =
@@ -198,7 +211,7 @@ where
 
             // Otherwise, store the identity in the user's cookies and redirect to their profile.
             let identity: Identity = Identity::extract(&req).await?;
-            identity.save(&cookie_identity);
+            identity.save(&root.make_authenticated_cookie());
             Ok(HttpResponse::Found()
                 .header(LOCATION, format!("/user/{}", username))
                 .finish())
@@ -212,15 +225,19 @@ where
                 make_redirect_url(&req, Self::registration_redirect_path());
             // Get the object to store in the user's cookie.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+            let root: RootIdentity = Self::make_identity(&token_response);
             // Extract the identity object from the request and store the cookie in it.
             let identity: Identity = Identity::extract(&req).await?;
-            identity.save(&cookie_identity);
+            identity.save(&root.make_authenticated_cookie());
 
             // Success! Redirect the user to finish the registration process.
             Ok(HttpResponse::Found()
                 .header(LOCATION, "/register/finish")
                 .finish())
         });
+    }
+
+    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut {
+        unimplemented!()
     }
 }

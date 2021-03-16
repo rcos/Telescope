@@ -3,7 +3,9 @@
 use crate::error::TelescopeError;
 use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::Form;
-use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::identity::AuthenticatedIdentities;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::services::auth::oauth2_providers::discord::DiscordIdentity;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "forms/register";
@@ -74,17 +76,16 @@ struct UserInfo {
 }
 
 /// Create a registration page with the appropriate information depending on
-/// the user's identity.
-pub async fn for_identity(cookie: &IdentityCookie) -> Result<Form, TelescopeError> {
-    match cookie {
-        // Get authenticated discord user
-        IdentityCookie::Discord(d) => d
-            .authenticated_user()
-            .await
-            // Convert into form
+/// the user's identity. The identity cookie should only be defined for one
+/// provider.
+pub async fn for_identity(cookie: &AuthenticatedIdentities) -> Result<Form, TelescopeError> {
+    // If the cookie is for a discord
+    if let Some(d) = cookie.discord.as_ref() {
+        // Get authenticated user, convert into registration form.
+        return d.get_authenticated_user().await
             .map(|discord_user| {
                 userless()
-                    .with_other_key(ICON, cookie.user_account_type())
+                    .with_other_key(ICON, UserAccountType::Discord)
                     .with_other_key(
                         INFO,
                         UserInfo {
@@ -93,16 +94,17 @@ pub async fn for_identity(cookie: &IdentityCookie) -> Result<Form, TelescopeErro
                             profile_url: None,
                         },
                     )
-            }),
+            });
+    }
 
-        // Get authenticated GitHub user
-        IdentityCookie::Github(g) => g
-            .get_authenticated_user()
-            .await
-            // Convert user info
+
+    // If cookie is for github
+    if let Some(g) = cookie.github.as_ref() {
+        // Get the authenticated github user and convert their info to a registration form.
+        return g.get_authenticated_user().await
             .map(|gh_user| {
                 userless()
-                    .with_other_key(ICON, cookie.user_account_type())
+                    .with_other_key(ICON, UserAccountType::GitHub)
                     .with_other_key(
                         INFO,
                         UserInfo {
@@ -111,6 +113,11 @@ pub async fn for_identity(cookie: &IdentityCookie) -> Result<Form, TelescopeErro
                             username: gh_user.login.clone(),
                         },
                     )
-            }),
+            });
     }
+
+    // If neither identity matches at this point, Panic. We could also throw
+    // an error here, but panicking seems more appropriate since the
+    // precondition of this function was failed.
+    panic!("No identity defined");
 }

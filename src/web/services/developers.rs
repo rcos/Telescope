@@ -9,7 +9,7 @@ use crate::web::api::rcos::{
         Developers,
     },
 };
-use crate::web::services::auth::identity::Identity;
+use crate::web::services::auth::identity::{Identity, AuthenticatedIdentities};
 use actix_web::web::Query;
 use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 

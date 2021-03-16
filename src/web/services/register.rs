@@ -4,7 +4,7 @@ use crate::templates::{auth, page, Template};
 use crate::web::api::rcos::send_query;
 use crate::web::api::rcos::users::create::CreateOneUser;
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::identity::AuthenticatedIdentities;
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use std::collections::HashMap;
@@ -23,7 +23,7 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// Users finish the registration process by supplying their first and last name. Telescope creates
 /// the necessary records in the RCOS database via the central API. Argument extractors will error
 /// if the identity is not authenticated.
-pub async fn finish_registration(identity_cookie: IdentityCookie) -> Result<Form, TelescopeError> {
+pub async fn finish_registration(identity_cookie: AuthenticatedIdentities) -> Result<Form, TelescopeError> {
     // Create a form for the authenticated the user's cookie.
     register::for_identity(&identity_cookie).await
 }
@@ -32,7 +32,7 @@ pub async fn finish_registration(identity_cookie: IdentityCookie) -> Result<Form
 /// Endpoint to which users submit their forms. Argument extractor will error if user is not
 /// authenticated.
 pub async fn submit_registration(
-    identity_cookie: IdentityCookie,
+    identity_cookie: AuthenticatedIdentities,
     form_input: FormInput,
 ) -> Result<HttpResponse, TelescopeError> {
     // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
@@ -53,9 +53,27 @@ pub async fn submit_registration(
         .clone();
 
     // Get the platform id username from the user's identity cookie.
-    let platform: UserAccountType = identity_cookie.user_account_type();
-    let username: String = identity_cookie.get_username_string().await?;
-    let platform_id: String = identity_cookie.get_account_identity().await?;
+    let platform: UserAccountType;
+    let username: String;
+    let platform_id: String;
+
+    // Check for discord identity first.
+    if let Some(discord) = identity_cookie.discord {
+        let user = discord.get_authenticated_user().await?;
+        platform = UserAccountType::Discord;
+        username = user.tag();
+        platform_id = user.id.to_string();
+    } else {
+        // If no discord identity, use github.
+        let github_user = identity_cookie.github
+            .expect("At least one identity provider should be defined")
+            .get_authenticated_user()
+            .await?;
+
+        platform = UserAccountType::GitHub;
+        platform_id = github_user.id;
+        username = github_user.login;
+    }
 
     // Create central API mutation variables.
     let vars = CreateOneUser::make_variables(

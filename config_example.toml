@@ -49,7 +49,7 @@ client_secret = "****************************************"
 # The Discord OAuth application credentials and bot token.
 # These can be generated at https://discord.com/developers/.
 # Make sure there are redirect URLS matching the homepage URL followed by
-# "/auth/discord/login" and "/auth/discord/register".
+# "/auth/discord/login", "/auth/discord/register", and "auth/discord/link".
 [discord_config]
 # [REQUIRED]
 # The Discord OAuth2 application client id.
