@@ -86,16 +86,13 @@ pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> 
     // Extract the identity from the request.
     let identity: Identity = Identity::extract(req).await?;
 
-    // Check if there is an identity
-    if let Some(cookie) = identity.identity().await {
-        // Check if there exists a username for this cookie
-        if let Some(username) = cookie.get_rcos_username().await? {
-            // If there is make a navbar with the username.
-            return Ok(for_user(req.path(), username.as_str()));
-        }
+    // Check if there is an authenticated RCOS account
+    if let Some(username) = identity.get_rcos_username().await? {
+        // If there is make a navbar with the username.
+        return Ok(for_user(req.path(), username.as_str()));
     }
 
     // If there is no cookie, or no RCOS user associated with the cookie,
-    // return a userless navbar.
+    // return a user-less navbar.
     return Ok(userless(req.path()));
 }

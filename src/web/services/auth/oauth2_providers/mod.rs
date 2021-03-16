@@ -2,7 +2,7 @@ use super::{make_redirect_url, IdentityProvider};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::web::csrf;
-use crate::web::services::auth::identity::{Identity, IdentityCookie};
+use crate::web::services::auth::identity::{Identity, AuthenticatedIdentities};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
 use actix_web::FromRequest;
@@ -15,6 +15,7 @@ use std::sync::Arc;
 use std::future::Future;
 use actix_web::body::Body;
 use actix_web::dev::Service;
+use crate::web::api::rcos::users::UserAccountType;
 
 pub mod discord;
 pub mod github;
@@ -36,6 +37,9 @@ pub trait Oauth2IdentityProvider {
     /// [`IdentityProvider`] trait for requirements.
     const SERVICE_NAME: &'static str;
 
+    /// The type of user account associated with accounts authenticated using this identity.
+    const USER_ACCOUNT_TYPE: UserAccountType;
+
     /// Get the client configuration for this Identity Provider.
     fn get_client() -> Arc<BasicClient>;
 
@@ -44,7 +48,7 @@ pub trait Oauth2IdentityProvider {
 
     /// Create a user identity struct from an auth token response to save
     /// in the user's cookies and identify them in future requests.
-    fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie;
+    fn make_identity(token_response: &BasicTokenResponse) -> AuthenticatedIdentities;
 
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
@@ -183,7 +187,7 @@ where T: Oauth2IdentityProvider + 'static
             let redir_uri: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
             // Get the API access token (in an identity cookie).
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+            let cookie_identity: AuthenticatedIdentities = Self::make_identity(&token_response);
             // Get the on-platform ID of the user's identity.
             let platform_id: String = cookie_identity.get_account_identity().await?;
 
@@ -224,7 +228,7 @@ where T: Oauth2IdentityProvider + 'static
                 make_redirect_url(&req, Self::registration_redirect_path());
             // Get the object to store in the user's cookie.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let cookie_identity: IdentityCookie = Self::make_identity(&token_response);
+            let cookie_identity: AuthenticatedIdentities = Self::make_identity(&token_response);
             // Extract the identity object from the request and store the cookie in it.
             let identity: Identity = Identity::extract(&req).await?;
             identity.save(&cookie_identity);

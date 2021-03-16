@@ -1,6 +1,6 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::identity::{AuthenticatedIdentities, AuthenticatedIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use hubcaps::{Credentials, Github};
 use crate::web::api::{
@@ -23,6 +23,9 @@ use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
+use crate::web::services::auth::IdentityProvider;
+use std::future::Future;
+use futures::future::LocalBoxFuture;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -56,6 +59,7 @@ lazy_static! {
 
 impl Oauth2IdentityProvider for GitHubOauth {
     const SERVICE_NAME: &'static str = "github";
+    const USER_ACCOUNT_TYPE: UserAccountType = GitHubIdentity::USER_ACCOUNT_TYPE;
 
     fn get_client() -> Arc<BasicClient> {
         GITHUB_CLIENT.clone()
@@ -70,25 +74,15 @@ impl Oauth2IdentityProvider for GitHubOauth {
         ]
     }
 
-    fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie {
+    fn make_identity(token_response: &BasicTokenResponse) -> AuthenticatedIdentities {
         // Extract the identity and build the identity cookie.
-        IdentityCookie::Github(GitHubIdentity {
+        AuthenticatedIdentities::Github(GitHubIdentity {
             access_token: token_response.access_token().clone(),
         })
     }
 }
 
 impl GitHubIdentity {
-    /// Get the authenticated user for this access token.
-    pub async fn get_authenticated_user(&self) -> Result<AuthenticatedUserViewer, TelescopeError> {
-        // Query the GitHub GraphQL API.
-        github::send_query::<AuthenticatedUser>(&self.access_token, Variables {})
-            // Wait for the response
-            .await
-            // Get the viewer from the response
-            .map(|response| response.viewer)
-    }
-
     /// Get the github account id of the user associated with this access token.
     /// Note that this is the GitHub GraphQL node ID, and is only compatible with the
     /// GitHub V4 API.
@@ -96,17 +90,43 @@ impl GitHubIdentity {
         // Get the authenticated user and convert their id to a string.
         self.get_authenticated_user().await.map(|u| u.id.to_string())
     }
+}
 
-    /// Get the RCOS username associated with this github auth token if it exists.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
-        // Get the on platform id of this user.
-        let platform_id: String = self.get_user_id().await?;
-        // Build the variables for a reverse lookup query to the central RCOS API.
-        let query_variables = ReverseLookup::make_vars(UserAccountType::GitHub, platform_id);
-        // Send the query to the central RCOS API and await response (we have no subject for this
-        // request since we are requesting something that would be the subject field)
-        return rcos::send_query::<ReverseLookup>(None, query_variables)
-            .await
-            .map(|response| response.username());
+impl AuthenticatedIdentity for GitHubIdentity {
+    type Provider = GitHubOauth;
+    const USER_ACCOUNT_TYPE: UserAccountType = UserAccountType::GitHub;
+    type AuthenticatedUser = AuthenticatedUserViewer;
+    type AuthenticatedUserFuture = LocalBoxFuture<'static, Result<Self::AuthenticatedUser, TelescopeError>>;
+    type RcosUsernameFuture = LocalBoxFuture<'static, Result<Option<String>, TelescopeError>>;
+
+    fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture {
+        // Clone the access token for ownership reasons.
+        let access_token: AccessToken = self.access_token.clone();
+        // Make and return the boxed future.
+        return Box::pin(async move {
+            // Query the GitHub GraphQL API.
+            github::send_query::<AuthenticatedUser>(&access_token, Variables {})
+                // Wait for the response
+                .await
+                // Get the viewer from the response
+                .map(|response| response.viewer)
+        });
+    }
+
+    fn get_rcos_username(&self) -> Self::RcosUsernameFuture {
+        // Clone this access token so that it can be owned by the future.
+        let owned: GitHubIdentity = self.clone();
+        // Make and return a boxed future.
+        return Box::pin(async move {
+            // Get the on platform id of this user.
+            let platform_id: String = owned.get_user_id().await?;
+            // Build the variables for a reverse lookup query to the central RCOS API.
+            let query_variables = ReverseLookup::make_vars(Self::USER_ACCOUNT_TYPE, platform_id);
+            // Send the query to the central RCOS API and await response (we have no subject for this
+            // request since we are requesting something that would be the subject field)
+            return rcos::send_query::<ReverseLookup>(None, query_variables)
+                .await
+                .map(|response| response.username());
+        });
     }
 }

@@ -2,7 +2,7 @@
 
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::IdentityCookie;
+use crate::web::services::auth::identity::{AuthenticatedIdentities, AuthenticatedIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;
@@ -15,6 +15,8 @@ use std::sync::Arc;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::send_query;
+use std::future::Future;
+use futures::future::LocalBoxFuture;
 
 /// The Discord API endpoint to query for user data.
 const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -54,6 +56,7 @@ lazy_static! {
 
 impl Oauth2IdentityProvider for DiscordOAuth {
     const SERVICE_NAME: &'static str = "discord";
+    const USER_ACCOUNT_TYPE: UserAccountType = DiscordIdentity::USER_ACCOUNT_TYPE;
 
     fn get_client() -> Arc<BasicClient> {
         DISCORD_CLIENT.clone()
@@ -66,8 +69,8 @@ impl Oauth2IdentityProvider for DiscordOAuth {
         ]
     }
 
-    fn make_identity(token_response: &BasicTokenResponse) -> IdentityCookie {
-        IdentityCookie::Discord(DiscordIdentity::from_response(token_response))
+    fn make_identity(token_response: &BasicTokenResponse) -> AuthenticatedIdentities {
+        AuthenticatedIdentities::Discord(DiscordIdentity::from_response(token_response))
     }
 }
 
@@ -124,41 +127,9 @@ impl DiscordIdentity {
         }
     }
 
-    /// Get the user authenticated in association with this access token. Assume this token has been
-    /// refreshed recently enough.
-    pub async fn authenticated_user(&self) -> Result<CurrentUser, TelescopeError> {
-        // Make a web client to request the user's identity from the discord API.
-        let client = actix_web::client::Client::builder()
-            .bearer_auth(self.access_token.secret())
-            .header(ACCEPT, "application/json")
-            .finish();
-
-        // Send the GET request to the discord API.
-        return client
-            .get(format!("{}/users/@me", DISCORD_API_ENDPOINT))
-            .send()
-            .await
-            .map_err(|e| {
-                TelescopeError::ise(format!(
-                    "Could not send identification query to Discord \
-                API. Internal error: {}",
-                    e
-                ))
-            })?
-            .json::<CurrentUser>()
-            .await
-            .map_err(|e| {
-                TelescopeError::ise(format!(
-                    "Error with identification response from Discord \
-                API. Internal error: {}",
-                    e
-                ))
-            });
-    }
-
     /// Get the authenticated Discord account's ID.
     pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
-        self.authenticated_user().await.map(|u| u.id.to_string())
+        self.get_authenticated_user().await.map(|u| u.id.to_string())
     }
 
     /// Get the RCOS username of the account associated with the authenticated
@@ -172,5 +143,48 @@ impl DiscordIdentity {
         return send_query::<ReverseLookup>(None, variables)
             .await
             .map(|response| response.username());
+    }
+}
+
+impl AuthenticatedIdentity for DiscordIdentity {
+    type Provider = DiscordOAuth;
+    const USER_ACCOUNT_TYPE: UserAccountType = UserAccountType::Discord;
+    type AuthenticatedUser = CurrentUser;
+    type AuthenticatedUserFuture = LocalBoxFuture<'static, Result<Self::AuthenticatedUser, TelescopeError>>;
+    type RcosUsernameFuture = LocalBoxFuture<'static, Result<Option<String>, TelescopeError>>;
+
+    fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture {
+        // Clone the access token to be owned by the future
+        let secret: String = self.access_token.secret().clone();
+
+        return Box::pin(async move {
+            // Send the GET request to the discord API.
+            return reqwest::Client::new()
+                .get(format!("{}/users/@me", DISCORD_API_ENDPOINT).as_str())
+                .bearer_auth(secret)
+                .header(ACCEPT, "application/json")
+                .send()
+                .await
+                .map_err(|e| {
+                    TelescopeError::ise(format!(
+                        "Could not send identification query to Discord \
+                API. Internal error: {}",
+                        e
+                    ))
+                })?
+                .json::<CurrentUser>()
+                .await
+                .map_err(|e| {
+                    TelescopeError::ise(format!(
+                        "Error with identification response from Discord \
+                API. Internal error: {}",
+                        e
+                    ))
+                });
+        });
+    }
+
+    fn get_rcos_username(&self) -> Self::RcosUsernameFuture {
+        unimplemented!()
     }
 }

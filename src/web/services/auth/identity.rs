@@ -10,20 +10,47 @@ use crate::web::services::auth::oauth2_providers::{
 use actix_identity::Identity as ActixIdentity;
 use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
-use futures::future::{ready, Ready};
+use futures::future::{ready, Ready, LocalBoxFuture};
 use serde::Serialize;
+use crate::web::services::auth::IdentityProvider;
+use std::future::Future;
+
+/// Trait for all identities stored in the top-level identity cookie.
+pub trait AuthenticatedIdentity {
+    /// The type that provides these authenticated identities.
+    type Provider: IdentityProvider;
+
+    /// The type of user account associated with this identity cookie.
+    const USER_ACCOUNT_TYPE: UserAccountType;
+
+    /// The type representing an authenticated user on this platform.
+    type AuthenticatedUser;
+
+    /// The future type returned by the function to get this platform's authenticated user.
+    type AuthenticatedUserFuture: Future<Output = Result<Self::AuthenticatedUser, TelescopeError>>;
+
+    /// The future type for the method to asynchronously fetch the authenticated RCOS username.
+    type RcosUsernameFuture: Future<Output = Result<Option<String>, TelescopeError>>;
+
+    /// Get the user object that is authenticated on this platform with this cookie.
+    fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture;
+
+    /// Get the username of the RCOS user associated with the authenticated account
+    /// if one exists.
+    fn get_rcos_username(&self) -> Self::RcosUsernameFuture;
+}
 
 /// The top level object stored in the identity cookie.
 #[derive(Serialize, Deserialize)]
-pub struct IdentityCookie {
+pub struct AuthenticatedIdentities {
     /// A GitHub access token.
-    pub github: Option<GitHubIdentity>,
+    github: Option<GitHubIdentity>,
 
     /// A Discord access and refresh token.
-    pub discord: Option<DiscordIdentity>,
+    discord: Option<DiscordIdentity>,
 }
 
-impl IdentityCookie {
+impl AuthenticatedIdentities {
     /// If necessary, refresh an identity cookie. This could include getting a
     /// new access token from an OAuth API for example.
     pub async fn refresh(mut self) -> Result<Self, TelescopeError> {
@@ -68,6 +95,15 @@ impl IdentityCookie {
         // If neither worked out, return none.
         return Ok(None);
     }
+
+    /// Try to get a specific type of authenticated identity from this cookie.
+    pub fn get<T: AuthenticatedIdentity>(&self) -> Option<&T> {
+        match T::USER_ACCOUNT_TYPE {
+            UserAccountType::GitHub => self.github.as_ref(),
+            UserAccountType::Discord => self.discord.as_ref(),
+            _ => unimplemented!()
+        }
+    }
 }
 
 /// The identity of a user accessing telescope.
@@ -103,21 +139,25 @@ impl FromRequest for Identity {
     }
 }
 
-impl FromRequest for IdentityCookie {
+impl FromRequest for AuthenticatedIdentities {
     type Error = TelescopeError;
-    type Future = Ready<Result<Self, Self::Error>>;
+    type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
     type Config = ();
 
-    fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
-        // Extract the telescope-identity from the request
-        ready(
-            Identity::from_request(req, payload)
-                // Unwrap the immediate future
-                .into_inner()
-                // Extract the identity or return an error telling the user to
-                // authenticate.
-                .and_then(|identity| identity.identity().ok_or(TelescopeError::NotAuthenticated)),
-        )
+    fn from_request(req: &HttpRequest, _: &mut Payload<PayloadStream>) -> Self::Future {
+        // Clone a reference to the HTTP req, since its behind an Rc pointer.
+        let owned_request: HttpRequest = req.clone();
+        return Box::pin(async move {
+            // Extract the telescope-identity from the request
+            Identity::extract(&owned_request)
+                // Wait and propagate errors
+                .await?
+                // Get the cookie if there is one
+                .identity()
+                // Wait and make error on none
+                .await
+                .ok_or(TelescopeError::NotAuthenticated)
+        });
     }
 }
 
@@ -128,7 +168,7 @@ impl Identity {
     }
 
     /// Save an identity object to the client's cookies.
-    pub fn save(&self, identity: &IdentityCookie) {
+    pub fn save(&self, identity: &AuthenticatedIdentities) {
         // Serialize the cookie to JSON first. This serialization should not fail.
         let cookie: String =
             serde_json::to_string(identity).expect("Could not serialize identity cookie");
@@ -138,11 +178,11 @@ impl Identity {
     }
 
     /// Get the user's identity. Refresh it if necessary.
-    pub async fn identity(&self) -> Option<IdentityCookie> {
+    pub async fn identity(&self) -> Option<AuthenticatedIdentities> {
         // Get the inner identity as a String.
         let id: String = self.inner.identity()?;
         // try to deserialize it
-        match serde_json::from_str::<IdentityCookie>(id.as_str()) {
+        match serde_json::from_str::<AuthenticatedIdentities>(id.as_str()) {
             // On okay, refresh the identity cookie if needed
             Ok(id) => match id.refresh().await {
                 // If this succeeds
@@ -177,4 +217,16 @@ impl Identity {
             }
         }
     }
+
+    /// Get the username of the authenticated RCOS account (if there is one.)
+    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+        // If there is an identity cookie
+        if let Some(id) = self.identity().await {
+            // Use it to get the authenticated RCOS username.
+            return id.get_rcos_username().await;
+        } else {
+            return Ok(None);
+        }
+    }
 }
+
