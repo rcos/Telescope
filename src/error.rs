@@ -142,12 +142,6 @@ pub enum TelescopeError {
     },
 
     #[error(ignore)]
-    #[display("GitHub API error: {}", _0)]
-    /// Error querying the GitHub API. This should be reported as an upstream
-    /// gateway error in general.
-    HubcapsError(String),
-
-    #[error(ignore)]
     #[display("Invalid form submission")]
     /// The user submitted invalid data to a form. This should be reported as a
     /// bad request and the form should be displayed for the user to try again.
@@ -337,15 +331,6 @@ impl TelescopeError {
                 ),
             ),
 
-            TelescopeError::HubcapsError(err) => jumbotron::new(
-                format!("{} - Error querying Github API", status_code),
-                format!(
-                    "Could not query the Github API. Please contact a coordinator and \
-                file an issue on the Telescope GitHub. Internal error message: {}",
-                    err
-                ),
-            ),
-
             TelescopeError::InvalidForm(form) => {
                 // Render the form.
                 // Start with a conversion.
@@ -418,7 +403,6 @@ impl ResponseError for TelescopeError {
             TelescopeError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
             TelescopeError::CsrfTokenNotFound => StatusCode::NOT_FOUND,
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
-            TelescopeError::HubcapsError(_) => StatusCode::BAD_GATEWAY,
             TelescopeError::InvalidForm(_) => StatusCode::BAD_REQUEST,
             TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
@@ -499,8 +483,3 @@ impl From<LettreSmtpError> for TelescopeError {
     }
 }
 
-impl From<hubcaps::Error> for TelescopeError {
-    fn from(err: hubcaps::Error) -> Self {
-        return TelescopeError::HubcapsError(err.to_string());
-    }
-}

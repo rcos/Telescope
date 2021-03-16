@@ -3,7 +3,6 @@
 use crate::web::services::developers::DevelopersPageQuery;
 use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 use crate::templates::Template;
-use hubcaps::{Github, Credentials};
 use crate::web::telescope_ua;
 use crate::env::global_config;
 use crate::error::TelescopeError;

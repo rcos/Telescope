@@ -70,8 +70,6 @@ reqwest = {version = "0.10", features = ["json"]}
 dashmap = "~4.0"
 
 # API stuff
-# GitHub API models and integration
-hubcaps = "~0.6"
 # Discord API and integration
 serenity = "~0.10"
 # GraphQL client and queries

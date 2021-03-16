@@ -2,7 +2,6 @@ use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity, Identity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
-use hubcaps::{Credentials, Github};
 use crate::web::api::{
     rcos,
     github::{

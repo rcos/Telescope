@@ -6,6 +6,8 @@ use crate::error::TelescopeError;
 use reqwest::Client;
 use crate::web::api::handle_graphql_response;
 use serde_json::Value;
+use reqwest::header::{ACCEPT, HeaderValue, USER_AGENT};
+use crate::web::telescope_ua;
 
 pub mod users;
 
@@ -26,25 +28,26 @@ pub async fn send_query<T: GraphQLQuery>(auth_token: &AccessToken, variables: T:
         .post(GITHUB_API_ENDPOINT)
         // With the user's access token
         .bearer_auth(auth_token.secret())
+        // And required headers
+        .header(ACCEPT, HeaderValue::from_static("application/json"))
+        .header(USER_AGENT, telescope_ua())
         // Send and wait for a response
         .send()
         .await
         // Propagate any errors sending or receiving
         .map_err(TelescopeError::github_api_error)?
-        // Deserialize response as JSON
-        .json::<Value>()
-        // Wait for the full response to deserialize
+        // Get response as string
+        .text()
+        // Wait to receive the full response
         .await
         // Convert any errors.
         .map_err(TelescopeError::github_api_error)
         // Convert the valid JSON value into the GraphQL response type.
-        .and_then(|json_value| serde_json::from_value::<GraphQLResponse<T::ResponseData>>(json_value.clone())
+        .and_then(|body| serde_json::from_str::<GraphQLResponse<T::ResponseData>>(body.as_str())
             // Convert serde error to telescope error
             .map_err(|err| {
                 // Log the error and response body
-                error!("Malformed GitHub API response: {}\nresponse body: {}",
-                       err,
-                       serde_json::to_string_pretty(&json_value).expect("Could not display response body"));
+                error!("Malformed GitHub API response: {}\nresponse body: {}", err, body.as_str());
                 // Convert error.
                 TelescopeError::GitHubApiError(err.to_string())
             }))
