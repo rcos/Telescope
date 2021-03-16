@@ -2,7 +2,7 @@
 
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
+use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity, Identity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;
@@ -70,6 +70,19 @@ impl Oauth2IdentityProvider for DiscordOAuth {
 
     fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
         RootIdentity::Discord(DiscordIdentity::from_response(token_response))
+    }
+
+    fn add_to_identity<'a>(token_response: &'a BasicTokenResponse, identity: &'a mut Identity) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
+        return Box::pin(async move {
+            //  Make the discord access token.
+            let access_token: DiscordIdentity = DiscordIdentity::from_response(token_response);
+            // Get the authenticated identity cookie or produce an error
+            let authenticated: AuthenticatedIdentities = identity.identity()
+                .await
+                .ok_or(TelescopeError::NotAuthenticated)?;
+
+            unimplemented!()
+        });
     }
 }
 

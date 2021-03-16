@@ -6,6 +6,9 @@ use actix_web::body::Body;
 use crate::web::services::auth::identity::Identity;
 use futures::future::LocalBoxFuture;
 
+/// The URL of the RPI CAS server.
+const RPI_CAS_ENDPOINT: &'static str = "https://cas-auth.rpi.edu/cas";
+
 /// Zero-Sized struct representing the RPI CAS identity provider
 pub struct RpiCas;
 

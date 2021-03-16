@@ -5,6 +5,7 @@ use oauth2::AccessToken;
 use crate::error::TelescopeError;
 use reqwest::Client;
 use crate::web::api::handle_graphql_response;
+use serde_json::Value;
 
 pub mod users;
 
@@ -31,11 +32,22 @@ pub async fn send_query<T: GraphQLQuery>(auth_token: &AccessToken, variables: T:
         // Propagate any errors sending or receiving
         .map_err(TelescopeError::github_api_error)?
         // Deserialize response as JSON
-        .json::<GraphQLResponse<T::ResponseData>>()
+        .json::<Value>()
         // Wait for the full response to deserialize
         .await
         // Convert any errors.
         .map_err(TelescopeError::github_api_error)
+        // Convert the valid JSON value into the GraphQL response type.
+        .and_then(|json_value| serde_json::from_value::<GraphQLResponse<T::ResponseData>>(json_value.clone())
+            // Convert serde error to telescope error
+            .map_err(|err| {
+                // Log the error and response body
+                error!("Malformed GitHub API response: {}\nresponse body: {}",
+                       err,
+                       serde_json::to_string_pretty(&json_value).expect("Could not display response body"));
+                // Convert error.
+                TelescopeError::GitHubApiError(err.to_string())
+            }))
         // Convert any errors in the response
         .and_then(|response| handle_graphql_response::<T>(API_NAME, response))
 }

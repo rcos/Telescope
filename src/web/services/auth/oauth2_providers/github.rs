@@ -1,6 +1,6 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
+use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity, Identity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use hubcaps::{Credentials, Github};
 use crate::web::api::{
@@ -76,6 +76,10 @@ impl Oauth2IdentityProvider for GitHubOauth {
     fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
         // Extract the identity and build the identity cookie.
         RootIdentity::GitHub(GitHubIdentity { access_token: token_response.access_token().clone() })
+    }
+
+    fn add_to_identity<'a>(token_response: &'a BasicTokenResponse, identity: &'a mut Identity) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
+        unimplemented!()
     }
 }
 

@@ -6,6 +6,7 @@ use crate::web::api::rcos::auth::ApiJwtClaims;
 use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
 use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 use crate::web::api::handle_graphql_response;
+use serde_json::Value;
 
 mod auth;
 pub mod landing_page_stats;
@@ -41,11 +42,21 @@ pub async fn send_query<T: GraphQLQuery>(
         // Convert and propagate any errors.
         .map_err(TelescopeError::rcos_api_error)?
         // The body of the response should be deserialized as JSON.
-        .json::<GraphQlResponse<T::ResponseData>>()
+        .json::<Value>()
         // Wait for the body to deconstruct.
         .await
         // Convert and propagate any errors on deserializing the response body.
         .map_err(TelescopeError::rcos_api_error)
+        // Convert the JSON value into the GraphQL response type.
+        .and_then(|json_value| serde_json::from_value::<GraphQlResponse<T::ResponseData>>(json_value.clone())
+            // Map Serde errors into telescope errors
+            .map_err(|err| {
+                // Log the error and response body.
+                error!("Error querying RCOS API: {}\nresponse body: {}",
+                    err, serde_json::to_string_pretty(&json_value).expect("Could not display response body."));
+                // Convert the error
+                TelescopeError::RcosApiError(err.to_string())
+            }))
         // Convert any GraphQL errors.
         .and_then(|response| handle_graphql_response::<T>(API_NAME, response));
 }

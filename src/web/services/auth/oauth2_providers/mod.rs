@@ -47,6 +47,9 @@ pub trait Oauth2IdentityProvider {
     /// in the user's cookies and identify them in future requests.
     fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity;
 
+    /// Add the authenticated identity to a user's token.
+    fn add_to_identity<'a>(token_response: &'a BasicTokenResponse, identity: &'a mut Identity) -> LocalBoxFuture<'a, Result<(), TelescopeError>>;
+
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
     fn auth_response(
@@ -163,8 +166,7 @@ where T: Oauth2IdentityProvider + 'static
 
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut {
         return Box::pin(async move {
-            // Check that the user is already authenticated with another service
-            // and exists.
+            // Check that the user is already authenticated with another service.
             if ident.identity().await.is_some() {
                 // If so, make the redirect url and send the user there.
                 let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
@@ -237,7 +239,25 @@ where T: Oauth2IdentityProvider + 'static
         });
     }
 
-    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut {
-        unimplemented!()
+    fn linking_authenticated_handler(req: HttpRequest, mut ident: Identity) -> Self::LinkAuthenticatedFut {
+        return Box::pin(async move {
+            // Get the redirect url.
+            let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
+            // Token exchange.
+            let token: BasicTokenResponse = Self::token_exchange(redir_url, &req)?;
+            // Add to the user's identity.
+            Self::add_to_identity(&token, &mut ident).await?;
+
+            // Redirect the user to their profile page
+            // Get the RCOS username
+            let username: String = ident.get_rcos_username()
+                .await?
+                // Or respond with a not authenticated error.
+                .ok_or(TelescopeError::NotAuthenticated)?;
+            // Redirect user.
+            Ok(HttpResponse::Found()
+                .header(LOCATION, format!("/user/{}", username))
+                .finish())
+        });
     }
 }

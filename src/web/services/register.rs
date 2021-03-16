@@ -2,12 +2,20 @@ use crate::error::TelescopeError;
 use crate::templates::forms::{register, Form, FormInput};
 use crate::templates::{auth, page, Template};
 use crate::web::api::rcos::send_query;
-use crate::web::api::rcos::users::create::CreateOneUser;
+use crate::web::api::rcos::users::create::{
+    CreateOneUser,
+    create_one_user::Variables as CreateOneUserVariables
+};
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::services::auth::identity::AuthenticatedIdentities;
+use crate::web::api::github::users::authenticated_user::authenticated_user::AuthenticatedUserViewer;
+use crate::web::services::auth::identity::{
+    AuthenticatedIdentities,
+    RootIdentity
+};
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use std::collections::HashMap;
+use serenity::model::user::CurrentUser;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -52,43 +60,42 @@ pub async fn submit_registration(
         .expect("Form should have validated last name.")
         .clone();
 
-    // Get the platform id username from the user's identity cookie.
-    let platform: UserAccountType;
-    let username: String;
-    let platform_id: String;
+    // Make query variables to create user
+    let query_vars: CreateOneUserVariables = match &identity_cookie.root {
+        // On GitHub authenticated identity
+        RootIdentity::GitHub(gh) => {
+            // Get the authenticated user.
+            let authenticated_user: AuthenticatedUserViewer = gh.get_authenticated_user().await?;
+            // Destructure important fields
+            let AuthenticatedUserViewer { login, id, .. } = authenticated_user;
+            // Build query variables.
+            CreateOneUser::make_variables(
+                login,
+                first_name,
+                last_name,
+                UserRole::External,
+                UserAccountType::GitHub,
+                id)
+        }
 
-    // Check for discord identity first.
-    if let Some(discord) = identity_cookie.discord {
-        let user = discord.get_authenticated_user().await?;
-        platform = UserAccountType::Discord;
-        username = user.tag();
-        platform_id = user.id.to_string();
-    } else {
-        // If no discord identity, use github.
-        let github_user = identity_cookie.github
-            .expect("At least one identity provider should be defined")
-            .get_authenticated_user()
-            .await?;
-
-        platform = UserAccountType::GitHub;
-        platform_id = github_user.id;
-        username = github_user.login;
-    }
-
-    // Create central API mutation variables.
-    let vars = CreateOneUser::make_variables(
-        username,
-        first_name,
-        last_name,
-        // All users are marked as external until linking an RPI CAS account.
-        UserRole::External,
-        platform,
-        platform_id,
-    );
+        // On Discord authenticated identity.
+        RootIdentity::Discord(d) => {
+            // Get authenticated user
+            let authenticated_user: CurrentUser = d.get_authenticated_user().await?;
+            // Build query variables.
+            CreateOneUser::make_variables(
+                authenticated_user.tag(),
+                first_name,
+                last_name,
+                UserRole::External,
+                UserAccountType::Discord,
+                authenticated_user.id.to_string())
+        }
+    };
 
     // Create the account!
     // We have no subject field since the account isn't created until this request resolves
-    let created_username: String = send_query::<CreateOneUser>(None, vars)
+    let created_username: String = send_query::<CreateOneUser>(None, query_vars)
         .await?
         .username()
         .ok_or(TelescopeError::ise(
