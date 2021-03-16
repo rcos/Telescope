@@ -110,6 +110,26 @@ impl AuthenticatedIdentities {
     pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
         self.root.get_rcos_username().await
     }
+
+    /// Get discord credentials if authenticated.
+    pub fn get_discord(&self) -> Option<&DiscordIdentity> {
+        // Check the root identity first
+        if let RootIdentity::Discord(discord) = &self.root {
+            Some(discord)
+        } else {
+            // Otherwise return the child field.
+            self.discord.as_ref()
+        }
+    }
+
+    /// Get the github credentials if authenticated.
+    pub fn get_github(&self) -> Option<&GitHubIdentity> {
+        if let RootIdentity::GitHub(gh) = &self.root {
+            Some(gh)
+        } else {
+            self.github.as_ref()
+        }
+    }
 }
 
 /// The identity of a user accessing telescope.
