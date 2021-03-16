@@ -6,7 +6,6 @@ use crate::web::services::auth::{
 };
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use futures::future::LocalBoxFuture;
-use url::Url;
 use actix_web::http::header::LOCATION;
 use futures::future::{ready, Ready};
 

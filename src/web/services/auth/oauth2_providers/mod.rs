@@ -1,7 +1,7 @@
 use super::{make_redirect_url, IdentityProvider};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::{send_query, users::accounts::reverse_lookup};
-use crate::web::csrf;
+use crate::web::{csrf, profile_for};
 use crate::web::services::auth::identity::{Identity, RootIdentity};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
@@ -12,6 +12,7 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
+use url::Url;
 
 pub mod discord;
 pub mod github;
@@ -221,7 +222,7 @@ where
             let identity: Identity = Identity::extract(&req).await?;
             identity.save(&root.make_authenticated_cookie());
             Ok(HttpResponse::Found()
-                .header(LOCATION, format!("/user/{}", username))
+                .header(LOCATION, profile_for(username.as_str()))
                 .finish())
         });
     }

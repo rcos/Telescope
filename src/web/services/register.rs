@@ -12,6 +12,7 @@ use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
+use crate::web::profile_for;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -95,15 +96,19 @@ pub async fn submit_registration(
 
     // Create the account!
     // We have no subject field since the account isn't created until this request resolves
-    let created_username: String = send_query::<CreateOneUser>(None, query_vars)
+    let profile: String = send_query::<CreateOneUser>(None, query_vars)
         .await?
+        // Extract the username
         .username()
+        // Get the profile address
+        .map(|username: String| profile_for(username.as_str()))
+        // If there is no username, throw an error
         .ok_or(TelescopeError::ise(
             "Create User mutation did not return username",
         ))?;
 
     // Redirect the user to the account we created for them
     Ok(HttpResponse::Found()
-        .header(LOCATION, format!("/users/{}", created_username))
+        .header(LOCATION, profile)
         .finish())
 }

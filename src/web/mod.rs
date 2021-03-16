@@ -17,3 +17,15 @@ pub fn telescope_ua() -> HeaderValue {
     HeaderValue::from_str(TELESCOPE_USER_AGENT.as_str())
         .expect("Could not make Telescope User-Agent")
 }
+
+/// Get the profile path for a given username.
+pub fn profile_for(username: &str) -> String {
+    // Encode the username
+    let encoded = serde_urlencoded::to_string(&[("u", username)])
+        .expect("Could not URL-encode username")
+        // Only use everything after "u="
+        .split_off(2);
+
+    // Put it in the correct part of the path.
+    format!("/user/{}", encoded)
+}
