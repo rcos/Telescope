@@ -3,9 +3,8 @@
 use crate::error::TelescopeError;
 use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::Form;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
+use crate::web::services::auth::identity::RootIdentity;
 use crate::web::api::rcos::users::UserAccountType;
-use crate::web::services::auth::oauth2_providers::discord::DiscordIdentity;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "forms/register";

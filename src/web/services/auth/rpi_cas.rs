@@ -1,8 +1,6 @@
 use crate::error::TelescopeError;
 use actix_web::{HttpRequest, HttpResponse};
 use crate::web::services::auth::IdentityProvider;
-use std::future::Future;
-use actix_web::body::Body;
 use crate::web::services::auth::identity::Identity;
 use futures::future::LocalBoxFuture;
 

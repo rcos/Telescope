@@ -1,8 +1,6 @@
 //! Trait for types stored in the user's identity cookie.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
-use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
@@ -12,9 +10,6 @@ use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, Ready, LocalBoxFuture};
 use serde::Serialize;
-use crate::web::services::auth::IdentityProvider;
-use std::future::Future;
-use std::any::Any;
 
 /// The root identity that this user is authenticated with.
 #[derive(Serialize, Deserialize)]
@@ -28,7 +23,7 @@ pub enum RootIdentity {
 
 impl RootIdentity {
     /// Refresh this identity token if necessary.
-    pub async fn refresh(mut self) -> Result<Self, TelescopeError> {
+    pub async fn refresh(self) -> Result<Self, TelescopeError> {
         // If this is a discord-based identity, refresh it and construct the refreshed root identity.
         if let RootIdentity::Discord(discord) = self {
             return discord.refresh().await.map(RootIdentity::Discord);

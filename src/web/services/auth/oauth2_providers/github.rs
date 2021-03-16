@@ -1,6 +1,6 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity, Identity};
+use crate::web::services::auth::identity::{RootIdentity, Identity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::api::{
     rcos,
@@ -22,8 +22,6 @@ use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
-use crate::web::services::auth::IdentityProvider;
-use std::future::Future;
 use futures::future::LocalBoxFuture;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.

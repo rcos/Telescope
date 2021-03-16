@@ -5,11 +5,11 @@ use crate::templates::Template;
 use crate::web::api::rcos::{
     send_query,
     users::developers_page::{
-        developers::{order_by, users_order_by, DevelopersUsers},
+        developers::{order_by, users_order_by},
         Developers,
     },
 };
-use crate::web::services::auth::identity::{Identity, AuthenticatedIdentities};
+use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
 use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 

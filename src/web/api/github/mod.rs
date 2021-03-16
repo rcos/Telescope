@@ -1,11 +1,10 @@
 //! GitHub API V4 queries and mutations.
 
-use graphql_client::{GraphQLQuery, Response as GraphQLResponse, QueryBody};
+use graphql_client::{GraphQLQuery, Response as GraphQLResponse};
 use oauth2::AccessToken;
 use crate::error::TelescopeError;
 use reqwest::Client;
 use crate::web::api::handle_graphql_response;
-use serde_json::Value;
 use reqwest::header::{ACCEPT, HeaderValue, USER_AGENT};
 use crate::web::telescope_ua;
 

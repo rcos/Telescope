@@ -2,7 +2,6 @@
 
 // Aliases necessary for generated module's namespace.
 use super::UserAccountType as user_account;
-use super::UserRole as user_role;
 
 /// Type representing GraphQL query to get a list of users and their
 /// account associations.
@@ -20,7 +19,6 @@ use developers::{
     users_order_by,
     DevelopersCurrentSemester,
     DevelopersUsersUserAccounts,
-    DevelopersUsersNewestEnrollment,
     DevelopersUsers
 };
 use regex::Regex;

@@ -15,7 +15,6 @@ use std::sync::Arc;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::send_query;
-use std::future::Future;
 use futures::future::LocalBoxFuture;
 
 /// The Discord API endpoint to query for user data.
