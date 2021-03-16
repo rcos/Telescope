@@ -25,11 +25,6 @@ pub const FNAME: &'static str = "first_name";
 /// The handlebars key for a user's last name.
 pub const LNAME: &'static str = "last_name";
 
-/// Default URL for user's profile pics when there is not an existing one for that user. We use the
-/// Gravatar mystery-person.
-pub const DEFAULT_PFP_URL: &'static str =
-    "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&r=g";
-
 // /// Get a user's github profile picture.
 // async fn get_pfp_url_github(github_user_id: String) -> Result<String, TelescopeError> {
 //     // Get the github credentials from the global config.
