@@ -14,12 +14,10 @@ use futures::future::{ready, Ready, LocalBoxFuture};
 use serde::Serialize;
 use crate::web::services::auth::IdentityProvider;
 use std::future::Future;
+use std::any::Any;
 
 /// Trait for all identities stored in the top-level identity cookie.
-pub trait AuthenticatedIdentity {
-    /// The type that provides these authenticated identities.
-    type Provider: IdentityProvider;
-
+pub trait AuthenticatedIdentity: Any {
     /// The type of user account associated with this identity cookie.
     const USER_ACCOUNT_TYPE: UserAccountType;
 
@@ -29,15 +27,12 @@ pub trait AuthenticatedIdentity {
     /// The future type returned by the function to get this platform's authenticated user.
     type AuthenticatedUserFuture: Future<Output = Result<Self::AuthenticatedUser, TelescopeError>>;
 
-    /// The future type for the method to asynchronously fetch the authenticated RCOS username.
-    type RcosUsernameFuture: Future<Output = Result<Option<String>, TelescopeError>>;
-
     /// Get the user object that is authenticated on this platform with this cookie.
     fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture;
 
     /// Get the username of the RCOS user associated with the authenticated account
     /// if one exists.
-    fn get_rcos_username(&self) -> Self::RcosUsernameFuture;
+    fn get_rcos_username(&self) -> LocalBoxFuture<Result<Option<String>, TelescopeError>>;
 }
 
 /// The top level object stored in the identity cookie.

@@ -147,11 +147,9 @@ impl DiscordIdentity {
 }
 
 impl AuthenticatedIdentity for DiscordIdentity {
-    type Provider = DiscordOAuth;
     const USER_ACCOUNT_TYPE: UserAccountType = UserAccountType::Discord;
     type AuthenticatedUser = CurrentUser;
     type AuthenticatedUserFuture = LocalBoxFuture<'static, Result<Self::AuthenticatedUser, TelescopeError>>;
-    type RcosUsernameFuture = LocalBoxFuture<'static, Result<Option<String>, TelescopeError>>;
 
     fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture {
         // Clone the access token to be owned by the future
@@ -184,7 +182,7 @@ impl AuthenticatedIdentity for DiscordIdentity {
         });
     }
 
-    fn get_rcos_username(&self) -> Self::RcosUsernameFuture {
+    fn get_rcos_username(&self) -> LocalBoxFuture<Result<Option<String>, TelescopeError>> {
         unimplemented!()
     }
 }

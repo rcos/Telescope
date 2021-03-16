@@ -93,11 +93,9 @@ impl GitHubIdentity {
 }
 
 impl AuthenticatedIdentity for GitHubIdentity {
-    type Provider = GitHubOauth;
     const USER_ACCOUNT_TYPE: UserAccountType = UserAccountType::GitHub;
     type AuthenticatedUser = AuthenticatedUserViewer;
     type AuthenticatedUserFuture = LocalBoxFuture<'static, Result<Self::AuthenticatedUser, TelescopeError>>;
-    type RcosUsernameFuture = LocalBoxFuture<'static, Result<Option<String>, TelescopeError>>;
 
     fn get_authenticated_user(&self) -> Self::AuthenticatedUserFuture {
         // Clone the access token for ownership reasons.
@@ -113,13 +111,11 @@ impl AuthenticatedIdentity for GitHubIdentity {
         });
     }
 
-    fn get_rcos_username(&self) -> Self::RcosUsernameFuture {
-        // Clone this access token so that it can be owned by the future.
-        let owned: GitHubIdentity = self.clone();
+    fn get_rcos_username(&self) -> LocalBoxFuture<Result<Option<String>, TelescopeError>> {
         // Make and return a boxed future.
         return Box::pin(async move {
             // Get the on platform id of this user.
-            let platform_id: String = owned.get_user_id().await?;
+            let platform_id: String = self.get_user_id().await?;
             // Build the variables for a reverse lookup query to the central RCOS API.
             let query_variables = ReverseLookup::make_vars(Self::USER_ACCOUNT_TYPE, platform_id);
             // Send the query to the central RCOS API and await response (we have no subject for this
