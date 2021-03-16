@@ -5,7 +5,7 @@ use crate::web::csrf;
 use crate::web::services::auth::identity::{Identity, RootIdentity};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
-use actix_web::FromRequest;
+use actix_web::{FromRequest, Responder};
 use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
@@ -138,9 +138,14 @@ where
 {
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
 
+    type LoginResponse = Result<HttpResponse, TelescopeError>;
+    type RegistrationResponse = Result<HttpResponse, TelescopeError>;
+    type LinkResponse = Result<HttpResponse, TelescopeError>;
+
     type LoginFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type RegistrationFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type LinkFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
+
     type LoginAuthenticatedFut = LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
     type RegistrationAuthenticatedFut =
         LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>>;
@@ -259,10 +264,8 @@ where
                 .await?
                 // Or respond with a not authenticated error.
                 .ok_or(TelescopeError::NotAuthenticated)?;
-            // Redirect user.
-            Ok(HttpResponse::Found()
-                .header(LOCATION, format!("/user/{}", username))
-                .finish())
+
+            unimplemented!()
         });
     }
 }

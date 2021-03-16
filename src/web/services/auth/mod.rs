@@ -3,7 +3,7 @@ use crate::web::services::auth::identity::Identity;
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
 use actix_web::http::header::HOST;
-use actix_web::web as aweb;
+use actix_web::{web as aweb, Responder};
 use actix_web::web::ServiceConfig;
 use actix_web::{HttpRequest, HttpResponse};
 use oauth2::RedirectUrl;
@@ -91,14 +91,23 @@ pub trait IdentityProvider: 'static {
         format!("/auth/{}/link", Self::SERVICE_NAME)
     }
 
+    /// The type used to respond to login requests.
+    type LoginResponse: Responder;
+
+    /// The type used to respond to registration requests.
+    type RegistrationResponse: Responder;
+
+    /// The type used to respond to account linking requests.
+    type LinkResponse: Responder;
+
     /// The type of future returned by the login handler.
-    type LoginFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+    type LoginFut: Future<Output = Self::LoginResponse> + 'static;
 
     /// The type of the future returned by the registration handler.
-    type RegistrationFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+    type RegistrationFut: Future<Output = Self::RegistrationResponse> + 'static;
 
     /// The type of the future returned by the account linking handler.
-    type LinkFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;
+    type LinkFut: Future<Output = Self::LinkResponse> + 'static;
 
     /// The type of future returned by the login authenticated response handler.
     type LoginAuthenticatedFut: Future<Output = Result<HttpResponse, TelescopeError>> + 'static;

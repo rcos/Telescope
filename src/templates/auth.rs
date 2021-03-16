@@ -4,6 +4,7 @@ use crate::templates::Template;
 use crate::web::services::auth::oauth2_providers::{discord::DiscordOAuth, github::GitHubOauth};
 use crate::web::services::auth::IdentityProvider;
 use serde_json::{Map, Value};
+use crate::web::services::auth::rpi_cas::RpiCas;
 
 /// Path to template from template directory root.
 const TEMPLATE_PATH: &'static str = "auth";
@@ -67,12 +68,18 @@ pub fn login() -> Template {
         ),
         item(
             DiscordOAuth::login_path(),
-            "btn-discord",
+            "btn-discord mb-2",
             "Login using Discord",
             // This is manually coded for in the template file and is not
             // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord"),
         ),
+        item(
+            RpiCas::login_path(),
+            "btn-rpi",
+            "Login Using RPI CAS",
+            None
+        )
     ];
 
     // Create and return template.
@@ -91,12 +98,18 @@ pub fn register() -> Template {
         ),
         item(
             DiscordOAuth::register_path(),
-            "btn-discord",
+            "btn-discord mb-2",
             "Register using Discord",
             // This is manually coded for in the template file and is not
             // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord"),
         ),
+        item(
+            RpiCas::register_path(),
+            "btn-rpi",
+            "Register Using RPI CAS",
+            None
+        )
     ];
 
     // Create and return template.
