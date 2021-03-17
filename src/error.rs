@@ -153,6 +153,12 @@ pub enum TelescopeError {
     /// An unauthenticated user is trying to access a page that requires
     /// authentication. Report as unauthorized and direct them to try again.
     NotAuthenticated,
+
+    #[error(ignore)]
+    #[display("RPI CAS error: {}", _0)]
+    /// Error sending to or receiving from the RPI CAS system.
+    /// This should report as a Gateway error.
+    RpiCasError(String),
 }
 
 impl TelescopeError {
@@ -179,14 +185,20 @@ impl TelescopeError {
 
     /// Convert a reqwest error from the RCOS API into a telescope error.
     pub fn rcos_api_error(err: ReqwestError) -> Self {
-        error!("Error Querying RCOS API: {}", err);
+        error!("Error querying RCOS API: {}", err);
         Self::RcosApiError(err.to_string())
     }
 
     /// Convert a reqwest error from the GitHub API into a telescope error.
     pub fn github_api_error(err: ReqwestError) -> Self {
-        error!("Error Querying GitHub API: {}", err);
+        error!("Error querying GitHub API: {}", err);
         Self::GitHubApiError(err.to_string())
+    }
+
+    /// Convert reqwest error from RPI CAS service into a Telescope error.
+    pub fn rpi_cas_error(err: ReqwestError) -> Self {
+        error!("Error querying RPI CAS endpoint: {}", err);
+        TelescopeError::RpiCasError(err.to_string())
     }
 
     /// Serialize an invalid form to send back to the user.
@@ -306,11 +318,16 @@ impl TelescopeError {
 
             TelescopeError::GitHubApiError(err) => jumbotron::new(
                 format!("{} - GitHub API V4 Query Error", status_code),
-                format!(
-                    "Could not query the GitHub API. Please contact a coordinator and \
-                file a GitHub issue on the Telescope repository. Internal error description: {}",
-                    err
-                ),
+                format!("Could not query the GitHub API. Please contact a coordinator and \
+                    file a GitHub issue on the Telescope repository. Internal error description: {}",
+                    err),
+            ),
+
+            TelescopeError::RpiCasError(err) => jumbotron::new(
+                format!("{} - RPI CAS Error", status_code),
+                format!("Issue communicating with the RPI CAS service. Please try again. \
+                If the error persists, please contact a coordinator and create an issue on the \
+                Telescope GitHub. Internal Error: {}", err)
             ),
 
             TelescopeError::GraphQLError { platform, errors } => {
@@ -408,6 +425,7 @@ impl ResponseError for TelescopeError {
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
             TelescopeError::InvalidForm(_) => StatusCode::BAD_REQUEST,
             TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,
+            TelescopeError::RpiCasError(_) => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

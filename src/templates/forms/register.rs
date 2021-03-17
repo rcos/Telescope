@@ -5,6 +5,7 @@ use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::Form;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::services::auth::identity::RootIdentity;
+use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "forms/register";
@@ -72,7 +73,7 @@ fn userless() -> Form {
 /// Serializable struct to store necessary information from the user's authenticated info.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct UserInfo {
-    avatar_url: String,
+    avatar_url: Option<String>,
     username: String,
     profile_url: Option<String>,
 }
@@ -94,7 +95,7 @@ pub async fn for_identity(cookie: &RootIdentity) -> Result<Form, TelescopeError>
                     .with_other_key(
                         INFO,
                         UserInfo {
-                            avatar_url: gh_user.avatar_url.to_string(),
+                            avatar_url: Some(gh_user.avatar_url.to_string()),
                             profile_url: Some(gh_user.url.to_string()),
                             username: gh_user.login.clone(),
                         },
@@ -115,10 +116,18 @@ pub async fn for_identity(cookie: &RootIdentity) -> Result<Form, TelescopeError>
                         INFO,
                         UserInfo {
                             username: discord_user.tag(),
-                            avatar_url: discord_user.face(),
+                            avatar_url: Some(discord_user.face()),
                             profile_url: None,
                         },
                     )
             }),
+
+        // On authentication via RPI CAS
+        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => Ok(userless()
+            .with_other_key(INFO, UserInfo {
+                avatar_url: None,
+                username: format!("{}@rpi.edu", rcs_id),
+                profile_url: None
+            })),
     }
 }

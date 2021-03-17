@@ -10,6 +10,7 @@ use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, LocalBoxFuture, Ready};
 use serde::Serialize;
+use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 
 /// The root identity that this user is authenticated with.
 #[derive(Serialize, Deserialize)]
@@ -19,6 +20,9 @@ pub enum RootIdentity {
 
     /// Discord access and refresh tokens.
     Discord(DiscordIdentity),
+
+    /// RCS ID.
+    RpiCas(RpiCasIdentity)
 }
 
 impl RootIdentity {
@@ -37,6 +41,7 @@ impl RootIdentity {
         match self {
             RootIdentity::GitHub(_) => UserAccountType::GitHub,
             RootIdentity::Discord(_) => UserAccountType::Discord,
+            RootIdentity::RpiCas(_) => UserAccountType::Rpi,
         }
     }
 
@@ -45,6 +50,7 @@ impl RootIdentity {
         match self {
             RootIdentity::GitHub(gh) => gh.get_user_id().await,
             RootIdentity::Discord(d) => d.get_user_id().await,
+            RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => Ok(rcs_id.clone()),
         }
     }
 
@@ -54,6 +60,7 @@ impl RootIdentity {
         match self {
             RootIdentity::GitHub(gh) => gh.get_rcos_username().await,
             RootIdentity::Discord(d) => d.get_rcos_username().await,
+            RootIdentity::RpiCas(rpi) => rpi.get_rcos_username().await,
         }
     }
 
@@ -78,6 +85,9 @@ pub struct AuthenticatedIdentities {
 
     /// An optional Discord access and refresh token.
     pub discord: Option<DiscordIdentity>,
+
+    // We don't store an optional RCS ID because it can be queried from the
+    // database.
 }
 
 impl AuthenticatedIdentities {

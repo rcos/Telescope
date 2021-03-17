@@ -13,6 +13,7 @@ use actix_web::{HttpRequest, HttpResponse};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
 use crate::web::profile_for;
+use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -92,6 +93,17 @@ pub async fn submit_registration(
                 authenticated_user.id.to_string(),
             )
         }
+
+        // On RPI CAS based identity
+        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => CreateOneUser::make_variables(
+            rcs_id.clone(),
+            first_name,
+            last_name,
+            // We assume anyone signing up via RPI CAS is a student.
+            UserRole::Student,
+            UserAccountType::Rpi,
+            rcs_id.clone(),
+        )
     };
 
     // Create the account!
