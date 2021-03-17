@@ -5,7 +5,7 @@ use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, Identity, RootIdentity};
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;
@@ -24,7 +24,7 @@ const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
 pub struct DiscordOAuth;
 
 /// The object stored in a user's cookies when authenticated via discord.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DiscordIdentity {
     /// The OAuth2 access token granted by discord.
     access_token: AccessToken,
@@ -79,7 +79,7 @@ impl Oauth2IdentityProvider for DiscordOAuth {
             //  Make the discord access token.
             let access_token: DiscordIdentity = DiscordIdentity::from_response(token_response);
             // Get the authenticated identity cookie or produce an error
-            let authenticated: AuthenticatedIdentities = identity
+            let authenticated: AuthenticationCookie = identity
                 .identity()
                 .await
                 .ok_or(TelescopeError::NotAuthenticated)?;

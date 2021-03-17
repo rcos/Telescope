@@ -13,7 +13,7 @@ use serde::Serialize;
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 
 /// The root identity that this user is authenticated with.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum RootIdentity {
     /// Github access token
     GitHub(GitHubIdentity),
@@ -65,8 +65,8 @@ impl RootIdentity {
     }
 
     /// Put this root in a top level identity cookie.
-    pub fn make_authenticated_cookie(self) -> AuthenticatedIdentities {
-        AuthenticatedIdentities {
+    pub fn make_authenticated_cookie(self) -> AuthenticationCookie {
+        AuthenticationCookie {
             root: self,
             github: None,
             discord: None,
@@ -75,8 +75,8 @@ impl RootIdentity {
 }
 
 /// The top level object stored in the identity cookie.
-#[derive(Serialize, Deserialize)]
-pub struct AuthenticatedIdentities {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AuthenticationCookie {
     /// The root authenticated identity. This identity must always exist.
     pub root: RootIdentity,
 
@@ -90,7 +90,7 @@ pub struct AuthenticatedIdentities {
     // database.
 }
 
-impl AuthenticatedIdentities {
+impl AuthenticationCookie {
     /// If necessary, refresh an identity cookie. This could include getting a
     /// new access token from an OAuth API for example.
     pub async fn refresh(mut self) -> Result<Self, TelescopeError> {
@@ -135,6 +135,23 @@ impl AuthenticatedIdentities {
             self.github.as_ref()
         }
     }
+
+    /// Try to remove the root identity from this authentication cookie
+    /// and replace it with one of the secondary ones. Return [`None`] if
+    /// there is no secondary cookie to replace the root. This may try to access
+    /// the RCOS API to look for an RCS ID to replace the root.
+    pub async fn remove_root(&self) -> Result<Option<Self>, TelescopeError> {
+        unimplemented!()
+        // match self.root {
+        //     // When the root identity is an RCS id.
+        //     RootIdentity::RpiCas(rpi) => {
+        //
+        //         if let Some(gh) = self.github {
+        //
+        //         }
+        //     }
+        // }
+    }
 }
 
 /// The identity of a user accessing telescope.
@@ -170,7 +187,7 @@ impl FromRequest for Identity {
     }
 }
 
-impl FromRequest for AuthenticatedIdentities {
+impl FromRequest for AuthenticationCookie {
     type Error = TelescopeError;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
     type Config = ();
@@ -199,7 +216,7 @@ impl Identity {
     }
 
     /// Save an identity object to the client's cookies.
-    pub fn save(&self, identity: &AuthenticatedIdentities) {
+    pub fn save(&self, identity: &AuthenticationCookie) {
         // Serialize the cookie to JSON first. This serialization should not fail.
         let cookie: String =
             serde_json::to_string(identity).expect("Could not serialize identity cookie");
@@ -209,11 +226,11 @@ impl Identity {
     }
 
     /// Get the user's identity. Refresh it if necessary.
-    pub async fn identity(&self) -> Option<AuthenticatedIdentities> {
+    pub async fn identity(&self) -> Option<AuthenticationCookie> {
         // Get the inner identity as a String.
         let id: String = self.inner.identity()?;
         // try to deserialize it
-        match serde_json::from_str::<AuthenticatedIdentities>(id.as_str()) {
+        match serde_json::from_str::<AuthenticationCookie>(id.as_str()) {
             // On okay, refresh the identity cookie if needed
             Ok(id) => match id.refresh().await {
                 // If this succeeds

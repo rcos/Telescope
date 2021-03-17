@@ -7,7 +7,7 @@ use crate::web::api::rcos::users::create::{
     create_one_user::Variables as CreateOneUserVariables, CreateOneUser,
 };
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
-use crate::web::services::auth::identity::{AuthenticatedIdentities, RootIdentity};
+use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
 use serenity::model::user::CurrentUser;
@@ -30,7 +30,7 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// the necessary records in the RCOS database via the central API. Argument extractors will error
 /// if the identity is not authenticated.
 pub async fn finish_registration(
-    identity_cookie: AuthenticatedIdentities,
+    identity_cookie: AuthenticationCookie,
 ) -> Result<Form, TelescopeError> {
     // Create a form for the authenticated the user's cookie.
     register::for_identity(&identity_cookie.root).await
@@ -40,7 +40,7 @@ pub async fn finish_registration(
 /// Endpoint to which users submit their forms. Argument extractor will error if user is not
 /// authenticated.
 pub async fn submit_registration(
-    identity_cookie: AuthenticatedIdentities,
+    identity_cookie: AuthenticationCookie,
     form_input: FormInput,
 ) -> Result<HttpResponse, TelescopeError> {
     // Create and validate a registration form. This will send the form back to the users repeatedly until they submit

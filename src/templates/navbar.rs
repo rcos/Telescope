@@ -2,7 +2,7 @@
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::services::auth::identity::{AuthenticatedIdentities, Identity};
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
 
@@ -85,7 +85,7 @@ fn for_user(req_path: &str, username: &str) -> Template {
 /// Create a navbar template for
 pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
     // Extract the authenticated identities from the request.
-    let identity: Option<AuthenticatedIdentities> = Identity::extract(req).await?.identity().await;
+    let identity: Option<AuthenticationCookie> = Identity::extract(req).await?.identity().await;
 
     // If the user is authenticated.
     if let Some(authenticated) = identity {

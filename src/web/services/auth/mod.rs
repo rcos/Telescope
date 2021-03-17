@@ -1,5 +1,5 @@
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::Identity;
+use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
 use actix_web::http::header::HOST;
@@ -9,6 +9,7 @@ use actix_web::{HttpRequest, HttpResponse};
 use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
+use futures::future::LocalBoxFuture;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -70,6 +71,9 @@ pub trait IdentityProvider: 'static {
     fn link_path() -> String {
         format!("/link/{}", Self::SERVICE_NAME)
     }
+
+    /// The path to unlink this service from the user's account.
+    fn unlink_path() -> String { format!("/unlink/{}", Self::SERVICE_NAME) }
 
     /// The path for the identity provider to redirect back to after authenticating
     /// a user for login. This path is also registered under actix with the
@@ -136,6 +140,10 @@ pub trait IdentityProvider: 'static {
                 aweb::get().to(Self::link_handler),
             )
             .route(
+                Self::unlink_path().as_str(),
+                aweb::get().to(Self::unlink_handler)
+            )
+            .route(
                 Self::login_redirect_path().as_str(),
                 aweb::get().to(Self::login_authenticated_handler),
             )
@@ -161,6 +169,11 @@ pub trait IdentityProvider: 'static {
     /// Actix-web handler for the route that redirects to the authentication provider
     /// to link an account.
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut;
+
+    /// Actix-web handler for the route that unlinks an identity service.
+    fn unlink_handler(req: HttpRequest, authenticated_identity: AuthenticationCookie) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
+        unimplemented!()
+    }
 
     /// Actix-web handler for authentication callback to login. Guarded by this
     /// trait to GET requests.

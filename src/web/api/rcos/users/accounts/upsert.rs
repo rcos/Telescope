@@ -1,7 +1,7 @@
 //! Mutation to insert or update a user account record.
 
 // Namespace items for generated code
-use crate::web::api::rcos::users::UserAccountType as user_account;
+use crate::web::api::rcos::users::{UserAccountType as user_account, UserAccountType};
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -17,7 +17,7 @@ use upsert_user_account::{
 
 impl UpsertUserAccount {
     /// Make the variables for a user account upsert mutation.
-    pub fn make_variables() -> Variables {
-        unimplemented!()
+    pub fn make_variables(username: String, platform: UserAccountType, platform_id: String) -> Variables {
+        Variables { username, platform, platform_id }
     }
 }

@@ -20,8 +20,10 @@ use regex::Regex;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::send_query;
-use crate::web::services::auth::identity::{RootIdentity, AuthenticatedIdentities};
+use crate::web::services::auth::identity::{RootIdentity, AuthenticationCookie};
 use crate::web::profile_for;
+use std::future::Future;
+use actix_web::body::Body;
 
 /// The URL of the RPI CAS server.
 const RPI_CAS_ENDPOINT: &'static str = "https://cas-auth.rpi.edu/cas";
@@ -245,7 +247,7 @@ impl IdentityProvider for RpiCas {
     ) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
             // Get the authenticated identities of this user.
-            let authenticated: AuthenticatedIdentities = ident.identity()
+            let authenticated: AuthenticationCookie = ident.identity()
                 .await
                 .ok_or(TelescopeError::NotAuthenticated)?;
 

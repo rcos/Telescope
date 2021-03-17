@@ -24,7 +24,7 @@ pub struct GitHubOauth;
 
 /// The identity object stored in the user's cookies for users signed in via
 /// GitHub.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GitHubIdentity {
     /// The OAuth2 Access token granted by GitHub.
     pub access_token: AccessToken,
