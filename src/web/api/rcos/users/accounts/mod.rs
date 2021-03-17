@@ -2,3 +2,4 @@
 
 pub mod lookup;
 pub mod reverse_lookup;
+pub mod upsert;

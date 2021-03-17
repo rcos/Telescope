@@ -20,7 +20,7 @@ use regex::Regex;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::send_query;
-use crate::web::services::auth::identity::RootIdentity;
+use crate::web::services::auth::identity::{RootIdentity, AuthenticatedIdentities};
 use crate::web::profile_for;
 
 /// The URL of the RPI CAS server.
@@ -176,7 +176,15 @@ impl IdentityProvider for RpiCas {
         return Box::pin(async move {
             // The user must already be authenticated to link RPI CAS to an
             // existing account.
-            if ident.identity().await.is_some() {
+            if let Some(authenticated_identity) = ident.identity().await {
+                // Make sure they are authenticated on a different platform.
+                if let RootIdentity::RpiCas(_) = authenticated_identity.root {
+                    return Err(TelescopeError::bad_request(
+                        "RPI CAS already linked",
+                        "You are already signed into an RPI CAS account."
+                    ));
+                }
+
                 // If authenticated make the URL and direct the user there.
                 let auth_url = make_authentication_url(&req, Self::link_redirect_path());
 
@@ -236,6 +244,11 @@ impl IdentityProvider for RpiCas {
         ident: Identity,
     ) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
+            // Get the authenticated identities of this user.
+            let authenticated: AuthenticatedIdentities = ident.identity()
+                .await
+                .ok_or(TelescopeError::NotAuthenticated)?;
+
             Err(TelescopeError::NotImplemented)
         });
     }
