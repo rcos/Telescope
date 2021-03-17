@@ -28,7 +28,7 @@ use rand::rngs::OsRng;
 use rand::Rng;
 
 use crate::{
-    templates::static_pages::{projects::ProjectsPage, sponsors::SponsorsPage, StaticPage},
+    templates::static_pages::{sponsors::SponsorsPage, StaticPage},
     web::csrf::CsrfJanitor,
 };
 
@@ -75,7 +75,6 @@ fn main() -> std::io::Result<()> {
             .configure(web::services::register)
             // static files service
             .service(afs::Files::new("/static", "static"))
-            .route("/projects", get().to(ProjectsPage::page))
             .route("/sponsors", get().to(SponsorsPage::page))
             .default_service(aweb::to(web::services::not_found::not_found))
     })

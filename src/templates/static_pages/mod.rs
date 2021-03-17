@@ -3,7 +3,6 @@ use crate::templates::{page, Template};
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 
-pub mod projects;
 pub mod sponsors;
 
 /// A piece of static content. This is just a reference to a

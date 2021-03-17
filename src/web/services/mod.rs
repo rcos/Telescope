@@ -6,6 +6,7 @@ mod index;
 mod login;
 pub mod not_found;
 mod register;
+mod projects;
 
 use actix_web::web::ServiceConfig;
 
@@ -24,6 +25,8 @@ pub fn register(config: &mut ServiceConfig) {
         .service(register::register_page)
         .service(register::finish_registration)
         .service(register::submit_registration)
-        // Developers Page
-        .service(developers::developers_page);
+        // Developers page
+        .service(developers::developers_page)
+        // Projects page
+        .service(projects::projects_page);
 }
