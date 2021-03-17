@@ -26,7 +26,12 @@ impl UpsertUserAccount {
 
     /// Create or update a user account record on behalf of a user. This method will send an
     /// [`UpsertUserAccount`] mutation with the subject set to the username. This method returns
-    /// the username associated with the created user account (whitch should match the supplied username).
+    /// the username associated with the created user account (whitch should match the supplied
+    /// username).
+    ///
+    /// This will fail if this user account is already linked to another user. In practice, this
+    /// should be rare, so we let this case get handled by Telescope error propagation instead
+    /// of accounting for it here.
     pub async fn send(username: String, platform: UserAccountType, platform_id: String) -> Result<String, TelescopeError> {
         send_query::<Self>(Some(username.clone()), Self::make_variables(username, platform, platform_id))
             .await
