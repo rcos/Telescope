@@ -157,7 +157,7 @@ impl DiscordIdentity {
         // Build the query variables for a reverse lookup query to the central RCOS API
         let variables = ReverseLookup::make_vars(UserAccountType::Discord, platform_id);
         // Send the query and await the response
-        return send_query::<ReverseLookup>(None, variables)
+        return send_query::<ReverseLookup>(variables)
             .await
             .map(|response| response.username());
     }

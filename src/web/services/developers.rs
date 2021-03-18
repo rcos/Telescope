@@ -129,10 +129,8 @@ pub async fn developers_page(
     // Build the query variables for the GraphQL request.
     let variables = Developers::make_variables(limit, offset, search_text, order_by_param);
 
-    // Extract the user identity for the query subject header (if it exists.)
-    let subject: Option<String> = identity.get_rcos_username().await?;
     // Send the query and wait for a response.
-    let query_response: DevelopersResponse = send_query::<Developers>(subject, variables)
+    let query_response: DevelopersResponse = send_query::<Developers>(variables)
         .await?
         .simplify();
 

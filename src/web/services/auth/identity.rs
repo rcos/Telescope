@@ -11,6 +11,7 @@ use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, LocalBoxFuture, Ready};
 use serde::Serialize;
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
+use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
 
 /// The root identity that this user is authenticated with.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -62,6 +63,15 @@ impl RootIdentity {
             RootIdentity::Discord(d) => d.get_rcos_username().await,
             RootIdentity::RpiCas(rpi) => rpi.get_rcos_username().await,
         }
+    }
+
+    /// Get the user's RCOS username. If the user is not found, throw an error.
+    pub async fn get_rcos_username_or_error(&self) -> Result<String, TelescopeError> {
+        self.get_rcos_username()
+            .await
+            .map(|opt| {
+                opt.ok_or(TelescopeError::ise("The authenticated user doesn't exist."))
+            })?
     }
 
     /// Put this root in a top level identity cookie.
@@ -116,6 +126,12 @@ impl AuthenticationCookie {
         self.root.get_rcos_username().await
     }
 
+    /// Get the authenticated user's RCOS username via the root identity or throw an internal
+    /// server error.
+    pub async fn get_rcos_username_or_error(&self) -> Result<String, TelescopeError> {
+        self.root.get_rcos_username_or_error().await
+    }
+
     /// Get discord credentials if authenticated.
     pub fn get_discord(&self) -> Option<&DiscordIdentity> {
         // Check the root identity first
@@ -136,21 +152,76 @@ impl AuthenticationCookie {
         }
     }
 
+    /// Try to replace the root identity with the secondary GitHub identity.
+    /// Return true on success.
+    fn replace_root_with_github(&mut self) -> bool {
+        // Check if there is a github token to act as the root authentication
+        if self.github.is_some() {
+            // Swap github to the root position. Use Option::take
+            // to extract the value and leave a None in its place.
+            let gh: GitHubIdentity = self.github.take().unwrap();
+            self.root = RootIdentity::GitHub(gh);
+            return true;
+        }
+
+        // If we could not replace the root, return false.
+        return false;
+    }
+
+    /// Try to replace the root identity with the discord token.
+    /// Return true on success.
+    /// See [`Self::replace_root_with_github`].
+    fn replace_root_with_discord(&mut self) -> bool {
+        if self.discord.is_some() {
+            self.root = RootIdentity::Discord(self.discord.take().unwrap());
+            return true;
+        }
+        return false;
+    }
+
+    /// Try to get the user's RCS id from the RCOS database and replace the root
+    /// identity with it.
+    /// Return true on success.
+    async fn replace_root_with_rpi_cas(&mut self) -> Result<bool, TelescopeError> {
+        // Lookup the user's username
+        let rcos_username: String = self.get_rcos_username_or_error().await?;
+        // Lookup the user's RCS id
+        let rcs_id: Option<String> = AccountLookup::send(rcos_username, UserAccountType::Rpi)
+            .await?;
+        // If there is an RCS id, replace the root.
+        if let Some(rcs_id) = rcs_id {
+            self.root = RootIdentity::RpiCas(RpiCasIdentity { rcs_id });
+            return Ok(true);
+        }
+
+        // Return false if we could not replace the root with the user's RCS id.
+        return Ok(false);
+    }
+
     /// Try to remove the root identity from this authentication cookie
-    /// and replace it with one of the secondary ones. Return [`None`] if
+    /// and replace it with one of the secondary ones. Return `false` if
     /// there is no secondary cookie to replace the root. This may try to access
     /// the RCOS API to look for an RCS ID to replace the root.
-    pub async fn remove_root(&self) -> Result<Option<Self>, TelescopeError> {
-        unimplemented!()
-        // match self.root {
-        //     // When the root identity is an RCS id.
-        //     RootIdentity::RpiCas(rpi) => {
-        //
-        //         if let Some(gh) = self.github {
-        //
-        //         }
-        //     }
-        // }
+    ///
+    /// If the root can successfully be replaced, return `true`.
+    pub async fn remove_root(&mut self) -> Result<bool, TelescopeError> {
+        match self.root {
+            // When the root identity is an RCS ID.
+            RootIdentity::RpiCas(_) => {
+                // Try with GitHub, then discord
+                Ok(self.replace_root_with_github() || self.replace_root_with_discord())
+            },
+            // When root identity is GitHub auth
+            RootIdentity::GitHub(_) => {
+                // Try with discord then RCS id.
+                Ok(self.replace_root_with_discord() || self.replace_root_with_rpi_cas().await?)
+            },
+            // When the root identity is Discord Auth
+            RootIdentity::Discord(_) => {
+                // Try with GitHub then with RPI CAS
+                Ok(self.replace_root_with_github() || self.replace_root_with_rpi_cas().await?)
+            }
+        }
     }
 }
 

@@ -24,14 +24,13 @@ impl UnlinkUserAccount {
     }
 
     /// Unlink and delete a user account from the database. Return the platform id
-    /// of the account if it existed. This will send a query with the subject set to the
-    /// user who's unlinking an account (users should only be able to unlink their own accounts).
+    /// of the account if it existed.
     ///
     /// This should be used with significant care, as a user record in the database with no linked
     /// accounts is orphaned and the user will not be able to login and use Telescope.
     pub async fn send(username: String, platform: user_account) -> Result<Option<String>, TelescopeError> {
         // Send the query, wait for and convert the response
-        send_query::<Self>(Some(username.clone()), Self::make_variables(username, platform))
+        send_query::<Self>(Self::make_variables(username, platform))
             .await
             .map(ResponseData::platform_id)
     }

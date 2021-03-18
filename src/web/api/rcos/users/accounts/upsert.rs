@@ -33,7 +33,7 @@ impl UpsertUserAccount {
     /// should be rare, so we let this case get handled by Telescope error propagation instead
     /// of accounting for it here.
     pub async fn send(username: String, platform: UserAccountType, platform_id: String) -> Result<String, TelescopeError> {
-        send_query::<Self>(Some(username.clone()), Self::make_variables(username, platform, platform_id))
+        send_query::<Self>(Self::make_variables(username, platform, platform_id))
             .await
             .map(ResponseData::username)
     }

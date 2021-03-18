@@ -108,9 +108,8 @@ impl GitHubIdentity {
         let platform_id: String = self.get_user_id().await?;
         // Build the variables for a reverse lookup query to the central RCOS API.
         let query_variables = ReverseLookup::make_vars(UserAccountType::GitHub, platform_id);
-        // Send the query to the central RCOS API and await response (we have no subject for this
-        // request since we are requesting something that would be the subject field)
-        return rcos::send_query::<ReverseLookup>(None, query_variables)
+        // Send the query to the central RCOS API and await response.
+        return rcos::send_query::<ReverseLookup>(query_variables)
             .await
             .map(|response| response.username());
     }

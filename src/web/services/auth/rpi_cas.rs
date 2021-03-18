@@ -80,7 +80,7 @@ impl RpiCasIdentity {
         // Make the query variables for a reverse lookup query.
         let query_variables = ReverseLookup::make_vars(UserAccountType::Rpi, self.rcs_id.clone());
         // Send the reverse lookup and propagate the response.
-        return send_query::<ReverseLookup>(None, query_variables)
+        return send_query::<ReverseLookup>(query_variables)
             .await
             .map(|response| response.username());
     }
