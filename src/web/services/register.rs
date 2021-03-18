@@ -108,7 +108,7 @@ pub async fn submit_registration(
 
     // Create the account!
     // We have no subject field since the account isn't created until this request resolves
-    let profile: String = send_query::<CreateOneUser>(None, query_vars)
+    let profile: String = send_query::<CreateOneUser>(query_vars)
         .await?
         // Extract the username
         .username()

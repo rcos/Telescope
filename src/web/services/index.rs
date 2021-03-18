@@ -11,11 +11,9 @@ use actix_web::HttpRequest;
 
 /// Service that serves the telescope homepage.
 #[get("/")]
-pub async fn index(identity: Identity, req: HttpRequest) -> Result<Template, TelescopeError> {
-    // Determine the subject (if they exist) making the stats request.
-    let subject: Option<String> = identity.get_rcos_username().await?;
+pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
     // Get the statistics.
-    let stats = send_query::<LandingPageStatistics>(subject, LandingPageStatsVars).await?;
+    let stats = send_query::<LandingPageStatistics>(LandingPageStatsVars).await?;
 
     // Make the homepage template as the content of the landing page.
     let content: Template = homepage::new(

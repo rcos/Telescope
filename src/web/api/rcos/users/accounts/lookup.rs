@@ -21,7 +21,7 @@ use crate::web::api::rcos::send_query;
 impl AccountLookup {
     /// Make the variables for an account lookup query.
     pub fn make_variables(username: String, platform: user_account) -> Variables {
-        Variables { username, platform }
+        Variables { rcos_username: username, platform }
     }
 
     /// Send the account lookup query. This return the user's ID on the given platform if there

@@ -202,10 +202,9 @@ where
                 platform: root.get_user_account_type(),
             };
             // Send API query.
-            let username: Option<String> =
-                send_query::<reverse_lookup::ReverseLookup>(None, variables)
-                    .await?
-                    .username();
+            let username: Option<String> = send_query::<reverse_lookup::ReverseLookup>(variables)
+                .await?
+                .username();
 
             // If there is no user, return a not-found error.
             let username: String = username.ok_or(TelescopeError::resource_not_found(
