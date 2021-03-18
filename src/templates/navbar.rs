@@ -82,6 +82,15 @@ fn for_user(req_path: &str, username: &str) -> Template {
     with_defaults(req_path).field(RIGHT_ITEMS, right_items)
 }
 
+/// Construct a navbar for a user who is partway through account creation and doesn't
+/// have a username yet.
+fn for_auth(req_path: &str) -> Template {
+    with_defaults(req_path).field(RIGHT_ITEMS, vec![
+        item(req_path, "Cancel Account Creation", "/logout")
+            .field(CLASS, "btn mr-2 mb-2 btn-danger")
+    ])
+}
+
 /// Create a navbar template for
 pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
     // Extract the authenticated identities from the request.
@@ -93,9 +102,12 @@ pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> 
         if let Some(username) = authenticated.get_rcos_username().await? {
             // If there is make a navbar with the username.
             return Ok(for_user(req.path(), username.as_str()));
+        } else {
+            // Otherwise the user is in the middle of creating an account.
+            return Ok(for_auth(req.path()));
         }
+    } else {
+        // If the user is not authenticated or there is no username, return a user-less navbar.
+        return Ok(userless(req.path()));
     }
-
-    // If the user is not authenticated or there is no username, return a user-less navbar.
-    return Ok(userless(req.path()));
 }
