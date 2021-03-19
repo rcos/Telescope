@@ -1,0 +1,9 @@
+mutation LinkUserAccount($username: String!, $platform: user_account!, $platform_id: String!) {
+    insert_user_accounts_one(
+        object: {
+            username: $username,
+            type: $platform,
+            account_id: $platform_id
+        }
+    ) { username }
+}

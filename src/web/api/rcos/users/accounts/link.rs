@@ -6,32 +6,34 @@ use crate::web::api::rcos::users::{UserAccountType as user_account, UserAccountT
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/users/accounts/upsert.graphql"
+    query_path = "graphql/rcos/users/accounts/link.graphql"
 )]
-pub struct UpsertUserAccount;
+pub struct LinkUserAccount;
 
-use upsert_user_account::{
+use link_user_account::{
     Variables,
     ResponseData
 };
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
 
-impl UpsertUserAccount {
+impl LinkUserAccount {
     /// Make the variables for a user account upsert mutation.
     fn make_variables(username: String, platform: UserAccountType, platform_id: String) -> Variables {
         Variables { username, platform, platform_id }
     }
 
 
-    /// Create or update a user account record on behalf of a user. This method will send an
-    /// [`UpsertUserAccount`] mutation with the subject set to the username. This method returns
-    /// the username associated with the created user account (whitch should match the supplied
+    /// Create a user account record on behalf of a user. This method will send a
+    /// [`LinkUserAccount`] mutation with the subject set to the username. This method returns
+    /// the username associated with the created user account (which should match the supplied
     /// username).
     ///
     /// This will fail if this user account is already linked to another user. In practice, this
     /// should be rare, so we let this case get handled by Telescope error propagation instead
     /// of accounting for it here.
+    /// This will also fail if the account already exists. Please check to make sure the user
+    /// has not already linked an account on this platform.
     pub async fn send(username: String, platform: UserAccountType, platform_id: String) -> Result<String, TelescopeError> {
         send_query::<Self>(Self::make_variables(username, platform, platform_id))
             .await

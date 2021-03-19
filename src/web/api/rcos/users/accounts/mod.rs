@@ -2,5 +2,5 @@
 
 pub mod lookup;
 pub mod reverse_lookup;
-pub mod upsert;
+pub mod link;
 pub mod unlink;
