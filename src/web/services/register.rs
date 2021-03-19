@@ -106,10 +106,24 @@ pub async fn submit_registration(
         )
     };
 
+    // Extract the platform for use in error reporting if necessary.
+    let platform: UserAccountType = query_vars.platform;
+
     // Create the account!
     // We have no subject field since the account isn't created until this request resolves
     let profile: String = send_query::<CreateOneUser>(query_vars)
-        .await?
+        .await
+        // If we cannot create an account, someone has probably already
+        // linked the identity provider to another account. Tell the user to
+        // cancel and try to login.
+        .map_err(|_| TelescopeError::bad_request(
+            "Could Not Create Account",
+            format!("We could not create an account. This likely (although not always) \
+            means that your {0} account is already linked to an existing user's account. Please try \
+            to login to that account. If you continue having issues or are sure that your {0} \
+            account is not already linked to an existing user, please contact a coordinator and \
+            file an issue on the Telescope GitHub.", platform)
+        ))?
         // Extract the username
         .username()
         // Get the profile address

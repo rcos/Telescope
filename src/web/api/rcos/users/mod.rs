@@ -17,13 +17,19 @@ pub enum UserRole {
 }
 
 /// The valid account types for all user accounts stored in the RCOS database.
-#[derive(Copy, Clone, Debug, Deserialize, Serialize)]
+#[derive(Copy, Clone, Debug, Deserialize, Serialize, Display)]
 #[serde(rename_all = "lowercase")]
 pub enum UserAccountType {
+    #[display(fmt = "RCS")]
     Rpi,
+    #[display(fmt = "Discord")]
     Discord,
+    #[display(fmt = "Mattermost")]
     Mattermost,
+    #[display(fmt = "GitHub")]
     GitHub,
+    #[display(fmt = "GitLab")]
     GitLab,
+    #[display(fmt = "BitBucket")]
     BitBucket,
 }
