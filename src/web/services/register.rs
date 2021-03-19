@@ -9,7 +9,7 @@ use crate::web::api::rcos::users::create::{
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use actix_web::http::header::LOCATION;
-use actix_web::{HttpRequest, HttpResponse};
+use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
 use crate::web::profile_for;
@@ -30,10 +30,22 @@ pub async fn register_page(req: HttpRequest) -> Result<Template, TelescopeError>
 /// the necessary records in the RCOS database via the central API. Argument extractors will error
 /// if the identity is not authenticated.
 pub async fn finish_registration(
+    req: HttpRequest,
     identity_cookie: AuthenticationCookie,
-) -> Result<Form, TelescopeError> {
-    // Create a form for the authenticated the user's cookie.
-    register::for_identity(&identity_cookie.root).await
+) -> Result<HttpResponse, actix_web::Error> {
+    // If this authenticated identity is already linked to an account
+    if let Some(rcs_id) = identity_cookie.get_rcos_username().await? {
+        return Ok(HttpResponse::Found()
+            .header(LOCATION, profile_for(rcs_id.as_str()))
+            .finish())
+    } else {
+        // Otherwise create a form for the authenticated the user's cookie.
+        // And convert it to an HttpResponse
+        return register::for_identity(&identity_cookie.root)
+            .await
+            .respond_to(&req)
+            .await;
+    }
 }
 
 #[post("/register/finish")]
