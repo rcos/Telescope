@@ -1,0 +1,6 @@
+query UserAccounts($username: String!) {
+    user_accounts(where: {username: {_eq: $username}}) {
+        type
+        account_id
+    }
+}

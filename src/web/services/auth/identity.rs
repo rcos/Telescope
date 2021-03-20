@@ -223,6 +223,25 @@ impl AuthenticationCookie {
             }
         }
     }
+
+    /// Try to remove a specific platform's identity and authentication from this cookie.
+    /// This is similar to [`Self::remove_root`].
+    pub async fn remove_platform(&mut self, platform: UserAccountType) -> Result<bool, TelescopeError> {
+        // If the account of this type is in the root, simply remove the root.
+        if self.root.get_user_account_type() == platform {
+            return self.remove_root().await;
+        }
+
+        // If it's not in the root, just drop the secondary authentication token
+        match platform {
+            UserAccountType::GitHub => self.github = None;
+            UserAccountType::Discord => self.discord = None;
+            // If it isn't held in the authentication cookie this is a no-op
+            _ => {}
+        }
+        // If it wasn't the root, we always succeed to remove a secondary.
+        return Ok(true);
+    }
 }
 
 /// The identity of a user accessing telescope.

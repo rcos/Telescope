@@ -10,10 +10,20 @@ use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::future::Future;
 use futures::future::LocalBoxFuture;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::api::rcos::users::accounts::for_user::UserAccounts;
+use std::collections::HashMap;
 
 pub mod identity;
 pub mod oauth2_providers;
 pub mod rpi_cas;
+
+/// The types of user accounts that provide authentication.
+const AUTHENTICATOR_ACCOUNT_TYPES: [UserAccountType; 3] = [
+    UserAccountType::Rpi,
+    UserAccountType::GitHub,
+    UserAccountType::Discord,
+];
 
 /// Register auth services.
 pub fn register(config: &mut ServiceConfig) {
@@ -50,6 +60,9 @@ pub trait IdentityProvider: 'static {
     /// The lowercase, one word name of the service. This is used in generating
     /// redirect paths and registering the service with actix. It must be unique.
     const SERVICE_NAME: &'static str;
+
+    /// The type of user account represented by this authentication service.
+    const USER_ACCOUNT_TY: UserAccountType;
 
     /// Get the login path of this service. This is the route in actix that will
     /// redirect to the authorization page using the handler function also defined
@@ -171,8 +184,30 @@ pub trait IdentityProvider: 'static {
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut;
 
     /// Actix-web handler for the route that unlinks an identity service.
-    fn unlink_handler(req: HttpRequest, authenticated_identity: AuthenticationCookie) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
-        unimplemented!()
+    fn unlink_handler(req: HttpRequest, id: Identity, mut cookie: AuthenticationCookie) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
+        return Box::pin(async move {
+            // Lookup the username of the user trying to unlink an account.
+            let username: String = cookie.get_rcos_username_or_error().await?;
+            // Get all of the accounts linked to this user. Make sure at least one
+            // can function for authentication.
+            let all_accounts: HashMap<UserAccountType, String> = UserAccounts::send(username).await?
+                // Iterate
+                .into_iter()
+                // filter down to the authentication providers
+                .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
+                // Collect into map.
+                .collect();
+
+            // If there is not a secondary account for the user to authenticate with,
+            // return an error.
+            if all_accounts.len() <= 1 {
+                return Err()
+            }
+
+
+            //let reduced_cookie_suc: bool = cookie.remove_platform(Self::USER_ACCOUNT_TY).await?;
+
+        });
     }
 
     /// Actix-web handler for authentication callback to login. Guarded by this
