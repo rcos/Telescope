@@ -2,7 +2,7 @@
 
 use crate::templates::Template;
 use crate::web::api::rcos::users::developers_page::DevelopersResponse;
-use crate::web::services::developers::DevelopersPageQuery;
+use crate::web::services::user::developers::DevelopersPageQuery;
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "developers";

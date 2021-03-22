@@ -5,7 +5,7 @@ pub mod create;
 pub mod developers_page;
 
 /// The valid user roles for all users in the RCOS database.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum UserRole {
     Student,
