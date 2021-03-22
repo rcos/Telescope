@@ -5,6 +5,7 @@ use crate::templates::Template;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
+use crate::web::profile_for;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";
@@ -73,7 +74,7 @@ fn userless(req_path: &str) -> Template {
 /// Construct a navbar for a given username
 fn for_user(req_path: &str, username: &str) -> Template {
     let right_items = vec![
-        item(req_path, "Profile", format!("/users/{}", username))
+        item(req_path, "Profile", profile_for(username))
             .field(CLASS, "btn mr-2 mb-2 btn-primary"),
         item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
     ];
