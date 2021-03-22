@@ -29,3 +29,4 @@ pub fn profile_for(username: &str) -> String {
     // Put it in the correct part of the path.
     format!("/user/{}", encoded)
 }
+

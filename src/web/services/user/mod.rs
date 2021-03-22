@@ -10,6 +10,8 @@ pub(crate) mod developers;
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {
     config
+        // User profile and settings
+        .service(profile::profile)
         // Developers page
         .service(developers::developers_page)
         // Login related services.

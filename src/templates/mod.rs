@@ -63,6 +63,13 @@ impl Template {
             // Convert any rendering errors that occur.
             .map_err(TelescopeError::RenderingError)
     }
+
+    /// Render this template as the content of a page.
+    pub async fn render_into_page(&self, req: &HttpRequest, title: impl Into<Value>)
+        -> Result<Template, TelescopeError>
+    {
+        page::of(req, title, self).await
+    }
 }
 
 impl<T: Into<String>> Index<T> for Template {

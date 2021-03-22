@@ -8,6 +8,9 @@ const TEMPLATE_NAME: &'static str = "user/profile";
 /// Handlebars key for the user's name.
 pub const NAME: &'static str = "name";
 
-pub fn make() -> Template {
-    unimplemented!()
+/// Make a profile template for a user.
+pub fn make(username: impl Into<String>) -> Template {
+    Template::new(TEMPLATE_NAME)
+        // Add the user's name
+        .field(NAME, username.into())
 }
