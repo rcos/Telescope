@@ -6,6 +6,7 @@ pub mod jumbotron;
 pub mod navbar;
 pub mod page;
 pub mod static_pages;
+pub mod user;
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
