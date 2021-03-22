@@ -51,6 +51,7 @@ lazy_static! {
 
 impl Oauth2IdentityProvider for GitHubOauth {
     const SERVICE_NAME: &'static str = "github";
+    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::GitHub;
 
     fn get_client() -> Arc<BasicClient> {
         GITHUB_CLIENT.clone()

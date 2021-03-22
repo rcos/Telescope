@@ -2,7 +2,7 @@ use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
-use actix_web::http::header::HOST;
+use actix_web::http::header::{HOST, LOCATION};
 use actix_web::{web as aweb, Responder};
 use actix_web::web::ServiceConfig;
 use actix_web::{HttpRequest, HttpResponse};
@@ -13,6 +13,8 @@ use futures::future::LocalBoxFuture;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::users::accounts::for_user::UserAccounts;
 use std::collections::HashMap;
+use crate::web::api::rcos::users::accounts::unlink::UnlinkUserAccount;
+use crate::web::profile_for;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -190,7 +192,7 @@ pub trait IdentityProvider: 'static {
             let username: String = cookie.get_rcos_username_or_error().await?;
             // Get all of the accounts linked to this user. Make sure at least one
             // can function for authentication.
-            let all_accounts: HashMap<UserAccountType, String> = UserAccounts::send(username).await?
+            let all_accounts: HashMap<UserAccountType, String> = UserAccounts::send(username.clone()).await?
                 // Iterate
                 .into_iter()
                 // filter down to the authentication providers
@@ -201,12 +203,47 @@ pub trait IdentityProvider: 'static {
             // If there is not a secondary account for the user to authenticate with,
             // return an error.
             if all_accounts.len() <= 1 {
-                return Err()
+                return Err(TelescopeError::bad_request(
+                    format!("Cannot unlink {} account", Self::USER_ACCOUNT_TY),
+                    "You have no other authentication methods linked, so unlinking \
+                    this platform would prevent you from logging in."
+                ));
             }
 
+            // There is a secondary authenticator linked, delete this user account record.
+            // Log a message about the unlinked platform.
+            let platform_id = UnlinkUserAccount::send(
+                username.clone(),
+                Self::USER_ACCOUNT_TY
+            ).await?;
 
-            //let reduced_cookie_suc: bool = cookie.remove_platform(Self::USER_ACCOUNT_TY).await?;
+            if let Some(platform_id) = platform_id {
+                info!("User {} unlinked {} account with id {}.",
+                      username, Self::USER_ACCOUNT_TY, platform_id);
+            }
 
+            // Try to replace the unlinked account in the authentication cookie's root
+            // (if it's authenticated as root).
+            let removed_auth: bool = cookie.remove_platform(Self::USER_ACCOUNT_TY).await?;
+            // If this is a success, then save the modified authentication cookie and redirect
+            // the user to their profile.
+            // If not, the user has been logged out. Redirect them to the homepage.
+            if removed_auth {
+                id.save(&cookie);
+            } else {
+                id.forget();
+            }
+
+            // Get the path to redirect the user to.
+            let redirect: String = removed_auth
+                // If the auth was replaced successfully, the user's profile.
+                .then(|| profile_for(username.as_str()))
+                // Otherwise the homepage.
+                .unwrap_or("/".into());
+
+            return Ok(HttpResponse::Found()
+                .header(LOCATION, redirect)
+                .finish());
         });
     }
 

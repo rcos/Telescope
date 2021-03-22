@@ -150,6 +150,8 @@ pub struct RpiCas;
 
 impl IdentityProvider for RpiCas {
     const SERVICE_NAME: &'static str = "rpi_cas";
+    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::Rpi;
+
     type LoginResponse = HttpResponse;
     type RegistrationResponse = HttpResponse;
     type LinkResponse = Result<HttpResponse, TelescopeError>;

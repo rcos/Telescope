@@ -55,6 +55,7 @@ lazy_static! {
 
 impl Oauth2IdentityProvider for DiscordOAuth {
     const SERVICE_NAME: &'static str = "discord";
+    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::Discord;
 
     fn get_client() -> Arc<BasicClient> {
         DISCORD_CLIENT.clone()

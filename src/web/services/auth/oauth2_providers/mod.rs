@@ -12,6 +12,7 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
+use crate::web::api::rcos::users::UserAccountType;
 
 pub mod discord;
 pub mod github;
@@ -32,6 +33,9 @@ pub trait Oauth2IdentityProvider {
     /// Name of this identity provider. See the documentation on the
     /// [`IdentityProvider`] trait for requirements.
     const SERVICE_NAME: &'static str;
+
+    /// The type of user account supported by this authentication method.
+    const USER_ACCOUNT_TY: UserAccountType;
 
     /// Get the client configuration for this Identity Provider.
     fn get_client() -> Arc<BasicClient>;
@@ -137,6 +141,7 @@ where
     T: Oauth2IdentityProvider + 'static,
 {
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
+    const USER_ACCOUNT_TY: UserAccountType = <Self as Oauth2IdentityProvider>::USER_ACCOUNT_TY;
 
     type LoginResponse = Result<HttpResponse, TelescopeError>;
     type RegistrationResponse = Result<HttpResponse, TelescopeError>;

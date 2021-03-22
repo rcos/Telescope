@@ -204,7 +204,7 @@ impl AuthenticationCookie {
     /// the RCOS API to look for an RCS ID to replace the root.
     ///
     /// If the root can successfully be replaced, return `true`.
-    pub async fn remove_root(&mut self) -> Result<bool, TelescopeError> {
+    async fn remove_root(&mut self) -> Result<bool, TelescopeError> {
         match self.root {
             // When the root identity is an RCS ID.
             RootIdentity::RpiCas(_) => {
@@ -234,8 +234,8 @@ impl AuthenticationCookie {
 
         // If it's not in the root, just drop the secondary authentication token
         match platform {
-            UserAccountType::GitHub => self.github = None;
-            UserAccountType::Discord => self.discord = None;
+            UserAccountType::GitHub => self.github = None,
+            UserAccountType::Discord => self.discord = None,
             // If it isn't held in the authentication cookie this is a no-op
             _ => {}
         }

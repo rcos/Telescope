@@ -17,7 +17,7 @@ pub enum UserRole {
 }
 
 /// The valid account types for all user accounts stored in the RCOS database.
-#[derive(Copy, Clone, Debug, Deserialize, Serialize, Display)]
+#[derive(Copy, Clone, Debug, Deserialize, Serialize, Display, Eq, PartialEq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum UserAccountType {
     #[display(fmt = "RCS")]
