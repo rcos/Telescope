@@ -1,0 +1,16 @@
+query Profile($username: String!) {
+    users_by_pk(username: $username) {
+        username
+        first_name
+        last_name
+        role
+        created_at
+        cohort
+
+        # Linked platforms
+        user_accounts {
+            type
+            account_id
+        }
+    }
+}

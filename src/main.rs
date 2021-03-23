@@ -31,6 +31,7 @@ use crate::{
     templates::static_pages::{sponsors::SponsorsPage, StaticPage},
     web::csrf::CsrfJanitor,
 };
+use chrono::Offset;
 
 mod app_data;
 mod env;
@@ -41,6 +42,8 @@ mod web;
 fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
+    // Log the server timezone
+    info!("Server timezone: {}", chrono::Local::now().offset().fix());
 
     // Create the actix runtime.
     let sys = System::new("telescope");

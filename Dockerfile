@@ -1,5 +1,8 @@
 # Use Rust 1.50 (we use library functions that were stablized in 1.50 and cannot use any previous version)
 FROM rust:1.50-buster
+# Set timezone
+ENV TZ=America/New_York
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Build Dependencies
 WORKDIR /telescope
 COPY ./Cargo.* ./

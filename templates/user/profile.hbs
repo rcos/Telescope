@@ -1,42 +1,48 @@
-<div class="container row row-cols-md-2 px-2" role="main">
-    <h1>{{name}}</h1>
-    {{!--
-    <div class="col-md-3 container px-0 pb-2">
-        <div class="card text-dark">
-            <img src="{{picture}}" alt="Profile Picture" class="card-img">
-            <div class="card-body">
-                <span class="h2" id="profile-name"> {{user.name}} <br></span>
-                <span class="text-muted">Account created {{created_at}}</span>
-            </div>
-            {{#if editable}}
-                <!-- Button to take us to form -->
-                <a href="/profile/{{user.id}}/settings" class="w-auto btn btn-primary">
-                    Edit Profile
-                </a>
+{{!
+`target` is the key for all data on the user who owns the profile.
+`viewer` is the key for the user viewign this profile (if there is one).
+}}
+
+<h1>{{target.name}}</h1>
+<span class="text-muted">Account created {{target.created_at}}</span>
+
+
+{{!--
+<div class="col-md-3 container px-0 pb-2">
+    <div class="card text-dark">
+        <img src="{{picture}}" alt="Profile Picture" class="card-img">
+        <div class="card-body">
+            <span class="h2" id="profile-name"> {{user.name}} <br></span>
+            <span class="text-muted">Account created {{created_at}}</span>
+        </div>
+        {{#if editable}}
+            <!-- Button to take us to form -->
+            <a href="/profile/{{user.id}}/settings" class="w-auto btn btn-primary">
+                Edit Profile
+            </a>
+        {{/if}}
+    </div>
+    <div class="card text-dark mt-2">
+        <span class="h4 card-header text-muted">
+            Contact
+        </span>
+        {{! Show GitHub account }}
+        <div class="p-1">
+            <i data-feather="github"></i>
+            {{#if user.github_link}}
+                <a href="{{user.github_link}}">{{user.github_link}}</a>
+            {{else}}
+                GitHub not linked.
             {{/if}}
         </div>
-        <div class="card text-dark mt-2">
-            <span class="h4 card-header text-muted">
-                Contact
-            </span>
-            {{! Show GitHub account }}
-            <div class="p-1">
-                <i data-feather="github"></i>
-                {{#if user.github_link}}
-                    <a href="{{user.github_link}}">{{user.github_link}}</a>
-                {{else}}
-                    GitHub not linked.
-                {{/if}}
-            </div>
-        </div>
     </div>
-    <div class="col-md-9 container px-2">
-        <div class="card text-dark">
-            <span class="h4 card-header text-muted">Bio</span>
-            <div class="card-body">
-                {{{bio}}}
-            </div>
-        </div>
-    </div>
-    --}}
 </div>
+<div class="col-md-9 container px-2">
+    <div class="card text-dark">
+        <span class="h4 card-header text-muted">Bio</span>
+        <div class="card-body">
+            {{{bio}}}
+        </div>
+    </div>
+</div>
+--}}
