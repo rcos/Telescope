@@ -1,6 +1,6 @@
 [package]
 name = "telescope"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
 edition = "2018"

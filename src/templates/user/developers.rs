@@ -5,7 +5,7 @@ use crate::web::api::rcos::users::developers_page::DevelopersResponse;
 use crate::web::services::user::developers::DevelopersPageQuery;
 
 /// The path to the developers page template from the templates directory.
-const TEMPLATE_PATH: &'static str = "developers";
+const TEMPLATE_PATH: &'static str = "user/developers";
 
 /// The handlebars key for the list of users to display.
 pub const USERS: &'static str = "users";
