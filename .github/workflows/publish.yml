@@ -7,8 +7,10 @@ jobs:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      - name: Check out the repo and submodules
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v1
         with:
