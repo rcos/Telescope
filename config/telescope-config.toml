@@ -6,12 +6,12 @@ api_url = "http://hasura:8080/v1/graphql"
 # RCOS JWT Secret
 jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-# GitHub credentials -- See the Telescope Application owned by the RCOS organization on github.
+# GitHub credentials -- See the Telescope application owned by the RCOS organization on GitHub.
 [github_credentials]
 client_id = "xxxxxxxxxxxxxxxxxxxx"
 client_secret = "****************************************"
 
-# Discord Credentials
+# Discord credentials -- See the Telescope application owned by the RCOS team on Discord. 
 [discord_config]
 client_id = "xxxxxxxxxxxxxxxxxxxx"
 client_secret = "****************************************"
