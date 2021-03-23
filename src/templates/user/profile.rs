@@ -2,6 +2,8 @@
 
 use crate::templates::Template;
 use crate::web::api::rcos::users::profile::profile::ProfileUsersByPk;
+use std::collections::HashMap;
+use crate::web::api::rcos::users::UserAccountType;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -17,6 +19,8 @@ pub struct TargetUser {
     // pub cohort: Option<i64>,
     /// String representing when the account was created.
     pub created_at: String,
+    /// Map of accounts to their on-platform IDs.
+    pub accounts: HashMap<UserAccountType, String>
 }
 
 /// Make a profile template for a user.
