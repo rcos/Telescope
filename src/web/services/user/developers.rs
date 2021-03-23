@@ -117,6 +117,9 @@ pub async fn developers_page(
     identity: Identity,
     Query(query): Query<DevelopersPageQuery>,
 ) -> Result<Template, TelescopeError> {
+    // Explicitly return not implemented to avoid exposing unfinished page.
+    return Err(TelescopeError::NotImplemented);
+
     // Extract the number of users to retrieve.
     let limit: u32 = query.per_page;
     // Extract the offset into the user data for the API query.

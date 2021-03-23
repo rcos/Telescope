@@ -177,6 +177,9 @@ where
 
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut {
         return Box::pin(async move {
+            // Explicitly return unimplemented here to avoid exposing unfinished service.
+            return Err(TelescopeError::NotImplemented);
+
             // Check that the user is already authenticated with another service.
             if ident.identity().await.is_some() {
                 // If so, make the redirect url and send the user there.
@@ -254,6 +257,9 @@ where
         mut ident: Identity,
     ) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
+            // Explicitly return unimplemented to avoid exposing unfinished service.
+            return Err(TelescopeError::NotImplemented);
+
             // Get the redirect url.
             let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
             // Token exchange.
