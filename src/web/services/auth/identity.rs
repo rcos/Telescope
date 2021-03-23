@@ -1,17 +1,17 @@
 //! Trait for types stored in the user's identity cookie.
 
 use crate::error::TelescopeError;
+use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
 };
+use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 use actix_identity::Identity as ActixIdentity;
 use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, LocalBoxFuture, Ready};
 use serde::Serialize;
-use crate::web::services::auth::rpi_cas::RpiCasIdentity;
-use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
 
 /// The root identity that this user is authenticated with.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -23,7 +23,7 @@ pub enum RootIdentity {
     Discord(DiscordIdentity),
 
     /// RCS ID.
-    RpiCas(RpiCasIdentity)
+    RpiCas(RpiCasIdentity),
 }
 
 impl RootIdentity {
@@ -69,9 +69,7 @@ impl RootIdentity {
     pub async fn get_rcos_username_or_error(&self) -> Result<String, TelescopeError> {
         self.get_rcos_username()
             .await
-            .map(|opt| {
-                opt.ok_or(TelescopeError::ise("The authenticated user doesn't exist."))
-            })?
+            .map(|opt| opt.ok_or(TelescopeError::ise("The authenticated user doesn't exist.")))?
     }
 
     /// Put this root in a top level identity cookie.
@@ -95,7 +93,6 @@ pub struct AuthenticationCookie {
 
     /// An optional Discord access and refresh token.
     pub discord: Option<DiscordIdentity>,
-
     // We don't store an optional RCS ID because it can be queried from the
     // database.
 }
@@ -186,8 +183,8 @@ impl AuthenticationCookie {
         // Lookup the user's username
         let rcos_username: String = self.get_rcos_username_or_error().await?;
         // Lookup the user's RCS id
-        let rcs_id: Option<String> = AccountLookup::send(rcos_username, UserAccountType::Rpi)
-            .await?;
+        let rcs_id: Option<String> =
+            AccountLookup::send(rcos_username, UserAccountType::Rpi).await?;
         // If there is an RCS id, replace the root.
         if let Some(rcs_id) = rcs_id {
             self.root = RootIdentity::RpiCas(RpiCasIdentity { rcs_id });
@@ -210,12 +207,12 @@ impl AuthenticationCookie {
             RootIdentity::RpiCas(_) => {
                 // Try with GitHub, then discord
                 Ok(self.replace_root_with_github() || self.replace_root_with_discord())
-            },
+            }
             // When root identity is GitHub auth
             RootIdentity::GitHub(_) => {
                 // Try with discord then RCS id.
                 Ok(self.replace_root_with_discord() || self.replace_root_with_rpi_cas().await?)
-            },
+            }
             // When the root identity is Discord Auth
             RootIdentity::Discord(_) => {
                 // Try with GitHub then with RPI CAS
@@ -226,7 +223,10 @@ impl AuthenticationCookie {
 
     /// Try to remove a specific platform's identity and authentication from this cookie.
     /// This is similar to [`Self::remove_root`].
-    pub async fn remove_platform(&mut self, platform: UserAccountType) -> Result<bool, TelescopeError> {
+    pub async fn remove_platform(
+        &mut self,
+        platform: UserAccountType,
+    ) -> Result<bool, TelescopeError> {
         // If the account of this type is in the root, simply remove the root.
         if self.root.get_user_account_type() == platform {
             return self.remove_root().await;

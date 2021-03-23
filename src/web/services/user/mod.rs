@@ -2,10 +2,10 @@
 
 use actix_web::web::ServiceConfig;
 
+pub(crate) mod developers;
 mod login;
 mod profile;
 mod register;
-pub(crate) mod developers;
 
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {

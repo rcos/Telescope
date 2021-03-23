@@ -7,13 +7,13 @@ use crate::web::api::rcos::users::create::{
     create_one_user::Variables as CreateOneUserVariables, CreateOneUser,
 };
 use crate::web::api::rcos::users::{UserAccountType, UserRole};
+use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
+use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
-use crate::web::profile_for;
-use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -37,7 +37,7 @@ pub async fn finish_registration(
     if let Some(rcs_id) = identity_cookie.get_rcos_username().await? {
         return Ok(HttpResponse::Found()
             .header(LOCATION, profile_for(rcs_id.as_str()))
-            .finish())
+            .finish());
     } else {
         // Otherwise create a form for the authenticated the user's cookie.
         // And convert it to an HttpResponse
@@ -115,7 +115,7 @@ pub async fn submit_registration(
             UserRole::Student,
             UserAccountType::Rpi,
             rcs_id.clone(),
-        )
+        ),
     };
 
     // Extract the platform for use in error reporting if necessary.
@@ -146,7 +146,5 @@ pub async fn submit_registration(
         ))?;
 
     // Redirect the user to the account we created for them
-    Ok(HttpResponse::Found()
-        .header(LOCATION, profile)
-        .finish())
+    Ok(HttpResponse::Found().header(LOCATION, profile).finish())
 }

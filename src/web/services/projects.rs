@@ -1,7 +1,7 @@
 //! Projects related services
 
-use actix_web::HttpResponse;
 use crate::error::TelescopeError;
+use actix_web::HttpResponse;
 
 /// Projects page service
 #[get("/projects")]

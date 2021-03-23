@@ -1,20 +1,20 @@
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
+use crate::web::api::rcos::users::accounts::for_user::UserAccounts;
+use crate::web::api::rcos::users::accounts::unlink::UnlinkUserAccount;
+use crate::web::api::rcos::users::UserAccountType;
+use crate::web::profile_for;
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
 use actix_web::http::header::{HOST, LOCATION};
-use actix_web::{web as aweb, Responder};
 use actix_web::web::ServiceConfig;
+use actix_web::{web as aweb, Responder};
 use actix_web::{HttpRequest, HttpResponse};
+use futures::future::LocalBoxFuture;
 use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
-use std::future::Future;
-use futures::future::LocalBoxFuture;
-use crate::web::api::rcos::users::UserAccountType;
-use crate::web::api::rcos::users::accounts::for_user::UserAccounts;
 use std::collections::HashMap;
-use crate::web::api::rcos::users::accounts::unlink::UnlinkUserAccount;
-use crate::web::profile_for;
+use std::future::Future;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -88,7 +88,9 @@ pub trait IdentityProvider: 'static {
     }
 
     /// The path to unlink this service from the user's account.
-    fn unlink_path() -> String { format!("/unlink/{}", Self::SERVICE_NAME) }
+    fn unlink_path() -> String {
+        format!("/unlink/{}", Self::SERVICE_NAME)
+    }
 
     /// The path for the identity provider to redirect back to after authenticating
     /// a user for login. This path is also registered under actix with the
@@ -156,7 +158,7 @@ pub trait IdentityProvider: 'static {
             )
             .route(
                 Self::unlink_path().as_str(),
-                aweb::get().to(Self::unlink_handler)
+                aweb::get().to(Self::unlink_handler),
             )
             .route(
                 Self::login_redirect_path().as_str(),
@@ -186,19 +188,25 @@ pub trait IdentityProvider: 'static {
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut;
 
     /// Actix-web handler for the route that unlinks an identity service.
-    fn unlink_handler(req: HttpRequest, id: Identity, mut cookie: AuthenticationCookie) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
+    fn unlink_handler(
+        req: HttpRequest,
+        id: Identity,
+        mut cookie: AuthenticationCookie,
+    ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
             // Lookup the username of the user trying to unlink an account.
             let username: String = cookie.get_rcos_username_or_error().await?;
             // Get all of the accounts linked to this user. Make sure at least one
             // can function for authentication.
-            let all_accounts: HashMap<UserAccountType, String> = UserAccounts::send(username.clone()).await?
-                // Iterate
-                .into_iter()
-                // filter down to the authentication providers
-                .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
-                // Collect into map.
-                .collect();
+            let all_accounts: HashMap<UserAccountType, String> =
+                UserAccounts::send(username.clone())
+                    .await?
+                    // Iterate
+                    .into_iter()
+                    // filter down to the authentication providers
+                    .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
+                    // Collect into map.
+                    .collect();
 
             // If there is not a secondary account for the user to authenticate with,
             // return an error.
@@ -206,20 +214,22 @@ pub trait IdentityProvider: 'static {
                 return Err(TelescopeError::bad_request(
                     format!("Cannot unlink {} account", Self::USER_ACCOUNT_TY),
                     "You have no other authentication methods linked, so unlinking \
-                    this platform would prevent you from logging in."
+                    this platform would prevent you from logging in.",
                 ));
             }
 
             // There is a secondary authenticator linked, delete this user account record.
             // Log a message about the unlinked platform.
-            let platform_id = UnlinkUserAccount::send(
-                username.clone(),
-                Self::USER_ACCOUNT_TY
-            ).await?;
+            let platform_id =
+                UnlinkUserAccount::send(username.clone(), Self::USER_ACCOUNT_TY).await?;
 
             if let Some(platform_id) = platform_id {
-                info!("User {} unlinked {} account with id {}.",
-                      username, Self::USER_ACCOUNT_TY, platform_id);
+                info!(
+                    "User {} unlinked {} account with id {}.",
+                    username,
+                    Self::USER_ACCOUNT_TY,
+                    platform_id
+                );
             }
 
             // Try to replace the unlinked account in the authentication cookie's root
@@ -241,9 +251,7 @@ pub trait IdentityProvider: 'static {
                 // Otherwise the homepage.
                 .unwrap_or("/".into());
 
-            return Ok(HttpResponse::Found()
-                .header(LOCATION, redirect)
-                .finish());
+            return Ok(HttpResponse::Found().header(LOCATION, redirect).finish());
         });
     }
 

@@ -2,11 +2,10 @@
 
 use crate::templates::Template;
 use crate::web::api::rcos::users::profile::profile::{
-    ProfileTargetCoordinating,
-    ProfileTargetMentoring
+    ProfileTargetCoordinating, ProfileTargetMentoring,
 };
-use serde::Serialize;
 use chrono::{DateTime, Utc};
+use serde::Serialize;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -36,13 +35,15 @@ pub fn make(
         .field(COORDINATING, coordinating)
         // Convert the created at time to local time and
         // format into a string
-        .field(CREATED_AT, created_at
-            .naive_local()
-            // Get just the date
-            .date()
-            // Format Month Day Year (e.g. July 1, 2020)
-            .format("%B %_d, %Y")
-            // Convert to string.
-            .to_string())
-
+        .field(
+            CREATED_AT,
+            created_at
+                .naive_local()
+                // Get just the date
+                .date()
+                // Format Month Day Year (e.g. July 1, 2020)
+                .format("%B %_d, %Y")
+                // Convert to string.
+                .to_string(),
+        )
 }

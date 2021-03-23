@@ -10,19 +10,23 @@ use crate::web::api::rcos::users::{UserAccountType as user_account, UserAccountT
 )]
 pub struct LinkUserAccount;
 
-use link_user_account::{
-    Variables,
-    ResponseData
-};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
+use link_user_account::{ResponseData, Variables};
 
 impl LinkUserAccount {
     /// Make the variables for a user account upsert mutation.
-    fn make_variables(username: String, platform: UserAccountType, platform_id: String) -> Variables {
-        Variables { username, platform, platform_id }
+    fn make_variables(
+        username: String,
+        platform: UserAccountType,
+        platform_id: String,
+    ) -> Variables {
+        Variables {
+            username,
+            platform,
+            platform_id,
+        }
     }
-
 
     /// Create a user account record on behalf of a user. This method will send a
     /// [`LinkUserAccount`] mutation with the subject set to the username. This method returns
@@ -34,7 +38,11 @@ impl LinkUserAccount {
     /// of accounting for it here.
     /// This will also fail if the account already exists. Please check to make sure the user
     /// has not already linked an account on this platform.
-    pub async fn send(username: String, platform: UserAccountType, platform_id: String) -> Result<String, TelescopeError> {
+    pub async fn send(
+        username: String,
+        platform: UserAccountType,
+        platform_id: String,
+    ) -> Result<String, TelescopeError> {
         send_query::<Self>(Self::make_variables(username, platform, platform_id))
             .await
             .map(ResponseData::username)

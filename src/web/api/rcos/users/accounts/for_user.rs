@@ -10,9 +10,9 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 )]
 pub struct UserAccounts;
 
-use user_accounts::Variables;
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
+use user_accounts::Variables;
 
 impl UserAccounts {
     /// Create the parameters for an accounts lookup query.
@@ -25,7 +25,8 @@ impl UserAccounts {
         send_query::<Self>(Self::make_variables(username))
             .await
             .map(|response| {
-                response.user_accounts
+                response
+                    .user_accounts
                     .into_iter()
                     .map(|linked_account| (linked_account.type_, linked_account.account_id))
                     .collect()

@@ -65,9 +65,11 @@ impl Template {
     }
 
     /// Render this template as the content of a page.
-    pub async fn render_into_page(&self, req: &HttpRequest, title: impl Into<Value>)
-        -> Result<Template, TelescopeError>
-    {
+    pub async fn render_into_page(
+        &self,
+        req: &HttpRequest,
+        title: impl Into<Value>,
+    ) -> Result<Template, TelescopeError> {
         page::of(req, title, self).await
     }
 }

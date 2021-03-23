@@ -1,19 +1,15 @@
 //! Profile query.
 
-use chrono::{DateTime, Utc};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
+use chrono::{DateTime, Utc};
 
 // Namespaced types for generated code
-use crate::web::api::rcos::users::{
-    // UserAccountType as user_account,
-    UserRole as user_role
-};
+use crate::web::api::rcos::users::UserRole as user_role;
 
 // Ignore the compiler warning this style would generate.
 #[allow(nonstandard_style)]
 type timestamptz = DateTime<Utc>;
-
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -25,9 +21,9 @@ pub struct Profile;
 
 // import generated types.
 use profile::{
-    Variables,
     ResponseData,
     //ProfileUsersByPk
+    Variables,
 };
 
 impl Profile {

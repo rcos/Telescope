@@ -2,10 +2,10 @@
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
+use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
-use crate::web::profile_for;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";
@@ -74,8 +74,7 @@ fn userless(req_path: &str) -> Template {
 /// Construct a navbar for a given username
 fn for_user(req_path: &str, username: &str) -> Template {
     let right_items = vec![
-        item(req_path, "Profile", profile_for(username))
-            .field(CLASS, "btn mr-2 mb-2 btn-primary"),
+        item(req_path, "Profile", profile_for(username)).field(CLASS, "btn mr-2 mb-2 btn-primary"),
         item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
     ];
 
@@ -86,10 +85,11 @@ fn for_user(req_path: &str, username: &str) -> Template {
 /// Construct a navbar for a user who is partway through account creation and doesn't
 /// have a username yet.
 fn for_auth(req_path: &str) -> Template {
-    with_defaults(req_path).field(RIGHT_ITEMS, vec![
-        item(req_path, "Cancel Account Creation", "/logout")
-            .field(CLASS, "btn mr-2 mb-2 btn-danger")
-    ])
+    with_defaults(req_path).field(
+        RIGHT_ITEMS,
+        vec![item(req_path, "Cancel Account Creation", "/logout")
+            .field(CLASS, "btn mr-2 mb-2 btn-danger")],
+    )
 }
 
 /// Create a navbar template for

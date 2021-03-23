@@ -123,11 +123,13 @@ pub async fn for_identity(cookie: &RootIdentity) -> Result<Form, TelescopeError>
             }),
 
         // On authentication via RPI CAS
-        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => Ok(userless()
-            .with_other_key(INFO, UserInfo {
+        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => Ok(userless().with_other_key(
+            INFO,
+            UserInfo {
                 avatar_url: None,
                 username: format!("{}@rpi.edu", rcs_id),
-                profile_url: None
-            })),
+                profile_url: None,
+            },
+        )),
     }
 }

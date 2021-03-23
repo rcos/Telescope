@@ -130,9 +130,7 @@ pub async fn developers_page(
     let variables = Developers::make_variables(limit, offset, search_text, order_by_param);
 
     // Send the query and wait for a response.
-    let query_response: DevelopersResponse = send_query::<Developers>(variables)
-        .await?
-        .simplify();
+    let query_response: DevelopersResponse = send_query::<Developers>(variables).await?.simplify();
 
     Err(TelescopeError::NotImplemented)
 }

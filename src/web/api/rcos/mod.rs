@@ -15,7 +15,9 @@ pub mod users;
 const API_NAME: &'static str = "RCOS Central Hasura GraphQL API";
 
 /// Send a GraphQL query to the central RCOS API for a given subject (or anonymously).
-pub async fn send_query<T: GraphQLQuery>(variables: T::Variables) -> Result<T::ResponseData, TelescopeError> {
+pub async fn send_query<T: GraphQLQuery>(
+    variables: T::Variables,
+) -> Result<T::ResponseData, TelescopeError> {
     // Build the GraphQL query
     let query = T::build_query(variables);
 

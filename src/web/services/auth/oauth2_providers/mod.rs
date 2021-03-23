@@ -1,8 +1,9 @@
 use super::{make_redirect_url, IdentityProvider};
 use crate::error::TelescopeError;
+use crate::web::api::rcos::users::UserAccountType;
 use crate::web::api::rcos::{send_query, users::accounts::reverse_lookup};
-use crate::web::{csrf, profile_for};
 use crate::web::services::auth::identity::{Identity, RootIdentity};
+use crate::web::{csrf, profile_for};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
 use actix_web::FromRequest;
@@ -12,7 +13,6 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
-use crate::web::api::rcos::users::UserAccountType;
 
 pub mod discord;
 pub mod github;
