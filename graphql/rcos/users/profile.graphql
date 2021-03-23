@@ -15,7 +15,7 @@ query Profile($username: String!) {
 
         # The user's github, if it exists.
         github: user_accounts(where: {type: {_eq: "github"}}, limit: 1) {
-            
+            account_id
         }
 
         # What semesters was this user a coordiator for
