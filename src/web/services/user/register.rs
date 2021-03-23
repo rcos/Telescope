@@ -1,5 +1,5 @@
 use crate::error::TelescopeError;
-use crate::templates::forms::{register, Form, FormInput};
+use crate::templates::forms::{register, FormInput};
 use crate::templates::{auth, page, Template};
 use crate::web::api::github::users::authenticated_user::authenticated_user::AuthenticatedUserViewer;
 use crate::web::api::rcos::send_query;

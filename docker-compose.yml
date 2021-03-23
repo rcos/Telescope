@@ -51,9 +51,9 @@ services:
       - hasura
     volumes:
       - "${PWD}/config.toml:/telescope/config.toml"
-    environment:
-      # See the config section about profiles.
-      PROFILE: "live"
+#    environment:
+#      # See the config section about profiles.
+#      PROFILE: "live"
 
 volumes:
   db_data:

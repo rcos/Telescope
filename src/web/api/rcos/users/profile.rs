@@ -2,9 +2,13 @@
 
 use chrono::{DateTime, Utc};
 use crate::error::TelescopeError;
+use crate::web::api::rcos::send_query;
 
 // Namespaced types for generated code
-use crate::web::api::rcos::users::{UserAccountType as user_account, UserRole as user_role};
+use crate::web::api::rcos::users::{
+    // UserAccountType as user_account,
+    UserRole as user_role
+};
 
 // Ignore the compiler warning this style would generate.
 #[allow(nonstandard_style)]
@@ -25,8 +29,6 @@ use profile::{
     ResponseData,
     //ProfileUsersByPk
 };
-use crate::web::api::rcos::send_query;
-use std::collections::HashMap;
 
 impl Profile {
     /// Get the profile data for a given username.

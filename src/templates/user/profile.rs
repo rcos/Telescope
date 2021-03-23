@@ -2,14 +2,9 @@
 
 use crate::templates::Template;
 use crate::web::api::rcos::users::profile::profile::{
-    ProfileTarget,
     ProfileTargetCoordinating,
     ProfileTargetMentoring
 };
-use std::collections::HashMap;
-use crate::web::api::rcos::users::UserAccountType;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use crate::error::TelescopeError;
 use serde::Serialize;
 use chrono::{DateTime, Utc};
 

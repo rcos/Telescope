@@ -6,7 +6,6 @@ use crate::web::api::rcos::{
     landing_page_stats::{LandingPageStatistics, LandingPageStatsVars},
     send_query,
 };
-use crate::web::services::auth::identity::Identity;
 use actix_web::HttpRequest;
 
 /// Service that serves the telescope homepage.

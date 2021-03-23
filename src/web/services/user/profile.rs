@@ -36,7 +36,7 @@ pub async fn profile(
         ))?.u;
 
     // Get the user's profile information from the RCOS API.
-    let mut response: ResponseData = Profile::for_user(decoded_username).await?;
+    let response: ResponseData = Profile::for_user(decoded_username).await?;
     // Throw an error if there is no user.
     if response.target.is_none() {
         return Err(TelescopeError::resource_not_found(
