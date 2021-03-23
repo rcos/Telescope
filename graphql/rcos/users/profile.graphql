@@ -1,5 +1,6 @@
 query Profile($username: String!) {
-    users_by_pk(username: $username) {
+    # The owner of the profile.
+    target: users_by_pk(username: $username) {
         username
         first_name
         last_name
@@ -7,10 +8,37 @@ query Profile($username: String!) {
         created_at
         cohort
 
-        # Linked platforms
-        user_accounts {
-            type
+        # The user's discord, if it exists
+        discord: user_accounts(where: {type: {_eq: "discord"}}, limit: 1) {
             account_id
+        }
+
+        # The user's github, if it exists.
+        github: user_accounts(where: {type: {_eq: "github"}}, limit: 1) {
+            
+        }
+
+        # What semesters was this user a coordiator for
+        coordinating: enrollments(
+            where: {is_coordinator: {_eq: true}},
+            order_by: {semester_id: desc}
+        ) {
+            semester {
+                title
+            }
+        }
+
+        # What semesters was this user a small group mentor?
+        mentoring: small_group_mentors(
+            order_by: {small_group: {semester_id: desc}}
+        ) {
+            small_group {
+                small_group_id
+
+                semester {
+                    title
+                }
+            }
         }
     }
 }

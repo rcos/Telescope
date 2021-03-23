@@ -10,10 +10,11 @@ use crate::web::api::rcos::users::profile::{
     Profile,
     profile::{
         ResponseData,
-        ProfileUsersByPk
+        ProfileTarget,
+        ProfileTargetMentoring,
+        ProfileTargetCoordinating
     }
 };
-use crate::templates::user::profile::TargetUser;
 
 /// Wrapper struct for deserializing username.
 #[derive(Serialize, Deserialize)]
@@ -35,20 +36,25 @@ pub async fn profile(
         ))?.u;
 
     // Get the user's profile information from the RCOS API.
-    let target_user: TargetUser = Profile::for_user(decoded_username)
-        .await?
-        .users_by_pk
-        .ok_or(TelescopeError::resource_not_found(
+    let mut response: ResponseData = Profile::for_user(decoded_username).await?;
+    // Throw an error if there is no user.
+    if response.target.is_none() {
+        return Err(TelescopeError::resource_not_found(
             "User Not Found",
             "Could not find a user by this username."
-        ))?
-        .into();
+        ));
+    }
 
+    // Get a reference to the user's info.
+    let target_user: &ProfileTarget = response.target.as_ref().unwrap();
+    // Get references to the parts of the user's info needed to build the profile template.
+    let mentoring: &[ProfileTargetMentoring] = target_user.mentoring.as_slice();
+    let coordinating: &[ProfileTargetCoordinating] = target_user.coordinating.as_slice();
+    let name: String = format!("{} {}", target_user.first_name, target_user.last_name);
 
     // Make a profile template
-    return profile_template::make(&target_user)
-        // Render it inside a page (with the user's name as the title)
-        .render_into_page(&req, target_user.name.as_str())
-        // Wait for the page to render and return
+    // Render it inside a page (with the user's name as the title)
+    return profile_template::make(name.as_str(), target_user.created_at, mentoring, coordinating)
+        .render_into_page(&req, name.as_str())
         .await;
 }

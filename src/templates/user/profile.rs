@@ -1,31 +1,53 @@
 //! User profile template functions and constants.
 
 use crate::templates::Template;
-use crate::web::api::rcos::users::profile::profile::ProfileUsersByPk;
+use crate::web::api::rcos::users::profile::profile::{
+    ProfileTarget,
+    ProfileTargetCoordinating,
+    ProfileTargetMentoring
+};
 use std::collections::HashMap;
 use crate::web::api::rcos::users::UserAccountType;
+use crate::web::services::auth::identity::AuthenticationCookie;
+use crate::error::TelescopeError;
+use serde::Serialize;
+use chrono::{DateTime, Utc};
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
 
-/// Handlebars key for the RCOS API response data about the target user.
-pub const TARGET: &'static str = "target";
+/// The handlebars key for the name of the user who owns the profile.
+pub const NAME: &'static str = "name";
 
-#[derive(Serialize, Debug, Clone, Deserialize)]
-pub struct TargetUser {
-    /// The user's name.
-    pub name: String,
-    // /// Cohort of the user.
-    // pub cohort: Option<i64>,
-    /// String representing when the account was created.
-    pub created_at: String,
-    /// Map of accounts to their on-platform IDs.
-    pub accounts: HashMap<UserAccountType, String>
-}
+/// The handlebars key for the account creation string.
+pub const CREATED_AT: &'static str = "created_at";
 
-/// Make a profile template for a user.
-pub fn make(data: &TargetUser) -> Template {
+/// The handlebars key for the list of semesters this user has mentored.
+pub const MENTORING: &'static str = "mentoring";
+
+/// The handlebars key for the list of semesters this user was a coordinator.
+pub const COORDINATING: &'static str = "coordinating";
+
+/// Make a profile template for a user. Query platform APIs as needed.
+pub fn make(
+    name: impl Serialize,
+    created_at: DateTime<Utc>,
+    mentoring: &[ProfileTargetMentoring],
+    coordinating: &[ProfileTargetCoordinating],
+) -> Template {
     Template::new(TEMPLATE_NAME)
-        // Add the user's name
-        .field(TARGET, data)
+        .field(NAME, name)
+        .field(MENTORING, mentoring)
+        .field(COORDINATING, coordinating)
+        // Convert the created at time to local time and
+        // format into a string
+        .field(CREATED_AT, created_at
+            .naive_local()
+            // Get just the date
+            .date()
+            // Format Month Day Year (e.g. July 1, 2020)
+            .format("%B %_d, %Y")
+            // Convert to string.
+            .to_string())
+
 }
