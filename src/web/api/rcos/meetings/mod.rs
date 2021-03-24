@@ -1,6 +1,6 @@
 //! Queries and mutations to the RCOS API for meeting data.
 
-pub mod public;
+pub mod get;
 
 /// The type of a meeting.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq)]

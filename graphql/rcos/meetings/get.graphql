@@ -1,7 +1,9 @@
 # Get all the public meetings between two timestamps
-query PublicMeetings($start: timestamptz!, $end: timestamptz!) {
+query Meetings($start: timestamptz!, $end: timestamptz!, $public_only: Boolean!) {
     meetings(where: {
-        is_public: {_eq: true},
+        # Use this instead of comparison so that if public_only is false, we
+        # still get public meetings.
+        is_public: {_in: [true, $public_only]},
         start_date_time: {_gte: $start, _lt: $end}
     }) {
         meeting_id
