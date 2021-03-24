@@ -2,8 +2,10 @@
 
 use crate::web::{
     api::rcos::prelude::*,
-    services::calendar::EventsQuery
 };
+use chrono::{DateTime, TimeZone, Utc};
+use crate::error::TelescopeError;
+use crate::web::api::rcos::send_query;
 
 /// Type representing public RCOS meetings.
 #[derive(GraphQLQuery)]
@@ -18,12 +20,10 @@ use self::meetings::{
     Variables,
     ResponseData
 };
-use chrono::{DateTime, TimeZone, Utc};
-use crate::error::TelescopeError;
 
 impl Meetings {
     /// Get the meetings between two times, optionally filter to public meetings only.
     pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, public_only: bool) -> Result<ResponseData, TelescopeError> {
-        unimplemented!()
+        send_query::<Self>(Variables { start, end, public_only }).await
     }
 }
