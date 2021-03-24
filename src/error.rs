@@ -62,6 +62,8 @@ pub enum TelescopeError {
         header: String,
         /// The error message to be displayed under the jumbotron.
         message: String,
+        /// Should the response status code be shown to the user?
+        show_status_code: bool,
     },
 
     #[display(fmt = "Lettre File Error: {}", description)]
@@ -175,14 +177,6 @@ impl TelescopeError {
         Self::InternalServerError(message.into())
     }
 
-    /// Construct a Bad Request error and convert the fields.
-    pub fn bad_request(header: impl Into<String>, message: impl Into<String>) -> Self {
-        Self::BadRequest {
-            header: header.into(),
-            message: message.into(),
-        }
-    }
-
     /// Convert a reqwest error from the RCOS API into a telescope error.
     pub fn rcos_api_error(err: ReqwestError) -> Self {
         error!("Error querying RCOS API: {}", err);
@@ -286,8 +280,15 @@ impl TelescopeError {
                 ),
             ),
 
-            TelescopeError::BadRequest { header, message } => {
-                jumbotron::new(format!("{} - {}", status_code, header), message)
+            TelescopeError::BadRequest { header, message, show_status_code} => {
+                jumbotron::new(
+                    // Decide whether or not to show the status code.
+                    show_status_code
+                        // With the status code
+                        .then(|| format!("{} - {}", status_code, header))
+                        // Without the status code
+                        .unwrap_or(header.clone()),
+                    message)
             }
 
             TelescopeError::IpExtractionError => jumbotron::new(

@@ -95,19 +95,20 @@ async fn cas_authenticated(
             .await
             // Convert any errors that occur.
             .map_err(|err| {
+                // Log the error
                 error!(
                     "Could not extract CAS ticket from request parameters: {}",
                     err
                 );
-                TelescopeError::bad_request(
-                    "Malformed CAS request",
-                    format!(
-                        "The RPI CAS endpoint did not respond with the appropriate data. \
-                Please try again. If this error persists, contact a coordinator and file an issue \
-                on Telescope's GitHub. Internal error: {}",
-                        err
-                    ),
-                )
+
+                // Display an error message to the user.
+                TelescopeError::BadRequest {
+                    header: "Malformed CAS request".into(),
+                    message: format!("The RPI CAS endpoint did not respond with the appropriate \
+                    data. Please try again. If this error persists, contact a coordinator and file \
+                    an issue on Telescope's GitHub. Internal error: {}", err),
+                    show_status_code: true
+                }
             })?;
 
     // Make the query parameters to send to the CAS validation server
@@ -201,10 +202,11 @@ impl IdentityProvider for RpiCas {
             if let Some(authenticated_identity) = ident.identity().await {
                 // Make sure they are authenticated on a different platform.
                 if let RootIdentity::RpiCas(_) = authenticated_identity.root {
-                    return Err(TelescopeError::bad_request(
-                        "RPI CAS already linked",
-                        "You are already signed into an RPI CAS account.",
-                    ));
+                    return Err(TelescopeError::BadRequest {
+                        header: "RPI CAS already linked".into(),
+                        message: "You are already signed into an RPI CAS account.".into(),
+                        show_status_code: false
+                    });
                 }
 
                 // If authenticated make the URL and direct the user there.

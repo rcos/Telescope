@@ -97,15 +97,12 @@ pub trait Oauth2IdentityProvider {
             .map_err(|err: actix_web::Error| {
                 // Map all errors getting the query from the request into a bad
                 // request error.
-                TelescopeError::bad_request(
-                    "Bad Authentication Request",
-                    format!(
-                        "Could not get authentication parameters from request URL. \
-                    Actix-web error: {}",
-                        err
-                    ),
-                )
-            })?;
+                TelescopeError::BadRequest {
+                    header: "Bad Authentication Request".into(),
+                    message: format!("Could not get authentication parameters from request URL. \
+                    Actix-web error: {}", err),
+                    show_status_code: true
+                }})?;
 
         // Destructure the parameters.
         let AuthResponse { code, state } = params.0;

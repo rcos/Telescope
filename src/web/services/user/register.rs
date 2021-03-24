@@ -128,14 +128,15 @@ pub async fn submit_registration(
         // If we cannot create an account, someone has probably already
         // linked the identity provider to another account. Tell the user to
         // cancel and try to login.
-        .map_err(|_| TelescopeError::bad_request(
-            "Could Not Create Account",
-            format!("We could not create an account. This likely (although not always) \
-            means that your {0} account is already linked to an existing user's account. Please try \
-            to login to that account. If you continue having issues or are sure that your {0} \
+        .map_err(|_| TelescopeError::BadRequest {
+            header: "Could Not Create Account".into(),
+            message: format!("We could not create an account. This likely (although not always) \
+            means that your {0} account is already linked to an existing user's account. Please \
+            try to login to that account. If you continue having issues or are sure that your {0} \
             account is not already linked to an existing user, please contact a coordinator and \
-            file an issue on the Telescope GitHub.", platform)
-        ))?
+            file an issue on the Telescope GitHub.", platform),
+            show_status_code: false
+        })?
         // Extract the username
         .username()
         // Get the profile address

@@ -28,16 +28,14 @@ pub async fn profile(
     let decoded_username: String =
         serde_urlencoded::from_str::<SerializedUsername>(format!("u={}", username).as_str())
             // Convert the error and get the inner value.
-            .map_err(|_| {
-                TelescopeError::bad_request(
-                    "Malformed Username",
-                    "Username not properly URL encoded.",
-                )
-            })?
-            .u;
+            .map_err(|_| TelescopeError::BadRequest {
+                header: "Malformed Username".into(),
+                message: "Username not properly URL encoded.".into(),
+                show_status_code: true
+            })?.u;
 
     // Get the user's profile information from the RCOS API.
-    let response: ResponseData = Profile::for_user(decoded_username).await?;
+    let response: ResponseData = Profile::for_user(decoded_username.clone()).await?;
     // Throw an error if there is no user.
     if response.target.is_none() {
         return Err(TelescopeError::resource_not_found(
@@ -52,6 +50,17 @@ pub async fn profile(
     let mentoring: &[ProfileTargetMentoring] = target_user.mentoring.as_slice();
     let coordinating: &[ProfileTargetCoordinating] = target_user.coordinating.as_slice();
     let name: String = format!("{} {}", target_user.first_name, target_user.last_name);
+    // Determine viewer privileges
+    let viewer_is_authenticated: bool = authentication.is_some();
+    let viewer_owns_profile: bool;
+    if let Some(viewer) = authentication {
+        viewer_owns_profile = (viewer.get_rcos_username_or_error().await? == decoded_username);
+    } else {
+        viewer_owns_profile = false;
+    }
+
+    //
+
 
     // Make a profile template
     // Render it inside a page (with the user's name as the title)

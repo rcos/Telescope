@@ -211,11 +211,12 @@ pub trait IdentityProvider: 'static {
             // If there is not a secondary account for the user to authenticate with,
             // return an error.
             if all_accounts.len() <= 1 {
-                return Err(TelescopeError::bad_request(
-                    format!("Cannot unlink {} account", Self::USER_ACCOUNT_TY),
-                    "You have no other authentication methods linked, so unlinking \
-                    this platform would prevent you from logging in.",
-                ));
+                return Err(TelescopeError::BadRequest {
+                    header: format!("Cannot unlink {} account", Self::USER_ACCOUNT_TY),
+                    message: "You have no other authentication methods linked, so unlinking \
+                    this platform would prevent you from logging in.".into(),
+                    show_status_code: false
+                });
             }
 
             // There is a secondary authenticator linked, delete this user account record.
