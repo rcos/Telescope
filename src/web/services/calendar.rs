@@ -65,11 +65,29 @@ async fn events(identity: Identity, Query(params): Query<EventsQuery>) -> Result
     // Convert timezones.
     let start_utc: DateTime<Utc> = params.time_zone
         // Get a timestamp with timezone
-        .from_utc_datetime(&params.start)
+        .from_local_datetime(&params.start)
+        // Unwrap the earliest valid time if there is one.
+        .earliest()
+        // Report an error if there is not.
+        .ok_or(TelescopeError::BadRequest {
+            header: "Invalid Query".into(),
+            message: "Invalid start timestamp in request query.".into(),
+            show_status_code: false,
+        })?
         // Convert to UTC
         .with_timezone(&Utc);
+
+    // Similar with end time.
     let end_utc: DateTime<Utc> = params.time_zone
-        .from_utc_datetime(&params.end)
+        .from_local_datetime(&params.end)
+        // Get the latest valid time just ot be safe here.
+        .latest()
+        .ok_or(TelescopeError::BadRequest {
+            header: "Invalid Query".into(),
+            message: "Invalid end time in request query.".into(),
+            show_status_code: false,
+        })?
+        // Convert to UTC.
         .with_timezone(&Utc);
 
     // Return the meetings from the API.
