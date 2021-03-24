@@ -9,12 +9,12 @@
         themeSystem: 'bootstrap',
         timeZone: 'America/New_York',
         weekends: true,
-        events: function (info, successCallback, failureCallback) {
-            fetch('/calendar/events')
-                .then(res => res.json())
-                .then(meetings => successCallback(meetings))
-                .catch(failureCallback)
-        },
+        events: "/calendar/events",
+        {{! Function called when event is rendered to DOM }}
+        eventDidMount ({ event, el }) {
+            {{! Extract the source object from the API }}
+            const { source } = event.extendedProps;
+        }
     });
 
     calendar.render();

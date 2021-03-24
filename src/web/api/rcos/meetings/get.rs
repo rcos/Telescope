@@ -23,18 +23,25 @@ use self::meetings::{
 
 impl Meetings {
     /// Get the meetings between two times, optionally filter to public meetings only.
-    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, public_only: bool) -> Result<ResponseData, TelescopeError> {
-        send_query::<Self>(Variables { start, end, public_only }).await
+    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, public_only: bool) -> Result<Vec<FullCalendarEvent>, TelescopeError> {
+        Ok(send_query::<Self>(Variables { start, end, public_only })
+            .await?
+            .meetings
+            .into_iter()
+            .map(|meeting: MeetingsMeetings| meeting.into())
+            .collect())
     }
 }
 
-impl<'a> Into<FullCalendarEvent> for &'a MeetingsMeetings {
+impl Into<FullCalendarEvent> for MeetingsMeetings {
     fn into(self) -> FullCalendarEvent {
         // Extract fields.
         let start: DateTime<Utc> = self.start_date_time;
         let end: DateTime<Utc> = self.end_date_time;
         let id: i64 = self.meeting_id;
         let variant: meeting_type = self.type_;
+        let meeting_url: Option<&String> = self.meeting_url.as_ref();
+        let recording_url: Option<&String> = self.recording_url.as_ref();
 
         // Resolve the title
         let title: Option<String> = self.title.clone();
@@ -46,6 +53,14 @@ impl<'a> Into<FullCalendarEvent> for &'a MeetingsMeetings {
                 // Format as month day, year (i.e May 1, 2021)
                 .format("%B %_d, %Y")));
 
-        FullCalendarEvent { id, title, start, end }
+        // TODO: eventually support generated meeting slides on telescope.
+        // Resolve the url
+        let url: Option<String> = meeting_url
+            // Use the recording URL as a secondary
+            .or(recording_url)
+            // Convert to string.
+            .map(String::from);
+
+        return FullCalendarEvent { id, title, start, end, url, source: self};
     }
 }

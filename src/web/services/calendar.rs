@@ -7,13 +7,21 @@ use crate::templates::{
 use crate::error::TelescopeError;
 use actix_web::web::{ServiceConfig, Json, Query};
 use actix_web::HttpRequest;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, TimeZone};
+use chrono_tz::Tz;
 use crate::web::services::auth::identity::Identity;
+use crate::web::api::rcos::meetings::get::{
+    Meetings,
+    meetings::{
+        MeetingsMeetings
+    }
+};
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
     config
-        .service(calendar_page);
+        .service(calendar_page)
+        .service(events);
 }
 
 /// Calendar page
@@ -29,7 +37,10 @@ pub struct EventsQuery {
     /// The start time to get events from.
     pub start: DateTime<Utc>,
     /// The end time to get events from.
-    pub end: DateTime<Utc>
+    pub end: DateTime<Utc>,
+    /// The timezone of the
+    #[serde(alias = "timeZone")]
+    pub time_zone: Tz
 }
 
 /// Serializable event type used with FullCalendar.
@@ -40,6 +51,9 @@ pub struct FullCalendarEvent {
     pub title: String,
     pub start: DateTime<Utc>,
     pub end: DateTime<Utc>,
+    pub url: Option<String>,
+    /// The source object from the API.
+    pub source: MeetingsMeetings
 }
 
 /// Events endpoint. This should return a JSON list of FullCalendarEvents.
@@ -48,5 +62,13 @@ async fn events(identity: Identity, Query(params): Query<EventsQuery>) -> Result
     // Check if the user is authenticated -- can we show them events that aren't public.
     let is_authenticated: bool = identity.get_rcos_username().await?.is_some();
 
-    Err(TelescopeError::NotImplemented)
+    // Convert timezones.
+    let start_utc: DateTime<Utc> = params.start.with_timezone(&Utc);
+    let end_utc: DateTime<Utc> = params.end.with_timezone(&Utc);
+
+    // Return the meetings from the API.
+    return Meetings::get(start_utc, end_utc, !is_authenticated)
+        .await
+        // Mapped into json.
+        .map(|meetings| Json(meetings));
 }

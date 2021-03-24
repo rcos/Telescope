@@ -49,6 +49,7 @@ lettre_email = "~0.9"
 
 # Date and time utilities and formats
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
+chrono-tz = {version = "~0.5", features = ["serde"]}
 time = "~0.2"
 
 # URL formatting
