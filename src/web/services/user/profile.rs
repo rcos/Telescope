@@ -8,7 +8,7 @@ use crate::web::api::rcos::users::profile::{
     Profile,
 };
 use crate::web::services::auth::identity::AuthenticationCookie;
-use actix_web::web::{Path, Query};
+use actix_web::web::Query;
 use actix_web::HttpRequest;
 
 /// Wrapper struct for deserializing username.
@@ -23,8 +23,7 @@ pub struct ProfileQuery {
 pub async fn profile(
     req: HttpRequest,
     authentication: Option<AuthenticationCookie>,
-    // This is removed until we switch over to UUID usernames.
-    //Path(username): Path<String>,
+    // TODO: Switch to using Path here when we switch to user ids.
     Query(ProfileQuery { username }): Query<ProfileQuery>
 ) -> Result<Template, TelescopeError> {
     // Get the user's profile information from the RCOS API.

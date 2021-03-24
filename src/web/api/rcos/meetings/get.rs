@@ -1,7 +1,7 @@
 //! Public meetings query.
 
 use crate::web::api::rcos::prelude::*;
-use chrono::{DateTime, TimeZone, Utc, Duration};
+use chrono::{DateTime, Utc};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
 use crate::web::services::calendar::FullCalendarEvent;
@@ -17,7 +17,6 @@ pub struct Meetings;
 
 use self::meetings::{
     Variables,
-    ResponseData,
     MeetingsMeetings
 };
 
