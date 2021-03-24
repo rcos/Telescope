@@ -8,6 +8,7 @@ query Meetings($start: timestamptz!, $end: timestamptz!, $public_only: Boolean!)
     }) {
         meeting_id
         start_date_time
+        end_date_time
         external_presentation_url
         title
         type

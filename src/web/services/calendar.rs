@@ -33,9 +33,13 @@ pub struct EventsQuery {
 }
 
 /// Serializable event type used with FullCalendar.
+/// See https://fullcalendar.io/docs/event-object.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct FullCalendarEvent {
-
+pub struct FullCalendarEvent {
+    pub id: i64,
+    pub title: String,
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
 }
 
 /// Events endpoint. This should return a JSON list of FullCalendarEvents.
