@@ -17,15 +17,16 @@ RUN rm -rfv target/release/deps/telescope*
 COPY ./src ./src
 COPY ./graphql ./graphql
 RUN cargo build --release
-# Copy over remaining files needed to run.
-COPY ./static ./static
-COPY ./templates ./templates
 
 # Delete unneeded build artifacts;
 # Move the telescope executable to the working directory and delete
 # everything else.
 RUN mv ./target/release/telescope ./telescope
 RUN rm -r ./target
+
+# Copy over remaining files needed to run.
+COPY ./static ./static
+COPY ./templates ./templates
 
 # Expose telescope's ports
 EXPOSE 80
