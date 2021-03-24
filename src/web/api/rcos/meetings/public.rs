@@ -1,7 +1,11 @@
 //! Public meetings query.
 
-use crate::web::api::rcos::prelude::*;
+use crate::web::{
+    api::rcos::prelude::*,
+    services::calendar::EventsQuery
+};
 
+/// Type representing public RCOS meetings.
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
@@ -9,3 +13,15 @@ use crate::web::api::rcos::prelude::*;
     response_derives = "Debug,Clone,Serialize"
 )]
 pub struct PublicMeetings;
+
+use self::public_meetings::{
+    Variables,
+    ResponseData
+};
+
+impl Into<Variables> for EventsQuery {
+    fn into(self) -> Variables {
+        Variables { start: self.start, end: self.end }
+    }
+}
+

@@ -6,8 +6,8 @@ pub mod auth;
 mod index;
 pub mod not_found;
 mod projects;
-pub(crate) mod user;
-mod calendar;
+pub mod user;
+pub mod calendar;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {

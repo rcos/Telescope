@@ -54,7 +54,7 @@ pub async fn profile(
     let viewer_is_authenticated: bool = authentication.is_some();
     let viewer_owns_profile: bool;
     if let Some(viewer) = authentication {
-        viewer_owns_profile = (viewer.get_rcos_username_or_error().await? == decoded_username);
+        viewer_owns_profile = viewer.get_rcos_username_or_error().await? == decoded_username;
     } else {
         viewer_owns_profile = false;
     }

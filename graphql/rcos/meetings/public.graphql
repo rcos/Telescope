@@ -5,6 +5,20 @@ query PublicMeetings($start: timestamptz!, $end: timestamptz!) {
         start_date_time: {_gte: $start, _lt: $end}
     }) {
         meeting_id
+        start_date_time
+        external_presentation_url
+        title
+        type
+        recording_url
+        meeting_url
+        is_remote
+        location
 
+        # Get info about the host
+        host: user {
+            username
+            first_name
+            last_name
+        }
     }
 }
