@@ -7,7 +7,7 @@ use crate::templates::{
 use crate::error::TelescopeError;
 use actix_web::web::{ServiceConfig, Json, Query};
 use actix_web::HttpRequest;
-use chrono::{DateTime, Utc, TimeZone};
+use chrono::{DateTime, Utc, TimeZone, NaiveDateTime};
 use chrono_tz::Tz;
 use crate::web::services::auth::identity::Identity;
 use crate::web::api::rcos::meetings::get::{
@@ -35,9 +35,9 @@ async fn calendar_page(req: HttpRequest) -> Result<Template, TelescopeError> {
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub struct EventsQuery {
     /// The start time to get events from.
-    pub start: DateTime<Utc>,
+    pub start: NaiveDateTime,
     /// The end time to get events from.
-    pub end: DateTime<Utc>,
+    pub end: NaiveDateTime,
     /// The timezone of the
     #[serde(alias = "timeZone")]
     pub time_zone: Tz
@@ -63,8 +63,14 @@ async fn events(identity: Identity, Query(params): Query<EventsQuery>) -> Result
     let is_authenticated: bool = identity.get_rcos_username().await?.is_some();
 
     // Convert timezones.
-    let start_utc: DateTime<Utc> = params.start.with_timezone(&Utc);
-    let end_utc: DateTime<Utc> = params.end.with_timezone(&Utc);
+    let start_utc: DateTime<Utc> = params.time_zone
+        // Get a timestamp with timezone
+        .from_utc_datetime(&params.start)
+        // Convert to UTC
+        .with_timezone(&Utc);
+    let end_utc: DateTime<Utc> = params.time_zone
+        .from_utc_datetime(&params.end)
+        .with_timezone(&Utc);
 
     // Return the meetings from the API.
     return Meetings::get(start_utc, end_utc, !is_authenticated)
