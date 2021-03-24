@@ -1,15 +1,10 @@
 //! Profile query.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
-use chrono::{DateTime, Utc};
-
-// Namespaced types for generated code
-use crate::web::api::rcos::users::UserRole as user_role;
-
-// Ignore the compiler warning this style would generate.
-#[allow(nonstandard_style)]
-type timestamptz = DateTime<Utc>;
+use crate::web::api::rcos::{
+    send_query,
+    prelude::*
+};
 
 #[derive(GraphQLQuery)]
 #[graphql(

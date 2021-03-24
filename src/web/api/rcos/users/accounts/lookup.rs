@@ -1,7 +1,10 @@
 //! Lookup an account by the type and username.
 
-// Import and rename for GraphQL macro
-use crate::web::api::rcos::users::UserAccountType as user_account;
+use crate::error::TelescopeError;
+use crate::web::api::rcos::{
+    send_query,
+    prelude::*
+};
 
 /// GraphQL query to lookup a user account by type and username.
 #[derive(GraphQLQuery)]
@@ -12,8 +15,6 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 pub struct AccountLookup;
 
 use self::account_lookup::{ResponseData, Variables};
-use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
 
 impl AccountLookup {
     /// Make the variables for an account lookup query.

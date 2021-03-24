@@ -53,7 +53,7 @@ fn with_defaults(req_path: &str) -> Template {
         // item(req_path, "Developers", "/developers"),
         item(req_path, "Sponsors", "/sponsors"),
         // item(req_path, "Blog", "/blog"),
-        // item(req_path, "Calendar", "/calendar")
+        item(req_path, "Calendar", "/calendar")
     ];
 
     // Add items to empty navbar.

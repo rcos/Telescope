@@ -16,6 +16,7 @@ pub mod navbar;
 pub mod page;
 pub mod static_pages;
 pub mod user;
+pub mod calendar;
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]

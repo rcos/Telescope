@@ -20,6 +20,9 @@ pub const CONTENT: &'static str = "content";
 /// is currently running.
 pub const VERSION: &'static str = "version";
 
+/// The handlebars key for a boolean that defines whether or not to include FullCalendar.
+pub const INCLUDE_FULLCALENDAR: &'static str = "include_fullcalendar";
+
 /// Create a new template object to hold the page.
 /// The content of the page is rendered here and must be re-rendered if updated.
 pub async fn of(
