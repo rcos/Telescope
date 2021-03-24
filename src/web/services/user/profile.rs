@@ -8,34 +8,27 @@ use crate::web::api::rcos::users::profile::{
     Profile,
 };
 use crate::web::services::auth::identity::AuthenticationCookie;
-use actix_web::web::Path;
+use actix_web::web::{Path, Query};
 use actix_web::HttpRequest;
 
 /// Wrapper struct for deserializing username.
-#[derive(Serialize, Deserialize)]
-struct SerializedUsername {
-    u: String,
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ProfileQuery {
+    /// The username of the owner of the profile.
+    pub username: String,
 }
 
 /// User profile service. The username in the path is url-encoded.
-#[get("/user/{username}")]
+#[get("/user")]
 pub async fn profile(
     req: HttpRequest,
     authentication: Option<AuthenticationCookie>,
-    Path(username): Path<String>,
+    // This is removed until we switch over to UUID usernames.
+    //Path(username): Path<String>,
+    Query(ProfileQuery { username }): Query<ProfileQuery>
 ) -> Result<Template, TelescopeError> {
-    // Decode the url-encoded username.
-    let decoded_username: String =
-        serde_urlencoded::from_str::<SerializedUsername>(format!("u={}", username).as_str())
-            // Convert the error and get the inner value.
-            .map_err(|_| TelescopeError::BadRequest {
-                header: "Malformed Username".into(),
-                message: "Username not properly URL encoded.".into(),
-                show_status_code: true
-            })?.u;
-
     // Get the user's profile information from the RCOS API.
-    let response: ResponseData = Profile::for_user(decoded_username.clone()).await?;
+    let response: ResponseData = Profile::for_user(username.clone()).await?;
     // Throw an error if there is no user.
     if response.target.is_none() {
         return Err(TelescopeError::resource_not_found(
@@ -54,7 +47,7 @@ pub async fn profile(
     let viewer_is_authenticated: bool = authentication.is_some();
     let viewer_owns_profile: bool;
     if let Some(viewer) = authentication {
-        viewer_owns_profile = viewer.get_rcos_username_or_error().await? == decoded_username;
+        viewer_owns_profile = viewer.get_rcos_username_or_error().await? == username;
     } else {
         viewer_owns_profile = false;
     }

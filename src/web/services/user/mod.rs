@@ -4,7 +4,7 @@ use actix_web::web::ServiceConfig;
 
 pub(crate) mod developers;
 mod login;
-mod profile;
+pub(crate) mod profile;
 mod register;
 
 /// Register user related services.
