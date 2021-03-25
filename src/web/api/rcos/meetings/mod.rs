@@ -20,6 +20,6 @@ pub enum MeetingType {
     Mentors,
     #[display(fmt = "Coordinator Meeting")]
     Coordinators,
-    #[display(fmt = "Meeting")]
+    #[display(fmt = "Uncategorized Meeting")]
     Other,
 }

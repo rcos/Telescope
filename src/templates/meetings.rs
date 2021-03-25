@@ -5,7 +5,7 @@ use crate::web::api::rcos::meetings::get::meetings::MeetingsMeetings;
 use crate::web::services::meetings::MeetingsQuery;
 
 /// The path to the template's handlebars file.
-const TEMPLATE_NAME: &'static str = "meetings/page";
+const TEMPLATE_NAME: &'static str = "meetings/list";
 
 /// The handlebars key for the list of meetings from the RCOS API response.
 pub const MEETINGS: &'static str = "meetings";

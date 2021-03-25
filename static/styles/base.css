@@ -1,4 +1,5 @@
 :root {
+    /* Branding colors */
     --rcos-red: #ff1a1a;
     --telescope-red: #dd2020;
     --rpi-red: #d6001c;
@@ -9,6 +10,24 @@
     --discord-dark: #2c2f33;
     --discord-darker: #23272a;
     --discord-black: #000000;
+
+    /* Meeting Colors */
+    --meeting-large_group-bg: var(--rcos-red);
+    --meeting-large_group-text: var(--light);
+    --meeting-small_group-bg: dodgerblue;
+    --meeting-small_group-text: var(--dark);
+    --meeting-presentations-bg: forestgreen;
+    --meeting-presentations-text: var(--light);
+    --meeting-bonus_session-bg: goldenrod;
+    --meeting-bonus_session-text: var(--dark);
+    --meeting-grading-bg: firebrick;
+    --meeting-grading-text: var(--light);
+    --meeting-mentors-bg: indigo;
+    --meeting-mentors-text: var(--light);
+    --meeting-coordinators-bg: orchid;
+    --meeting-coordinators-text: var(--dark);
+    --meeting-other-bg: black;
+    --meeting-other-text: var(--light);
 }
 
 /*

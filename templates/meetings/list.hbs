@@ -32,9 +32,15 @@
             {{#if title}}
                 {{title}}
             {{else}}
-                {{format_meeting_type type_}} {{format_date start_date_time}}
+                {{format_meeting_type type}} {{format_date start_date_time}}
             {{/if}}
             <span class="float-right">
+                {{! Meeting-type badge }}
+                <h4 class="badge mr-2" style="background: var(--meeting-{{type}}-bg); color: var(--meeting-{{type}}-text)">
+                    {{format_meeting_type type}}
+                </h4>
+
+                {{! Page link -- TODO: Replace with perma-link }}
                 <a href="#meeting-{{meeting_id}}">
                     <i data-feather="link"></i>
                 </a>
@@ -127,10 +133,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="card-footer text-dark">
-            <span class="text-muted">Meeting ID: {{meeting_id}}</span>
         </div>
     </div>
 {{/each}}
