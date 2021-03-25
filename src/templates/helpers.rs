@@ -4,11 +4,13 @@ use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResul
 use crate::web::profile_for;
 use serde_json::Value;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime};
+use crate::web::api::rcos::meetings::MeetingType;
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
     registry.register_helper("profile_for",wrap_helper(profile_for_helper));
     registry.register_helper("format_date", wrap_helper(format_date_helper));
+    registry.register_helper("format_meeting_type", wrap_helper(format_meeting_type_helper));
 }
 
 /// Wrap a two-argument helper function into a helper object to add to the
@@ -39,6 +41,21 @@ fn profile_for_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     let converted: String = profile_for(username);
     // Write it to the output.
     out.write(converted.as_str())?;
+    Ok(())
+}
+
+/// Handlebars helper to properly format a meeting type.
+fn format_meeting_type_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
+    // Extract the parameter
+    let input: MeetingType = h.param(0)
+        .and_then(|param| {
+            // Deserialize to meeting type
+            serde_json::from_value::<MeetingType>(param.value().clone()).ok()
+        })
+        .expect("format_meeting_type expects a meeting_type value.");
+
+    // Write the display formatting to the output.
+    out.write(input.to_string().as_str())?;
     Ok(())
 }
 
