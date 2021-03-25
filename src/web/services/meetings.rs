@@ -74,7 +74,8 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     // Query the RCOS API to get meeting data.
     let events: Vec<MeetingsMeetings> = Meetings::get(start, end, public_only).await?;
     // Build a meetings page template, render it into a page for the user.
-    return meetings::make(events, params.map(|q| q.0))
+    let query = MeetingsQuery {start: Some(start.naive_local().date()), end: Some(end.naive_local().date())};
+    return meetings::make(events, Some(query))
         .render_into_page(&req, "RCOS Meetings")
         .await;
 }
