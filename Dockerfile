@@ -1,5 +1,5 @@
-# Use Rust 1.50 (we use library functions that were stablized in 1.50 and cannot use any previous version)
-FROM rust:1.50-buster
+# Use latest rust
+FROM rust:1.51-buster
 
 # Set timezone
 ENV TZ=America/New_York
