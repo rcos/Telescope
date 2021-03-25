@@ -1,5 +1,5 @@
 # Use latest rust
-FROM rust:1.51-buster
+FROM rust:latest
 
 # Set timezone
 ENV TZ=America/New_York
