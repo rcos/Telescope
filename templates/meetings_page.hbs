@@ -27,24 +27,38 @@
 </form>
 
 {{#each meetings}}
-    <div class="card my-2">
+    <div class="card my-2" id="meeting-{{meeting_id}}">
         <h3 class="card-header text-dark">
             {{#if title}}
                 {{title}}
             {{else}}
                 {{format_meeting_type type_}} {{format_date start_date_time}}
             {{/if}}
+            <span class="float-right">
+                <a href="#meeting-{{meeting_id}}">
+                    <i data-feather="link"></i>
+                </a>
+            </span>
         </h3>
 
-        <div class="card-body text-dark">
+        <div class="list-group list-group-flush text-dark">
             {{#if host}}
-                <span class="text-muted">
-                    Hosted by <a href="{{profile_for host.username}}">{{host.first_name}} {{host.last_name}}</a>
-                </span>
+                <div class="list-group-item">
+                    <span class="text-muted">
+                        Hosted by <a href="{{profile_for host.username}}">{{host.first_name}} {{host.last_name}}</a>
+                    </span>
+                </div>
             {{/if}}
 
-            Start: {{!format_date start_date_time}} {{format_time start_date_time}} <br>
-            End: {{!format_date end_date_time}} {{format_time end_date_time}} <br>
+            {{! If the event does not span multiple days}}
+            <div class="list-group-item">
+                {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
+                    {{format_date start_date_time}}: {{format_time start_date_time}} {{format_time end_date_time}}
+                {{else}}
+                    Start: {{format_date start_date_time}} at {{format_time start_date_time}} <br>
+                    End: {{format_date end_date_time}} {{format_time end_date_time}}
+                {{/if}}
+            </div>
 
         </div>
 
