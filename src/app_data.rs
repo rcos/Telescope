@@ -8,6 +8,7 @@ use lettre::{
 };
 use lettre_email::Mailbox;
 use std::{path::PathBuf, sync::Arc};
+use crate::templates::helpers::register_helpers;
 
 lazy_static! {
     /// Lazy Static to store app data at runtime.
@@ -48,6 +49,8 @@ impl AppData {
         // Use handlebars strict mode so that we get an error when we try to render a
         // non-existent field
         template_registry.set_strict_mode(true);
+        // Register the helpers defined in the helpers module.
+        register_helpers(&mut template_registry);
         info!("Handlebars templates registered.");
 
         Self {

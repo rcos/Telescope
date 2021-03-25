@@ -4,7 +4,7 @@ use crate::web::api::rcos::prelude::*;
 use chrono::{DateTime, Utc};
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
-use crate::web::services::calendar::FullCalendarEvent;
+use crate::web::services::meetings::FullCalendarEvent;
 
 /// Type representing public RCOS meetings.
 #[derive(GraphQLQuery)]
@@ -60,6 +60,6 @@ impl Into<FullCalendarEvent> for MeetingsMeetings {
             // Convert to string.
             .map(String::from);
 
-        return FullCalendarEvent { id, title, start, end, url, source: self};
+        return FullCalendarEvent { id, title, start, end, url, meeting: self};
     }
 }

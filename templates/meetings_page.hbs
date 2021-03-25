@@ -1,0 +1,28 @@
+<h1>RCOS Meetings</h1>
+
+{{! Form for users to filter events to a certain range }}
+<form method="get" class="form-inline">
+    <label class="sr-only" for="start-input">Start Date</label>
+    <div class="input-group mr-2">
+        <div class="input-group-prepend">
+            <div class="input-group-text">
+                From:
+            </div>
+        </div>
+        <input id="start-input" type="date" name="start" class="form-control">
+    </div>
+
+    <label class="sr-only" for="end-input">End Date</label>
+    <div class="input-group mr-2">
+        <div class="input-group-prepend">
+            <div class="input-group-text">
+                To:
+            </div>
+        </div>
+
+        <input id="end-input" type="date" name="end" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">View</button>
+</form>
+

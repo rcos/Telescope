@@ -7,7 +7,7 @@ mod index;
 pub mod not_found;
 mod projects;
 pub mod user;
-pub mod calendar;
+pub mod meetings;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {
@@ -16,7 +16,7 @@ pub fn register(config: &mut ServiceConfig) {
     // Register user related services
     user::register(config);
     // Calendar related services.
-    calendar::register(config);
+    meetings::register(config);
 
     config
         // Homepage

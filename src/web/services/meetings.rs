@@ -2,7 +2,7 @@
 
 use crate::templates::{
     Template,
-    calendar
+    meetings
 };
 use crate::error::TelescopeError;
 use actix_web::web::{ServiceConfig, Json, Query};
@@ -25,10 +25,10 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 /// Calendar page
-#[get("/calendar")]
+#[get("/meetings")]
 async fn calendar_page(req: HttpRequest) -> Result<Template, TelescopeError> {
     // Render calendar page.
-    calendar::calendar_page(&req).await
+    meetings::calendar_page(&req).await
 }
 
 /// Event endpoint query parameters used by FullCalendar.
@@ -38,9 +38,6 @@ pub struct EventsQuery {
     pub start: NaiveDateTime,
     /// The end time to get events from.
     pub end: NaiveDateTime,
-    /// The timezone of the
-    #[serde(alias = "timeZone")]
-    pub time_zone: Tz
 }
 
 /// Serializable event type used with FullCalendar.
@@ -53,7 +50,7 @@ pub struct FullCalendarEvent {
     pub end: DateTime<Utc>,
     pub url: Option<String>,
     /// The source object from the API.
-    pub source: MeetingsMeetings
+    pub meeting: MeetingsMeetings
 }
 
 /// Events endpoint. This should return a JSON list of FullCalendarEvents.
