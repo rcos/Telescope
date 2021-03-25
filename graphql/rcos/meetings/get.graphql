@@ -21,7 +21,9 @@ query Meetings($start: timestamptz!, $end: timestamptz!, $public_only: Boolean!)
         recording_url
         meeting_url
         is_remote
+
         location
+        agenda
 
         # Get info about the host
         host: user {

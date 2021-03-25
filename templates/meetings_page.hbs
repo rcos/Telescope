@@ -53,12 +53,31 @@
             <div class="list-group-item">
                 {{! If the event does not span multiple days}}
                 {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
-                    {{format_date start_date_time}}: {{format_time start_date_time}} {{format_time end_date_time}}
+                    {{format_date start_date_time}}: {{format_time start_date_time}} to {{format_time end_date_time}}
                 {{else}}
                     Start: {{format_date start_date_time}} at {{format_time start_date_time}} <br>
                     End: {{format_date end_date_time}} {{format_time end_date_time}}
                 {{/if}}
             </div>
+
+
+            {{#if location}}
+                <div class="list-group-item">
+                    Location: {{location}}
+                </div>
+            {{/if}}
+
+            {{#if agenda}}
+                <div class="list-group-item">
+                    <h5>Agenda:</h5>
+                    <ul>
+                        {{#each agenda}}
+                            <li> {{this}} </li>
+                        {{/each}}
+                    </ul>
+
+                </div>
+            {{/if}}
 
             {{#if is_remote}}
                 <div class="list-group-item">

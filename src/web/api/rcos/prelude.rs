@@ -23,3 +23,6 @@ pub type user_account = UserAccountType;
 
 /// Meeting variants.
 pub type meeting_type = MeetingType;
+
+/// List of strings for some reason not properly set in GraphQL.
+pub type _varchar = Vec<String>;
