@@ -1,9 +1,10 @@
 //! Handlebars helpers.
 
-use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResult, HelperDef};
+use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResult, HelperDef, RenderError};
 use crate::web::profile_for;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use crate::web::api::rcos::meetings::MeetingType;
+use url::Url;
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
@@ -11,6 +12,7 @@ pub fn register_helpers(registry: &mut Handlebars) {
     registry.register_helper("format_date", wrap_helper(format_date_helper));
     registry.register_helper("format_time", wrap_helper(format_time_helper));
     registry.register_helper("format_meeting_type", wrap_helper(format_meeting_type_helper));
+    registry.register_helper("domain_of", wrap_helper(domain_of_helper));
 }
 
 /// Wrap a two-argument helper function into a helper object to add to the
@@ -35,7 +37,7 @@ fn profile_for_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         // As a string
         .and_then(|v| v.value().as_str())
         // Handle errors
-        .expect("profile_for helper parameter should be string");
+        .ok_or(RenderError::new("profile_for helper requires one string parameter"))?;
 
     // Get the profile for this user
     let converted: String = profile_for(username);
@@ -52,7 +54,8 @@ fn format_meeting_type_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> Helpe
             // Deserialize to meeting type
             serde_json::from_value::<MeetingType>(param.value().clone()).ok()
         })
-        .expect("format_meeting_type expects a meeting_type value.");
+        // Convert and handle error
+        .ok_or(RenderError::new("format_meeting_type expects one meeting_type parameter"))?;
 
     // Write the display formatting to the output.
     out.write(input.to_string().as_str())?;
@@ -68,7 +71,7 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         // Get the value of the parameter
         .and_then(|param| param.value().as_str())
         // Handle missing parameter.
-        .expect("format_date helper requires string parameter");
+        .ok_or(RenderError::new("format_date helper requires one string parameter"))?;
 
     // If the input is a timestamp with timezone
     if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
@@ -91,7 +94,7 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     // If the input is just a date
     let formatted = input.parse::<NaiveDate>()
         // If it fails to parse, the parameter is malformed.
-        .expect("format_date parameter invalid")
+        .map_err(|_| RenderError::new("format_date helper expects date or timestamp"))?
         // Format
         .format("%B %_d, %Y")
         // Convert to string.
@@ -108,8 +111,8 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     let input: &str = h.param(0)
         // Convert to string
         .and_then(|p| p.value().as_str())
-        // Panic on no input
-        .expect("format_time expects one string parameter.");
+        // Error on no input
+        .ok_or(RenderError::new("format_time helper expects one string parameter."))?;
 
     // Try to parse a timestamp
     if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
@@ -129,11 +132,29 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
 
     // Lastly try just a time.
     let formatted: String = input.parse::<NaiveTime>()
-        // Panic on invalid data.
-        .expect("format_time parameter invalid")
+        // Convert and propagate error if necessary
+        .map_err(|_| RenderError::new("format_time helper expects a date or timestamp"))?
         // Format the time.
         .format("%_I:%M %P")
         .to_string();
     out.write(formatted.as_str())?;
+    Ok(())
+}
+
+/// Handlebars helper to extract the domain and subdomain of a URL.
+fn domain_of_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
+    // Extract the parameter.
+    let host: String = h.param(0)
+        // The parameter should be a string.
+        .and_then(|param| param.value().as_str())
+        // Parse parameter into URL
+        .and_then(|s: &str| Url::parse(s).ok())
+        // Extract the host from the URL
+        .and_then(|url: Url| url.host_str().map(|s| s.to_string()))
+        // If there are any issues propagate an error.
+        .ok_or(RenderError::new("domain_of helper expects one URL argument"))?;
+
+    // Write to output
+    out.write(host.as_str())?;
     Ok(())
 }
