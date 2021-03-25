@@ -27,9 +27,29 @@
 </form>
 
 {{#each meetings}}
-    {{#if title}}
-        <h3>{{title}}</h3>
-    {{else}}
-        <h3>{{}}</h3>
-    {{/if}}
+    <div class="card my-2">
+        <h3 class="card-header text-dark">
+            {{#if title}}
+                {{title}}
+            {{else}}
+                {{format_meeting_type type_}} {{format_date start_date_time}}
+            {{/if}}
+        </h3>
+
+        <div class="card-body text-dark">
+            {{#if host}}
+                <span class="text-muted">
+                    Hosted by <a href="{{profile_for host.username}}">{{host.first_name}} {{host.last_name}}</a>
+                </span>
+            {{/if}}
+
+            Start: {{!format_date start_date_time}} {{format_time start_date_time}} <br>
+            End: {{!format_date end_date_time}} {{format_time end_date_time}} <br>
+
+        </div>
+
+        <div class="card-footer text-dark">
+            <span class="text-muted">Meeting ID: {{meeting_id}}</span>
+        </div>
+    </div>
 {{/each}}

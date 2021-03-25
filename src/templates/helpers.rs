@@ -9,6 +9,7 @@ use crate::web::api::rcos::meetings::MeetingType;
 pub fn register_helpers(registry: &mut Handlebars) {
     registry.register_helper("profile_for",wrap_helper(profile_for_helper));
     registry.register_helper("format_date", wrap_helper(format_date_helper));
+    registry.register_helper("format_time", wrap_helper(format_time_helper));
     registry.register_helper("format_meeting_type", wrap_helper(format_meeting_type_helper));
 }
 
@@ -70,7 +71,7 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         .expect("format_date helper requires string parameter");
 
     // If the input is a timestamp with timezone
-    if let Ok(timestamp) = serde_json::from_str::<DateTime<Local>>(input) {
+    if let Ok(timestamp) = input.parse::<DateTime<Local>>() {
         // Format the date properly.
         let formatted: String = timestamp.format("%B %_d, %Y").to_string();
         // Write to output and return.
@@ -79,14 +80,14 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     }
 
     // If the input is a naive timestamp
-    if let Ok(timestamp) = serde_json::from_str::<NaiveDateTime>(input) {
+    if let Ok(timestamp) = input.parse::<NaiveDateTime>() {
         let formatted: String = timestamp.format("%B %_d, %Y").to_string();
         out.write(formatted.as_str())?;
         return Ok(());
     }
 
     // If the input is just a date
-    let formatted = serde_json::from_str::<NaiveDate>(input)
+    let formatted = input.parse::<NaiveDate>()
         // If it fails to parse, the parameter is malformed.
         .expect("format_date parameter invalid")
         // Format
@@ -109,7 +110,7 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         .expect("format_time expects one string parameter.");
 
     // Try to parse a timestamp
-    if let Ok(timestamp) = serde_json::from_str::<DateTime<Local>>(input) {
+    if let Ok(timestamp) = input.parse::<DateTime<Local>>() {
         // Format the time with the timezone (e.g. " 7:15 AM EDT")
         let formatted: String = timestamp.format("%_I:%M %p %Z").to_string();
         out.write(formatted.as_str())?;
@@ -117,14 +118,14 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     }
 
     // Next try a naive timestamp
-    if let Ok(timestamp) = serde_json::from_str::<NaiveDateTime>(input) {
+    if let Ok(timestamp) = input.parse::<NaiveDateTime>() {
         let formatted: String = timestamp.format("%_I:%M %p").to_string();
         out.write(formatted.as_str())?;
         return Ok(());
     }
 
     // Lastly try just a time.
-    let formatted: String = serde_json::from_str::<NaiveTime>(input)
+    let formatted: String = input.parse::<NaiveTime>()
         // Panic on invalid data.
         .expect("format_time parameter invalid")
         // Format the time.

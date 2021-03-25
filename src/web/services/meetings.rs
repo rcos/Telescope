@@ -5,10 +5,9 @@ use crate::templates::{
     meetings
 };
 use crate::error::TelescopeError;
-use actix_web::web::{ServiceConfig, Json, Query};
+use actix_web::web::{ServiceConfig, Query};
 use actix_web::HttpRequest;
-use chrono::{DateTime, Utc, TimeZone, NaiveDateTime, Local, Duration};
-use chrono_tz::Tz;
+use chrono::{DateTime, Utc, TimeZone, Local, Duration, NaiveDate, Date};
 use crate::web::services::auth::identity::Identity;
 use crate::web::api::rcos::meetings::get::{
     Meetings,
@@ -27,9 +26,9 @@ pub fn register(config: &mut ServiceConfig) {
 #[derive(Deserialize, Debug, Copy, Clone)]
 pub struct MeetingsQuery {
     /// The start time to get events from.
-    pub start: Option<NaiveDateTime>,
+    pub start: Option<NaiveDate>,
     /// The end time to get events from.
-    pub end: Option<NaiveDateTime>,
+    pub end: Option<NaiveDate>,
 }
 
 /// Calendar page
@@ -39,10 +38,12 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     let start: DateTime<Utc> = params.as_ref()
         // Extract the start parameter from the query
         .and_then(|p| p.start.as_ref())
-        // Convert to a timestamp in the local timezone
-        .map(|naive: &NaiveDateTime| Local.from_local_datetime(naive))
-        // If it's ambiguous what timestamp to use in the local timezone, pick the earlier one.
+        // Convert to a date in the local timezone
+        .map(|naive: &NaiveDate| Local.from_local_date(naive))
+        // If it's ambiguous what date to use in the local timezone, pick the earlier one.
         .and_then(|local_result| local_result.earliest())
+        // Conver the date to a timestamp of the beginning of the day
+        .map(|date: Date<Local>| date.and_hms(0,0,0))
         // If there is no valid timezone or the start parameter wasn't supplied,
         // use the current time minus 2 hours. This should be sufficient to catch all
         // recent and ongoing meetings.
@@ -53,10 +54,12 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     let end: DateTime<Utc> = params.as_ref()
         // Extract the end parameter from the query
         .and_then(|p| p.end.as_ref())
-        // Convert to a timestamp in the local timezone.
-        .map(|naive: &NaiveDateTime| Local.from_local_datetime(naive))
-        // If the time in the local timezone is ambiguous, use the later one
+        // Convert to a date in the local timezone.
+        .map(|naive: &NaiveDate| Local.from_local_date(naive))
+        // If the date in the local timezone is ambiguous, use the later one
         .and_then(|local_result| local_result.latest())
+        // Convert the date to a timestamp at midnight.
+        .map(|date: Date<Local>| date.and_hms(0,0,0))
         // If there is no valid time, or the parameter wasn't supplied,
         // default to one week from today. This will show all the next meetings.
         .unwrap_or(Local::now() + Duration::weeks(1))
