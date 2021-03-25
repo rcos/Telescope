@@ -74,8 +74,6 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
         // Format the date properly.
         let formatted: String = timestamp
-            // Convert timezone
-            .with_timezone(&Local)
             // Format
             .format("%B %_d, %Y").to_string();
         // Write to output and return.
@@ -116,8 +114,6 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
     // Try to parse a timestamp
     if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
         let formatted: String = timestamp
-            // Convert to local timezone
-            .with_timezone(&Local)
             // Format date.
             .format("%_I:%M %P").to_string();
         out.write(formatted.as_str())?;
