@@ -2,7 +2,7 @@
 
 use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResult, HelperDef};
 use crate::web::profile_for;
-use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use crate::web::api::rcos::meetings::MeetingType;
 
 /// Register the custom handlebars helpers to the handlebars registry.

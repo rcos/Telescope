@@ -23,7 +23,7 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 /// Event endpoint query parameters used by FullCalendar.
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub struct MeetingsQuery {
     /// The start time to get events from.
     pub start: Option<NaiveDate>,
@@ -74,5 +74,7 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     // Query the RCOS API to get meeting data.
     let events: Vec<MeetingsMeetings> = Meetings::get(start, end, public_only).await?;
     // Build a meetings page template, render it into a page for the user.
-    return meetings::make(events).render_into_page(&req, "RCOS Meetings").await;
+    return meetings::make(events, params.map(|q| q.0))
+        .render_into_page(&req, "RCOS Meetings")
+        .await;
 }
