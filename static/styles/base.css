@@ -12,13 +12,13 @@
     --discord-black: #000000;
 
     /* Meeting Colors */
-    --meeting-large_group-bg: lightcoral;
-    --meeting-large_group-text: var(--dark);
+    --meeting-large_group-bg: #ff4c3e;
+    --meeting-large_group-text: var(--light);
     --meeting-small_group-bg: dodgerblue;
     --meeting-small_group-text: var(--dark);
     --meeting-presentations-bg: forestgreen;
     --meeting-presentations-text: var(--light);
-    --meeting-bonus_session-bg: palegoldenrod;
+    --meeting-bonus_session-bg: #eeba32;
     --meeting-bonus_session-text: var(--dark);
     --meeting-grading-bg: firebrick;
     --meeting-grading-text: var(--light);
