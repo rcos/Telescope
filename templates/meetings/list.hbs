@@ -27,8 +27,9 @@
 </form>
 
 {{#each meetings}}
-    <div class="card my-2" id="meeting-{{meeting_id}}">
-        <h3 class="card-header text-dark">
+    <div class="card my-2" id="meeting-{{meeting_id}}" style="border-color: var(--meeting-{{type}}-bg); border-width: 4px;">
+        <h3 class="card-header"
+            style="background: var(--meeting-{{type}}-bg); color: var(--meeting-{{type}}-text); border-radius: 0;">
             {{#if title}}
                 {{title}}
             {{else}}
@@ -36,12 +37,17 @@
             {{/if}}
             <span class="float-right">
                 {{! Meeting-type badge }}
-                <h4 class="badge mr-2" style="background: var(--meeting-{{type}}-bg); color: var(--meeting-{{type}}-text)">
+                <h4 class="badge mr-2"
+                    style="background: var(--meeting-{{type}}-bg);
+                            color: var(--meeting-{{type}}-text);
+                            border-color: var(--meeting-{{type}}-text);
+                            border-width: 2px;
+                            border-style: solid;">
                     {{format_meeting_type type}}
                 </h4>
 
                 {{! Page link -- TODO: Replace with perma-link }}
-                <a href="#meeting-{{meeting_id}}">
+                <a href="#meeting-{{meeting_id}}" style="color: var(--meeting-{{type}}-text);">
                     <i data-feather="link"></i>
                 </a>
             </span>

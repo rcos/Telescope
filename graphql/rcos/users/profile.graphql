@@ -40,5 +40,24 @@ query Profile($username: String!) {
                 }
             }
         }
+
+        hosting: meetings(order_by: {start_date_time: desc}) {
+            semester {
+                semester_id
+                title
+            }
+
+            meeting_id
+            title
+            type
+            start_date_time
+            end_date_time
+            agenda
+            location
+            is_public
+            is_remote
+            meeting_url
+
+        }
     }
 }
