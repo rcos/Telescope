@@ -2,7 +2,7 @@
 
 use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResult, HelperDef};
 use crate::web::profile_for;
-use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use crate::web::api::rcos::meetings::MeetingType;
 
 /// Register the custom handlebars helpers to the handlebars registry.
@@ -71,9 +71,13 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         .expect("format_date helper requires string parameter");
 
     // If the input is a timestamp with timezone
-    if let Ok(timestamp) = input.parse::<DateTime<Local>>() {
+    if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
         // Format the date properly.
-        let formatted: String = timestamp.format("%B %_d, %Y").to_string();
+        let formatted: String = timestamp
+            // Convert timezone
+            .with_timezone(&Local)
+            // Format
+            .format("%B %_d, %Y").to_string();
         // Write to output and return.
         out.write(formatted.as_str())?;
         return Ok(());
@@ -110,16 +114,19 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         .expect("format_time expects one string parameter.");
 
     // Try to parse a timestamp
-    if let Ok(timestamp) = input.parse::<DateTime<Local>>() {
-        // Format the time with the timezone (e.g. " 7:15 AM EDT")
-        let formatted: String = timestamp.format("%_I:%M %p %Z").to_string();
+    if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
+        let formatted: String = timestamp
+            // Convert to local timezone
+            .with_timezone(&Local)
+            // Format date.
+            .format("%_I:%M %P").to_string();
         out.write(formatted.as_str())?;
         return Ok(());
     }
 
     // Next try a naive timestamp
     if let Ok(timestamp) = input.parse::<NaiveDateTime>() {
-        let formatted: String = timestamp.format("%_I:%M %p").to_string();
+        let formatted: String = timestamp.format("%_I:%M %P").to_string();
         out.write(formatted.as_str())?;
         return Ok(());
     }
@@ -129,7 +136,7 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         // Panic on invalid data.
         .expect("format_time parameter invalid")
         // Format the time.
-        .format("%_I:%M %p")
+        .format("%_I:%M %P")
         .to_string();
     out.write(formatted.as_str())?;
     Ok(())
