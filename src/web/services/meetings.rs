@@ -26,9 +26,9 @@ pub fn register(config: &mut ServiceConfig) {
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub struct MeetingsQuery {
     /// The start time to get events from.
-    pub start: Option<NaiveDate>,
+    pub start: NaiveDate,
     /// The end time to get events from.
-    pub end: Option<NaiveDate>,
+    pub end: NaiveDate,
 }
 
 /// Calendar page
@@ -37,9 +37,9 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     // Resolve parameters to API query variables
     let start: DateTime<Utc> = params.as_ref()
         // Extract the start parameter from the query
-        .and_then(|p| p.start.as_ref())
+        .map(|p| p.start)
         // Convert to a date in the local timezone
-        .map(|naive: &NaiveDate| Local.from_local_date(naive))
+        .map(|naive: NaiveDate| Local.from_local_date(&naive))
         // If it's ambiguous what date to use in the local timezone, pick the earlier one.
         .and_then(|local_result| local_result.earliest())
         // Conver the date to a timestamp of the beginning of the day
@@ -53,9 +53,9 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 
     let end: DateTime<Utc> = params.as_ref()
         // Extract the end parameter from the query
-        .and_then(|p| p.end.as_ref())
+        .map(|p| p.end)
         // Convert to a date in the local timezone.
-        .map(|naive: &NaiveDate| Local.from_local_date(naive))
+        .map(|naive: NaiveDate| Local.from_local_date(&naive))
         // If the date in the local timezone is ambiguous, use the later one
         .and_then(|local_result| local_result.latest())
         // Convert the date to a timestamp near midnight that night.
@@ -74,8 +74,7 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     // Query the RCOS API to get meeting data.
     let events: Vec<MeetingsMeetings> = Meetings::get(start, end, public_only).await?;
     // Build a meetings page template, render it into a page for the user.
-    let query = MeetingsQuery {start: Some(start.naive_local().date()), end: Some(end.naive_local().date())};
-    return meetings::make(events, Some(query))
+    return meetings::make(events, params.map(|p| p.0))
         .render_into_page(&req, "RCOS Meetings")
         .await;
 }

@@ -9,7 +9,7 @@
                 From
             </div>
         </div>
-        <input id="start-input" type="date" name="start" class="form-control" {{#if query.start}} value="{{query.start}}" {{/if}}>
+        <input id="start-input" type="date" name="start" class="form-control" {{#if query.start}} value="{{query.start}}" {{/if}} required>
     </div>
 
     <label class="sr-only" for="end-input">End Date</label>
@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <input id="end-input" type="date" name="end" class="form-control" {{#if query.end}} value="{{query.end}}" {{/if}}>
+        <input id="end-input" type="date" name="end" class="form-control" {{#if query.end}} value="{{query.end}}" {{/if}} required>
     </div>
 
     <button type="submit" class="btn btn-primary mb-2">View</button>
