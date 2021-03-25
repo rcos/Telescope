@@ -6,7 +6,7 @@
     <div class="input-group mr-2">
         <div class="input-group-prepend">
             <div class="input-group-text">
-                From:
+                From
             </div>
         </div>
         <input id="start-input" type="date" name="start" class="form-control">
@@ -16,7 +16,7 @@
     <div class="input-group mr-2">
         <div class="input-group-prepend">
             <div class="input-group-text">
-                To:
+                To
             </div>
         </div>
 
@@ -26,3 +26,10 @@
     <button type="submit" class="btn btn-primary">View</button>
 </form>
 
+{{#each meetings}}
+    {{#if title}}
+        <h3>{{title}}</h3>
+    {{else}}
+        <h3>{{}}</h3>
+    {{/if}}
+{{/each}}
