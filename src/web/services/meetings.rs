@@ -58,8 +58,8 @@ async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
         .map(|naive: &NaiveDate| Local.from_local_date(naive))
         // If the date in the local timezone is ambiguous, use the later one
         .and_then(|local_result| local_result.latest())
-        // Convert the date to a timestamp at midnight.
-        .map(|date: Date<Local>| date.and_hms(0,0,0))
+        // Convert the date to a timestamp near midnight that night.
+        .map(|date: Date<Local>| date.and_hms(23,59,59))
         // If there is no valid time, or the parameter wasn't supplied,
         // default to one week from today. This will show all the next meetings.
         .unwrap_or(Local::now() + Duration::weeks(1))
