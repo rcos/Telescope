@@ -41,6 +41,7 @@ query Profile($username: String!) {
             }
         }
 
+        # Meedings this user has hosted
         hosting: meetings(order_by: {start_date_time: desc}) {
             semester {
                 semester_id
@@ -57,6 +58,8 @@ query Profile($username: String!) {
             is_public
             is_remote
             meeting_url
+            external_presentation_url
+            recording_url
 
         }
     }
