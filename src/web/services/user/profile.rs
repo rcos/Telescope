@@ -7,7 +7,7 @@ use crate::web::api::rcos::users::profile::{
     profile::{ProfileTarget, ProfileTargetCoordinating, ProfileTargetMentoring, ResponseData},
     Profile,
 };
-use crate::web::services::auth::identity::AuthenticationCookie;
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::Query;
 use actix_web::HttpRequest;
 
@@ -22,7 +22,7 @@ pub struct ProfileQuery {
 #[get("/user")]
 pub async fn profile(
     req: HttpRequest,
-    authentication: Option<AuthenticationCookie>,
+    identity: Identity,
     // TODO: Switch to using Path here when we switch to user ids.
     Query(ProfileQuery { username }): Query<ProfileQuery>
 ) -> Result<Template, TelescopeError> {
@@ -36,32 +36,14 @@ pub async fn profile(
         ));
     }
 
-    // Get a reference to the user's info.
-    let target_user: &ProfileTarget = response.target.as_ref().unwrap();
-    // Get references to the parts of the user's info needed to build the profile template.
-    let mentoring: &[ProfileTargetMentoring] = target_user.mentoring.as_slice();
-    let coordinating: &[ProfileTargetCoordinating] = target_user.coordinating.as_slice();
-    let name: String = format!("{} {}", target_user.first_name, target_user.last_name);
-    // Determine viewer privileges
-    let viewer_is_authenticated: bool = authentication.is_some();
-    let viewer_owns_profile: bool;
-    if let Some(viewer) = authentication {
-        viewer_owns_profile = viewer.get_rcos_username_or_error().await? == username;
-    } else {
-        viewer_owns_profile = false;
-    }
-
-    //
-
+    // Get the target user's info.
+    let target_user: ProfileTarget = response.target.unwrap();
+    // Get the viewer's username.
+    let viewer_username: Option<String> = identity.get_rcos_username().await?;
 
     // Make a profile template
     // Render it inside a page (with the user's name as the title)
-    return profile_template::make(
-        name.as_str(),
-        target_user.created_at,
-        mentoring,
-        coordinating,
-    )
-    .render_into_page(&req, name.as_str())
-    .await;
+    return profile_template::make(&target_user, viewer_username)
+        .render_into_page(&req, format!("{} {}", target_user.first_name, target_user.last_name))
+        .await;
 }

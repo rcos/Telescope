@@ -1,8 +1,10 @@
-<h1>{{name}}</h1>
-<span class="text-muted">Account created {{created_at}}</span>
+<h1>{{target.first_name}} {{target.last_name}}</h1>
+<span class="text-muted">
+    Account created {{format_date target.created_at}} {{format_time target.created_at}}
+</span>
 <div class="row row-cols-1 row-cols-lg-4 mt-2">
     {{! If the user has coordinating or mentoring history }}
-    {{# if (or coordinating mentoring)}}
+    {{!--{{# if (or coordinating mentoring)}}
         <div class="col">
             {{! The user's coording history }}
             {{#if coordinating}}
@@ -30,5 +32,5 @@
                 </div>
             {{/if}}
         </div>
-    {{/if}}
+    {{/if}}  --}}
 </div>

@@ -2,7 +2,7 @@
 
 use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResult, HelperDef, RenderError};
 use crate::web::profile_for;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc, Local};
 use crate::web::api::rcos::meetings::MeetingType;
 use url::Url;
 
@@ -74,7 +74,7 @@ fn format_date_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         .ok_or(RenderError::new("format_date helper requires one string parameter"))?;
 
     // If the input is a timestamp with timezone
-    if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
+    if let Ok(timestamp) = input.parse::<DateTime<Local>>() {
         // Format the date properly.
         let formatted: String = timestamp
             // Format
@@ -115,7 +115,7 @@ fn format_time_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult 
         .ok_or(RenderError::new("format_time helper expects one string parameter."))?;
 
     // Try to parse a timestamp
-    if let Ok(timestamp) = input.parse::<DateTime<Utc>>() {
+    if let Ok(timestamp) = input.parse::<DateTime<Local>>() {
         let formatted: String = timestamp
             // Format date.
             .format("%_I:%M %P").to_string();
