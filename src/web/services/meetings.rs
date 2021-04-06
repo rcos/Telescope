@@ -1,4 +1,4 @@
-//! Calendar page and services
+//! Meetings page and services
 
 use crate::templates::{
     Template,
@@ -19,7 +19,7 @@ use crate::web::api::rcos::meetings::get::{
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
     config
-        .service(calendar_page);
+        .service(meetings_page);
 }
 
 /// Event endpoint query parameters used by FullCalendar.
@@ -31,9 +31,9 @@ pub struct MeetingsQuery {
     pub end: NaiveDate,
 }
 
-/// Calendar page
+/// Meetings page
 #[get("/meetings")]
-async fn calendar_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, identity: Identity) -> Result<Template, TelescopeError> {
+async fn meetings_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, identity: Identity) -> Result<Template, TelescopeError> {
     // Resolve parameters to API query variables
     let start: DateTime<Utc> = params.as_ref()
         // Extract the start parameter from the query
