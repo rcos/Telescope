@@ -5,24 +5,30 @@ use crate::templates::{
     meetings
 };
 use crate::error::TelescopeError;
-use actix_web::web::{ServiceConfig, Query};
-use actix_web::HttpRequest;
+use actix_web::web::{ServiceConfig, Query, Path};
+use actix_web::{HttpRequest, HttpResponse};
 use chrono::{DateTime, Utc, TimeZone, Local, Duration, NaiveDate, Date};
-use crate::web::services::auth::identity::Identity;
+use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
 use crate::web::api::rcos::meetings::get::{
     Meetings,
     meetings::{
         MeetingsMeetings
     }
 };
+use crate::templates::forms::Form;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
     config
-        .service(meetings_page);
+        .service(meetings_list)
+        .service(meeting)
+        .service(edit_meeting)
+        .service(submit_meeting_edit)
+        .service(create_meeting)
+        .service(submit_new_meeting);
 }
 
-/// Event endpoint query parameters used by FullCalendar.
+/// Query parameters submitted via the form on the meetings page.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub struct MeetingsQuery {
     /// The start time to get events from.
@@ -33,7 +39,7 @@ pub struct MeetingsQuery {
 
 /// Meetings page
 #[get("/meetings")]
-async fn meetings_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, identity: Identity) -> Result<Template, TelescopeError> {
+async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, identity: Identity) -> Result<Template, TelescopeError> {
     // Resolve parameters to API query variables
     let start: DateTime<Utc> = params.as_ref()
         // Extract the start parameter from the query
@@ -88,4 +94,31 @@ async fn meetings_page(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
     return meetings::make(events, Some(query))
         .render_into_page(&req, "RCOS Meetings")
         .await;
+}
+
+/// Endpoint to preview a specific meeting.
+#[get("/meeting/{meeting_id}")]
+async fn meeting(req: HttpRequest, Path(meeting_id): Path<i32>, identity: Identity) -> Result<Template, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
+}
+
+/// Endpoint to edit a meeting.
+#[get("/meeting/{meeting_id}/edit")]
+async fn edit_meeting(Path(meeting_id): Path<i32>, auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
+}
+
+#[post("/meeting/{meeting_id}/edit")]
+async fn submit_meeting_edit(Path(meeting_id): Path<i32>) -> Result<HttpResponse, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
+}
+
+#[get("/meeting/create")]
+async fn create_meeting(auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
+}
+
+#[post("/meeting/create")]
+async fn submit_new_meeting(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
 }
