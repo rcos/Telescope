@@ -9,10 +9,14 @@ use actix_web::web::{ServiceConfig, Query, Path};
 use actix_web::{HttpRequest, HttpResponse};
 use chrono::{DateTime, Utc, TimeZone, Local, Duration, NaiveDate, Date};
 use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
-use crate::web::api::rcos::meetings::get::{
-    Meetings,
-    meetings::{
-        MeetingsMeetings
+use crate::web::api::rcos::meetings::{
+    get::{
+        Meetings,
+        meetings::MeetingsMeetings
+    },
+    get_by_id::{
+        Meeting,
+        meeting::MeetingMeetingsByPk
     }
 };
 use crate::templates::forms::Form;
@@ -21,11 +25,13 @@ use crate::templates::forms::Form;
 pub fn register(config: &mut ServiceConfig) {
     config
         .service(meetings_list)
-        .service(meeting)
         .service(edit_meeting)
         .service(submit_meeting_edit)
         .service(create_meeting)
-        .service(submit_new_meeting);
+        .service(submit_new_meeting)
+        // The meeting viewing endpoint must be registered after the meeting creation endpoint,
+        // so that the ID path doesn't match the create path.
+        .service(meeting);
 }
 
 /// Query parameters submitted via the form on the meetings page.
@@ -91,25 +97,34 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
         });
 
     // Build a meetings page template, render it into a page for the user.
-    return meetings::make(events, Some(query))
+    return meetings::list_page::make(events, Some(query))
         .render_into_page(&req, "RCOS Meetings")
         .await;
 }
 
 /// Endpoint to preview a specific meeting.
 #[get("/meeting/{meeting_id}")]
-async fn meeting(req: HttpRequest, Path(meeting_id): Path<i32>, identity: Identity) -> Result<Template, TelescopeError> {
+async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identity) -> Result<Template, TelescopeError> {
+    // Get the meeting from the RCOS API.
+    let meeting: MeetingMeetingsByPk = Meeting::get_by_id(meeting_id)
+        // Wait for the API response
+        .await?
+        // If there does not exist a meeting for this ID, return an error.
+        .ok_or(TelescopeError::resource_not_found(
+            "Meeting Not Found",
+            "Could not find a meeting for this ID."))?;
+
     Err(TelescopeError::NotImplemented)
 }
 
 /// Endpoint to edit a meeting.
 #[get("/meeting/{meeting_id}/edit")]
-async fn edit_meeting(Path(meeting_id): Path<i32>, auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
+async fn edit_meeting(Path(meeting_id): Path<i64>, auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 
 #[post("/meeting/{meeting_id}/edit")]
-async fn submit_meeting_edit(Path(meeting_id): Path<i32>) -> Result<HttpResponse, TelescopeError> {
+async fn submit_meeting_edit(Path(meeting_id): Path<i64>) -> Result<HttpResponse, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 

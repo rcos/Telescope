@@ -1,4 +1,4 @@
-//! Public meetings query.
+//! List meetings query.
 
 use crate::web::api::rcos::prelude::*;
 use chrono::{DateTime, Utc};

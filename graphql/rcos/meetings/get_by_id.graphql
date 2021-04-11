@@ -1,0 +1,24 @@
+query Meeting($id: Int!) {
+    meetings_by_pk(meeting_id: $id) {
+        meeting_id
+        start_date_time
+        end_date_time
+        title
+        type
+
+        is_public
+        is_remote
+        meeting_url
+        recording_url
+
+        external_presentation_url
+        location
+        agenda
+
+        host: user {
+            first_name
+            last_name
+            username
+        }
+    }
+}

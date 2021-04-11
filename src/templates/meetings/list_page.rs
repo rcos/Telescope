@@ -1,4 +1,4 @@
-//! Meetings page template. This is mostly a static template.
+//! Template for page listing of meetings.
 
 use crate::templates::Template;
 use crate::web::api::rcos::meetings::get::meetings::MeetingsMeetings;
