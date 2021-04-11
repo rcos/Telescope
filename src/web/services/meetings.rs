@@ -16,7 +16,7 @@ use crate::web::api::rcos::meetings::{
     },
     get_by_id::{
         Meeting,
-        meeting::MeetingMeetingsByPk
+        //meeting::MeetingMeetingsByPk
     }
 };
 use crate::templates::forms::Form;
@@ -105,14 +105,16 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 /// Endpoint to preview a specific meeting.
 #[get("/meeting/{meeting_id}")]
 async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identity) -> Result<Template, TelescopeError> {
+    // Get the viewer's username.
+    let viewer_username: Option<String> = identity.get_rcos_username().await?;
     // Get the meeting from the RCOS API.
-    let meeting: MeetingMeetingsByPk = Meeting::get_by_id(meeting_id)
-        // Wait for the API response
-        .await?
-        // If there does not exist a meeting for this ID, return an error.
-        .ok_or(TelescopeError::resource_not_found(
-            "Meeting Not Found",
-            "Could not find a meeting for this ID."))?;
+    // let meeting: MeetingMeetingsByPk = Meeting::get_by_id(meeting_id)
+    //     // Wait for the API response
+    //     .await?
+    //     // If there does not exist a meeting for this ID, return an error.
+    //     .ok_or(TelescopeError::resource_not_found(
+    //         "Meeting Not Found",
+    //         "Could not find a meeting for this ID."))?;
 
     Err(TelescopeError::NotImplemented)
 }

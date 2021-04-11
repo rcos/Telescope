@@ -1,5 +1,26 @@
-query Meeting($id: Int!) {
-    meetings_by_pk(meeting_id: $id) {
+# Get some info about a meeting and the viewer based on the meeting ID and
+# the viewer's username.
+query Meeting($id: Int!, $viewer: String) {
+    # Current semester info
+    current_semester: semesters(order_by: {start_date: desc_nulls_last}, limit: 1) {
+        semester_id
+    }
+
+    # Viewer info
+    viewer: users(where: {username: {_eq: $viewer}}, limit: 1) {
+        username
+        role
+
+        # What is the most recent semester (if there is one) that this user
+        # Was a coordinator
+        coordinating: enrollments(
+            where: {is_coordinator: {_eq: true}},
+            order_by: {semester: {start_date: desc_nulls_last}},
+            limit: 1
+        ) { semester_id }
+    }
+
+    meeting: meetings_by_pk(meeting_id: $id) {
         meeting_id
         start_date_time
         end_date_time
@@ -15,6 +36,7 @@ query Meeting($id: Int!) {
         location
         agenda
 
+        # Info on the host
         host: user {
             first_name
             last_name
