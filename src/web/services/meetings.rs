@@ -2,6 +2,7 @@
 
 use crate::templates::{
     Template,
+    forms::Form,
     meetings
 };
 use crate::error::TelescopeError;
@@ -16,10 +17,10 @@ use crate::web::api::rcos::meetings::{
     },
     get_by_id::{
         Meeting,
-        //meeting::MeetingMeetingsByPk
+        meeting::MeetingMeeting,
+        ConvertedResponseData
     }
 };
-use crate::templates::forms::Form;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
@@ -108,15 +109,33 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
     // Get the viewer's username.
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
     // Get the meeting from the RCOS API.
-    // let meeting: MeetingMeetingsByPk = Meeting::get_by_id(meeting_id)
-    //     // Wait for the API response
-    //     .await?
-    //     // If there does not exist a meeting for this ID, return an error.
-    //     .ok_or(TelescopeError::resource_not_found(
-    //         "Meeting Not Found",
-    //         "Could not find a meeting for this ID."))?;
+    let api_data: ConvertedResponseData = Meeting::get_by_id(meeting_id, viewer_username).await?;
+    // Check to make sure the meeting exists.
+    if api_data.meeting.is_none() {
+        return Err(TelescopeError::resource_not_found(
+            "Meeting Not Found",
+            "Could not find a meeting for this ID."
+        ));
+    }
 
-    Err(TelescopeError::NotImplemented)
+    // The meeting is some, destructure the response data into fields.
+    let ConvertedResponseData { meeting, viewer, current_semester } = api_data;
+    // Unwrap the meeting object.
+    let meeting: MeetingMeeting = meeting.unwrap();
+
+    // Get the title for the meeting page by rendering just the title template.
+    let title: String = meetings::title::of(
+        &meeting.title,
+        meeting.type_,
+        meeting.start_date_time
+    ).render()?;
+
+    // Make and return the template.
+    return meetings::meeting_page::make(&meeting, &viewer, &current_semester)
+        // Rendered inside a page
+        .render_into_page(&req, title)
+        // Wait for page to render and return result.
+        .await;
 }
 
 /// Endpoint to edit a meeting.

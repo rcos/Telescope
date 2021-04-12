@@ -30,11 +30,7 @@
     <div class="card my-2" id="meeting-{{meeting_id}}" style="border-color: var(--meeting-{{type}}-bg); border-width: 4px;">
         <h3 class="card-header"
             style="background: var(--meeting-{{type}}-bg); color: var(--meeting-{{type}}-text); border-radius: 0;">
-            {{#if title}}
-                {{title}}
-            {{else}}
-                {{format_meeting_type type}} {{format_date start_date_time}}
-            {{/if}}
+            {{> meetings/title this}}
             <span class="float-right">
                 {{! Meeting-type badge }}
                 <h4 class="badge mr-2"

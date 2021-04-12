@@ -1,0 +1,7 @@
+{{! Template to render a meeting title}}
+
+{{#if title}}
+    {{title}}
+{{else}}
+    {{format_meeting_type type}} {{format_date start_date_time}}
+{{/if}}
