@@ -1,0 +1,37 @@
+{{#if meeting.is_public}}
+    <h1>{{> meetings/title meeting}}</h1>
+    <h3>
+        <span class="badge" style="background: var(--meeting-{{meeting.type}}-bg); color: var(--meeting-{{meeting.type}}-text)">
+            {{format_meeting_type meeting.type}}
+        </span>
+    </h3>
+
+    {{! If the meeting starts and ends on the same date, just put the date at the begining. }}
+    <span class="text-muted">
+        {{#with meeting}}
+            {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
+                {{format_date start_date_time}} from {{format_time start_date_time}} to {{format_time end_date_time}}
+            {{else}}
+                From {{format_date start_date_time}} at {{format_time start_date_time}}
+                to {{format_date end_date_time}} at {{format_time end_date_time}}
+            {{/if}}
+        {{/with}}
+    </span>
+
+
+    {{#if (eq meeting.type "mentors")}}
+    {{else}}
+    {{/if}}
+{{else}}
+    {{!
+    If the viewer is a faculty advisor or is a coordinator during the most recent semester, show them the draft.
+    Otherwise display the meeting title and a "coming soon" message.
+    }}
+    <h1 class="font-italic">{{> meetings/title meeting}}</h1>
+    {{#if (or (eq viewer.role "faculty_advisor") (eq current_semester.semester_id (lookup (lookup viewer.coordinating 0) "semester_id")) )}}
+
+    {{else}}
+        This meeting is a draft, and is not visible to anyone except current coordinators and faculty advisors. If you
+        think this is in error, please contact a coordinator.
+    {{/if}}
+{{/if}}
