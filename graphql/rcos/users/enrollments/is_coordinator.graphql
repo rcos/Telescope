@@ -1,0 +1,10 @@
+# Is this user a coordinator in any of the given semesters?
+query IsCoordinator($username: String!, $semester_ids: [String!]!) {
+    enrollments(where: {
+        username: {_eq: $username},
+        semester_id: {_in: $semester_ids}
+    }) {
+        semester_id
+        is_coordinator
+    }
+}

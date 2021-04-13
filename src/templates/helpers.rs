@@ -2,7 +2,7 @@
 
 use handlebars::{Handlebars, Helper, Context, RenderContext, Output, HelperResult, HelperDef, RenderError};
 use crate::web::profile_for;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc, Local};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Local};
 use crate::web::api::rcos::meetings::MeetingType;
 use url::Url;
 
