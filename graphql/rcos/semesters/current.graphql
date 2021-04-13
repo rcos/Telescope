@@ -1,0 +1,11 @@
+query CurrentSemesters($now: date!) {
+    # Get all semesters containing the current date, as supplied in the
+    # query parameters.
+    semesters(where: {
+        start_date: {_lte: $now},
+        end_date: {_gte: $now}}
+    ) {
+        semester_id
+        title
+    }
+}

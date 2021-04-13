@@ -12,6 +12,7 @@ pub mod landing_page_stats;
 pub mod users;
 pub mod meetings;
 pub mod prelude;
+pub mod semesters;
 
 
 /// The name of this API in error messages.

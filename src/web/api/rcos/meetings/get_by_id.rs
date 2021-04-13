@@ -52,8 +52,8 @@ impl From<ResponseData> for ConvertedResponseData {
 
 impl Meeting {
     /// Get the meetings between two times, optionally filter to public meetings only.
-    pub async fn get_by_id(meeting_id: i64, viewer_username: Option<String>) -> Result<ConvertedResponseData, TelescopeError> {
-        Ok(send_query::<Self>(Variables { id: meeting_id, viewer: viewer_username })
+    pub async fn get_by_id(meeting_id: i64) -> Result<ConvertedResponseData, TelescopeError> {
+        Ok(send_query::<Self>(Variables { id: meeting_id })
             // Wait for API response
             .await?
             // Convert response data

@@ -1,6 +1,6 @@
 # Get some info about a meeting and the viewer based on the meeting ID and
 # the viewer's username.
-query Meeting($id: Int!, $viewer: String) {
+query Meeting($id: Int!) {
     # Current semester info
     current_semester: semesters(order_by: {start_date: desc_nulls_last}, limit: 1) {
         semester_id

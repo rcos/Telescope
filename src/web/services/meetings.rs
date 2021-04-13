@@ -81,11 +81,9 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 
     // Is there an RCOS user authenticated?
     let is_authenticated: bool = identity.get_rcos_username().await?.is_some();
-    // The visibility of private events is true if there's an authenticated user.
-    let public_only: bool = !is_authenticated;
 
     // Query the RCOS API to get meeting data.
-    let events: Vec<MeetingsMeetings> = Meetings::get(start, end, public_only).await?;
+    let events: Vec<MeetingsMeetings> = Meetings::get(start, end, false).await?;
 
     // Get the values to pre-fill in the filters.
     let query = params
@@ -109,7 +107,7 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
     // Get the viewer's username.
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
     // Get the meeting from the RCOS API.
-    let api_data: ConvertedResponseData = Meeting::get_by_id(meeting_id, viewer_username).await?;
+    let api_data: ConvertedResponseData = Meeting::get_by_id(meeting_id).await?;
     // Check to make sure the meeting exists.
     if api_data.meeting.is_none() {
         return Err(TelescopeError::resource_not_found(
