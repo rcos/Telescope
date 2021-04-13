@@ -11,11 +11,11 @@ pub enum MeetingType {
     LargeGroup,
     #[display(fmt = "Small Group")]
     SmallGroup,
-    #[display(fmt = "Presentations")]
+    #[display(fmt = "Presentation")]
     Presentations,
     #[display(fmt = "Bonus Session")]
     BonusSession,
-    #[display(fmt = "Grading")]
+    #[display(fmt = "Grading Meeting")]
     Grading,
     #[display(fmt = "Mentor Meeting")]
     Mentors,

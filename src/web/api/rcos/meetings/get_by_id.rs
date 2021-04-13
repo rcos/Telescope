@@ -15,48 +15,30 @@ pub struct Meeting;
 
 use self::meeting::{
     Variables,
-    ResponseData,
     MeetingMeeting,
-    MeetingViewer,
-    MeetingCurrentSemester
 };
 
-/// Converted response data from the RCOS API.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ConvertedResponseData {
-    /// The meeting object (if it exists).
-    pub meeting: Option<MeetingMeeting>,
-    /// The user viewing meeting page.
-    pub viewer: Option<MeetingViewer>,
-    /// The current semester as reported by the RCOS API.
-    pub current_semester: Option<MeetingCurrentSemester>,
-}
-
-impl From<ResponseData> for ConvertedResponseData {
-    fn from(rdata: ResponseData) -> Self {
-        // Destructure response data.
-        let ResponseData {
-            mut current_semester,
-            mut viewer,
-            meeting,
-        } = rdata;
-
-        // Convert the fields from single-item lists to options.
-        ConvertedResponseData {
-            meeting,
-            viewer: viewer.pop(),
-            current_semester: current_semester.pop(),
-        }
-    }
-}
-
 impl Meeting {
-    /// Get the meetings between two times, optionally filter to public meetings only.
-    pub async fn get_by_id(meeting_id: i64) -> Result<ConvertedResponseData, TelescopeError> {
+    /// Get a meeting by its ID.
+    pub async fn get_by_id(meeting_id: i64) -> Result<Option<MeetingMeeting>, TelescopeError> {
         Ok(send_query::<Self>(Variables { id: meeting_id })
             // Wait for API response
             .await?
-            // Convert response data
-            .into())
+            // Extract the meeting object.
+            .meeting)
+    }
+}
+
+impl MeetingMeeting {
+    /// Get the title of this meeting. This is the user-defined title if there is one, otherwise
+    /// a title is constructed from the start date and meeting type.
+    pub fn title(&self) -> String {
+        // Check for a user-defined title.
+        if self.title.is_some() {
+            return self.title.clone().unwrap();
+        }
+
+        // Otherwise create a title.
+        format!("RCOS {} - {}", self.type_, self.start_date_time.format("%B %_d, %Y"))
     }
 }

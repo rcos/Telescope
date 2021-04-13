@@ -2,7 +2,6 @@
 
 use crate::templates::Template;
 use crate::web::api::rcos::users::profile::profile::ProfileTarget;
-use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 /// The path from the template directory to the profile template.

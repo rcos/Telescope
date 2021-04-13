@@ -18,7 +18,6 @@ use crate::web::api::rcos::meetings::{
     get_by_id::{
         Meeting,
         meeting::MeetingMeeting,
-        ConvertedResponseData
     }
 };
 
@@ -106,34 +105,26 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identity) -> Result<Template, TelescopeError> {
     // Get the viewer's username.
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
-    // Get the meeting from the RCOS API.
-    let api_data: ConvertedResponseData = Meeting::get_by_id(meeting_id).await?;
+    // Get the meeting data from the RCOS API.
+    let meeting: Option<MeetingMeeting> = Meeting::get_by_id(meeting_id).await?;
     // Check to make sure the meeting exists.
-    if api_data.meeting.is_none() {
+    if meeting.is_none() {
         return Err(TelescopeError::resource_not_found(
             "Meeting Not Found",
             "Could not find a meeting for this ID."
         ));
     }
 
-    // The meeting is some, destructure the response data into fields.
-    let ConvertedResponseData { meeting, viewer, current_semester } = api_data;
     // Unwrap the meeting object.
     let meeting: MeetingMeeting = meeting.unwrap();
-
-    // Get the title for the meeting page by rendering just the title template.
-    let title: String = meetings::title::of(
-        &meeting.title,
-        meeting.type_,
-        meeting.start_date_time
-    ).render()?;
-
-    // Make and return the template.
-    return meetings::meeting_page::make(&meeting, &viewer, &current_semester)
-        // Rendered inside a page
-        .render_into_page(&req, title)
-        // Wait for page to render and return result.
-        .await;
+    unimplemented!()
+    //
+    // // Make and return the template.
+    // return meetings::meeting_page::make(&meeting, &viewer, &current_semester)
+    //     // Rendered inside a page
+    //     .render_into_page(&req, title)
+    //     // Wait for page to render and return result.
+    //     .await;
 }
 
 /// Endpoint to edit a meeting.

@@ -1,32 +1,6 @@
 # Get some info about a meeting and the viewer based on the meeting ID and
 # the viewer's username.
 query Meeting($id: Int!) {
-    # Current semester info
-    current_semester: semesters(order_by: {start_date: desc_nulls_last}, limit: 1) {
-        semester_id
-    }
-
-    # Viewer info
-    viewer: users(where: {username: {_eq: $viewer}}, limit: 1) {
-        username
-        role
-
-        # What is the most recent semester (if there is one) that this user
-        # was a coordinator
-        coordinating: enrollments(
-            where: {is_coordinator: {_eq: true}},
-            order_by: {semester: {start_date: desc_nulls_last}},
-            limit: 1
-        ) { semester_id }
-
-        # What semester is the most recent semester (if there is one) that this
-        # user was a mentor
-        mentoring: small_group_mentors(
-            order_by: {small_group: {semester: {start_date: desc_nulls_last}}},
-            limit: 1
-        ) { small_group { semester_id } }
-    }
-
     meeting: meetings_by_pk(meeting_id: $id) {
         meeting_id
         start_date_time
