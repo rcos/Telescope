@@ -20,9 +20,9 @@ use self::meetings::{
 };
 
 impl Meetings {
-    /// Get the meetings between two times, optionally filter to public meetings only.
-    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, public_only: bool) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
-        Ok(send_query::<Self>(Variables { start, end, public_only })
+    /// Get the meetings between two times, optionally filter to finalized meetings only.
+    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, include_drafts: bool) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
+        Ok(send_query::<Self>(Variables { start, end, include_drafts })
             .await?
             .meetings)
     }

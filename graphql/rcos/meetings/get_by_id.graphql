@@ -34,7 +34,7 @@ query Meeting($id: Int!, $viewer: String) {
         title
         type
 
-        is_public
+        is_draft
         is_remote
         meeting_url
         recording_url
