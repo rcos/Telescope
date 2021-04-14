@@ -1,0 +1,13 @@
+# Get the mentors for any semester currently occuring
+query CurrentMentors($now: date!) {
+    current_semesters: semesters(where: {
+        start_date: {_lte: $now},
+        end_date: {_gte: $now}
+    }) {
+        small_groups {
+            small_group_mentors {
+                username
+            }
+        }
+    }
+}
