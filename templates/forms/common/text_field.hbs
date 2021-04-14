@@ -1,4 +1,4 @@
-<div class="form-group row">
+<div class="form-group form-row">
     <label for="{{id}}" class="col-md-2 col-form-label">
         {{label}}
     </label>
@@ -30,16 +30,6 @@
 
             {{#if required}} required {{/if}}
         >
-        {{#if error}}
-            <div id="{{id}}-invalid" class="invalid-feedback">
-                {{error}}
-            </div>
-        {{else}}
-            {{#if success}}
-                <div id="{{id}}-valid" class="valid-feedback">
-                    {{success}}
-                </div>
-            {{/if}}
-        {{/if}}
+        {{> forms/common/feedback_tooltips this}}
     </div>
 </div>

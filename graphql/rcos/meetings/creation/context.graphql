@@ -1,0 +1,8 @@
+query MeetingCreationContext($now: date!) {
+    # Semesters in which a meeting can be created. This will be
+    # all current and duture semesters in ascending order.
+    available_semesters: semesters(where: {end_date: {_gte: $now}}, order_by: {start_date: asc}) {
+        semester_id
+        title
+    }
+}
