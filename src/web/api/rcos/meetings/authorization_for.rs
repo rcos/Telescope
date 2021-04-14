@@ -98,6 +98,12 @@ impl UserMeetingAuthorization {
         self.can_view_drafts()
     }
 
+    /// Can the user associated with this authorization create meetings?
+    /// This is currently just coordinators and faculty advisors.
+    pub fn can_create_meetings(&self) -> bool {
+        self.can_view_drafts()
+    }
+
     /// Get a list of the types of meetings viewable under this authorization.
     pub fn viewable_types(&self) -> Vec<MeetingType> {
         // Start with a vector of sufficient capacity to hold a full access list.
