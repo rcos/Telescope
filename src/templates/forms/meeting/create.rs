@@ -49,16 +49,16 @@ fn title_field() -> TextField {
 }
 
 /// Create a date/time field with a given name.
-fn chrono_field<T: FromStr + Display>(name: &'static str) -> TextField {
+fn chrono_field<T: Display + 'static, E: 'static>(name: &'static str, parse: fn(&str) -> Result<T, E>) -> TextField {
     // Convert the name.
     TextField::new(name.to_string(), move |input: Option<&String>| {
         // Create a result version of this field to modify.
-        let mut result: TextField = chrono_field::<T>(name);
+        let mut result: TextField = chrono_field::<T, E>(name, parse);
 
         // This field is required, so return an error on no input.
         if let Some(value) = input.map(|input| input.trim()) {
             // There is a value, lets try to parse it.
-            match value.parse::<T>() {
+            match parse(value) {
                 Ok(parsed) => {
                     result.value = Some(parsed.to_string());
                     result.is_valid = Some(true);
@@ -79,6 +79,15 @@ fn chrono_field<T: FromStr + Display>(name: &'static str) -> TextField {
     })
 }
 
+/// Create a date field with a given name.
+fn date_field(name: &'static str) -> TextField {
+    chrono_field::<NaiveDate, _>(name, |input: &str| { input.parse::<NaiveDate>() })
+}
+
+/// Create a time field with a given name.
+fn time_field(name: &'static str) -> TextField {
+    chrono_field::<NaiveTime, _>(name, |input: &str| { NaiveTime::parse_from_str(input, "%H:%M") })
+}
 
 /// Create a meeting creation form object.
 pub fn make() -> Form {
@@ -87,10 +96,10 @@ pub fn make() -> Form {
     // Add the title field
     f.add_text_field(title_field());
     // Add the date and time fields
-    f.add_text_field(chrono_field::<NaiveDate>(START_DATE));
-    f.add_text_field(chrono_field::<NaiveTime>(START_TIME));
-    f.add_text_field(chrono_field::<NaiveDate>(END_DATE));
-    f.add_text_field(chrono_field::<NaiveTime>(END_TIME));
+    f.add_text_field(date_field(START_DATE));
+    f.add_text_field(time_field(START_TIME));
+    f.add_text_field(date_field(END_DATE));
+    f.add_text_field(time_field(END_TIME));
     // Return the form.
     return f;
 }
