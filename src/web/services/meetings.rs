@@ -2,7 +2,10 @@
 
 use crate::templates::{
     Template,
-    forms::Form,
+    forms::{
+        Form,
+        meeting::create as creation_form
+    },
     meetings
 };
 use crate::error::TelescopeError;
@@ -10,13 +13,18 @@ use actix_web::web::{ServiceConfig, Query, Path};
 use actix_web::{HttpRequest, HttpResponse};
 use chrono::{DateTime, Utc, TimeZone, Local, Duration, NaiveDate, Date};
 use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
-use crate::web::api::rcos::meetings::{get::{
-    Meetings,
-    meetings::MeetingsMeetings
-}, get_by_id::{
-    Meeting,
-    meeting::MeetingMeeting,
-}, authorization_for::AuthorizationFor, MeetingType};
+use crate::web::api::rcos::meetings::{
+    get::{
+        Meetings,
+        meetings::MeetingsMeetings
+    },
+    get_by_id::{
+        Meeting,
+        meeting::MeetingMeeting,
+    },
+    authorization_for::AuthorizationFor,
+    MeetingType
+};
 use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 
 /// Register calendar related services.
@@ -174,7 +182,20 @@ async fn submit_meeting_edit(Path(meeting_id): Path<i64>) -> Result<HttpResponse
 /// Endpoint to create a meeting.
 #[get("/meeting/create")]
 async fn create_meeting(auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
-    Err(TelescopeError::NotImplemented)
+    // Check that the authenticated user has perms to create meetings.
+    let username: String = auth.get_rcos_username_or_error().await?;
+    let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(username)).await?;
+    if !auth.can_create_meetings() {
+        return Err(TelescopeError::BadRequest {
+            header: "Access Denied".into(),
+            message: "The authenticated user does not have permission to create meetings. If you \
+            think this is in error, please contact a coordinator.".into(),
+            show_status_code: false
+        });
+    }
+
+    // Otherwise return the meeting creation form.
+    return Ok(creation_form::make());
 }
 
 /// Endpoint to submit a meeting creation.

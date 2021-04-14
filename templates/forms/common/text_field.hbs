@@ -7,12 +7,15 @@
             id="{{id}}"
             type="{{type}}"
             name="{{name}}"
+
             {{#if value}}
                 value="{{value}}"
             {{/if}}
+
             {{#if placeholder}}
                 placeholder="{{placeholder}}"
             {{/if}}
+
             {{#if error}}
                 class="form-control is-invalid"
                 aria-labelledby="{{id}}-invalid"
@@ -24,7 +27,9 @@
                     class="form-control"
                 {{/if}}
             {{/if}}
-                required>
+
+            {{#if required}} required {{/if}}
+        >
         {{#if error}}
             <div id="{{id}}-invalid" class="invalid-feedback">
                 {{error}}

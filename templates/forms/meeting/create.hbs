@@ -1,0 +1,21 @@
+<div class="card text-dark">
+    <h1 class="card-header"> Create Meeting </h1>
+    <div class="card-body">
+        <form method="post">
+            {{! Form fields }}
+            {{#with form_fields}}
+                {{#with title.text_field}}
+                    {{> forms/common/text_field name=name value=value error=error success=success
+                            id="title" label="Meeting Title" type="text"}}
+                {{/with}}
+
+                {{#with
+
+            {{/with}}
+            {{! Submit button }}
+            <div class="float-right">
+                {{> forms/common/submit_button submit_button}}
+            </div>
+        </form>
+    </div>
+</div>

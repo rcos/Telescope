@@ -18,6 +18,7 @@ use std::collections::HashMap;
 
 pub mod common;
 pub mod register;
+pub mod meeting;
 
 /// A field in a form.
 #[derive(Serialize, Deserialize)]
@@ -73,9 +74,9 @@ pub struct Form {
 
 impl Form {
     /// Create a new empty form.
-    pub fn new(path: impl Into<String>, page_title: impl Into<String>) -> Self {
+    pub fn new(template_path: impl Into<String>, page_title: impl Into<String>) -> Self {
         Self {
-            template_path: path.into(),
+            template_path: template_path.into(),
             page_title: page_title.into(),
             form_fields: HashMap::new(),
             submit_button: SubmitButton {
