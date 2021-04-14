@@ -24,6 +24,7 @@ pub fn register(config: &mut ServiceConfig) {
     config
         .service(meetings_list)
         .service(edit_meeting)
+        .service(delete_meeting)
         .service(submit_meeting_edit)
         .service(create_meeting)
         .service(submit_new_meeting)
@@ -108,6 +109,8 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identity) -> Result<Template, TelescopeError> {
     // Get the viewer's username.
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
+    // Get the viewer's authorization info.
+    let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer_username).await?;
     // Get the meeting data from the RCOS API.
     let meeting: Option<MeetingMeeting> = Meeting::get_by_id(meeting_id).await?;
     // Check to make sure the meeting exists.
@@ -120,14 +123,34 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
 
     // Unwrap the meeting object.
     let meeting: MeetingMeeting = meeting.unwrap();
-    Err(TelescopeError::NotImplemented)
-    //
-    // // Make and return the template.
-    // return meetings::meeting_page::make(&meeting, &viewer, &current_semester)
-    //     // Rendered inside a page
-    //     .render_into_page(&req, title)
-    //     // Wait for page to render and return result.
-    //     .await;
+    // Make sure that the meeting is visible to the user.
+    // First check for draft status.
+    if meeting.is_draft && !authorization.can_view_drafts() {
+        return Err(TelescopeError::BadRequest {
+            header: "Meeting Not Visible".into(),
+            message: "This meeting is currently marked as a draft and is only visible to \
+            coordinators and faculty advisors. If you believe this is in error, please \
+            contact a coordinator.".into(),
+            show_status_code: false
+        });
+    }
+
+    // Then check the meeting variant.
+    if !authorization.can_view(meeting.type_) {
+        return Err(TelescopeError::BadRequest {
+            header: "Meeting Access Restricted".into(),
+            message: "Access to this meeting is restricted to mentors or coordinators. If you \
+            think this is in error, please contact a coordinator.".into(),
+            show_status_code: false
+        });
+    }
+
+    // If the meeting is visible to the viewer, make and return the template.
+    return meetings::meeting_page::make(&meeting, &authorization)
+        // Rendered inside a page
+        .render_into_page(&req, meeting.title())
+        // Wait for page to render and return result.
+        .await;
 }
 
 /// Endpoint to edit a meeting.
@@ -136,16 +159,25 @@ async fn edit_meeting(Path(meeting_id): Path<i64>, auth: AuthenticationCookie) -
     Err(TelescopeError::NotImplemented)
 }
 
+/// Endpoint to delete a meeting.
+#[get("/meeting/{meeting_id}/delete")]
+async fn delete_meeting(Path(meeting_id): Path<i64>, auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
+}
+
+/// Endpoint to submit a meeting edit.
 #[post("/meeting/{meeting_id}/edit")]
 async fn submit_meeting_edit(Path(meeting_id): Path<i64>) -> Result<HttpResponse, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 
+/// Endpoint to create a meeting.
 #[get("/meeting/create")]
 async fn create_meeting(auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 
+/// Endpoint to submit a meeting creation.
 #[post("/meeting/create")]
 async fn submit_new_meeting(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
     Err(TelescopeError::NotImplemented)
