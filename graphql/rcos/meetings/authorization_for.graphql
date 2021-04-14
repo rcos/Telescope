@@ -1,5 +1,5 @@
 # GraphQL query to check if a given user can view draft meetings on a given date (which should generally be now).
-query UserCanViewDrafts($now: date!, $username: String!) {
+query AuthorizationFor($now: date!, $username: String!) {
     # Coordinators can view drafts
     current_semesters: semesters(where: {
         start_date: {_lte: $now},
@@ -8,6 +8,11 @@ query UserCanViewDrafts($now: date!, $username: String!) {
         # Check if the user is a coordinator.
         enrollments(where: {username: {_eq: $username}}, limit: 1) {
             is_coordinator
+        }
+
+        # Check if the user is a mentor
+        small_groups(where: {small_group_mentors: {username: {_eq: $username}}}) {
+            small_group_id
         }
     }
 

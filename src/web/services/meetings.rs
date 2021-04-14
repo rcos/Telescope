@@ -19,7 +19,7 @@ use crate::web::api::rcos::meetings::{
         Meeting,
         meeting::MeetingMeeting,
     },
-    can_view_drafts::UserCanViewDrafts
+    authorization_for::AuthorizationFor
 };
 
 /// Register calendar related services.
@@ -81,13 +81,11 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 
     // Is there an RCOS user authenticated?
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
-    // Check if that user can view drafts.
-    let include_drafts: bool = UserCanViewDrafts::check(viewer_username).await?;
-
-    // TODO: access rules around meeting type vs user role. 
+    // // Check if that user can view drafts.
+    // let include_drafts: bool = AuthorizationFor::check(viewer_username).await?;
 
     // Query the RCOS API to get meeting data.
-    let events: Vec<MeetingsMeetings> = Meetings::get(start, end, include_drafts).await?;
+    let events: Vec<MeetingsMeetings> = Meetings::get(start, end, false).await?;
 
     // Get the values to pre-fill in the filters.
     let query = params

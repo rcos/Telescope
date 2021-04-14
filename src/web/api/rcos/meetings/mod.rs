@@ -2,7 +2,7 @@
 
 pub mod get;
 pub mod get_by_id;
-pub mod can_view_drafts;
+pub mod authorization_for;
 
 /// The type of a meeting.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Display)]
