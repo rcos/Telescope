@@ -4,6 +4,13 @@ pub mod get;
 pub mod get_by_id;
 pub mod authorization_for;
 
+/// List of all existing meeting type variants.
+pub const ALL_MEETING_TYPES: [MeetingType; 8] = [
+    MeetingType::LargeGroup, MeetingType::SmallGroup, MeetingType::Presentations,
+    MeetingType::BonusSession, MeetingType::Grading, MeetingType::Mentors,
+    MeetingType::Coordinators, MeetingType::Other
+];
+
 /// The type of a meeting.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Display)]
 #[serde(rename_all = "snake_case")]

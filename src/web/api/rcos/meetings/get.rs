@@ -1,5 +1,6 @@
 //! List meetings query.
 
+use crate::web::api::rcos::meetings::MeetingType;
 use crate::web::api::rcos::prelude::*;
 use chrono::{DateTime, Utc};
 use crate::error::TelescopeError;
@@ -21,8 +22,8 @@ use self::meetings::{
 
 impl Meetings {
     /// Get the meetings between two times, optionally filter to finalized meetings only.
-    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, include_drafts: bool) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
-        Ok(send_query::<Self>(Variables { start, end, include_drafts })
+    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, include_drafts: bool, accept_types: Vec<MeetingType>) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
+        Ok(send_query::<Self>(Variables { start, end, include_drafts, accept_types })
             .await?
             .meetings)
     }

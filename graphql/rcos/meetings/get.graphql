@@ -1,11 +1,12 @@
 # Get all the public meetings between two timestamps
-query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolean!) {
+query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolean!, $accept_types: [meeting_type!]!) {
     meetings(
         where: {
             # Use this instead of comparison so that if $include_drafts
             # is true, we still get finalized meetings as well.
             is_draft: {_in: [false, $include_drafts]},
-            start_date_time: {_gte: $start, _lt: $end}
+            start_date_time: {_gte: $start, _lt: $end},
+            type: {_in: $accept_types}
         },
         # Order chronologically
         order_by: {

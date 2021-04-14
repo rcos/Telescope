@@ -5,6 +5,10 @@ use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
 use chrono::Local;
 use crate::web::api::rcos::users::UserRole;
+use crate::web::api::rcos::meetings::{
+    ALL_MEETING_TYPES,
+    MeetingType
+};
 
 /// Type representing GraphQL query to check if a user can view drafts.
 #[derive(GraphQLQuery)]
@@ -17,7 +21,6 @@ pub struct AuthorizationFor;
 use authorization_for::{
     Variables, ResponseData
 };
-use crate::web::api::rcos::meetings::MeetingType;
 
 /// Info on the user that dictates their ability to access meeting data.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -93,6 +96,19 @@ impl UserMeetingAuthorization {
     /// This is currently just coordinators and faculty advisors.
     pub fn can_delete_meetings(&self) -> bool {
         self.can_view_drafts()
+    }
+
+    /// Get a list of the types of meetings viewable under this authorization.
+    pub fn viewable_types(&self) -> Vec<MeetingType> {
+        // Start with a vector of sufficient capacity to hold a full access list.
+        let mut visible_types: Vec<MeetingType> = Vec::with_capacity(ALL_MEETING_TYPES.len());
+        // Add all the types this user is authorized for.
+        for ty in ALL_MEETING_TYPES.iter() {
+            if self.can_view(*ty) {
+                visible_types.push(*ty);
+            }
+        }
+        return visible_types;
     }
 }
 

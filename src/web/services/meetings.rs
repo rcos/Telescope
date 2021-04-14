@@ -10,17 +10,14 @@ use actix_web::web::{ServiceConfig, Query, Path};
 use actix_web::{HttpRequest, HttpResponse};
 use chrono::{DateTime, Utc, TimeZone, Local, Duration, NaiveDate, Date};
 use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
-use crate::web::api::rcos::meetings::{
-    get::{
-        Meetings,
-        meetings::MeetingsMeetings
-    },
-    get_by_id::{
-        Meeting,
-        meeting::MeetingMeeting,
-    },
-    authorization_for::AuthorizationFor
-};
+use crate::web::api::rcos::meetings::{get::{
+    Meetings,
+    meetings::MeetingsMeetings
+}, get_by_id::{
+    Meeting,
+    meeting::MeetingMeeting,
+}, authorization_for::AuthorizationFor, MeetingType};
+use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
@@ -81,11 +78,14 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 
     // Is there an RCOS user authenticated?
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
-    // // Check if that user can view drafts.
-    // let include_drafts: bool = AuthorizationFor::check(viewer_username).await?;
+    // Check if that user can view drafts / certain meeting types.
+    let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer_username).await?;
+    let include_drafts: bool = authorization.can_view_drafts();
+    let visible_meeting_types: Vec<MeetingType> = authorization.viewable_types();
 
     // Query the RCOS API to get meeting data.
-    let events: Vec<MeetingsMeetings> = Meetings::get(start, end, false).await?;
+    let events: Vec<MeetingsMeetings> =
+        Meetings::get(start, end, include_drafts, visible_meeting_types).await?;
 
     // Get the values to pre-fill in the filters.
     let query = params
@@ -98,7 +98,7 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
         });
 
     // Build a meetings page template, render it into a page for the user.
-    return meetings::list_page::make(events, Some(query))
+    return meetings::list_page::make(events, Some(query), &authorization)
         .render_into_page(&req, "RCOS Meetings")
         .await;
 }
@@ -120,7 +120,7 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
 
     // Unwrap the meeting object.
     let meeting: MeetingMeeting = meeting.unwrap();
-    unimplemented!()
+    Err(TelescopeError::NotImplemented)
     //
     // // Make and return the template.
     // return meetings::meeting_page::make(&meeting, &viewer, &current_semester)
