@@ -35,11 +35,11 @@
 
             {{! Form fields }}
             {{#with form_fields}}
-                {{#with first_name.text_field}}
+                {{#with first_name}}
                     {{> forms/common/text_field name=name value=value error=error success=success
                             placeholder="John" id="fname" label="First Name" type="text" required="true"}}
                 {{/with}}
-                {{#with last_name.text_field}}
+                {{#with last_name}}
                     {{> forms/common/text_field name=name value=value error=error success=success
                             placeholder="Appleseed" id="lname" label="Last Name" type="text" required="true"}}
                 {{/with}}

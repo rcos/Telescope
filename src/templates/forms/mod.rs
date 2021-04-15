@@ -22,7 +22,7 @@ pub mod meeting;
 
 /// A field in a form.
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(untagged)]
 enum FormField {
     /// A text field in a form.
     TextField(TextField),

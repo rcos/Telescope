@@ -3,7 +3,7 @@
     {{! Form fields }}
     {{#with form_fields}}
         {{! Title }}
-        {{#with title.text_field}}
+        {{#with title}}
             {{> forms/common/text_field name=name value=value error=error success=success
                     id="title" label="Meeting Title" type="text"}}
         {{/with}}
@@ -11,7 +11,7 @@
         {{! Start Date & Time }}
         <div class="form-group form-row row-cols-1 row-cols-md-5">
             <div class="col">
-                {{#with start_date.text_field}}
+                {{#with start_date}}
                     <input type="date"
                            name="{{name}}"
 
@@ -36,7 +36,7 @@
             </div>
 
             <div class="col">
-                {{#with start_time.text_field}}
+                {{#with start_time}}
                     <input
                             type="time"
                             aria-label="Start Time"
@@ -68,7 +68,7 @@
             </span>
 
             <div class="col">
-                {{#with end_date.text_field}}
+                {{#with end_date}}
                     <input
                             type="date"
                             name="{{name}}"
@@ -92,7 +92,7 @@
             </div>
 
             <div class="col">
-                {{#with end_time.text_field}}
+                {{#with end_time}}
                     <input
                             type="time"
                             id="start-time"
