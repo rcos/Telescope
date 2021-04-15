@@ -74,7 +74,7 @@ pub fn login() -> Template {
             // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord"),
         ),
-        item(RpiCas::login_path(), "btn-rpi", "Login Using RPI CAS", None),
+        item(RpiCas::login_path(), "btn-rpi", "Login using RPI CAS", None),
     ];
 
     // Create and return template.
@@ -102,7 +102,7 @@ pub fn register() -> Template {
         item(
             RpiCas::register_path(),
             "btn-rpi",
-            "Register Using RPI CAS",
+            "Register using RPI CAS",
             None,
         ),
     ];
