@@ -19,6 +19,12 @@
             {{/each}}
         </ul>
         <ul class="navbar-nav">
+            {{! Handbook link should be available to all users }}
+            <li class="nav-item">
+                <a href="https://handbook.rcos.io" class="btn btn-outline-info mr-2 mb-2">
+                    Handbook <i data-feather="external-link"></i>
+                </a>
+            </li>
             {{#each right_items}}
                 {{> navbar/item this}}
             {{/each}}
