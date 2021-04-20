@@ -15,6 +15,8 @@ use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use futures::future::{ready, Ready};
 use regex::Regex;
+use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
+use crate::web::api::rcos::users::accounts::link::LinkUserAccount;
 
 /// The URL of the RPI CAS server.
 const RPI_CAS_ENDPOINT: &'static str = "https://cas-auth.rpi.edu/cas";
@@ -277,7 +279,47 @@ impl IdentityProvider for RpiCas {
                 .await
                 .ok_or(TelescopeError::NotAuthenticated)?;
 
-            Err(TelescopeError::NotImplemented)
+            // Get the RCOS username of the authenticated user.
+            let rcos_username: String = authenticated.get_rcos_username_or_error().await?;
+
+            // Get the RCS ID of the authenticated user (if one exists).
+            let existing_rcs_id: Option<String> =
+                AccountLookup::send(rcos_username.clone(), Self::USER_ACCOUNT_TY).await?;
+
+            // Get the RCS ID from the authenticated RPI CAS response.
+            let new_rcs_id: String = cas_authenticated(&req, Self::link_redirect_path())
+                .await?;
+
+            // We add the new RCS ID to the database for any user who doesn't have one.
+            let add_new_to_db: bool = existing_rcs_id.is_none();
+            // Also check if the new one matches the existing one.
+            let new_matches_existing: bool = existing_rcs_id
+                .as_ref()
+                .map(|existing| existing.as_str() == new_rcs_id.as_str())
+                .unwrap_or(true);
+
+            // Add to database if needed.
+            if add_new_to_db {
+                // Link the account.
+                LinkUserAccount::send(rcos_username.clone(), Self::USER_ACCOUNT_TY, new_rcs_id.clone()).await?;
+            }
+
+            // Throw an error if the new RCS ID doesn't match the linked one.
+            if !new_matches_existing {
+                return Err(TelescopeError::BadRequest {
+                    header: "Different RCS ID already linked".into(),
+                    message: format!("This account is already linked to the RPI CAS system \
+                        as {}@rpi.edu. Please unlink this RCS id before linking a different one. \
+                        If you did not link this account please contact a coordinator.\
+                        ", existing_rcs_id.unwrap()),
+                    show_status_code: false
+                });
+            }
+
+            // We are all set at this point, redirect to the user's account.
+            return Ok(HttpResponse::Found()
+                .header(LOCATION, profile_for(rcos_username.as_str()))
+                .finish());
         });
     }
 }

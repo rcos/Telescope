@@ -185,6 +185,13 @@ pub trait IdentityProvider: 'static {
 
     /// Actix-web handler for the route that redirects to the authentication provider
     /// to link an account.
+    ///
+    /// Linking an account will authenticate with the identity provider and then insert
+    /// the account into the RCOS database via the API. If there is already an account linked,
+    /// then the account's platform ID will be checked against the ID of the linked account.
+    /// If it matches then the auth cookie is modified, and we return a successful response.
+    /// If it does not match, we forget the new account and tell the user to unlink their
+    /// existing account on this platform first.
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut;
 
     /// Actix-web handler for the route that unlinks an identity service.
