@@ -74,7 +74,9 @@ fn main() -> std::io::Result<()> {
             // register Services
             .configure(web::services::register)
             // static files service
-            .service(afs::Files::new("/static", "static"))
+            .service(afs::Files::new("/static", "static")
+                .prefer_utf8(true)
+                .show_files_listing())
             .route("/sponsors", get().to(SponsorsPage::page))
             .default_service(aweb::to(web::services::not_found::not_found))
     })
