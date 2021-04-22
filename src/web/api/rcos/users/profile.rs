@@ -17,7 +17,6 @@ pub struct Profile;
 // import generated types.
 use profile::{
     ResponseData,
-    //ProfileUsersByPk
     Variables,
 };
 

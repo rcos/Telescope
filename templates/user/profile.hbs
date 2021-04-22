@@ -2,35 +2,41 @@
 <span class="text-muted">
     Account created {{format_date target.created_at}} {{format_time target.created_at}}
 </span>
-<div class="row row-cols-1 row-cols-lg-4 mt-2">
-    {{! If the user has coordinating or mentoring history }}
-    {{!--{{# if (or coordinating mentoring)}}
-        <div class="col">
-            {{! The user's coording history }}
-            {{#if coordinating}}
-                <div class="card text-dark mb-2">
-                    <h3 class="card-header">Coordinating</h3>
-                    <div class="card-body">
-                        {{#each coordinating}}
-                            {{semester.title}} <br>
-                        {{/each}}
-                    </div>
-                </div>
-            {{/if}}
+{{! Account info -- RPI email, etc (Only visible to authenticated users)}}
+{{#if viewer_username}}
+    <h3 class="mt-2">User Info</h3>
 
-            {{! The user's mentoring history}}
-            {{#if mentoring}}
-                <div class="card text-dark">
-                    <h3 class="card-header">Mentoring</h3>
-                    <div class="card-body">
-                        {{#each mentoring}}
-                            {{#with small_group}}
-                                {{semester.title}}: Small group {{small_group_id}} <br>
-                            {{/with}}
-                        {{/each}}
-                    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mt-2">
+        <div class="col">
+            <div class="card text-dark text-center">
+                <h5 class="card-header">RPI E-Mail</h5>
+                <div class="card-body p-1">
+                    {{! If the user has an email associated }}
+                    {{#if (lookup target.rcs_id 0)}}
+                        {{! Link the email }}
+                        {{#with (lookup target.rcs_id 0)}}
+                            <a href="mailto:{{account_id}}@rpi.edu">
+                                {{account_id}}@rpi.edu
+                            </a>
+                        {{/with}}
+
+                        {{! If the target is the viewer link to the unlink handler }}
+                        {{#if (eq viewer_username target.username)}}
+                            <a href="/unlink/rpi_cas" class="btn btn-danger w-100 mt-1">
+                                Unlink this e-mail
+                            </a>
+                        {{/if}}
+                    {{else}}
+                        {{! Show a message indicating not linked and let the user link if it's their account. }}
+                        RPI e-mail not linked.
+                        {{#if (eq viewer_username target.username)}}
+                            <a href="/link/rpi_cas" class="btn btn-primary w-100">
+                                Link with RPI CAS.
+                            </a>
+                        {{/if}}
+                    {{/if}}
                 </div>
-            {{/if}}
+            </div>
         </div>
-    {{/if}}  --}}
-</div>
+    </div>
+{{/if}}

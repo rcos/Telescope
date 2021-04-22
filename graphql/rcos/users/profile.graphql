@@ -18,6 +18,11 @@ query Profile($username: String!) {
             account_id
         }
 
+        # The user's RCS ID if they have linkled RPI CAS.
+        rcs_id: user_accounts(where: {type: {_eq: "rpi"}}, limit: 1) {
+            account_id
+        }
+
         # What semesters was this user a coordiator for
         coordinating: enrollments(
             where: {is_coordinator: {_eq: true}},
