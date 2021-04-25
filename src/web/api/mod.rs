@@ -5,6 +5,7 @@ use graphql_client::{GraphQLQuery, Response};
 
 pub mod github;
 pub mod rcos;
+pub mod discord;
 
 /// Handle a response from a GraphQL API. Convert any errors as necessary and
 /// extract the returned data if possible.

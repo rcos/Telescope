@@ -52,7 +52,7 @@ pub struct GithubOauthConfig {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DiscordConfig {
-    /// The Discord OAuth2 application client id.
+    /// The Discord application client id.
     pub client_id: ClientId,
     /// The Discord OAuth2 application client secret.
     pub client_secret: ClientSecret,

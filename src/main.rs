@@ -11,6 +11,9 @@ extern crate lazy_static;
 extern crate serde;
 
 #[macro_use]
+extern crate serde_json;
+
+#[macro_use]
 extern crate derive_more;
 
 #[macro_use]
@@ -44,6 +47,8 @@ fn main() -> std::io::Result<()> {
 
     // Create the actix runtime.
     let sys = System::new("telescope");
+    // Start the actix runtime.
+    sys.start()?;
 
     // Start global CSRF token janitor.
     CsrfJanitor.start();

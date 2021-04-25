@@ -14,7 +14,7 @@ dotenv = "~0.15"
 toml = "~0.5"
 
 # actix actor framework -- system for running server and other tasks.
-actix = "~0.10"
+actix = "0.11.1"
 # actix web server
 actix-web = {version = "~3.3", features = ["rustls"]}
 # static file serving
@@ -80,11 +80,9 @@ graphql_client = "0.9.0"
 
 
 # Discord API and integration
-# sodiumoxide for signature verification
-sodiumoxide = "0.2.6"
 # Serenity for sharding and models
 [dependencies.serenity]
-version = "~0.10"
+version = "0.10.5"
 features = [
     "builder", "cache", "client", "gateway", "http", "model",
     "unstable_discord_api", "utils", "rustls_backend"
