@@ -26,12 +26,15 @@ use actix_web::cookie::SameSite;
 use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
 use rand::rngs::OsRng;
 use rand::Rng;
-
 use crate::{
     templates::static_pages::{sponsors::SponsorsPage, StaticPage},
-    web::csrf::CsrfJanitor,
+    web::{
+        csrf::CsrfJanitor,
+        api::discord,
+    },
 };
 use chrono::Offset;
+
 
 mod app_data;
 mod env;
@@ -46,9 +49,7 @@ fn main() -> std::io::Result<()> {
     info!("Server timezone: {}", chrono::Local::now().offset().fix());
 
     // Create the actix runtime.
-    let sys = System::new("telescope");
-    // Start the actix runtime.
-    sys.start()?;
+    let sys: SystemRunner = System::new();
 
     // Start global CSRF token janitor.
     CsrfJanitor.start();

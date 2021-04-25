@@ -32,7 +32,7 @@ async fn init_serenity() -> Client {
         .expect("Could not start serenity client.");
 
     let command = Interaction::create_global_application_command(
-        discord_client,
+        &discord_client.cache_and_http.http,
         application_id,
         |i| {
             // Create the argument object to this interaction
@@ -50,13 +50,34 @@ async fn init_serenity() -> Client {
 
     }).await.expect("Could not create application command.");
 
-
+    return discord_client;
 }
 
 /// Zero-sized type representing an actix actor to talk to discord.
-pub struct DiscordActor;
+#[derive(Default)]
+pub struct DiscordActor {
+    /// The internal serenity client used to communicate with discord.
+    serenity_client: Option<Client>
+}
 
 impl Actor for DiscordActor {
     type Context = Context<Self>;
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        // Initialize serenity client on start.
+
+        // Make the client initialization future.
+        let fut = async {
+            // Start by initializing serenity.
+            let serenity_client: Client = init_serenity().await;
+            // And adding the serenity client to self.
+            self.serenity_client = Some(serenity_client);
+        };
+
+        // Wrap the future into an actix future.
+        let actix_future = actix::fut::wrap_future::<_, Self>(fut);
+
+
+    }
 }
 
