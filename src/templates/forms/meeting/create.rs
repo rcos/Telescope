@@ -2,7 +2,6 @@
 
 use crate::templates::forms::Form;
 use crate::templates::forms::common::text_field::TextField;
-use std::str::FromStr;
 use std::fmt::Display;
 use chrono::{NaiveDate, NaiveTime};
 

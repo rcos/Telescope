@@ -4,10 +4,10 @@ use crate::error::TelescopeError;
 use crate::templates::user::profile as profile_template;
 use crate::templates::Template;
 use crate::web::api::rcos::users::profile::{
-    profile::{ProfileTarget, ProfileTargetCoordinating, ProfileTargetMentoring, ResponseData},
+    profile::{ProfileTarget, ResponseData},
     Profile,
 };
-use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
+use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
 use actix_web::HttpRequest;
 

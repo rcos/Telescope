@@ -19,7 +19,7 @@ impl RawEventHandler for Handler {
                 Event::InteractionCreate(event) => {
                     // Destructure the interaction data from the event data.
                     let InteractionCreateEvent { interaction, ..} = event;
-
+                    
                 },
 
                 // All other events are ignored.

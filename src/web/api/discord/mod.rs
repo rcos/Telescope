@@ -4,7 +4,7 @@ mod event_handler;
 use event_handler::Handler;
 
 use serenity::client::Client;
-use actix::{Actor, ActorContext, Context, AsyncContext, ActorFuture};
+use actix::{Actor, Context, AsyncContext, ActorFuture};
 use crate::env::{global_config, DiscordConfig};
 use serenity::model::interactions::{Interaction, ApplicationCommandOptionType};
 use serenity::builder::CreateInteractionOption;
@@ -17,7 +17,7 @@ struct InitSerenityFuture<F: Future<Output = Client> + std::marker::Unpin + 'sta
     inner: F
 }
 
-impl<F: futures::Future<Output = Client> + std::marker::Unpin> ActorFuture<DiscordActor> for InitSerenityFuture<F>
+impl<F: Future<Output = Client> + std::marker::Unpin> ActorFuture<DiscordActor> for InitSerenityFuture<F>
 {
     type Output = ();
 

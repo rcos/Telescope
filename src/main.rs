@@ -30,7 +30,7 @@ use crate::{
     templates::static_pages::{sponsors::SponsorsPage, StaticPage},
     web::{
         csrf::CsrfJanitor,
-        api::discord,
+        api::discord::DiscordActor,
     },
 };
 use chrono::Offset;
@@ -53,6 +53,9 @@ fn main() -> std::io::Result<()> {
 
     // Start global CSRF token janitor.
     CsrfJanitor.start();
+
+    // Start the Discord Event Handler to interact with discord.
+    DiscordActor::default().start();
 
     // Setup identity middleware.
     // Create secure random sequence to encrypt cookie identities.
