@@ -4,10 +4,40 @@ mod event_handler;
 use event_handler::Handler;
 
 use serenity::client::Client;
-use actix::{Actor, ActorContext, Context};
+use actix::{Actor, ActorContext, Context, AsyncContext, ActorFuture};
 use crate::env::{global_config, DiscordConfig};
 use serenity::model::interactions::{Interaction, ApplicationCommandOptionType};
 use serenity::builder::CreateInteractionOption;
+use std::pin::Pin;
+use std::task::Poll;
+use futures::Future;
+
+/// Zero-sized type to initialize serenity in an actix future.
+struct InitSerenityFuture<F: Future<Output = Client> + std::marker::Unpin + 'static> {
+    inner: F
+}
+
+impl<F: futures::Future<Output = Client> + std::marker::Unpin> ActorFuture<DiscordActor> for InitSerenityFuture<F>
+{
+    type Output = ();
+
+    fn poll(mut self: Pin<&mut Self>, srv: &mut DiscordActor, _: &mut <DiscordActor as Actor>::Context, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        // Get a pin on the mutable pointer to the initialization future.
+        let inner: Pin<&mut F> = Pin::new(&mut self.inner);
+
+        // Poll the inner future.
+        match Future::poll(inner, cx) {
+            // If the inner future is ready, add the client to the actor and return ready.
+            Poll::Ready(serenity_client) => {
+                srv.serenity_client = Some(serenity_client);
+                return Poll::Ready(());
+            },
+
+            // Otherwise, keep waiting on the internal future.
+            Poll::Pending => Poll::Pending
+        }
+    }
+}
 
 /// Make the global serenity client to talk to discord.
 /// Create all necessary interactions.
@@ -67,17 +97,12 @@ impl Actor for DiscordActor {
         // Initialize serenity client on start.
 
         // Make the client initialization future.
-        let fut = async {
-            // Start by initializing serenity.
-            let serenity_client: Client = init_serenity().await;
-            // And adding the serenity client to self.
-            self.serenity_client = Some(serenity_client);
-        };
-
+        let fut = Box::pin(init_serenity());
         // Wrap the future into an actix future.
-        let actix_future = actix::fut::wrap_future::<_, Self>(fut);
+        let actix_future = InitSerenityFuture {inner: fut};
 
-
+        // Execute the future on this actor's context.
+        ctx.wait(actix_future);
     }
 }
 
