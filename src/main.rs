@@ -35,7 +35,6 @@ use crate::{
 };
 use chrono::Offset;
 
-
 mod app_data;
 mod env;
 mod error;
@@ -49,7 +48,7 @@ fn main() -> std::io::Result<()> {
     info!("Server timezone: {}", chrono::Local::now().offset().fix());
 
     // Create the actix runtime.
-    let sys: SystemRunner = System::new();
+    let sys: SystemRunner = System::new("telescope");
 
     // Start global CSRF token janitor.
     CsrfJanitor.start();

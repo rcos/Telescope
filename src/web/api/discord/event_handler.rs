@@ -47,6 +47,7 @@ async fn handle_interaction(ctx: Context, i: Interaction) -> SerenityResult<()> 
 
         // Otherwise destructure the command invocation.
         InteractionType::ApplicationCommand => {
+            dbg!(&i);
             unimplemented!()
         }
 

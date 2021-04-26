@@ -1,8 +1,8 @@
 //! Discord API utilities and serenity tie-ins.
 
 mod event_handler;
-use event_handler::Handler;
 
+use event_handler::Handler;
 use serenity::client::Client;
 use actix::{Actor, Context, AsyncContext, ActorFuture};
 use crate::env::{global_config, DiscordConfig};
@@ -17,9 +17,10 @@ struct InitSerenityFuture<F: Future<Output = Client> + std::marker::Unpin + 'sta
     inner: F
 }
 
-impl<F: Future<Output = Client> + std::marker::Unpin> ActorFuture<DiscordActor> for InitSerenityFuture<F>
+impl<F: Future<Output = Client> + std::marker::Unpin> ActorFuture for InitSerenityFuture<F>
 {
     type Output = ();
+    type Actor = DiscordActor;
 
     fn poll(mut self: Pin<&mut Self>, srv: &mut DiscordActor, _: &mut <DiscordActor as Actor>::Context, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
         // Get a pin on the mutable pointer to the initialization future.
