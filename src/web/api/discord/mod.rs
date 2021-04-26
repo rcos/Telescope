@@ -104,6 +104,7 @@ impl Actor for DiscordActor {
 
         // Execute the future on this actor's context.
         ctx.wait(actix_future);
+
     }
 }
 

@@ -85,6 +85,7 @@ graphql_client = "0.9.0"
 version = "0.10.5"
 features = [
     "builder", "cache", "client", "gateway", "http", "model",
-    "unstable_discord_api", "utils", "rustls_backend"
+    "unstable_discord_api", "utils", "rustls_backend",
+    "default_tokio_0_2"
 ]
 default-features = false
