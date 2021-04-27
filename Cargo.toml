@@ -84,8 +84,23 @@ graphql_client = "0.9.0"
 [dependencies.serenity]
 version = "0.10.5"
 features = [
-    "builder", "cache", "client", "gateway", "http", "model",
-    "unstable_discord_api", "utils", "rustls_backend",
-    "default_tokio_0_2"
+    # Builder stype methods on Discord's API objects
+    "builder",
+    # Response caching -- disable this if RAM is an issue.
+    "cache",
+    # Discord API HTTP Client
+    "client",
+    # Discord WebSocket geteway events and interactions.
+    "gateway",
+    # HTTP client
+    "http",
+    # Discord API Models
+    "model",
+    # Interactions and Commands API
+    "unstable_discord_api",
+    # Utility functionality
+    "utils",
+    # Rustls with tokio 0.2 for compatibility with actix.
+    "rustls_tokio_0_2_backend"
 ]
 default-features = false

@@ -54,11 +54,19 @@ pub struct GithubOauthConfig {
 pub struct DiscordConfig {
     /// The Discord application client id.
     pub client_id: ClientId,
+
     /// The Discord OAuth2 application client secret.
     pub client_secret: ClientSecret,
+
     /// The bot token granted by discord used to authenticate with the discord
     /// bot API.
     pub bot_token: String,
+
+    /// The discord Guild IDs for the bot to add the commands to as needed.
+    /// These commands will match the global versions but will be
+    /// available immediately for testing (since they are guild commands)
+    #[serde(default)]
+    pub debug_guild_ids: Vec<u64>,
 }
 
 /// The config of the server instance.
