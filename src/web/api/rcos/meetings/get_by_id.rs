@@ -1,8 +1,8 @@
 //! GraphQL query to get a meeting by its ID.
 
+use crate::error::TelescopeError;
 use crate::web::api::rcos::prelude::*;
 use crate::web::api::rcos::send_query;
-use crate::error::TelescopeError;
 
 /// Type representing public RCOS meetings.
 #[derive(GraphQLQuery)]
@@ -13,10 +13,7 @@ use crate::error::TelescopeError;
 )]
 pub struct Meeting;
 
-use self::meeting::{
-    Variables,
-    MeetingMeeting,
-};
+use self::meeting::{MeetingMeeting, Variables};
 
 impl Meeting {
     /// Get a meeting by its ID.
@@ -39,6 +36,10 @@ impl MeetingMeeting {
         }
 
         // Otherwise create a title.
-        format!("RCOS {} - {}", self.type_, self.start_date_time.format("%B %_d, %Y"))
+        format!(
+            "RCOS {} - {}",
+            self.type_,
+            self.start_date_time.format("%B %_d, %Y")
+        )
     }
 }

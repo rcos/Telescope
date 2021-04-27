@@ -4,7 +4,6 @@ use std::{collections::HashMap, env, path::PathBuf};
 use std::{fs::File, io::Read, process::exit};
 use structopt::StructOpt;
 
-
 /// Credentials granted by GitHub for the OAuth application.
 /// Generated these by creating an application at
 /// https://github.com/settings/applications/new/.

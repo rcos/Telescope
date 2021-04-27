@@ -24,7 +24,7 @@ pub async fn profile(
     req: HttpRequest,
     identity: Identity,
     // TODO: Switch to using Path here when we switch to user ids.
-    Query(ProfileQuery { username }): Query<ProfileQuery>
+    Query(ProfileQuery { username }): Query<ProfileQuery>,
 ) -> Result<Template, TelescopeError> {
     // Get the user's profile information from the RCOS API.
     let response: ResponseData = Profile::for_user(username.clone()).await?;
@@ -44,6 +44,9 @@ pub async fn profile(
     // Make a profile template
     // Render it inside a page (with the user's name as the title)
     return profile_template::make(&target_user, viewer_username)
-        .render_into_page(&req, format!("{} {}", target_user.first_name, target_user.last_name))
+        .render_into_page(
+            &req,
+            format!("{} {}", target_user.first_name, target_user.last_name),
+        )
         .await;
 }

@@ -1,10 +1,7 @@
 //! Profile query.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::{
-    send_query,
-    prelude::*
-};
+use crate::web::api::rcos::{prelude::*, send_query};
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -15,10 +12,7 @@ use crate::web::api::rcos::{
 pub struct Profile;
 
 // import generated types.
-use profile::{
-    ResponseData,
-    Variables,
-};
+use profile::{ResponseData, Variables};
 
 impl Profile {
     /// Get the profile data for a given username.

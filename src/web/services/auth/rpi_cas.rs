@@ -4,6 +4,8 @@
 
 use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
+use crate::web::api::rcos::users::accounts::link::LinkUserAccount;
+use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::web::api::rcos::users::UserAccountType;
 use crate::web::profile_for;
@@ -15,8 +17,6 @@ use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use futures::future::{ready, Ready};
 use regex::Regex;
-use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
-use crate::web::api::rcos::users::accounts::link::LinkUserAccount;
 
 /// The URL of the RPI CAS server.
 const RPI_CAS_ENDPOINT: &'static str = "https://cas-auth.rpi.edu/cas";
@@ -106,10 +106,13 @@ async fn cas_authenticated(
                 // Display an error message to the user.
                 TelescopeError::BadRequest {
                     header: "Malformed CAS request".into(),
-                    message: format!("The RPI CAS endpoint did not respond with the appropriate \
+                    message: format!(
+                        "The RPI CAS endpoint did not respond with the appropriate \
                     data. Please try again. If this error persists, contact a coordinator and file \
-                    an issue on Telescope's GitHub. Internal error: {}", err),
-                    show_status_code: true
+                    an issue on Telescope's GitHub. Internal error: {}",
+                        err
+                    ),
+                    show_status_code: true,
                 }
             })?;
 
@@ -207,7 +210,7 @@ impl IdentityProvider for RpiCas {
                     return Err(TelescopeError::BadRequest {
                         header: "RPI CAS already linked".into(),
                         message: "You are already signed into an RPI CAS account.".into(),
-                        show_status_code: false
+                        show_status_code: false,
                     });
                 }
 
@@ -287,8 +290,7 @@ impl IdentityProvider for RpiCas {
                 AccountLookup::send(rcos_username.clone(), Self::USER_ACCOUNT_TY).await?;
 
             // Get the RCS ID from the authenticated RPI CAS response.
-            let new_rcs_id: String = cas_authenticated(&req, Self::link_redirect_path())
-                .await?;
+            let new_rcs_id: String = cas_authenticated(&req, Self::link_redirect_path()).await?;
 
             // We add the new RCS ID to the database for any user who doesn't have one.
             let add_new_to_db: bool = existing_rcs_id.is_none();
@@ -301,18 +303,26 @@ impl IdentityProvider for RpiCas {
             // Add to database if needed.
             if add_new_to_db {
                 // Link the account.
-                LinkUserAccount::send(rcos_username.clone(), Self::USER_ACCOUNT_TY, new_rcs_id.clone()).await?;
+                LinkUserAccount::send(
+                    rcos_username.clone(),
+                    Self::USER_ACCOUNT_TY,
+                    new_rcs_id.clone(),
+                )
+                .await?;
             }
 
             // Throw an error if the new RCS ID doesn't match the linked one.
             if !new_matches_existing {
                 return Err(TelescopeError::BadRequest {
                     header: "Different RCS ID already linked".into(),
-                    message: format!("This account is already linked to the RPI CAS system \
+                    message: format!(
+                        "This account is already linked to the RPI CAS system \
                         as {}@rpi.edu. Please unlink this RCS id before linking a different one. \
                         If you did not link this account please contact a coordinator.\
-                        ", existing_rcs_id.unwrap()),
-                    show_status_code: false
+                        ",
+                        existing_rcs_id.unwrap()
+                    ),
+                    show_status_code: false,
                 });
             }
 

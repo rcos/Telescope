@@ -10,14 +10,14 @@ use crate::error::TelescopeError;
 
 pub mod auth;
 pub mod forms;
+pub mod helpers;
 pub mod homepage;
 pub mod jumbotron;
+pub mod meetings;
 pub mod navbar;
 pub mod page;
 pub mod static_pages;
 pub mod user;
-pub mod meetings;
-pub mod helpers;
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]

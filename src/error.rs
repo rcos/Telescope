@@ -333,7 +333,6 @@ where
     }
 }
 
-
 // This may produce a warning in some IDEs because the `Display` trait
 // is derived. You can safely ignore it.
 impl ResponseError for TelescopeError {

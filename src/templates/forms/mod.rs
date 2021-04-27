@@ -17,8 +17,8 @@ use serde_json::{Map, Value};
 use std::collections::HashMap;
 
 pub mod common;
-pub mod register;
 pub mod meeting;
+pub mod register;
 
 /// A field in a form.
 #[derive(Serialize, Deserialize)]

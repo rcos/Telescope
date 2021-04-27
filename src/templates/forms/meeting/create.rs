@@ -1,9 +1,9 @@
 //! Form to create a meeting.
 
-use crate::templates::forms::Form;
 use crate::templates::forms::common::text_field::TextField;
-use std::fmt::Display;
+use crate::templates::forms::Form;
 use chrono::{NaiveDate, NaiveTime};
+use std::fmt::Display;
 
 /// The path to the handlebars template to create a meeting.
 const TEMPLATE_PATH: &'static str = "forms/meeting/create";
@@ -48,7 +48,10 @@ fn title_field() -> TextField {
 }
 
 /// Create a date/time field with a given name.
-fn chrono_field<T: Display + 'static, E: 'static>(name: &'static str, parse: fn(&str) -> Result<T, E>) -> TextField {
+fn chrono_field<T: Display + 'static, E: 'static>(
+    name: &'static str,
+    parse: fn(&str) -> Result<T, E>,
+) -> TextField {
     // Convert the name.
     TextField::new(name.to_string(), move |input: Option<&String>| {
         // Create a result version of this field to modify.
@@ -62,7 +65,7 @@ fn chrono_field<T: Display + 'static, E: 'static>(name: &'static str, parse: fn(
                     result.value = Some(parsed.to_string());
                     result.is_valid = Some(true);
                     result.success = Some("Looks good!".to_string());
-                },
+                }
                 Err(_) => {
                     result.value = Some(value.to_string());
                     result.is_valid = Some(false);
@@ -80,12 +83,14 @@ fn chrono_field<T: Display + 'static, E: 'static>(name: &'static str, parse: fn(
 
 /// Create a date field with a given name.
 fn date_field(name: &'static str) -> TextField {
-    chrono_field::<NaiveDate, _>(name, |input: &str| { input.parse::<NaiveDate>() })
+    chrono_field::<NaiveDate, _>(name, |input: &str| input.parse::<NaiveDate>())
 }
 
 /// Create a time field with a given name.
 fn time_field(name: &'static str) -> TextField {
-    chrono_field::<NaiveTime, _>(name, |input: &str| { NaiveTime::parse_from_str(input, "%H:%M") })
+    chrono_field::<NaiveTime, _>(name, |input: &str| {
+        NaiveTime::parse_from_str(input, "%H:%M")
+    })
 }
 
 /// Create a meeting creation form object.

@@ -3,8 +3,8 @@
 pub mod accounts;
 pub mod create;
 pub mod developers_page;
-pub mod profile;
 pub mod enrollments;
+pub mod profile;
 
 /// The valid user roles for all users in the RCOS database.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Hash)]

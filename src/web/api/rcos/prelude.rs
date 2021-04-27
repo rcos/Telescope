@@ -3,14 +3,11 @@
 // Ignore compiler warnings for lowercase typenames.
 #![allow(nonstandard_style)]
 
-use chrono::{Utc, DateTime, NaiveDate};
 use crate::web::api::rcos::{
-    users::{
-        UserAccountType,
-        UserRole
-    },
-    meetings::MeetingType
+    meetings::MeetingType,
+    users::{UserAccountType, UserRole},
 };
+use chrono::{DateTime, NaiveDate, Utc};
 
 /// Timestamp with Timezone.
 pub type timestamptz = DateTime<Utc>;

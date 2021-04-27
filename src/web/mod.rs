@@ -1,7 +1,7 @@
 //! Web services and utilities.
 
-use reqwest::header::HeaderValue;
 use crate::web::services::user::profile::ProfileQuery;
+use reqwest::header::HeaderValue;
 
 pub mod api;
 pub mod csrf;
@@ -23,8 +23,9 @@ pub fn telescope_ua() -> HeaderValue {
 pub fn profile_for(username: &str) -> String {
     // Encode the username
     let encoded: String = serde_urlencoded::to_string(ProfileQuery {
-        username: username.to_string()
-    }).expect("Could not URL-encode username");
+        username: username.to_string(),
+    })
+    .expect("Could not URL-encode username");
 
     // Put it in the correct part of the query for now.
     return format!("/user?{}", encoded);

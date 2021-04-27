@@ -1,26 +1,21 @@
 //! GraphQL query to check if a user can view draft meetings.
 
-use crate::web::api::rcos::prelude::*;
 use crate::error::TelescopeError;
+use crate::web::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
+use crate::web::api::rcos::prelude::*;
 use crate::web::api::rcos::send_query;
-use chrono::Local;
 use crate::web::api::rcos::users::UserRole;
-use crate::web::api::rcos::meetings::{
-    ALL_MEETING_TYPES,
-    MeetingType
-};
+use chrono::Local;
 
 /// Type representing GraphQL query to check if a user can view drafts.
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/meetings/authorization_for.graphql",
+    query_path = "graphql/rcos/meetings/authorization_for.graphql"
 )]
 pub struct AuthorizationFor;
 
-use authorization_for::{
-    Variables, ResponseData
-};
+use authorization_for::{ResponseData, Variables};
 
 /// Info on the user that dictates their ability to access meeting data.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -53,7 +48,7 @@ impl UserMeetingAuthorization {
             username: Some(username),
             role: UserRole::FacultyAdvisor,
             is_current_mentor: false,
-            is_current_coordinator: false
+            is_current_coordinator: false,
         }
     }
 
@@ -66,16 +61,19 @@ impl UserMeetingAuthorization {
     pub fn can_view(&self, meeting_type: MeetingType) -> bool {
         match meeting_type {
             // Coordinators can be viewed by just coordinators and faculty advisors
-            MeetingType::Coordinators => self.is_current_coordinator
-                || self.role == UserRole::FacultyAdvisor,
+            MeetingType::Coordinators => {
+                self.is_current_coordinator || self.role == UserRole::FacultyAdvisor
+            }
             // Mentor and Grading meetings can be viewed by mentors, coordinators,
             // and faculty advisors
-            MeetingType::Mentors | MeetingType::Grading => self.is_current_mentor
-                || self.is_current_coordinator
-                || self.role == UserRole::FacultyAdvisor,
+            MeetingType::Mentors | MeetingType::Grading => {
+                self.is_current_mentor
+                    || self.is_current_coordinator
+                    || self.role == UserRole::FacultyAdvisor
+            }
             // All other meeting types (small groups, large groups, bonus sessions, etc)
             // are public.
-            _ => true
+            _ => true,
         }
     }
 
@@ -134,14 +132,17 @@ impl AuthorizationFor {
             // Use the current local date.
             now: Local::today().naive_local(),
             // Clone the username
-            username: username.clone()
+            username: username.clone(),
         };
 
         // Call the API.
         let api_response: ResponseData = send_query::<Self>(query_vars).await?;
 
         // First check if the user is a faculty advisor.
-        let user_role: UserRole = api_response.users_by_pk.map(|user| user.role).unwrap_or(UserRole::Student);
+        let user_role: UserRole = api_response
+            .users_by_pk
+            .map(|user| user.role)
+            .unwrap_or(UserRole::Student);
         if user_role == UserRole::FacultyAdvisor {
             return Ok(UserMeetingAuthorization::faculty_advisor(username));
         }
@@ -165,13 +166,14 @@ impl AuthorizationFor {
             .flatten()
             .map(|small_group| small_group.small_group_id)
             // This user must be a mentor for at least one to be considered a current mentor.
-            .count() >= 1;
+            .count()
+            >= 1;
 
         return Ok(UserMeetingAuthorization {
             username: Some(username),
             role: user_role,
             is_current_coordinator,
-            is_current_mentor
+            is_current_mentor,
         });
     }
 }

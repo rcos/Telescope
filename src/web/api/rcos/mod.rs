@@ -9,11 +9,10 @@ use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 
 mod auth;
 pub mod landing_page_stats;
-pub mod users;
 pub mod meetings;
 pub mod prelude;
 pub mod semesters;
-
+pub mod users;
 
 /// The name of this API in error messages.
 const API_NAME: &'static str = "RCOS Central Hasura GraphQL API";

@@ -19,25 +19,25 @@ extern crate derive_more;
 #[macro_use]
 extern crate graphql_client;
 
+use crate::{
+    templates::static_pages::{sponsors::SponsorsPage, StaticPage},
+    web::csrf::CsrfJanitor,
+};
 use actix::prelude::*;
 use actix_files as afs;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::cookie::SameSite;
 use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
+use chrono::Offset;
 use rand::rngs::OsRng;
 use rand::Rng;
-use crate::{
-    templates::static_pages::{sponsors::SponsorsPage, StaticPage},
-    web::csrf::CsrfJanitor,
-};
-use chrono::Offset;
 
 mod app_data;
+mod discord_bot;
 mod env;
 mod error;
 mod templates;
 mod web;
-mod discord_bot;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -78,19 +78,21 @@ async fn main() -> std::io::Result<()> {
             // register Services
             .configure(web::services::register)
             // static files service
-            .service(afs::Files::new("/static", "static")
-                // Text responses are UTF-8
-                .prefer_utf8(true)
-                // Show listings of directories
-                .show_files_listing())
+            .service(
+                afs::Files::new("/static", "static")
+                    // Text responses are UTF-8
+                    .prefer_utf8(true)
+                    // Show listings of directories
+                    .show_files_listing(),
+            )
             .route("/sponsors", get().to(SponsorsPage::page))
             .default_service(aweb::to(web::services::not_found::not_found))
     })
-        // Bind to 80 (this gets reversed proxied by Caddy later)
-        .bind("0.0.0.0:80")
-        .expect("Could not bind http://localhost:80")
-        // Start the server running.
-        .run();
+    // Bind to 80 (this gets reversed proxied by Caddy later)
+    .bind("0.0.0.0:80")
+    .expect("Could not bind http://localhost:80")
+    // Start the server running.
+    .run();
 
     // Wait on server to produce an error.
     return web_server.await;

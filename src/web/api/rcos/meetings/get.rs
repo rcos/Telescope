@@ -1,10 +1,10 @@
 //! List meetings query.
 
+use crate::error::TelescopeError;
 use crate::web::api::rcos::meetings::MeetingType;
 use crate::web::api::rcos::prelude::*;
-use chrono::{DateTime, Utc};
-use crate::error::TelescopeError;
 use crate::web::api::rcos::send_query;
+use chrono::{DateTime, Utc};
 
 /// Type representing public RCOS meetings.
 #[derive(GraphQLQuery)]
@@ -15,16 +15,23 @@ use crate::web::api::rcos::send_query;
 )]
 pub struct Meetings;
 
-use self::meetings::{
-    Variables,
-    MeetingsMeetings
-};
+use self::meetings::{MeetingsMeetings, Variables};
 
 impl Meetings {
     /// Get the meetings between two times, optionally filter to finalized meetings only.
-    pub async fn get(start: DateTime<Utc>, end: DateTime<Utc>, include_drafts: bool, accept_types: Vec<MeetingType>) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
-        Ok(send_query::<Self>(Variables { start, end, include_drafts, accept_types })
-            .await?
-            .meetings)
+    pub async fn get(
+        start: DateTime<Utc>,
+        end: DateTime<Utc>,
+        include_drafts: bool,
+        accept_types: Vec<MeetingType>,
+    ) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
+        Ok(send_query::<Self>(Variables {
+            start,
+            end,
+            include_drafts,
+            accept_types,
+        })
+        .await?
+        .meetings)
     }
 }

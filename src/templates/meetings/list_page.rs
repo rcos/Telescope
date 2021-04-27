@@ -1,9 +1,9 @@
 //! Template for page listing of meetings.
 
 use crate::templates::Template;
+use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::web::api::rcos::meetings::get::meetings::MeetingsMeetings;
 use crate::web::services::meetings::MeetingsQuery;
-use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 
 /// The path to the template's handlebars file.
 const TEMPLATE_NAME: &'static str = "meetings/list";
@@ -21,7 +21,7 @@ pub const AUTHORIZATION: &'static str = "authorization";
 pub fn make(
     events: Vec<MeetingsMeetings>,
     query: Option<MeetingsQuery>,
-    authorization: &UserMeetingAuthorization
+    authorization: &UserMeetingAuthorization,
 ) -> Template {
     Template::new(TEMPLATE_NAME)
         .field(MEETINGS, events)

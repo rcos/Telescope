@@ -221,8 +221,9 @@ pub trait IdentityProvider: 'static {
                 return Err(TelescopeError::BadRequest {
                     header: format!("Cannot unlink {} account", Self::USER_ACCOUNT_TY),
                     message: "You have no other authentication methods linked, so unlinking \
-                    this platform would prevent you from logging in.".into(),
-                    show_status_code: false
+                    this platform would prevent you from logging in."
+                        .into(),
+                    show_status_code: false,
                 });
             }
 

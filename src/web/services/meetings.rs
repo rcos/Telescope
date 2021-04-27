@@ -1,31 +1,21 @@
 //! Meetings page and services
 
-use crate::templates::{
-    Template,
-    forms::{
-        Form,
-        meeting::create as creation_form
-    },
-    meetings
-};
 use crate::error::TelescopeError;
-use actix_web::web::{ServiceConfig, Query, Path};
-use actix_web::{HttpRequest, HttpResponse};
-use chrono::{DateTime, Utc, TimeZone, Local, Duration, NaiveDate, Date};
-use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
-use crate::web::api::rcos::meetings::{
-    get::{
-        Meetings,
-        meetings::MeetingsMeetings
-    },
-    get_by_id::{
-        Meeting,
-        meeting::MeetingMeeting,
-    },
-    authorization_for::AuthorizationFor,
-    MeetingType
+use crate::templates::{
+    forms::{meeting::create as creation_form, Form},
+    meetings, Template,
 };
 use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
+use crate::web::api::rcos::meetings::{
+    authorization_for::AuthorizationFor,
+    get::{meetings::MeetingsMeetings, Meetings},
+    get_by_id::{meeting::MeetingMeeting, Meeting},
+    MeetingType,
+};
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
+use actix_web::web::{Path, Query, ServiceConfig};
+use actix_web::{HttpRequest, HttpResponse};
+use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
@@ -52,9 +42,14 @@ pub struct MeetingsQuery {
 
 /// Meetings page
 #[get("/meetings")]
-async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, identity: Identity) -> Result<Template, TelescopeError> {
+async fn meetings_list(
+    req: HttpRequest,
+    params: Option<Query<MeetingsQuery>>,
+    identity: Identity,
+) -> Result<Template, TelescopeError> {
     // Resolve parameters to API query variables
-    let start: DateTime<Utc> = params.as_ref()
+    let start: DateTime<Utc> = params
+        .as_ref()
         // Extract the start parameter from the query
         .map(|p| p.start)
         // Convert to a date in the local timezone
@@ -62,7 +57,7 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
         // If it's ambiguous what date to use in the local timezone, pick the earlier one.
         .and_then(|local_result| local_result.earliest())
         // Conver the date to a timestamp of the beginning of the day
-        .map(|date: Date<Local>| date.and_hms(0,0,0))
+        .map(|date: Date<Local>| date.and_hms(0, 0, 0))
         // If there is no valid timezone or the start parameter wasn't supplied,
         // use the current time minus 2 hours. This should be sufficient to catch all
         // recent and ongoing meetings.
@@ -70,7 +65,8 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
         // Convert timezone to UTC.
         .with_timezone(&Utc);
 
-    let end: DateTime<Utc> = params.as_ref()
+    let end: DateTime<Utc> = params
+        .as_ref()
         // Extract the end parameter from the query
         .map(|p| p.end)
         // Convert to a date in the local timezone.
@@ -78,7 +74,7 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
         // If the date in the local timezone is ambiguous, use the later one
         .and_then(|local_result| local_result.latest())
         // Convert the date to a timestamp near midnight that night.
-        .map(|date: Date<Local>| date.and_hms(23,59,59))
+        .map(|date: Date<Local>| date.and_hms(23, 59, 59))
         // If there is no valid time, or the parameter wasn't supplied,
         // default to one week from today. This will show all the next meetings.
         .unwrap_or(Local::now() + Duration::weeks(1))
@@ -114,7 +110,11 @@ async fn meetings_list(req: HttpRequest, params: Option<Query<MeetingsQuery>>, i
 
 /// Endpoint to preview a specific meeting.
 #[get("/meeting/{meeting_id}")]
-async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identity) -> Result<Template, TelescopeError> {
+async fn meeting(
+    req: HttpRequest,
+    Path(meeting_id): Path<i64>,
+    identity: Identity,
+) -> Result<Template, TelescopeError> {
     // Get the viewer's username.
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
     // Get the viewer's authorization info.
@@ -125,7 +125,7 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
     if meeting.is_none() {
         return Err(TelescopeError::resource_not_found(
             "Meeting Not Found",
-            "Could not find a meeting for this ID."
+            "Could not find a meeting for this ID.",
         ));
     }
 
@@ -138,8 +138,9 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
             header: "Meeting Not Visible".into(),
             message: "This meeting is currently marked as a draft and is only visible to \
             coordinators and faculty advisors. If you believe this is in error, please \
-            contact a coordinator.".into(),
-            show_status_code: false
+            contact a coordinator."
+                .into(),
+            show_status_code: false,
         });
     }
 
@@ -148,8 +149,9 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
         return Err(TelescopeError::BadRequest {
             header: "Meeting Access Restricted".into(),
             message: "Access to this meeting is restricted to mentors or coordinators. If you \
-            think this is in error, please contact a coordinator.".into(),
-            show_status_code: false
+            think this is in error, please contact a coordinator."
+                .into(),
+            show_status_code: false,
         });
     }
 
@@ -163,13 +165,19 @@ async fn meeting(req: HttpRequest, Path(meeting_id): Path<i64>, identity: Identi
 
 /// Endpoint to edit a meeting.
 #[get("/meeting/{meeting_id}/edit")]
-async fn edit_meeting(Path(meeting_id): Path<i64>, auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
+async fn edit_meeting(
+    Path(meeting_id): Path<i64>,
+    auth: AuthenticationCookie,
+) -> Result<Form, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 
 /// Endpoint to delete a meeting.
 #[get("/meeting/{meeting_id}/delete")]
-async fn delete_meeting(Path(meeting_id): Path<i64>, auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
+async fn delete_meeting(
+    Path(meeting_id): Path<i64>,
+    auth: AuthenticationCookie,
+) -> Result<HttpResponse, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 
@@ -189,12 +197,11 @@ async fn create_meeting(auth: AuthenticationCookie) -> Result<Form, TelescopeErr
         return Err(TelescopeError::BadRequest {
             header: "Access Denied".into(),
             message: "The authenticated user does not have permission to create meetings. If you \
-            think this is in error, please contact a coordinator.".into(),
-            show_status_code: false
+            think this is in error, please contact a coordinator."
+                .into(),
+            show_status_code: false,
         });
     }
-
-
 
     // Otherwise return the meeting creation form.
     return Ok(creation_form::make());

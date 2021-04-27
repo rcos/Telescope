@@ -1,9 +1,9 @@
 use crate::env::{ConcreteConfig, CONFIG};
 use crate::error::TelescopeError;
+use crate::templates::helpers::register_helpers;
 use actix_web::web::block;
 use handlebars::Handlebars;
 use std::{path::PathBuf, sync::Arc};
-use crate::templates::helpers::register_helpers;
 
 lazy_static! {
     /// Lazy Static to store app data at runtime.
