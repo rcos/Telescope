@@ -31,6 +31,7 @@ use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
 use chrono::Offset;
 use rand::rngs::OsRng;
 use rand::Rng;
+use crate::discord_bot::DiscordBot;
 
 mod app_data;
 mod discord_bot;
@@ -49,8 +50,11 @@ async fn main() -> std::io::Result<()> {
     // Start global CSRF token janitor.
     CsrfJanitor.start();
 
-    // Start the Discord Event Handler to interact with discord.
-    // DiscordActor::default().start();
+    // Create and start the discord bot.
+    let discord_bot: DiscordBot = DiscordBot::create()
+        .await
+        .expect("Could not create discord bot.");
+    discord_bot.start();
 
     // Setup identity middleware.
     // Create secure random sequence to encrypt cookie identities.

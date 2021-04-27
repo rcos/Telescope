@@ -88,16 +88,7 @@ async fn init_serenity() -> Client {
     // Get the Discord config
     let discord_conf: &DiscordConfig = &global_config().discord_config;
 
-    // Log a link to invite the bot to a server.
-    info!("Invite bot using \
-        https://discord.com/api/oauth2/authorize?client_id={}&permissions=2147549184&response_type=code&scope=bot%20applications.commands",
-          discord_conf.client_id.as_str());
 
-    // Create the serenity client to talk to discord.
-    return Client::builder(&discord_conf.bot_token)
-        .raw_event_handler(Handler)
-        .await
-        .expect("Could not create serenity client");
 
     /*
     info!("Starting Serenity Discord Client");
