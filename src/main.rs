@@ -28,10 +28,7 @@ use rand::rngs::OsRng;
 use rand::Rng;
 use crate::{
     templates::static_pages::{sponsors::SponsorsPage, StaticPage},
-    web::{
-        csrf::CsrfJanitor,
-        api::discord::DiscordActor,
-    },
+    web::csrf::CsrfJanitor,
 };
 use chrono::Offset;
 
@@ -40,28 +37,27 @@ mod env;
 mod error;
 mod templates;
 mod web;
+mod discord_bot;
 
-fn main() -> std::io::Result<()> {
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
     // Log the server timezone
     info!("Server timezone: {}", chrono::Local::now().offset().fix());
 
-    // Create the actix runtime.
-    let sys: SystemRunner = System::new("telescope");
-
     // Start global CSRF token janitor.
     CsrfJanitor.start();
 
     // Start the Discord Event Handler to interact with discord.
-    DiscordActor::default().start();
+    // DiscordActor::default().start();
 
     // Setup identity middleware.
     // Create secure random sequence to encrypt cookie identities.
     let cookie_key: [u8; 32] = OsRng::default().gen::<[u8; 32]>();
 
     // Construct and start main server instance.
-    HttpServer::new(move || {
+    let web_server = HttpServer::new(move || {
         // Create cookie policy.
         let cookie_policy = CookieIdentityPolicy::new(&cookie_key)
             // Transmit cookies over HTTPS only.
@@ -90,10 +86,12 @@ fn main() -> std::io::Result<()> {
             .route("/sponsors", get().to(SponsorsPage::page))
             .default_service(aweb::to(web::services::not_found::not_found))
     })
-    .bind("0.0.0.0:80")
-    .expect("Could not bind http://localhost:80")
-    .run();
+        // Bind to 80 (this gets reversed proxied by Caddy later)
+        .bind("0.0.0.0:80")
+        .expect("Could not bind http://localhost:80")
+        // Start the server running.
+        .run();
 
-    // Start the actix runtime.
-    sys.run()
+    // Wait on server to produce an error.
+    return web_server.await;
 }

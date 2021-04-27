@@ -1,26 +1,18 @@
 //! Functionality for handling events from discord.
 
-use serenity::client::{RawEventHandler, Context};
+use serenity::client::{Context, EventHandler};
 use serenity::model::event::{Event, InteractionCreateEvent};
 use futures::future::BoxFuture;
 use serenity::model::interactions::{InteractionType, Interaction, InteractionResponseType};
 use serenity::Result as SerenityResult;
 
+/// ZST for handling events from discord.
 pub struct Handler;
 
-impl RawEventHandler for Handler {
-    fn raw_event<'a, 'b>(&'a self, ctx: Context, event: Event) -> BoxFuture<'b, ()>
-    where
-        'a: 'b,
-        Self: 'b,
-    {
-        // Log the incoming raw event.
-        debug!("Received Discord event:\n{:#?}", event);
-        // Wrap all event handling into a future.
-        return Box::pin(handle_discord_event(ctx, event));
-    }
-}
+#[serenity::async_trait]
+impl EventHandler for Handler {}
 
+/*
 /// Function to handle all Discord events.
 async fn handle_discord_event(ctx: Context, event: Event) {
     match event {
@@ -29,7 +21,13 @@ async fn handle_discord_event(ctx: Context, event: Event) {
             // Destructure the interaction data from the event data.
             let InteractionCreateEvent { interaction, ..} = event;
             // Send it to the interaction handler.
-            handle_interaction(ctx, interaction).await;
+            handle_interaction(ctx, interaction)
+                .await;
+        },
+
+        // Ready event -- This event is sent when Discord is ready.
+        Event::Ready(event) => {
+
         },
 
         // All other events are ignored.
@@ -61,4 +59,4 @@ async fn handle_interaction(ctx: Context, i: Interaction) -> SerenityResult<()> 
     // If we reach this we are successful.
     return Ok(());
 }
-
+*/

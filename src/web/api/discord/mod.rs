@@ -1,10 +1,11 @@
 //! Discord API utilities and serenity tie-ins.
 
 mod event_handler;
+mod init;
 
 use event_handler::Handler;
 use serenity::client::Client;
-use actix::{Actor, Context, AsyncContext, ActorFuture};
+use actix::{Actor, Context, AsyncContext, ActorFuture, SpawnHandle};
 use crate::env::{global_config, DiscordConfig};
 use serenity::model::interactions::{Interaction, ApplicationCommandOptionType};
 use serenity::builder::{CreateInteractionOption, CreateInteraction};
@@ -13,7 +14,7 @@ use std::task::Poll;
 use futures::Future;
 use serenity::model::id::GuildId;
 
-/// Zero-sized type to initialize serenity in an actix future.
+/// Future wrapper to initialize serenity in an actix future.
 struct InitSerenityFuture<F: Future<Output = Client> + std::marker::Unpin + 'static> {
     inner: F
 }
@@ -41,6 +42,27 @@ impl<F: Future<Output = Client> + std::marker::Unpin> ActorFuture for InitSereni
     }
 }
 
+/// Future wrapper storing that never resolves while serenity's
+/// shards are running.
+struct SerenityListeningFuture;
+
+impl ActorFuture for SerenityListeningFuture {
+    type Output = ();
+    type Actor = DiscordActor;
+
+    fn poll(self: Pin<&mut Self>, srv: &mut Self::Actor, ctx: &mut _, task: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        // Get the internal discord client from the actor's state.
+        let discord_client: &mut Client = srv.serenity_client
+            // As &mut ref
+            .as_mut()
+            // Panic on None.
+            .expect("Could not get discord client from actor.");
+
+        discord_client.start_autosharded()
+    }
+}
+
+
 /// Function add a name and info to an interaction used by serenity.
 /// In this case builds the /whois command.
 fn create_whois(interaction: &mut CreateInteraction) -> &mut CreateInteraction {
@@ -65,19 +87,19 @@ async fn init_serenity() -> Client {
 
     // Get the Discord config
     let discord_conf: &DiscordConfig = &global_config().discord_config;
-    // Parse the application ID.
-    let application_id: u64 = discord_conf
-        .client_id
-        .as_str()
-        .parse::<u64>()
-        .expect("Invalid discord application ID.");
+
+    // Log a link to invite the bot to a server.
+    info!("Invite bot using \
+        https://discord.com/api/oauth2/authorize?client_id={}&permissions=2147549184&response_type=code&scope=bot%20applications.commands",
+          discord_conf.client_id.as_str());
 
     // Create the serenity client to talk to discord.
-    let mut discord_client: Client = Client::builder(&discord_conf.bot_token)
+    return Client::builder(&discord_conf.bot_token)
         .raw_event_handler(Handler)
         .await
         .expect("Could not create serenity client");
 
+    /*
     info!("Starting Serenity Discord Client");
     // start_autosharded blocks!!
     discord_client.start_autosharded()
@@ -110,19 +132,13 @@ async fn init_serenity() -> Client {
 
         debug!("Guild ({}) command response:\n{:#?}", guild_id, command);
     }
-
-    info!("Invite bot using \
-        https://discord.com/api/oauth2/authorize?client_id={}&permissions=2147549184&response_type=code&scope=bot%20applications.commands",
-        discord_conf.client_id.as_str());
-
-    return discord_client;
+     */
 }
 
 /// Zero-sized type representing an actix actor to talk to discord.
-#[derive(Default)]
+
 pub struct DiscordActor {
-    /// The internal serenity client used to communicate with discord.
-    serenity_client: Option<Client>
+    thread: std::thread::JoinHandle<()>
 }
 
 impl Actor for DiscordActor {
@@ -139,7 +155,14 @@ impl Actor for DiscordActor {
         // Execute the future on this actor's context.
         ctx.wait(actix_future);
 
-        info!("Discord Actor started");
+        // Wait for the client to initialize.
+        let mut discord_client: Client = self.serenity_client
+            .expect("Discord client has not initialized.");
+
+        // Start listening for connections.
+        info!("Listening for connections from Discord");
+        ctx.spawn()
+        discord_client.start_autosharded()
     }
 }
 
