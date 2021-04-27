@@ -14,6 +14,8 @@ impl RawEventHandler for Handler {
         'a: 'b,
         Self: 'b,
     {
+        // Log the incoming raw event.
+        debug!("Received Discord event:\n{:#?}", event);
         // Wrap all event handling into a future.
         return Box::pin(handle_discord_event(ctx, event));
     }

@@ -61,6 +61,8 @@ fn create_whois(interaction: &mut CreateInteraction) -> &mut CreateInteraction {
 /// Make the global serenity client to talk to discord.
 /// Create all necessary interactions.
 async fn init_serenity() -> Client {
+    info!("Initializing Serenity Discord Client");
+
     // Get the Discord config
     let discord_conf: &DiscordConfig = &global_config().discord_config;
     // Parse the application ID.
@@ -76,6 +78,8 @@ async fn init_serenity() -> Client {
         .await
         .expect("Could not create serenity client");
 
+    info!("Starting Serenity Discord Client");
+    // start_autosharded blocks!!
     discord_client.start_autosharded()
         .await
         .expect("Could not start serenity client.");
@@ -83,15 +87,19 @@ async fn init_serenity() -> Client {
     // Add the interactions.
     // Get reference to serenity's http client
     let http = &discord_client.cache_and_http.http;
+
     // Create the interaction on the global scope
+    info!("Registering global Discord commands");
     let command = Interaction::create_global_application_command(http, application_id, create_whois)
         .await
         .expect("Could not create global application command.");
 
-    dbg!(command);
+    debug!("Global Command Response:\n{:#?}", command);
 
     // Create the interaction for each of the debug guilds.
     for guild_id in discord_conf.debug_guild_ids.iter() {
+        info!("Registering Discord commands for guild ID {}", guild_id);
+
         // Convert the guild ID
         let gid = GuildId::from(*guild_id);
 
@@ -100,7 +108,7 @@ async fn init_serenity() -> Client {
             .await
             .expect(format!("Could not create guild command for guild {}", guild_id).as_str());
 
-        dbg!(command);
+        debug!("Guild ({}) command response:\n{:#?}", guild_id, command);
     }
 
     info!("Invite bot using \
