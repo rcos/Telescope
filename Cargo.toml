@@ -46,10 +46,6 @@ lazy_static = "~1.4"
 # utilities for dealing with async futures
 futures = "0.3"
 
-# Sending emails.
-lettre = {version = "~0.9", features = ["serde-impls"]}
-lettre_email = "~0.9"
-
 # Date and time utilities and formats
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
 chrono-tz = {version = "~0.5", features = ["serde"]}

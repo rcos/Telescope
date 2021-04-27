@@ -10,9 +10,6 @@ use actix_web::rt::blocking::BlockingError;
 use actix_web::{HttpRequest, HttpResponse, ResponseError};
 use graphql_client::Error as GraphQlError;
 use handlebars::RenderError;
-use lettre::file::error::Error as LettreFileError;
-use lettre::smtp::error::Error as LettreSmtpError;
-use lettre::smtp::response::Response as SmtpResponse;
 use reqwest::Error as ReqwestError;
 use serde_json::Value;
 use std::error::Error;
@@ -65,42 +62,6 @@ pub enum TelescopeError {
         /// Should the response status code be shown to the user?
         show_status_code: bool,
     },
-
-    #[display(fmt = "Lettre File Error: {}", description)]
-    #[error(ignore)]
-    /// Error sending an email using lettre's file transport. This should report
-    /// as an internal server error most of the time as file transport is used
-    /// for debugging and logging.
-    LettreFileError {
-        #[serde(skip)]
-        /// The lettre error that caused this. This gets stripped away on
-        /// serialization.
-        source: Option<LettreFileError>,
-        /// A description of the cause.
-        description: String,
-    },
-
-    #[display(fmt = "Lettre SMTP Error: {}", description)]
-    #[error(ignore)]
-    /// Error sending mail using lettre's SMTP transport. This should report as
-    /// an internal server error when unexpected, but otherwise should
-    /// be lowered to a form error and reported in the webpage.
-    LettreSmtpError {
-        #[serde(skip)]
-        /// The lettre error that caused this. This gets stripped away during
-        /// serialization.
-        source: Option<LettreSmtpError>,
-        /// The description of the error.
-        description: String,
-    },
-
-    #[error(ignore)]
-    #[display(fmt = "Negative SMTP response: {} - {:?}", "_0.code", "_0.message")]
-    /// A negative response from the SMTP server, indicating a failure to
-    /// authenticate or send an email. This should be reported as an internal
-    /// server error where necessary but otherwise can be lowered to a form
-    /// error.
-    NegativeSmtpResponse(SmtpResponse),
 
     #[display(fmt = "Not Implemented")]
     /// Error to send when user accesses something that is not yet implemented.
@@ -241,36 +202,6 @@ impl TelescopeError {
                 Telescope GitHub repository.",
             ),
 
-            TelescopeError::LettreFileError { description, .. } => jumbotron::new(
-                format!("{} - {}", status_code, canonical_reason),
-                format!(
-                    "There was an error saving a server generated email to the local \
-                filesystem. Please contact a coordinator and open a GitHub issue. Internal \
-                error description: \"{}\"",
-                    description
-                ),
-            ),
-
-            TelescopeError::LettreSmtpError { description, .. } => jumbotron::new(
-                format!("{} - {}", status_code, canonical_reason),
-                format!(
-                    "There was an error sending a server generated email via SMTP. \
-                Please contact a coordinator and open a GitHub issue on the Telescope repository. \
-                Internal error description: \"{}\"",
-                    description
-                ),
-            ),
-
-            TelescopeError::NegativeSmtpResponse(response) => jumbotron::new(
-                format!("{} - {}", status_code, canonical_reason),
-                format!(
-                    "The internal SMTP client received a negative response. Please \
-                contact a coordinator and create an issue on Telescope's GitHub repo. Error code \
-                {}.",
-                    response.code
-                ),
-            ),
-
             TelescopeError::RenderingError(err) => jumbotron::new(
                 format!("{} - Internal Server Template Error", status_code),
                 format!(
@@ -402,15 +333,6 @@ where
     }
 }
 
-impl From<SmtpResponse> for TelescopeError {
-    /// Convert the SMTP response. Panic if it is not negative.
-    fn from(res: SmtpResponse) -> Self {
-        if res.is_positive() {
-            panic!("Cannot construct error from positive SMTP response.");
-        }
-        TelescopeError::NegativeSmtpResponse(res)
-    }
-}
 
 // This may produce a warning in some IDEs because the `Display` trait
 // is derived. You can safely ignore it.
@@ -480,27 +402,5 @@ impl From<RenderErrorDef> for RenderError {
         new.line_no = err.line_no;
         new.template_name = err.template_name;
         return new;
-    }
-}
-
-impl From<LettreFileError> for TelescopeError {
-    fn from(err: LettreFileError) -> Self {
-        let description: String = format!("{}", err);
-
-        return TelescopeError::LettreFileError {
-            source: Some(err),
-            description,
-        };
-    }
-}
-
-impl From<LettreSmtpError> for TelescopeError {
-    fn from(err: LettreSmtpError) -> Self {
-        let description: String = format!("{}", err);
-
-        return TelescopeError::LettreSmtpError {
-            source: Some(err),
-            description,
-        };
     }
 }
