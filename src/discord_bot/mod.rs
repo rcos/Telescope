@@ -11,7 +11,6 @@ use std::pin::Pin;
 use std::task::Poll;
 use std::task::Context as StdContext;
 use futures::{
-    future::BoxFuture,
     Future
 };
 use futures::future::LocalBoxFuture;
