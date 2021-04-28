@@ -2,6 +2,7 @@
 //!
 
 mod event_handler;
+mod commands;
 
 use crate::discord_bot::event_handler::Handler;
 use crate::env::{global_config, DiscordConfig};
