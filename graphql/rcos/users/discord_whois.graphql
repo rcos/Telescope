@@ -1,0 +1,39 @@
+query DiscordWhoIs($discord_id: String!, $now: date!) {
+    user_accounts(where: {account_id: {_eq: $discord_id} type: {_eq: "discord"}} limit: 1) {
+        user {
+            username
+            first_name
+            last_name
+            created_at
+            cohort
+
+            # Is this user currently a coordinator.
+            is_current_coordinator: enrollments(where: {
+                is_coordinator: {_eq: true},
+                semester: {
+                    start_date: {_lte: $now}
+                    end_date: {_gte: $now}
+                }
+            }) {
+                is_coordinator
+            }
+
+            # Is this user a small group mentor
+            currently_mentors: small_group_mentors(where: {
+                small_group: {
+                    semester: {
+                        start_date: {_lte: $now}
+                        end_date: {_gte: $now}
+                    }
+                }
+            }) {
+                small_group_id
+            }
+
+            # RCS ID info for the user
+            rcs_id: user_accounts(where: {type: {_eq: "rpi"}} limit: 1) {
+                account_id
+            }
+        }
+    }
+}
