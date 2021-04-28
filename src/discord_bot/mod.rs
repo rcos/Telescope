@@ -14,56 +14,52 @@ use futures::{
     future::BoxFuture,
     Future
 };
+use futures::future::LocalBoxFuture;
 
 
-
-/// Telescope's discord bot. This is instantiated once and used with
-/// as an actix actor.
-pub struct DiscordBot {
-    serenity_client: Client
-}
+/// ZST representing Telescope's discord bot. The actual client is stored by the
+/// future representing the bots listening state.
+pub struct DiscordBot;
 
 impl DiscordBot {
-    /// Create an instance of the telescope Discord bot.
-    pub async fn create() -> SerenityResult<Self> {
+    /// Create a Serenity Discord client.
+    async fn create() -> SerenityResult<Client> {
         // Get the global Discord config
         let discord_conf: &DiscordConfig = &global_config().discord_config;
 
         // Instantiate a serenity Discord client.
-        let client: Client = Client::builder(&discord_conf.bot_token)
+        return Client::builder(&discord_conf.bot_token)
             .event_handler(Handler)
-            .await?;
-
-        // Wrap the client in this actor type.
-        return Ok(Self { serenity_client: client });
+            .await;
     }
 
-    /// Listen for incoming Discord events and handle them
-    async fn listen(&mut self) -> SerenityResult<()> {
-        self.serenity_client.start_autosharded().await
+    /// Create a Discord client and start listening for Discord events.
+    async fn create_and_listen() -> SerenityResult<()> {
+        Self::create()
+            .await?
+            .start_autosharded()
+            .await
     }
 
-    /// Listen for incoming Discord events in an actix-compatible future.
-    fn listen_in_actor_fut(&mut self) -> ListeningFuture {
-        // Start listening for discord events.
-        let listening_fut = self.listen();
-        // Box the listening future and convert it to an ActorFuture.
-        let boxed = Box::pin(listening_fut);
-        return ListeningFuture { inner: boxed };
+    /// Run create_and_listen in an Actix compatible future.
+    fn wrapped_create_and_listen() -> ListeningFuture {
+        ListeningFuture {
+            inner: Box::pin(Self::create_and_listen())
+        }
     }
 }
 
 /// Future representing the indefinite async computation of the Discord bot
 /// listening for events.
 struct ListeningFuture {
-    inner: BoxFuture<'static, SerenityResult<()>>
+    inner: LocalBoxFuture<'static, SerenityResult<()>>
 }
 
 impl ActorFuture for ListeningFuture {
     type Output = ();
     type Actor = DiscordBot;
 
-    fn poll(self: Pin<&mut Self>, srv: &mut Self::Actor, ctx: &mut <DiscordBot as Actor>::Context, task: &mut StdContext<'_>) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, srv: &mut Self::Actor, ctx: &mut <DiscordBot as Actor>::Context, task: &mut StdContext<'_>) -> Poll<Self::Output> {
         // Pin a mutable reference to the internal future.
         let pinned_inner = Pin::new(&mut self.inner);
         // Poll the pinned internal future.
@@ -100,7 +96,7 @@ impl Actor for DiscordBot {
               discord_conf.client_id.as_str());
 
         // Listen for incoming Discord events on this actor's context.
-        ctx.wait(self.listen_in_actor_fut());
+        ctx.wait(Self::wrapped_create_and_listen());
     }
 }
 
@@ -109,6 +105,6 @@ impl Supervised for DiscordBot {
         // Restart the Discord bot when it crashes.
         error!("Discord bot crashed. Restarting now");
         // Start listening for Discord events again on the new context.
-        ctx.wait(self.listen_in_actor_fut());
+        ctx.wait(Self::wrapped_create_and_listen());
     }
 }

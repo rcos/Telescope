@@ -50,11 +50,9 @@ async fn main() -> std::io::Result<()> {
     // Start global CSRF token janitor.
     CsrfJanitor.start();
 
-    // Create and start the discord bot.
-    let discord_bot: DiscordBot = DiscordBot::create()
-        .await
-        .expect("Could not create discord bot.");
-    discord_bot.start();
+    // Create and start the discord bot under a Supervisor that will
+    // restart it if it crashes.
+    Supervisor::start(|_| DiscordBot);
 
     // Setup identity middleware.
     // Create secure random sequence to encrypt cookie identities.
