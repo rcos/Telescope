@@ -19,6 +19,7 @@ extern crate derive_more;
 #[macro_use]
 extern crate graphql_client;
 
+use crate::discord_bot::DiscordBot;
 use crate::{
     templates::static_pages::{sponsors::SponsorsPage, StaticPage},
     web::csrf::CsrfJanitor,
@@ -31,7 +32,6 @@ use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
 use chrono::Offset;
 use rand::rngs::OsRng;
 use rand::Rng;
-use crate::discord_bot::DiscordBot;
 
 mod app_data;
 mod discord_bot;

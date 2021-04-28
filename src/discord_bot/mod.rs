@@ -3,18 +3,15 @@
 
 mod event_handler;
 
-use actix::{Actor, ActorContext, Context, Supervised, ActorFuture, AsyncContext};
-use crate::env::{global_config, DiscordConfig};
-use serenity::{Client, Result as SerenityResult};
 use crate::discord_bot::event_handler::Handler;
-use std::pin::Pin;
-use std::task::Poll;
-use std::task::Context as StdContext;
-use futures::{
-    Future
-};
+use crate::env::{global_config, DiscordConfig};
+use actix::{Actor, ActorContext, ActorFuture, AsyncContext, Context, Supervised};
 use futures::future::LocalBoxFuture;
-
+use futures::Future;
+use serenity::{Client, Result as SerenityResult};
+use std::pin::Pin;
+use std::task::Context as StdContext;
+use std::task::Poll;
 
 /// ZST representing Telescope's discord bot. The actual client is stored by the
 /// future representing the bots listening state.
@@ -34,16 +31,13 @@ impl DiscordBot {
 
     /// Create a Discord client and start listening for Discord events.
     async fn create_and_listen() -> SerenityResult<()> {
-        Self::create()
-            .await?
-            .start_autosharded()
-            .await
+        Self::create().await?.start_autosharded().await
     }
 
     /// Run create_and_listen in an Actix compatible future.
     fn wrapped_create_and_listen() -> ListeningFuture {
         ListeningFuture {
-            inner: Box::pin(Self::create_and_listen())
+            inner: Box::pin(Self::create_and_listen()),
         }
     }
 }
@@ -51,14 +45,19 @@ impl DiscordBot {
 /// Future representing the indefinite async computation of the Discord bot
 /// listening for events.
 struct ListeningFuture {
-    inner: LocalBoxFuture<'static, SerenityResult<()>>
+    inner: LocalBoxFuture<'static, SerenityResult<()>>,
 }
 
 impl ActorFuture for ListeningFuture {
     type Output = ();
     type Actor = DiscordBot;
 
-    fn poll(mut self: Pin<&mut Self>, srv: &mut Self::Actor, ctx: &mut <DiscordBot as Actor>::Context, task: &mut StdContext<'_>) -> Poll<Self::Output> {
+    fn poll(
+        mut self: Pin<&mut Self>,
+        srv: &mut Self::Actor,
+        ctx: &mut <DiscordBot as Actor>::Context,
+        task: &mut StdContext<'_>,
+    ) -> Poll<Self::Output> {
         // Pin a mutable reference to the internal future.
         let pinned_inner = Pin::new(&mut self.inner);
         // Poll the pinned internal future.
