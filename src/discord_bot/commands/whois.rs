@@ -9,8 +9,9 @@ use serenity::{
     Result as SerenityResult,
     Error as SerenityError,
 };
-use serenity::model::prelude::ApplicationCommandInteractionDataOption;
+use serenity::model::prelude::{ApplicationCommandInteractionDataOption, InteractionResponseType};
 use serenity::model::user::User;
+use crate::web::api::rcos::users::discord_whois::DiscordWhoIs;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -62,11 +63,35 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
         .ok_or_else(|| {
             error!("'/whois' command missing user option. Interaction: {:#?}", interaction);
         })
+        // Unwrap because we expect discord not to give bad data.
         .unwrap();
 
     // Lookup this user on the discord and RCOS API.
     let discord_user_info: User = ctx.http.get_user(user_id).await?;
-    let rcos_user_info = unimplemented!();
+    let rcos_api_response = DiscordWhoIs::send(user_id)
+        .await
+        // Log the error if there is one.
+        .map_err(|err| {
+            error!("Could not query the RCOS API: {}", err);
+            err
+        });
+
+    if let Err(err) = rcos_api_response {
+        unimplemented!()
+        /*
+        interaction.create_interaction_response(ctx.http, |response| {
+            response.kind(InteractionResponseType::ChannelMessageWithSource)
+                .interaction_response_data(|rdata| {
+                    rdata.content("***Error***: Could not query RCOS API. @venus blonde!")
+                        .allowed_mentions(|allow| {
+                            allow.users(&[407704723618136065])
+                        })
+                })
+        })
+
+         */
+    }
+
 
     Ok(())
 }

@@ -12,3 +12,23 @@ use crate::web::api::rcos::prelude::*;
 )]
 pub struct DiscordWhoIs;
 
+use discord_who_is::Variables;
+
+pub use discord_who_is::ResponseData;
+use crate::error::TelescopeError;
+use crate::web::api::rcos::send_query;
+use chrono::Utc;
+
+impl DiscordWhoIs {
+    /// Send this query for a given discord user.
+    pub async fn send(discord_id: u64) -> Result<ResponseData, TelescopeError> {
+        // Construct the query variables
+        let query_vars = Variables {
+            now: Utc::today().naive_utc(),
+            discord_id: format!("{}", discord_id)
+        };
+
+        // Send the query.
+        return send_query::<Self>(query_vars).await;
+    }
+}
