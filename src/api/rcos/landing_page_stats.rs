@@ -16,8 +16,6 @@ use chrono::Utc;
 )]
 pub struct LandingPageStatistics;
 
-
-// Re-export variable and response types.
 use self::landing_page_statistics::{
     ResponseData, Variables,
 };
