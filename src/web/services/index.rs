@@ -1,30 +1,25 @@
 //! Module for serving the RCOS homepage.
 
 use crate::error::TelescopeError;
-use crate::templates::{homepage, page, Template};
-use crate::web::api::rcos::{
-    landing_page_stats::{LandingPageStatistics, LandingPageStatsVars},
+use crate::templates::Template;
+use crate::api::rcos::{
+    landing_page_stats::LandingPageStatistics,
     send_query,
 };
 use actix_web::HttpRequest;
+
+/// Path to the Handlebars file from the templates directory.
+const TEMPLATE_PATH: &'static str = "index";
 
 /// Service that serves the telescope homepage.
 #[get("/")]
 pub async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
     // Get the statistics.
-    let stats = send_query::<LandingPageStatistics>(LandingPageStatsVars).await?;
+    let stats = LandingPageStatistics::get().await?;
 
-    // Make the homepage template as the content of the landing page.
-    let content: Template = homepage::new(
-        stats
-            .current_semester()
-            .unwrap_or("(Unknown Semester)".to_string()),
-        stats.current_projects().unwrap_or(-1),
-        stats.total_projects().unwrap_or(-1),
-        stats.current_students().unwrap_or(-1),
-        stats.total_students().unwrap_or(-1),
-    );
-
-    // Return a page with the homepage content.
-    return page::of(&req, "RCOS", &content).await;
+    // Make and return a template with the statistics.
+    Template::new(TEMPLATE_PATH)
+        .field("stats", stats)
+        .render_into_page(&req, "RCOS")
+        .await
 }

@@ -1,7 +1,7 @@
 //! Lookup all the user accounts for a given user.
 
 // Namespacing
-use crate::web::api::rcos::users::UserAccountType as user_account;
+use crate::api::rcos::users::UserAccountType as user_account;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -11,7 +11,7 @@ use crate::web::api::rcos::users::UserAccountType as user_account;
 pub struct UserAccounts;
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
+use crate::api::rcos::send_query;
 use user_accounts::Variables;
 
 impl UserAccounts {

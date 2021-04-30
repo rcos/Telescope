@@ -1,6 +1,6 @@
 //! GraphQL query for info about the current semester.
 
-use crate::web::api::rcos::prelude::*;
+use crate::api::rcos::prelude::*;
 
 /// Type representing GraphQL query for current semester data.
 #[derive(GraphQLQuery)]

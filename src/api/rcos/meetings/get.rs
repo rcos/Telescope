@@ -1,9 +1,9 @@
 //! List meetings query.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::meetings::MeetingType;
-use crate::web::api::rcos::prelude::*;
-use crate::web::api::rcos::send_query;
+use crate::api::rcos::meetings::MeetingType;
+use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
 use chrono::{DateTime, Utc};
 
 /// Type representing public RCOS meetings.

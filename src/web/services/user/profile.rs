@@ -3,7 +3,7 @@
 use crate::error::TelescopeError;
 use crate::templates::user::profile as profile_template;
 use crate::templates::Template;
-use crate::web::api::rcos::users::profile::{
+use crate::api::rcos::users::profile::{
     profile::{ProfileTarget, ResponseData},
     Profile,
 };

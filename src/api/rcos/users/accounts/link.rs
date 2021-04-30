@@ -1,7 +1,7 @@
 //! Mutation to insert or update a user account record.
 
 // Namespace items for generated code
-use crate::web::api::rcos::users::{UserAccountType as user_account, UserAccountType};
+use crate::api::rcos::users::{UserAccountType as user_account, UserAccountType};
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -11,7 +11,7 @@ use crate::web::api::rcos::users::{UserAccountType as user_account, UserAccountT
 pub struct LinkUserAccount;
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
+use crate::api::rcos::send_query;
 use link_user_account::{ResponseData, Variables};
 
 impl LinkUserAccount {

@@ -1,8 +1,8 @@
 //! Trait for types stored in the user's identity cookie.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::users::accounts::lookup::AccountLookup;
-use crate::web::api::rcos::users::UserAccountType;
+use crate::api::rcos::users::accounts::lookup::AccountLookup;
+use crate::api::rcos::users::UserAccountType;
 use crate::web::services::auth::oauth2_providers::{
     discord::DiscordIdentity, github::GitHubIdentity,
 };

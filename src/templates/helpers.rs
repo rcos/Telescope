@@ -1,6 +1,6 @@
 //! Handlebars helpers.
 
-use crate::web::api::rcos::meetings::MeetingType;
+use crate::api::rcos::meetings::MeetingType;
 use crate::web::profile_for;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use handlebars::{

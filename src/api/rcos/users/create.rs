@@ -1,7 +1,7 @@
 //! RCOS API mutation to create a user record and user_account record with it.
 
 // Import and rename for GraphQL macro
-use crate::web::api::rcos::users::{UserAccountType as user_account, UserRole as user_role};
+use crate::api::rcos::users::{UserAccountType as user_account, UserRole as user_role};
 
 /// Type representing GraphQL mutation to create a user and a user account.
 #[derive(GraphQLQuery)]
