@@ -18,6 +18,9 @@ fn twenty() -> u32 {
     20
 }
 
+/// The path to the developers page template from the templates directory.
+const TEMPLATE_PATH: &'static str = "user/developers";
+
 /// Which field should users be ordered by.
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
