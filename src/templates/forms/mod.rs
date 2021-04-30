@@ -15,25 +15,11 @@ use futures::future::LocalBoxFuture;
 use serde::Serialize;
 use serde_json::{Map, Value};
 use std::collections::HashMap;
-use serde::de::DeserializeOwned;
 
 pub mod common;
 pub mod meeting;
 pub mod register;
 
-/// Trait for Telescope's forms. Generic over the submitted input type and the
-/// output template type.
-pub trait Form {
-    /// The input to the form submitted by the user in their browser.
-    type Input: DeserializeOwned;
-
-    /// The type of the template sent to the user to display the form.
-    type Template: Serialize;
-
-    
-}
-
-/*
 /// A field in a form.
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
@@ -192,4 +178,3 @@ impl Responder for Form {
         });
     }
 }
-*/
