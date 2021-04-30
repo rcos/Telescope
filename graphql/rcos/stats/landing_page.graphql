@@ -1,6 +1,6 @@
 query LandingPageStatistics($now: date!) {
     # Count of students in ongoing semesters.
-    curent_students: enrollments_aggregate(
+    current_students: enrollments_aggregate(
         where: {
             semester: {
                 end_date: {_gte: $now}
