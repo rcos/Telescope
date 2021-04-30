@@ -2,9 +2,9 @@
 
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
-use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
-use crate::web::api::rcos::users::UserAccountType;
+use crate::api::rcos::send_query;
+use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
+use crate::api::rcos::users::UserAccountType;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use crate::web::services::auth::IdentityProvider;

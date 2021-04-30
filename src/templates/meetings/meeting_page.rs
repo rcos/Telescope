@@ -1,8 +1,8 @@
 //! Meeting page template.
 
 use crate::templates::Template;
-use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
-use crate::web::api::rcos::meetings::get_by_id::meeting::MeetingMeeting;
+use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
+use crate::api::rcos::meetings::get_by_id::meeting::MeetingMeeting;
 
 /// The path from the templates directory to this template.
 const TEMPLATE_NAME: &'static str = "meetings/page";

@@ -1,10 +1,10 @@
 //! GraphQL query to check if a user can view draft meetings.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
-use crate::web::api::rcos::prelude::*;
-use crate::web::api::rcos::send_query;
-use crate::web::api::rcos::users::UserRole;
+use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
+use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
+use crate::api::rcos::users::UserRole;
 use chrono::Local;
 
 /// Type representing GraphQL query to check if a user can view drafts.

@@ -2,7 +2,7 @@
 //! a partial other templates, but can be called manually via this module.
 
 use crate::templates::Template;
-use crate::web::api::rcos::meetings::MeetingType;
+use crate::api::rcos::meetings::MeetingType;
 use chrono::{DateTime, Utc};
 
 /// Path to the handlebars template file from the templates directory.

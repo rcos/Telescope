@@ -5,8 +5,8 @@ use crate::templates::{
     forms::{meeting::create as creation_form, Form},
     meetings, Template,
 };
-use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
-use crate::web::api::rcos::meetings::{
+use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
+use crate::api::rcos::meetings::{
     authorization_for::AuthorizationFor,
     get::{meetings::MeetingsMeetings, Meetings},
     get_by_id::{meeting::MeetingMeeting, Meeting},

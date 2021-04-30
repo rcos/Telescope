@@ -1,8 +1,8 @@
 //! Template for page listing of meetings.
 
 use crate::templates::Template;
-use crate::web::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
-use crate::web::api::rcos::meetings::get::meetings::MeetingsMeetings;
+use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
+use crate::api::rcos::meetings::get::meetings::MeetingsMeetings;
 use crate::web::services::meetings::MeetingsQuery;
 
 /// The path to the template's handlebars file.

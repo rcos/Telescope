@@ -19,19 +19,20 @@ extern crate derive_more;
 #[macro_use]
 extern crate graphql_client;
 
-use crate::discord_bot::DiscordBot;
+use actix::prelude::*;
+use actix_files as afs;
+use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::{App, HttpServer, middleware, web as aweb, web::get};
+use actix_web::cookie::SameSite;
+use chrono::Offset;
+use rand::Rng;
+use rand::rngs::OsRng;
+
 use crate::{
     templates::static_pages::{sponsors::SponsorsPage, StaticPage},
     web::csrf::CsrfJanitor,
 };
-use actix::prelude::*;
-use actix_files as afs;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::cookie::SameSite;
-use actix_web::{middleware, web as aweb, web::get, App, HttpServer};
-use chrono::Offset;
-use rand::rngs::OsRng;
-use rand::Rng;
+use crate::discord_bot::DiscordBot;
 
 mod app_data;
 mod discord_bot;
@@ -39,6 +40,7 @@ mod env;
 mod error;
 mod templates;
 mod web;
+pub mod api;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

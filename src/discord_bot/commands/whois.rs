@@ -11,7 +11,7 @@ use serenity::{
 };
 use serenity::model::prelude::{ApplicationCommandInteractionDataOption, InteractionResponseType};
 use serenity::model::user::User;
-use crate::web::api::rcos::users::discord_whois::DiscordWhoIs;
+use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";

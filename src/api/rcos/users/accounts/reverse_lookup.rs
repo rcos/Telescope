@@ -1,7 +1,7 @@
 //! RCOS API query to get the username (if available) of a user by platform and account id.
 
 // Import and rename for GraphQL macro
-use crate::web::api::rcos::users::UserAccountType as user_account;
+use crate::api::rcos::users::UserAccountType as user_account;
 
 /// Type representing query for username given a platform and user id on that
 /// platform.

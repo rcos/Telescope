@@ -1,7 +1,7 @@
 //! User profile template functions and constants.
 
 use crate::templates::Template;
-use crate::web::api::rcos::users::profile::profile::ProfileTarget;
+use crate::api::rcos::users::profile::profile::ProfileTarget;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";

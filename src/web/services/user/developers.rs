@@ -2,8 +2,8 @@
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::api::rcos::users::developers_page::DevelopersResponse;
-use crate::web::api::rcos::{
+use crate::api::rcos::users::developers_page::DevelopersResponse;
+use crate::api::rcos::{
     send_query,
     users::developers_page::{
         developers::{order_by, users_order_by},

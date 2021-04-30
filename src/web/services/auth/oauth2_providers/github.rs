@@ -1,8 +1,8 @@
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
-use crate::web::api::rcos::users::UserAccountType;
-use crate::web::api::{
+use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
+use crate::api::rcos::users::UserAccountType;
+use crate::api::{
     github::{
         self,
         users::authenticated_user::{
