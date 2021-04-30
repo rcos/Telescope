@@ -29,7 +29,7 @@ pub async fn profile(
     Query(ProfileQuery { username }): Query<ProfileQuery>,
 ) -> Result<Template, TelescopeError> {
     // Get the user's profile information from the RCOS API.
-    let response: ResponseData = Profile::for_user(username.clone()).await?;
+    let response: ResponseData = Profile::for_user(username).await?;
     // Throw an error if there is no user.
     if response.target.is_none() {
         return Err(TelescopeError::resource_not_found(
