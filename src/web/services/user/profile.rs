@@ -1,7 +1,6 @@
 //! Profile services.
 
 use crate::error::TelescopeError;
-use crate::templates::user::profile as profile_template;
 use crate::templates::Template;
 use crate::api::rcos::users::profile::{
     profile::{ProfileTarget, ResponseData},
@@ -10,6 +9,9 @@ use crate::api::rcos::users::profile::{
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
 use actix_web::HttpRequest;
+
+/// The path from the template directory to the profile template.
+const TEMPLATE_NAME: &'static str = "user/profile";
 
 /// Wrapper struct for deserializing username.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -43,7 +45,9 @@ pub async fn profile(
 
     // Make a profile template
     // Render it inside a page (with the user's name as the title)
-    return profile_template::make(&target_user, viewer_username)
+    return Template::new(TEMPLATE_NAME)
+        .field("target", &target_user)
+        .field("viewer_username", viewer_username)
         .render_into_page(
             &req,
             format!("{} {}", target_user.first_name, target_user.last_name),
