@@ -12,6 +12,7 @@ pub const USERS: &'static str = "users";
 
 /// The handlebars key for the query parameters.
 pub const QUERY: &'static str = "query";
+
 /// The handlebars key for a user's username.
 pub const USERNAME: &'static str = "username";
 
