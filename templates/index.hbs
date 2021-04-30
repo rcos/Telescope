@@ -105,20 +105,36 @@
                 <h4 class="card-header text-center">Statistics</h4>
                 <ul class="list-group">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{current_semester}} Projects:
-                        <a class="badge badge-primary" href="/projects">{{active_projects}}</a>
+                        {{#with stats.current_projects.aggregate}}
+                            Active Projects:
+                            <a class="badge badge-primary" href="/projects">{{count}}</a>
+                        {{else}}
+                            Could not retrieve active project count from RCOS API.
+                        {{/with}}
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Total Project Count:
-                        <a class="badge badge-secondary" href="/projects">{{total_projects}}</a>
+                        {{#with stats.total_projects.aggregate}}
+                            Total Project Count:
+                            <a class="badge badge-secondary" href="/projects">{{count}}</a>
+                        {{else}}
+                            Could not retrieve total project count from RCOS API.
+                        {{/with}}
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Students active {{current_semester}}:
-                        <a class="badge badge-primary" href="/developers">{{current_students}}</a>
+                        {{#with stats.current_students.aggregate}}
+                            Active Students:
+                            <a class="badge badge-primary" href="/developers">{{count}}</a>
+                        {{else}}
+                            Could not retrieve active student count from RCOS API.
+                        {{/with}}
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        User Count:
-                        <a class="badge badge-secondary" href="/developers">{{total_users}}</a>
+                        {{#with stats.total_students.aggregate}}
+                            User Count:
+                            <a class="badge badge-secondary" href="/developers">{{count}}</a>
+                        {{else}}
+                            Could not retrieve user count from RCOS API.
+                        {{/with}}
                     </li>
                 </ul>
             </div>

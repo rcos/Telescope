@@ -1,23 +1,28 @@
-query LandingPageStatistics {
-    current_semester: semesters(
-        order_by: {end_date: desc_nulls_last},
-        limit: 1
+query LandingPageStatistics($now: date!) {
+    # Count of students in ongoing semesters.
+    curent_students: enrollments_aggregate(
+        where: {
+            semester: {
+                end_date: {_gte: $now}
+                start_date: {_lte: $now}
+            }
+        },
+        distinct_on: [username]
     ) {
-        title
-
-        current_students: enrollments_aggregate {
-            aggregate {
-                count
-            }
+        aggregate {
+            count
         }
+    }
 
-        current_projects: enrollments_aggregate (
-            distinct_on: project_id,
-            where: { project_id: {_is_null: false} }
-        ) {
-            aggregate {
-                count
-            }
+    # Count of projects associated with a small group of an ongoing semester
+    current_projects: projects_aggregate(
+        where: {small_group_projects: {small_group: {semester: {
+            start_date: {_lte: $now}
+            end_date: {_gte: $now}
+        }}}}
+    ) {
+        aggregate {
+            count
         }
     }
 

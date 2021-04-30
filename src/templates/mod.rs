@@ -11,7 +11,6 @@ use crate::error::TelescopeError;
 pub mod auth;
 pub mod forms;
 pub mod helpers;
-pub mod homepage;
 pub mod jumbotron;
 pub mod meetings;
 pub mod navbar;
