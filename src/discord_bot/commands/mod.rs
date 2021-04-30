@@ -1,17 +1,17 @@
 //! Telescope's discord bot commands.
 
-use serenity::client::Context;
-use serenity::builder::CreateInteraction;
 use crate::discord_bot::event_handler::discord_client_id;
-use serenity::model::interactions::Interaction;
-use serenity::model::id::GuildId;
-use serenity::model::prelude::{ApplicationCommand, CommandId};
 use dashmap::DashMap;
-use std::pin::Pin;
 use futures::future::BoxFuture;
+use serenity::builder::CreateInteraction;
+use serenity::client::Context;
+use serenity::model::guild::Guild;
+use serenity::model::id::GuildId;
+use serenity::model::interactions::Interaction;
+use serenity::model::prelude::{ApplicationCommand, CommandId};
 use std::borrow::Borrow;
 use std::ops::Deref;
-use serenity::model::guild::Guild;
+use std::pin::Pin;
 
 mod whois;
 
@@ -25,7 +25,6 @@ type InteractionHandler = fn(Context, Interaction) -> InteractionResult;
 /// Command builder type. These builder function all act on serenity models
 /// and add the necessary info to them for each command.
 type CommandBuilder = fn(&mut CreateInteraction) -> &mut CreateInteraction;
-
 
 /// Telescope's concept of a discord command.
 /// A builder function and a handler function.
@@ -41,12 +40,12 @@ const COMMANDS: &'static [Command] = &[
     Command {
         name: whois::COMMAND_NAME,
         builder: whois::create_whois,
-        handler: whois::handle_whois
-    }
+        handler: whois::handle_whois,
+    },
 ];
 
 // Global command map.
-lazy_static!{ static ref COMMAND_MAP: DashMap<String, InteractionHandler> = {
+lazy_static! { static ref COMMAND_MAP: DashMap<String, InteractionHandler> = {
     let map = DashMap::new();
 
     // Add the commands to the map
@@ -86,16 +85,18 @@ pub async fn register_commands_for_guild(ctx: &mut Context, guild: &Guild) -> se
 
     // Register each command to the whitelisted Guild ID.
     for cmd in COMMANDS {
-
         let created: ApplicationCommand = Interaction::create_guild_application_command(
             ctx.http.as_ref(),
             guild.id,
             app_id,
-            cmd.builder
-        ).await?;
+            cmd.builder,
+        )
+        .await?;
 
-        info!("Registered '/{}' command for '{}' guild (command ID: {}) (guild ID: {})",
-              created.name, guild.name, created.id, guild.id);
+        info!(
+            "Registered '/{}' command for '{}' guild (command ID: {}) (guild ID: {})",
+            created.name, guild.name, created.id, guild.id
+        );
     }
 
     return Ok(());

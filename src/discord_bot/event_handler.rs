@@ -1,13 +1,13 @@
 //! Event handling code for the telescope Discord Bot.
 
-use serenity::client::{EventHandler, Context};
-use serenity::model::gateway::Ready;
 use crate::discord_bot::commands;
+use crate::discord_bot::commands::{get_handler, register_commands_for_guild};
 use crate::env::global_config;
+use serenity::client::{Context, EventHandler};
+use serenity::model::gateway::Ready;
 use serenity::model::guild::Guild;
-use crate::discord_bot::commands::{register_commands_for_guild, get_handler};
+use serenity::model::interactions::{InteractionResponseType, InteractionType};
 use serenity::model::prelude::Interaction;
-use serenity::model::interactions::{InteractionType, InteractionResponseType};
 
 /// Get the global config's discord client ID parsed to a u64.
 pub fn discord_client_id() -> u64 {
@@ -24,14 +24,24 @@ pub struct Handler;
 #[serenity::async_trait]
 impl EventHandler for Handler {
     async fn guild_create(&self, mut ctx: Context, guild: Guild, is_new: bool) {
-        info!("{}uild connected: {} (ID: {})",
-              is_new.then(|| "NEW g").unwrap_or("G"), guild.name, guild.id);
+        info!(
+            "{}uild connected: {} (ID: {})",
+            is_new.then(|| "NEW g").unwrap_or("G"),
+            guild.name,
+            guild.id
+        );
 
         // Check if the guild is whitelisted.
-        if global_config().discord_config.debug_guild_ids.contains(guild.id.as_u64()) {
+        if global_config()
+            .discord_config
+            .debug_guild_ids
+            .contains(guild.id.as_u64())
+        {
             // If so, register telescope's commands
-            info!("Registering telescope's Discord commands for guild \"{}\" (ID: {})",
-                  guild.name, guild.id);
+            info!(
+                "Registering telescope's Discord commands for guild \"{}\" (ID: {})",
+                guild.name, guild.id
+            );
 
             register_commands_for_guild(&mut ctx, &guild)
                 .await
@@ -43,7 +53,11 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         // Let us know we're connected.
-        info!("{} is connected! (user id: {})", ready.user.tag(), ready.user.id);
+        info!(
+            "{} is connected! (user id: {})",
+            ready.user.tag(),
+            ready.user.id
+        );
 
         // Get the list of global application commands.
         ctx.http
@@ -51,7 +65,11 @@ impl EventHandler for Handler {
             .await
             // Log them on success
             .map(|list| {
-                info!("{} global application commands registered: {:#?}", list.len(), list);
+                info!(
+                    "{} global application commands registered: {:#?}",
+                    list.len(),
+                    list
+                );
             })
             // Otherwise log an error message.
             .unwrap_or_else(|err| {
@@ -74,15 +92,13 @@ impl EventHandler for Handler {
                 if let Err(err) = r {
                     error!("Error responding to Ping interaction: {}", err);
                 }
-            },
+            }
 
             // Application commands. These map to one of the commands registered
             // in the global command ID map.
             InteractionType::ApplicationCommand => {
                 // The data field should always be available on this variant.
-                let command_name = interaction.data
-                    .as_ref()
-                    .map(|data| data.name.as_str());
+                let command_name = interaction.data.as_ref().map(|data| data.name.as_str());
 
                 // If we receive a command without a name, throw an error and return.
                 if command_name.is_none() {
@@ -97,7 +113,10 @@ impl EventHandler for Handler {
 
                 // Error if the handler doesn't exist.
                 if handler.is_none() {
-                    error!("Handler not found for '/{}'. Interaction: {:#?}", command_name, interaction);
+                    error!(
+                        "Handler not found for '/{}'. Interaction: {:#?}",
+                        command_name, interaction
+                    );
                     return;
                 }
 
@@ -111,7 +130,7 @@ impl EventHandler for Handler {
                 if let Err(err) = handler_result {
                     error!("'/{}' handler returned an error: {}", command_name, err);
                 }
-            },
+            }
 
             // Non-exhaustive match requires other branch.
             other => warn!("Unhandled interaction type: {:?}", other),

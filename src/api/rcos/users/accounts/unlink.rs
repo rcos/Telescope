@@ -10,8 +10,8 @@ use crate::api::rcos::users::UserAccountType as user_account;
 )]
 pub struct UnlinkUserAccount;
 
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 use unlink_user_account::{ResponseData, Variables};
 
 impl UnlinkUserAccount {

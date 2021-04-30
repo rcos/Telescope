@@ -10,8 +10,8 @@ use crate::api::rcos::users::UserAccountType as user_account;
 )]
 pub struct UserAccounts;
 
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 use user_accounts::Variables;
 
 impl UserAccounts {

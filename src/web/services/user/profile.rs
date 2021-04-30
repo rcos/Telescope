@@ -1,11 +1,11 @@
 //! Profile services.
 
-use crate::error::TelescopeError;
-use crate::templates::Template;
 use crate::api::rcos::users::profile::{
     profile::{ProfileTarget, ResponseData},
     Profile,
 };
+use crate::error::TelescopeError;
+use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
 use actix_web::HttpRequest;

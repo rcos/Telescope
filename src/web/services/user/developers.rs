@@ -1,7 +1,5 @@
 //! Developers page services
 
-use crate::error::TelescopeError;
-use crate::templates::Template;
 use crate::api::rcos::users::developers_page::DevelopersResponse;
 use crate::api::rcos::{
     send_query,
@@ -10,6 +8,8 @@ use crate::api::rcos::{
         Developers,
     },
 };
+use crate::error::TelescopeError;
+use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::Query;
 

@@ -2,12 +2,12 @@
 //! [here](https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol.html)
 //! and work from RPI students who came before me.
 
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::link::LinkUserAccount;
 use crate::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
+use crate::error::TelescopeError;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::{identity::Identity, make_redirect_url, IdentityProvider};

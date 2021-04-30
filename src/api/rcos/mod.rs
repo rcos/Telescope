@@ -1,9 +1,9 @@
 //! API interactions and functionality.
 
-use crate::env::global_config;
-use crate::error::TelescopeError;
 use crate::api::handle_graphql_response;
 use crate::api::rcos::auth::ApiJwtClaims;
+use crate::env::global_config;
+use crate::error::TelescopeError;
 use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
 use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 

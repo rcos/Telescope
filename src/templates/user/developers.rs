@@ -1,7 +1,7 @@
 //! Developers page template fields and functions
 
-use crate::templates::Template;
 use crate::api::rcos::users::developers_page::DevelopersResponse;
+use crate::templates::Template;
 use crate::web::services::user::developers::DevelopersPageQuery;
 
 /// The path to the developers page template from the templates directory.

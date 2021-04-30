@@ -1,16 +1,16 @@
 //! Meetings page and services
 
-use crate::error::TelescopeError;
-use crate::templates::{
-    forms::{meeting::create as creation_form, Form},
-    meetings, Template,
-};
 use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::api::rcos::meetings::{
     authorization_for::AuthorizationFor,
     get::{meetings::MeetingsMeetings, Meetings},
     get_by_id::{meeting::MeetingMeeting, Meeting},
     MeetingType,
+};
+use crate::error::TelescopeError;
+use crate::templates::{
+    forms::{meeting::create as creation_form, Form},
+    meetings, Template,
 };
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Path, Query, ServiceConfig};

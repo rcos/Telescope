@@ -1,8 +1,8 @@
 //! Module bridging to template used to render meeting title. This template is mostly used as
 //! a partial other templates, but can be called manually via this module.
 
-use crate::templates::Template;
 use crate::api::rcos::meetings::MeetingType;
+use crate::templates::Template;
 use chrono::{DateTime, Utc};
 
 /// Path to the handlebars template file from the templates directory.

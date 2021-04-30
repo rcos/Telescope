@@ -1,8 +1,8 @@
 //! Discord functionality built on top of serenity.
 //!
 
-mod event_handler;
 mod commands;
+mod event_handler;
 
 use crate::discord_bot::event_handler::Handler;
 use crate::env::{global_config, DiscordConfig};

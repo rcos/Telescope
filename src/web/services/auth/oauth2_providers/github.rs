@@ -1,5 +1,3 @@
-use crate::env::global_config;
-use crate::error::TelescopeError;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::api::{
@@ -12,6 +10,8 @@ use crate::api::{
     },
     rcos,
 };
+use crate::env::global_config;
+use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{Identity, RootIdentity};
 use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
 use futures::future::LocalBoxFuture;

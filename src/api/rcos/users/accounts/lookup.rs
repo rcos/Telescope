@@ -1,7 +1,7 @@
 //! Lookup an account by the type and username.
 
-use crate::error::TelescopeError;
 use crate::api::rcos::{prelude::*, send_query};
+use crate::error::TelescopeError;
 
 /// GraphQL query to lookup a user account by type and username.
 #[derive(GraphQLQuery)]

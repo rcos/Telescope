@@ -1,9 +1,9 @@
 //! Registration form and constants.
 
+use crate::api::rcos::users::UserAccountType;
 use crate::error::TelescopeError;
 use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::Form;
-use crate::api::rcos::users::UserAccountType;
 use crate::web::services::auth::identity::RootIdentity;
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 

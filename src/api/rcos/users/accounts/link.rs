@@ -10,8 +10,8 @@ use crate::api::rcos::users::{UserAccountType as user_account, UserAccountType};
 )]
 pub struct LinkUserAccount;
 
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 use link_user_account::{ResponseData, Variables};
 
 impl LinkUserAccount {

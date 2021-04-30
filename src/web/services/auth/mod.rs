@@ -1,7 +1,7 @@
-use crate::error::TelescopeError;
 use crate::api::rcos::users::accounts::for_user::UserAccounts;
 use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
+use crate::error::TelescopeError;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;

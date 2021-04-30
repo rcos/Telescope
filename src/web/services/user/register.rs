@@ -1,12 +1,12 @@
-use crate::error::TelescopeError;
-use crate::templates::forms::{register, FormInput};
-use crate::templates::{auth, page, Template};
 use crate::api::github::users::authenticated_user::authenticated_user::AuthenticatedUserViewer;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::create::{
     create_one_user::Variables as CreateOneUserVariables, CreateOneUser,
 };
 use crate::api::rcos::users::{UserAccountType, UserRole};
+use crate::error::TelescopeError;
+use crate::templates::forms::{register, FormInput};
+use crate::templates::{auth, page, Template};
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;

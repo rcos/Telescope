@@ -1,11 +1,8 @@
 //! Module for serving the RCOS homepage.
 
+use crate::api::rcos::{landing_page_stats::LandingPageStatistics, send_query};
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::api::rcos::{
-    landing_page_stats::LandingPageStatistics,
-    send_query,
-};
 use actix_web::HttpRequest;
 
 /// Path to the Handlebars file from the templates directory.

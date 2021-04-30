@@ -1,7 +1,7 @@
 use super::{make_redirect_url, IdentityProvider};
-use crate::error::TelescopeError;
 use crate::api::rcos::users::UserAccountType;
 use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
+use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{Identity, RootIdentity};
 use crate::web::{csrf, profile_for};
 use actix_web::http::header::LOCATION;

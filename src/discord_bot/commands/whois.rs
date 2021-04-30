@@ -1,17 +1,16 @@
 //! Discord slash command to get information about a user.
 
-use serenity::model::interactions::{ApplicationCommandOptionType, Interaction, ApplicationCommandInteractionData};
+use crate::api::rcos::users::discord_whois::DiscordWhoIs;
+use crate::discord_bot::commands::InteractionResult;
+use futures::future::LocalBoxFuture;
 use serenity::builder::{CreateInteraction, CreateInteractionOption};
 use serenity::client::Context;
-use futures::future::LocalBoxFuture;
-use crate::discord_bot::commands::InteractionResult;
-use serenity::{
-    Result as SerenityResult,
-    Error as SerenityError,
+use serenity::model::interactions::{
+    ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
 };
 use serenity::model::prelude::{ApplicationCommandInteractionDataOption, InteractionResponseType};
 use serenity::model::user::User;
-use crate::api::rcos::users::discord_whois::DiscordWhoIs;
+use serenity::{Error as SerenityError, Result as SerenityResult};
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -43,13 +42,15 @@ pub fn handle_whois(ctx: Context, interaction: Interaction) -> InteractionResult
 /// Inner async fn to handle /whois commands without dealing with annoying types.
 async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
     // Get the interaction data reference
-    let data: &ApplicationCommandInteractionData = interaction.data
+    let data: &ApplicationCommandInteractionData = interaction
+        .data
         .as_ref()
         // This should exist and be checked for before now.
         .unwrap();
 
     // Extract the user ID from the payload.
-    let user_id = data.options
+    let user_id = data
+        .options
         .get(0)
         // Check that the option name matches the one set previously
         .filter(|opt| opt.name == OPTION_NAME)
@@ -61,7 +62,10 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
         .and_then(|string| string.parse::<u64>().ok())
         // Log an error if the command has no user.
         .ok_or_else(|| {
-            error!("'/whois' command missing user option. Interaction: {:#?}", interaction);
+            error!(
+                "'/whois' command missing user option. Interaction: {:#?}",
+                interaction
+            );
         })
         // Unwrap because we expect discord not to give bad data.
         .unwrap();
@@ -91,7 +95,6 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
 
          */
     }
-
 
     Ok(())
 }

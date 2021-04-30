@@ -14,10 +14,10 @@ pub struct DiscordWhoIs;
 
 use discord_who_is::Variables;
 
-pub use discord_who_is::ResponseData;
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 use chrono::Utc;
+pub use discord_who_is::ResponseData;
 
 impl DiscordWhoIs {
     /// Send this query for a given discord user.
@@ -25,7 +25,7 @@ impl DiscordWhoIs {
         // Construct the query variables
         let query_vars = Variables {
             now: Utc::today().naive_utc(),
-            discord_id: format!("{}", discord_id)
+            discord_id: format!("{}", discord_id),
         };
 
         // Send the query.
