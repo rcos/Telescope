@@ -1,9 +1,9 @@
 //! Web services and utilities.
 
-use crate::web::services::user::profile::ProfileQuery;
 use reqwest::header::HeaderValue;
 
-pub mod api;
+use crate::web::services::user::profile::ProfileQuery;
+
 pub mod csrf;
 pub mod error_rendering_middleware;
 pub mod services;

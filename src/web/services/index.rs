@@ -2,7 +2,7 @@
 
 use crate::error::TelescopeError;
 use crate::templates::{homepage, page, Template};
-use crate::web::api::rcos::{
+use crate::api::rcos::{
     landing_page_stats::{LandingPageStatistics, LandingPageStatsVars},
     send_query,
 };

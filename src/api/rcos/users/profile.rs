@@ -1,7 +1,7 @@
 //! Profile query.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::{prelude::*, send_query};
+use crate::api::rcos::{prelude::*, send_query};
 
 #[derive(GraphQLQuery)]
 #[graphql(

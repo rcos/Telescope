@@ -1,7 +1,7 @@
 //! GraphQL query to get user info to populate the embed for the `/whois` command on the
 //! RCOS Discord bot.
 
-use crate::web::api::rcos::prelude::*;
+use crate::api::rcos::prelude::*;
 
 /// ZST representing the associated GraphQL query.
 #[derive(GraphQLQuery)]
@@ -16,7 +16,7 @@ use discord_who_is::Variables;
 
 pub use discord_who_is::ResponseData;
 use crate::error::TelescopeError;
-use crate::web::api::rcos::send_query;
+use crate::api::rcos::send_query;
 use chrono::Utc;
 
 impl DiscordWhoIs {

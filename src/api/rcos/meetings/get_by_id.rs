@@ -1,8 +1,8 @@
 //! GraphQL query to get a meeting by its ID.
 
 use crate::error::TelescopeError;
-use crate::web::api::rcos::prelude::*;
-use crate::web::api::rcos::send_query;
+use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
 
 /// Type representing public RCOS meetings.
 #[derive(GraphQLQuery)]
