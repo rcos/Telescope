@@ -1,19 +1,56 @@
+# Fragment used by the two variants of the Developers query to get user info.
+fragment UserInfo on users {
+    username
+    first_name
+    last_name
+    role
+
+    # RCS ID if available
+    rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+        account_id
+    }
+
+
+    # Are they a coordinator in an ongoing semester
+    is_coordinating: enrollments(
+        where: {
+            semester: {
+                start_date: {_lte: $now}
+                end_date: {_gte: $now}
+            },
+            is_coordinator: {_eq: true}
+        }
+    ) {
+        semester {
+            title
+        }
+    }
+
+    # What small groups does this user currently mentor?
+    current_mentoring: small_group_mentors(
+        where: {small_group: {semester: {
+            start_date: {_lte: $now}
+            end_date: {_gte: $now}
+        }}}
+    ) {
+        small_group {
+            title
+        }
+    }
+
+}
+
+# Developers Page Query
 query Developers(
     $limit: Int!,
     $offset: Int!,
     $search: String!,
-    $order_by: users_order_by!,
+    $now: date!,
+    $include_old: Boolean!
 ) {
-    # Get the current semester
-    current_semester: semesters(
-        limit: 1,
-        order_by: {start_date: desc_nulls_last}
-    ) {
-        semester_id
-        title
-    }
-
-    users(
+    # All users (this field will be available if old users are included.)
+    all_users: users(
+        # Get users in groups of 20.
         limit: $limit,
         offset: $offset,
         where: {
@@ -23,39 +60,28 @@ query Developers(
                 username: {_ilike: $search}
             }
         },
-        order_by: [$order_by]
-    ) {
-        username
-        first_name
-        last_name
+        order_by: [{first_name: asc}, {last_name: asc}]
+    ) @include(if: $include_old) {
+        ...UserInfo
+    }
 
-        # What accounts are associated
-        user_accounts {
-            account_id
-            type
-        }
-
-        # Are they a coordinator the most recent semester
-        newest_enrollment: enrollments(
-            limit: 1,
-            order_by: {semester: {start_date: desc_nulls_last}}
-        ) {
-            is_coordinator
-            semester_id
-        }
-
-        # Is this user a mentor for the
-        # most recent semester?
-        small_group_mentors(
-            limit: 1,
-            order_by: {
-                small_group: {
-                    semester: {start_date: desc_nulls_last}}},
-        ) {
-            small_group {
-                small_group_id
-                semester_id
+    # Current users (if include_old is false)
+    current_users: users(
+        # Get users in groups of 20
+        limit: $limit,
+        offset: $offset,
+        where: {
+            enrollments: {semester: {
+                start_date: {_lte: $now}
+                end_date: {_gte: $now}
+            }},
+            _or: {
+                first_name: {_ilike: $search}
+                last_name: {_ilike: $search}
+                username: {_ilike: $search}
             }
         }
+    ) @skip(if: $include_old) {
+        ... UserInfo
     }
 }

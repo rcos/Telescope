@@ -1,13 +1,24 @@
 <h1>Developers</h1>
 
 {{! Form to filter users }}
-<form method="get">
-    <div class="form-row">
-        <div class="col">
-
-            <button class="btn btn-primary" type="submit">View</button>
+<form method="get" class="mb-2">
+    <div class="input-group mr-2">
+        <div class="input-group-prepend">
+            <div class="input-group-text">
+                <i data-feather="search"></i>
+            </div>
         </div>
+        <input type="text" name="search" class="form-control" placeholder="Search..." aria-label="Search">
     </div>
+
+    <div class="form-check mr-2">
+        <input class="form-check-input" type="checkbox" name="include_old" id="include-old">
+        <label for="include-old" class="form-check-label">
+            Include previous members
+        </label>
+    </div>
+
+    <button class="btn btn-primary" type="submit">View</button>
 </form>
 
 {{!--
