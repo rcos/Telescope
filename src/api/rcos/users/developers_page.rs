@@ -19,6 +19,8 @@ const PER_PAGE: u32 = 20;
 pub struct Developers;
 
 use developers::{ResponseData, Variables};
+use crate::error::TelescopeError;
+use crate::api::rcos::send_query;
 
 lazy_static! {
     static ref SEARCH_REGEX: Regex = Regex::new(r"[@%\]").unwrap();
@@ -34,13 +36,6 @@ fn escape_search_string(search: &str) -> Cow<'_, str> {
 
 impl Developers {
     /// Create the variables object to pass to the GraphQL query.
-    ///
-    /// ## Parameters:
-    /// - `limit`: The number of users to return.
-    /// - `offset`: The offset into the user data.
-    /// - `search`: Case insensitive string to match against user's first name,
-    ///     last name, or username. This gets escaped before being sent.
-    /// - `order_by`: How to order the users requested.
     fn make_variables(
         page_num: u32,
         search: Option<String>,
@@ -48,7 +43,7 @@ impl Developers {
     ) -> Variables {
         Variables {
             limit: PER_PAGE as i64,
-            offset: PER_PAGE*page_num as i64,
+            offset: (PER_PAGE * page_num) as i64,
             // Search string should default to matching any user.
             search: search
                 // Escape the search string and surround it in `%`s to match on any sequence.
@@ -60,5 +55,8 @@ impl Developers {
         }
     }
 
-    pub async fn get(page_num: u32, search: Option<String>, include_old: bool) ->
+    /// Send the developers page query and wait for a response.
+    pub async fn get(page_num: u32, search: Option<String>, include_old: bool) -> Result<ResponseData, TelescopeError> {
+        send_query::<Self>(Self::make_variables(page_num, search, include_old)).await
+    }
 }

@@ -1,7 +1,5 @@
 //! Developers page services
 
-use crate::api::rcos::users::developers_page::DevelopersResponse;
-use crate::api::rcos::users::developers_page::Developers;
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
@@ -37,6 +35,7 @@ pub async fn developers_page(
     // Explicitly return not implemented to avoid exposing unfinished page.
     return Err(TelescopeError::NotImplemented);
 
+    /*
     // Extract the number of users to retrieve.
     let limit: u32 = query.per_page;
     // Extract the offset into the user data for the API query.
@@ -53,4 +52,6 @@ pub async fn developers_page(
     let query_response: DevelopersResponse = send_query::<Developers>(variables).await?.simplify();
 
     Err(TelescopeError::NotImplemented)
+
+     */
 }
