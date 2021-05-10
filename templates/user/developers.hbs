@@ -8,7 +8,11 @@
                 <i data-feather="search"></i>
             </div>
         </div>
-        <input type="text" name="search" class="form-control" placeholder="Search..." aria-label="Search">
+        <input type="text" name="search" class="form-control" placeholder="Search..." aria-label="Search"
+               {{#with query.search}}
+                   value="{{this}}"
+               {{/with}}
+        >
     </div>
 
     <div class="form-check mr-2">

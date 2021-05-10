@@ -9,11 +9,13 @@ mod register;
 
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {
+    // Developers page
+    developers::register_services(config);
+
+    // Everything else
     config
         // User profile and settings
         .service(profile::profile)
-        // Developers page
-        .service(developers::developers_page)
         // Login related services.
         .service(login::login_page)
         .service(login::logout)

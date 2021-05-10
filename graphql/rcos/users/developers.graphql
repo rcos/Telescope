@@ -10,7 +10,6 @@ fragment UserInfo on users {
         account_id
     }
 
-
     # Are they a coordinator in an ongoing semester
     is_coordinating: enrollments(
         where: {
