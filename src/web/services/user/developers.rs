@@ -8,6 +8,8 @@ use actix_web::web::{
     self as aweb
 };
 use actix_web::HttpRequest;
+use serde_json::Value;
+use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers};
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "user/developers";
@@ -59,9 +61,21 @@ pub async fn developers_page(
         // Otherwise default to 0
         .unwrap_or(0);
 
-    // Send the API query
-    let api_data = unimplemented!();
-        //Developers::get(page_num, query.search.clone(), query.include_old).await?;
+    // Get the API data by sending one of the developer page queries.
+    let api_data: Value;
+    // Determine which API query to send using the request query.
+    if query.include_old {
+        // Get all the developers (including ones not active this semester).
+        let query_response = AllDevelopers::get(page_num, query.search.clone()).await?;
+        // Convert the response into a JSON value.
+        api_data = serde_json::to_value(query_response)
+            .expect("Could not serialize API response to JSON value.");
+    } else {
+        // Get only the current developers.
+        let query_response = CurrentDevelopers::get(page_num, query.search.clone()).await?;
+        api_data = serde_json::to_value(query_response)
+            .expect("Could not serialize API response to JSON value.");
+    }
 
     // Get the viewers username
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
