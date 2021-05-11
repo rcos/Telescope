@@ -7,7 +7,6 @@ use actix_web::web::{
     Query, Path, ServiceConfig,
     self as aweb
 };
-use crate::api::rcos::users::developers_page::Developers;
 use actix_web::HttpRequest;
 
 /// The path to the developers page template from the templates directory.
@@ -61,7 +60,8 @@ pub async fn developers_page(
         .unwrap_or(0);
 
     // Send the API query
-    let api_data = Developers::get(page_num, query.search.clone(), query.include_old).await?;
+    let api_data = unimplemented!();
+        //Developers::get(page_num, query.search.clone(), query.include_old).await?;
 
     // Get the viewers username
     let viewer_username: Option<String> = identity.get_rcos_username().await?;

@@ -39,16 +39,14 @@ fragment UserInfo on users {
 
 }
 
-# Developers Page Query
-query Developers(
+# Developers Page Query (including older developers)
+query AllDevelopers(
     $limit: Int!,
     $offset: Int!,
     $search: String!,
     $now: date!,
-    $include_old: Boolean!
 ) {
-    # All users (this field will be available if old users are included.)
-    all_users: users(
+    users(
         # Get users in groups of 20.
         limit: $limit,
         offset: $offset,
@@ -60,12 +58,17 @@ query Developers(
             }
         },
         order_by: [{first_name: asc}, {last_name: asc}]
-    ) @include(if: $include_old) {
-        ...UserInfo
-    }
+    ) {...UserInfo}
+}
 
-    # Current users (if include_old is false)
-    current_users: users(
+# Separate query to get list of (current) developers for the developers page.
+query CurrentDevelopers(
+    $limit: Int!,
+    $offset: Int!,
+    $search: String!,
+    $now: date!,
+) {
+    users(
         # Get users in groups of 20
         limit: $limit,
         offset: $offset,
@@ -80,7 +83,6 @@ query Developers(
                 username: {_ilike: $search}
             }
         }
-    ) @skip(if: $include_old) {
-        ... UserInfo
-    }
+        order_by: [{first_name: asc}, {last_name: asc}]
+    ) {... UserInfo}
 }
