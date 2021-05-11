@@ -32,7 +32,7 @@ pub struct AllDevelopers;
 pub struct CurrentDevelopers;
 
 lazy_static! {
-    static ref SEARCH_REGEX: Regex = Regex::new(r"[@%\]").unwrap();
+    static ref SEARCH_REGEX: Regex = Regex::new(r"[@%\\]").unwrap();
 }
 
 /// Escape a search string by putting a back-slash before all

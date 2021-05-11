@@ -36,7 +36,7 @@ pub struct DevelopersPageQuery {
 
     /// Should the results include previous members?
     #[serde(default)]
-    pub include_old: bool,
+    pub include_old: String,
 }
 
 pub fn register_services(conf: &mut ServiceConfig) {
@@ -64,7 +64,7 @@ pub async fn developers_page(
     // Get the API data by sending one of the developer page queries.
     let api_data: Value;
     // Determine which API query to send using the request query.
-    if query.include_old {
+    if query.include_old == "on" {
         // Get all the developers (including ones not active this semester).
         let query_response = AllDevelopers::get(page_num, query.search.clone()).await?;
         // Convert the response into a JSON value.
