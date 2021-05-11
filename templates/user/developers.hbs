@@ -1,7 +1,7 @@
 <h1>Developers</h1>
 
-{{! Form to filter users }}
-<form method="get" class="mb-2 form-inline">
+{{! Form to filter users -- use the action attribute to prevent queries from a later page indexing incorrectly }}
+<form method="get" class="mb-2 form-inline" action="/developers">
     <div class="input-group mr-2">
         <div class="input-group-prepend">
             <div class="input-group-text">
@@ -16,7 +16,9 @@
     </div>
 
     <div class="form-check mr-2">
-        <input class="form-check-input" type="checkbox" name="include_old" id="include-old">
+        <input class="form-check-input" type="checkbox" name="include_old" id="include-old" value="true"
+            {{#if query.include_old}} checked {{/if}}
+        >
         <label for="include-old" class="form-check-label">
             Include previous members
         </label>
