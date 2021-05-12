@@ -47,25 +47,25 @@ query Profile($username: String!) {
         }
 
         # Meedings this user has hosted
-        hosting: meetings(order_by: {start_date_time: desc}) {
-            semester {
-                semester_id
-                title
-            }
-
-            meeting_id
-            title
-            type
-            start_date_time
-            end_date_time
-            agenda
-            location
-            is_draft
-            is_remote
-            meeting_url
-            external_presentation_url
-            recording_url
-
-        }
+#        hosting: meetings(order_by: {start_date_time: desc}) {
+#            semester {
+#                semester_id
+#                title
+#            }
+#
+#            meeting_id
+#            title
+#            type
+#            start_date_time
+#            end_date_time
+#            agenda
+#            location
+#            is_draft
+#            is_remote
+#            meeting_url
+#            external_presentation_url
+#            recording_url
+#
+#        }
     }
 }
