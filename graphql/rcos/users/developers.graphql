@@ -109,12 +109,4 @@ query CurrentDevelopers(
         }
         order_by: [{first_name: asc}, {last_name: asc}]
     ) {... UserInfo}
-
-    # Ongoing semester info
-    ongoing_semesters: semesters(where: {
-        start_date: {_lte: $now}
-        end_date: {_gte: $now}
-    }) {
-        title
-    }
 }

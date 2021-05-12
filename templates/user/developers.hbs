@@ -91,7 +91,20 @@
 {{/with}}
 
 {{! User info }}
+{{#each data.users}}
 
+{{else}}
+    {{! No users -- display a message }}
+    <div class="justify-content-center">
+        Could not find any users matching these parameters.
+
+        {{! Additional message on only current users }}
+        {{#unless query.include_old }}
+            Perhaps the current semester is over or there have not been any recorded enrollments yet. You can check the
+            box above to include all RCOS members from previous semesters.
+        {{/unless}}
+    </div>
+{{/each}}
 
 
 {{!--
