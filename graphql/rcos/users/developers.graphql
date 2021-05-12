@@ -48,11 +48,11 @@ query AllDevelopers(
 ) {
     # Count of users to determine the number of pages
     user_count: users_aggregate(where: {
-        _or: {
-            first_name: {_ilike: $search},
-            last_name: {_ilike: $search},
-            username: {_ilike: $search}
-        }
+        _or: [
+            {first_name: {_ilike: $search}},
+            {last_name: {_ilike: $search}},
+            {username: {_ilike: $search}},
+        ]
     }) {
         aggregate {
             count
@@ -62,13 +62,11 @@ query AllDevelopers(
     users(
         limit: $limit,
         offset: $offset,
-        where: {
-            _or: {
-                first_name: {_ilike: $search},
-                last_name: {_ilike: $search},
-                username: {_ilike: $search}
-            }
-        },
+        where: {_or: [
+            {first_name: {_ilike: $search}},
+            {last_name: {_ilike: $search}},
+            {username: {_ilike: $search}},
+        ]},
         order_by: [{first_name: asc}, {last_name: asc}]
     ) {...UserInfo}
 }
@@ -86,11 +84,11 @@ query CurrentDevelopers(
             start_date: {_lte: $now}
             end_date: {_gte: $now}
         }},
-        _or: {
-            first_name: {_ilike: $search}
-            last_name: {_ilike: $search}
-            username: {_ilike: $search}
-        }
+        _or: [
+            {first_name: {_ilike: $search}},
+            {last_name: {_ilike: $search}},
+            {username: {_ilike: $search}},
+        ]
     }) { aggregate { count } }
 
     users(
@@ -101,11 +99,11 @@ query CurrentDevelopers(
                 start_date: {_lte: $now}
                 end_date: {_gte: $now}
             }},
-            _or: {
-                first_name: {_ilike: $search}
-                last_name: {_ilike: $search}
-                username: {_ilike: $search}
-            }
+            _or: [
+                {first_name: {_ilike: $search}},
+                {last_name: {_ilike: $search}},
+                {username: {_ilike: $search}},
+            ]
         }
         order_by: [{first_name: asc}, {last_name: asc}]
     ) {... UserInfo}
