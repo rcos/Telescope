@@ -9,7 +9,7 @@ use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
 
 /// The query returns 20 developers per page.
-const PER_PAGE: u32 = 20;
+pub const PER_PAGE: u32 = 20;
 
 /// Type representing GraphQL query to get a list of all users and their
 /// account associations for the developers page.

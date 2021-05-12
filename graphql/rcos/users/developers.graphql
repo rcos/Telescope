@@ -46,8 +46,20 @@ query AllDevelopers(
     $search: String!,
     $now: date!,
 ) {
+    # Count of users to determine the number of pages
+    user_count: users_aggregate(where: {
+        _or: {
+            first_name: {_ilike: $search},
+            last_name: {_ilike: $search},
+            username: {_ilike: $search}
+        }
+    }) {
+        aggregate {
+            count
+        }
+    }
+
     users(
-        # Get users in groups of 20.
         limit: $limit,
         offset: $offset,
         where: {
@@ -68,8 +80,20 @@ query CurrentDevelopers(
     $search: String!,
     $now: date!,
 ) {
+    # Current user count -- used to determine the number of pages.
+    user_count: users_aggregate(where: {
+        enrollments: {semester: {
+            start_date: {_lte: $now}
+            end_date: {_gte: $now}
+        }},
+        _or: {
+            first_name: {_ilike: $search}
+            last_name: {_ilike: $search}
+            username: {_ilike: $search}
+        }
+    }) { aggregate { count } }
+
     users(
-        # Get users in groups of 20
         limit: $limit,
         offset: $offset,
         where: {
@@ -85,4 +109,12 @@ query CurrentDevelopers(
         }
         order_by: [{first_name: asc}, {last_name: asc}]
     ) {... UserInfo}
+
+    # Ongoing semester info
+    ongoing_semesters: semesters(where: {
+        start_date: {_lte: $now}
+        end_date: {_gte: $now}
+    }) {
+        title
+    }
 }
