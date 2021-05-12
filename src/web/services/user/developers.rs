@@ -10,7 +10,6 @@ use actix_web::web::{
 use actix_web::HttpRequest;
 use serde_json::Value;
 use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};
-use std::ops::RangeInclusive;
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "user/developers";

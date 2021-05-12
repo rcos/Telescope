@@ -60,7 +60,6 @@ impl AllDevelopers {
             limit: PER_PAGE as i64,
             offset: (PER_PAGE * page_num) as i64,
             search: resolve_search_string(search),
-            now: Utc::today().naive_utc()
         }).await
     }
 }

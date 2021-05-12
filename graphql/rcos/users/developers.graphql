@@ -10,13 +10,9 @@ fragment UserInfo on users {
         account_id
     }
 
-    # Are they a coordinator in an ongoing semester
-    is_coordinating: enrollments(
+    # Semesters coordinating
+    coordinating: enrollments(
         where: {
-            semester: {
-                start_date: {_lte: $now}
-                end_date: {_gte: $now}
-            },
             is_coordinator: {_eq: true}
         }
     ) {
@@ -26,17 +22,14 @@ fragment UserInfo on users {
     }
 
     # What small groups does this user currently mentor?
-    current_mentoring: small_group_mentors(
-        where: {small_group: {semester: {
-            start_date: {_lte: $now}
-            end_date: {_gte: $now}
-        }}}
-    ) {
+    mentoring: small_group_mentors {
         small_group {
             title
+            semester {
+                title
+            }
         }
     }
-
 }
 
 # Developers Page Query (including older developers)
@@ -44,7 +37,6 @@ query AllDevelopers(
     $limit: Int!,
     $offset: Int!,
     $search: String!,
-    $now: date!,
 ) {
     # Count of users to determine the number of pages
     user_count: users_aggregate(where: {
