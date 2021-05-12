@@ -92,14 +92,27 @@
 
 {{! User info }}
 {{#each data.users}}
+    <div class="my-2 card text-dark">
+        <div class="card-header">
+            <h3 class="card-title">
+                {{first_name}} {{last_name}}
 
+                <span class="float-right">
+                    <a class="btn btn-primary" href="{{profile_for username}}">
+                        Profile
+                    </a>
+                </span>
+            </h3>
+        </div>
+
+    </div>
 {{else}}
     {{! No users -- display a message }}
     <div class="justify-content-center">
         Could not find any users matching these parameters.
 
         {{! Additional message on only current users }}
-        {{#unless query.include_old }}
+        {{#unless query.include_old}}
             Perhaps the current semester is over or there have not been any recorded enrollments yet. You can check the
             box above to include all RCOS members from previous semesters.
         {{/unless}}
