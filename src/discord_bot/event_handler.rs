@@ -45,7 +45,10 @@ impl EventHandler for Handler {
             register_commands_for_guild(&mut ctx, &guild)
                 .await
                 .unwrap_or_else(|err| {
-                    error!("Could not register a command on guild with ID {}: {}", guild.id, err);
+                    error!(
+                        "Could not register a command on guild with ID {}: {}",
+                        guild.id, err
+                    );
                 });
         }
     }

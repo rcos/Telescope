@@ -8,7 +8,7 @@ use serenity::model::interactions::{
     ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
 };
 use serenity::model::user::User;
-use serenity::{Result as SerenityResult};
+use serenity::Result as SerenityResult;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";

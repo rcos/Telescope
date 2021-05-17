@@ -1,15 +1,12 @@
 //! Developers page services
 
+use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
-use actix_web::web::{
-    Query, Path, ServiceConfig,
-    self as aweb
-};
+use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
 use actix_web::HttpRequest;
 use serde_json::Value;
-use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "user/developers";
@@ -46,8 +43,7 @@ pub struct DevelopersPageQuery {
 
 pub fn register_services(conf: &mut ServiceConfig) {
     // Route with or without the page number to the developers_page handler
-    conf
-        .route("/developers", aweb::get().to(developers_page))
+    conf.route("/developers", aweb::get().to(developers_page))
         .route("/developers/{page}", aweb::get().to(developers_page));
 }
 
@@ -79,7 +75,7 @@ fn get_page_numbers(api_response: &Value, current_page: u64) -> Option<Paginatio
         // Convert to range (or no range if less than 20 results)
         .and_then(|count| {
             // Calculate the number of pages required to display this many users.
-            let page_count = count/(PER_PAGE as u64) + 1;
+            let page_count = count / (PER_PAGE as u64) + 1;
 
             // No page range if there's only one page
             if page_count <= 1 {
@@ -98,7 +94,7 @@ fn get_page_numbers(api_response: &Value, current_page: u64) -> Option<Paginatio
             current: current_page,
             next: current_page + 1,
             right_sep: current_page + 1 < *range.end() - 1,
-            last: *range.end()
+            last: *range.end(),
         })
 }
 

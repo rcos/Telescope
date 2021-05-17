@@ -3,11 +3,11 @@
 use crate::discord_bot::event_handler::discord_client_id;
 use dashmap::DashMap;
 use futures::future::BoxFuture;
+use serenity::builder::CreateApplicationCommand;
 use serenity::client::Context;
 use serenity::model::guild::Guild;
 use serenity::model::interactions::Interaction;
-use serenity::model::prelude::{ApplicationCommand};
-use serenity::builder::CreateApplicationCommand;
+use serenity::model::prelude::ApplicationCommand;
 
 mod whois;
 
@@ -88,7 +88,8 @@ pub async fn register_commands_for_guild(ctx: &mut Context, guild: &Guild) -> se
         let json_value = serde_json::Value::Object(json_map);
 
         // Send the HTTP request to create (or update) the guild command.
-        let created: ApplicationCommand = ctx.http
+        let created: ApplicationCommand = ctx
+            .http
             .create_guild_application_command(*guild.id.as_u64(), &json_value)
             .await?;
 

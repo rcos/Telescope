@@ -1,12 +1,12 @@
 //! RCOS API query to get list of developers to display on the developers page.
 
 use crate::api::rcos::prelude::*;
-use regex::Regex;
-use std::borrow::Cow;
+use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 use chrono::Utc;
 use graphql_client::GraphQLQuery;
-use crate::error::TelescopeError;
-use crate::api::rcos::send_query;
+use regex::Regex;
+use std::borrow::Cow;
 
 /// The query returns 20 developers per page.
 pub const PER_PAGE: u32 = 20;
@@ -55,23 +55,31 @@ fn resolve_search_string(search: Option<String>) -> String {
 
 impl AllDevelopers {
     /// Send the query to get all the developers (including old ones) and wait for a response.
-    pub async fn get(page_num: u32, search: Option<String>) -> Result<<Self as GraphQLQuery>::ResponseData, TelescopeError> {
+    pub async fn get(
+        page_num: u32,
+        search: Option<String>,
+    ) -> Result<<Self as GraphQLQuery>::ResponseData, TelescopeError> {
         send_query::<Self>(all_developers::Variables {
             limit: PER_PAGE as i64,
             offset: (PER_PAGE * page_num) as i64,
             search: resolve_search_string(search),
-        }).await
+        })
+        .await
     }
 }
 
 impl CurrentDevelopers {
     /// Send the developers page query (and limit to current developers) and wait for a response.
-    pub async fn get(page_num: u32, search: Option<String>) -> Result<<Self as GraphQLQuery>::ResponseData, TelescopeError> {
+    pub async fn get(
+        page_num: u32,
+        search: Option<String>,
+    ) -> Result<<Self as GraphQLQuery>::ResponseData, TelescopeError> {
         send_query::<Self>(current_developers::Variables {
             limit: PER_PAGE as i64,
             offset: (PER_PAGE * page_num) as i64,
             search: resolve_search_string(search),
-            now: Utc::today().naive_utc()
-        }).await
+            now: Utc::today().naive_utc(),
+        })
+        .await
     }
 }

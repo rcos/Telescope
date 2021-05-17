@@ -1,6 +1,6 @@
 //! Module for serving the RCOS homepage.
 
-use crate::api::rcos::{landing_page_stats::LandingPageStatistics};
+use crate::api::rcos::landing_page_stats::LandingPageStatistics;
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use actix_web::HttpRequest;
