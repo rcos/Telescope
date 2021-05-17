@@ -1,4 +1,3 @@
-use crate::env::{ConcreteConfig, CONFIG};
 use crate::templates::helpers::register_helpers;
 use handlebars::Handlebars;
 use std::sync::Arc;

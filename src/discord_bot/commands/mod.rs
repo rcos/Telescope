@@ -1,6 +1,5 @@
 //! Telescope's discord bot commands.
 
-use crate::discord_bot::event_handler::discord_client_id;
 use dashmap::DashMap;
 use futures::future::BoxFuture;
 use serenity::builder::CreateApplicationCommand;

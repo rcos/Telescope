@@ -1,5 +1,4 @@
 //! Discord functionality built on top of serenity.
-//!
 
 mod commands;
 mod event_handler;
