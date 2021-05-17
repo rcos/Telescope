@@ -23,7 +23,8 @@ impl DiscordBot {
         // Get the global Discord config
         let discord_conf: &DiscordConfig = &global_config().discord_config;
         // Extract the application ID.
-        let app_id = discord_conf.client_id
+        let app_id = discord_conf
+            .client_id
             .as_str()
             .parse::<u64>()
             .expect("Could not parse Discord Application ID.");
