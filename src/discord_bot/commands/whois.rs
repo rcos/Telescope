@@ -2,14 +2,17 @@
 
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::discord_bot::commands::InteractionResult;
-use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
-use serenity::client::Context;
-use serenity::model::interactions::{ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction, InteractionResponseType};
-use serenity::model::user::User;
-use serenity::Result as SerenityResult;
-use serenity::utils::Color;
 use crate::env::global_config;
 use crate::web::profile_for;
+use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
+use serenity::client::Context;
+use serenity::model::interactions::{
+    ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
+    InteractionResponseType,
+};
+use serenity::model::user::User;
+use serenity::utils::Color;
+use serenity::Result as SerenityResult;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -84,75 +87,81 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
 
     // Respond with an embed indicating an error on RCOS API error.
     if let Err(err) = rcos_api_response {
-        return interaction.create_interaction_response(ctx.http, |create_response| {
-            create_response
-                // Sent the response to be a message
-                .kind(InteractionResponseType::ChannelMessageWithSource)
-                // Set the content of the message.
-                .interaction_response_data(|rdata| {
-                    rdata
-                        // Do not allow any mentions
-                        .allowed_mentions(|am| {
-                            am.empty_parse()
-                        })
-                        .embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("RCOS API Error")
-                                .description("We could not get data about this user because the \
+        return interaction
+            .create_interaction_response(ctx.http, |create_response| {
+                create_response
+                    // Sent the response to be a message
+                    .kind(InteractionResponseType::ChannelMessageWithSource)
+                    // Set the content of the message.
+                    .interaction_response_data(|rdata| {
+                        rdata
+                            // Do not allow any mentions
+                            .allowed_mentions(|am| am.empty_parse())
+                            .embed(|embed| {
+                                // Add common attributes
+                                embed_common(embed)
+                                    .color(ERROR_COLOR)
+                                    .title("RCOS API Error")
+                                    .description(
+                                        "We could not get data about this user because the \
                                 RCOS API responded with an error. Please contact a coordinator and \
-                                report this error on Telescope's GitHub.")
-                                // Include the error as a field of the embed.
-                                .field("Error Message", err, false)
-
-                        })
-                })
-        }).await;
+                                report this error on Telescope's GitHub.",
+                                    )
+                                    // Include the error as a field of the embed.
+                                    .field("Error Message", err, false)
+                            })
+                    })
+            })
+            .await;
     }
 
     // Error handled -- unwrap API response.
     let rcos_user: Option<_> = rcos_api_response.unwrap().get_user();
 
     // Respond to the discord interaction.
-    return interaction.create_interaction_response(ctx.http, |create_response| {
-        create_response
-            .kind(InteractionResponseType::ChannelMessageWithSource)
-            .interaction_response_data(|rdata| {
-                rdata
-                    // Allow no mentions
-                    .allowed_mentions(|am| {
-                        am.empty_parse()
-                    })
-                    .embed(|create_embed| {
-                        // Set common embed fields (author, footer, timestamp)
-                        embed_common(create_embed);
+    return interaction
+        .create_interaction_response(ctx.http, |create_response| {
+            create_response
+                .kind(InteractionResponseType::ChannelMessageWithSource)
+                .interaction_response_data(|rdata| {
+                    rdata
+                        // Allow no mentions
+                        .allowed_mentions(|am| am.empty_parse())
+                        .embed(|create_embed| {
+                            // Set common embed fields (author, footer, timestamp)
+                            embed_common(create_embed);
 
-                        // Set remaining fields based on user
-                        if let Some(u) = rcos_user {
-                            create_embed
-                                // Title with the user's name
-                                .title(format!("{} {}", u.first_name, u.last_name))
-                                // Link to their profile
-                                .url(format!("{}{}", global_config().discord_config.telescope_url, profile_for(u.username.as_str())))
-                                // List their role inline
-                                .field("User Role", u.role, true);
+                            // Set remaining fields based on user
+                            if let Some(u) = rcos_user {
+                                create_embed
+                                    // Title with the user's name
+                                    .title(format!("{} {}", u.first_name, u.last_name))
+                                    // Link to their profile
+                                    .url(format!(
+                                        "{}{}",
+                                        global_config().discord_config.telescope_url,
+                                        profile_for(u.username.as_str())
+                                    ))
+                                    // List their role inline
+                                    .field("User Role", u.role, true);
 
-                            // Add their RPI email if available
-                            let rcs_id = u.rcs_id
-                                .get(0)
-                                .map(|o| format!("{}@rpi.edu", o.account_id))
-                                .unwrap_or("RPI CAS not linked to this user.".into());
+                                // Add their RPI email if available
+                                let rcs_id = u
+                                    .rcs_id
+                                    .get(0)
+                                    .map(|o| format!("{}@rpi.edu", o.account_id))
+                                    .unwrap_or("RPI CAS not linked to this user.".into());
 
-                            create_embed.field("RPI Email", rcs_id, true)
-                        } else {
-                            create_embed
-                                .color(ERROR_COLOR)
-                                .description("User not found in RCOS database.")
-                        }
-                    })
-            })
-    }).await;
+                                create_embed.field("RPI Email", rcs_id, true)
+                            } else {
+                                create_embed
+                                    .color(ERROR_COLOR)
+                                    .description("User not found in RCOS database.")
+                            }
+                        })
+                })
+        })
+        .await;
 }
 
 /// Add common data to a Discord embed. This includes the author, footer, and timestamp.

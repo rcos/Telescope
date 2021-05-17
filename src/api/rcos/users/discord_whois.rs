@@ -14,14 +14,16 @@ use crate::error::TelescopeError;
 )]
 pub struct DiscordWhoIs;
 
-use discord_who_is::Variables;
 use discord_who_is::ResponseData;
+use discord_who_is::Variables;
 
 impl DiscordWhoIs {
     /// Send this query for a given discord user.
     pub async fn send(discord_id: u64) -> Result<ResponseData, TelescopeError> {
         // Construct the query variables
-        let query_vars = Variables { discord_id: format!("{}", discord_id) };
+        let query_vars = Variables {
+            discord_id: format!("{}", discord_id),
+        };
 
         // Send the query.
         return send_query::<Self>(query_vars).await;
@@ -34,7 +36,8 @@ impl ResponseData {
         // Get the mutable lists of the returned accounts.
         let mut accounts: Vec<_> = self.user_accounts;
         // Get the last one (there should be at most one).
-        return accounts.pop()
+        return accounts
+            .pop()
             // Everything is in the user field.
             .map(|account| account.user);
     }
