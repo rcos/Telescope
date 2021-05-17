@@ -23,10 +23,16 @@ impl DiscordBot {
     async fn create() -> SerenityResult<Client> {
         // Get the global Discord config
         let discord_conf: &DiscordConfig = &global_config().discord_config;
+        // Extract the application ID.
+        let app_id = discord_conf.client_id
+            .as_str()
+            .parse::<u64>()
+            .expect("Could not parse Discord Application ID.");
 
         // Instantiate a serenity Discord client.
         return Client::builder(&discord_conf.bot_token)
             .event_handler(Handler)
+            .application_id(app_id)
             .await;
     }
 
