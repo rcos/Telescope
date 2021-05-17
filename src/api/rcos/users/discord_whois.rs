@@ -4,7 +4,6 @@
 use crate::api::rcos::prelude::*;
 use crate::api::rcos::send_query;
 use crate::error::TelescopeError;
-use chrono::Utc;
 
 /// ZST representing the associated GraphQL query.
 #[derive(GraphQLQuery)]
@@ -22,10 +21,7 @@ impl DiscordWhoIs {
     /// Send this query for a given discord user.
     pub async fn send(discord_id: u64) -> Result<ResponseData, TelescopeError> {
         // Construct the query variables
-        let query_vars = Variables {
-            now: Utc::today().naive_utc(),
-            discord_id: format!("{}", discord_id),
-        };
+        let query_vars = Variables { discord_id: format!("{}", discord_id) };
 
         // Send the query.
         return send_query::<Self>(query_vars).await;
