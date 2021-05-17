@@ -65,10 +65,10 @@ bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # The URL that Telescope is running at. This is used to generate links for
 # Discord embeds.
 telescope_url = "https://telescope.rcos.io"
-# [OPTIONAL]
-# Guilds for the discord bot to add commands to at the guild level instead of
-# globally. These are immediately available to test against.
-debug_guild_ids = []
+# [REQUIRED]
+# Guilds for the discord bot to add commands to. Telescope does not use global
+# commands, so each RCOS guild mut be whitelisted.
+guild_ids = []
 
 # Development Profile
 # These options will override the global ones when telescope is run using

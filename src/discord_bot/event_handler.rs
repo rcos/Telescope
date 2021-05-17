@@ -33,7 +33,7 @@ impl EventHandler for Handler {
         // Check if the guild is whitelisted.
         if global_config()
             .discord_config
-            .debug_guild_ids
+            .guild_ids
             .contains(guild.id.as_u64())
         {
             // If so, register telescope's commands
