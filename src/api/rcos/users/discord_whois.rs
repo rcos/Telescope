@@ -2,6 +2,9 @@
 //! RCOS Discord bot.
 
 use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
+use chrono::Utc;
 
 /// ZST representing the associated GraphQL query.
 #[derive(GraphQLQuery)]
@@ -13,11 +16,7 @@ use crate::api::rcos::prelude::*;
 pub struct DiscordWhoIs;
 
 use discord_who_is::Variables;
-
-use crate::api::rcos::send_query;
-use crate::error::TelescopeError;
-use chrono::Utc;
-pub use discord_who_is::ResponseData;
+use discord_who_is::ResponseData;
 
 impl DiscordWhoIs {
     /// Send this query for a given discord user.
@@ -30,5 +29,17 @@ impl DiscordWhoIs {
 
         // Send the query.
         return send_query::<Self>(query_vars).await;
+    }
+}
+
+impl ResponseData {
+    /// Extract the user data (if there is a user) from the response data.
+    pub fn get_user(self) -> Option<discord_who_is::DiscordWhoIsUserAccountsUser> {
+        // Get the mutable lists of the returned accounts.
+        let mut accounts: Vec<_> = self.user_accounts;
+        // Get the last one (there should be at most one).
+        return accounts.pop()
+            // Everything is in the user field.
+            .map(|account| account.user);
     }
 }

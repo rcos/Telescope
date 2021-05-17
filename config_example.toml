@@ -61,6 +61,10 @@ client_secret = "****************************************"
 # The discord bot token. Generate this under your application settings
 # in the Discord developer dashboard.
 bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# [REQUIRED]
+# The URL that Telescope is running at. This is used to generate links for
+# Discord embeds.
+telescope_url = "https://telescope.rcos.io"
 # [OPTIONAL]
 # Guilds for the discord bot to add commands to at the guild level instead of
 # globally. These are immediately available to test against.

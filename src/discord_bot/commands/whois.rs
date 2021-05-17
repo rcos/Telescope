@@ -2,19 +2,23 @@
 
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::discord_bot::commands::InteractionResult;
-use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption};
+use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
 use serenity::client::Context;
-use serenity::model::interactions::{
-    ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
-};
+use serenity::model::interactions::{ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction, InteractionResponseType};
 use serenity::model::user::User;
 use serenity::Result as SerenityResult;
+use serenity::utils::Color;
+use crate::env::global_config;
+use crate::web::profile_for;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
 
 /// The name of the only option available on this command.
 pub const OPTION_NAME: &'static str = "user";
+
+/// The embed color of /whois error responses.
+pub const ERROR_COLOR: Color = Color::new(0xDC3545); // bootstrap 4 error color
 
 /// Build the option for the /whois command.
 fn whois_option(obj: &mut CreateApplicationCommandOption) -> &mut CreateApplicationCommandOption {
@@ -78,21 +82,100 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
             err
         });
 
+    // Respond with an embed indicating an error on RCOS API error.
     if let Err(err) = rcos_api_response {
-        unimplemented!()
-        /*
-        interaction.create_interaction_response(ctx.http, |response| {
-            response.kind(InteractionResponseType::ChannelMessageWithSource)
+        return interaction.create_interaction_response(ctx.http, |create_response| {
+            create_response
+                // Sent the response to be a message
+                .kind(InteractionResponseType::ChannelMessageWithSource)
+                // Set the content of the message.
                 .interaction_response_data(|rdata| {
-                    rdata.content("***Error***: Could not query RCOS API. @venus blonde!")
-                        .allowed_mentions(|allow| {
-                            allow.users(&[407704723618136065])
+                    rdata
+                        // Do not allow any mentions
+                        .allowed_mentions(|am| {
+                            am.empty_parse()
+                        })
+                        .embed(|embed| {
+                            // Add common attributes
+                            embed_common(embed)
+                                .color(ERROR_COLOR)
+                                .title("RCOS API Error")
+                                .description("We could not get data about this user because the \
+                                RCOS API responded with an error. Please contact a coordinator and \
+                                report this error on Telescope's GitHub.")
+                                // Include the error as a field of the embed.
+                                .field("Error Message", err, false)
+
                         })
                 })
-        })
-
-         */
+        }).await;
     }
 
-    Ok(())
+    // Error handled -- unwrap API response.
+    let rcos_user: Option<_> = rcos_api_response.unwrap().get_user();
+
+    // Respond to the discord interaction.
+    return interaction.create_interaction_response(ctx.http, |create_response| {
+        create_response
+            .kind(InteractionResponseType::ChannelMessageWithSource)
+            .interaction_response_data(|rdata| {
+                rdata
+                    // Allow no mentions
+                    .allowed_mentions(|am| {
+                        am.empty_parse()
+                    })
+                    .embed(|create_embed| {
+                        // Set common embed fields (author, footer, timestamp)
+                        embed_common(create_embed);
+
+                        // Set remaining fields based on user
+                        if let Some(u) = rcos_user {
+                            create_embed
+                                // Title with the user's name
+                                .title(format!("{} {}", u.first_name, u.last_name))
+                                // Link to their profile
+                                .url(format!("{}{}", global_config().discord_config.telescope_url, profile_for(u.username.as_str())))
+                                // List their role inline
+                                .field("User Role", u.role, true);
+
+                            // Add their RPI email if available
+                            let rcs_id = u.rcs_id
+                                .get(0)
+                                .map(|o| o.account_id.as_str())
+                                .unwrap_or("RPI CAS not linked to this user.");
+
+                            create_embed.field("RPI Email", rcs_id, true)
+                        } else {
+                            create_embed
+                                .color(ERROR_COLOR)
+                                .description("User not found in RCOS database.")
+                        }
+                    })
+            })
+    }).await;
+}
+
+/// Add common data to a Discord embed. This includes the author, footer, and timestamp.
+fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
+    create_embed
+        // Timestamp is always now
+        .timestamp(&chrono::Utc::now())
+        // Footer is telescope version
+        .footer(|create_footer| {
+            create_footer
+                .text(format!("Telescope {}", env!("CARGO_PKG_VERSION")))
+        })
+        // Author links to telescope's github.
+        .author(|create_author| {
+            create_author
+                .name("Telescope")
+                // FIXME:
+                // Link to GitHub asset here -- this is theoretically less
+                // volatile than linking to a hosted asset (since urls can
+                // change). This will break if this asset is removed from
+                // GitHub, so it should be changed to an RCOS url when
+                // telescope has stable hosting.
+                .icon_url("https://raw.githubusercontent.com/rcos/Telescope/master/static/icons/telescope/v3-black.png")
+                .url("https://github.com/rcos/Telescope")
+        })
 }

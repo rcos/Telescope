@@ -1,11 +1,10 @@
 query DiscordWhoIs($discord_id: String!, $now: date!) {
-    user_accounts(where: {account_id: {_eq: $discord_id} type: {_eq: "discord"}} limit: 1) {
+    user_accounts(where: {account_id: {_eq: $discord_id}, type: {_eq: "discord"}}, limit: 1) {
         user {
             username
             first_name
             last_name
-            created_at
-            cohort
+            role
 
             # Is this user currently a coordinator.
             is_current_coordinator: enrollments(where: {
@@ -15,7 +14,9 @@ query DiscordWhoIs($discord_id: String!, $now: date!) {
                     end_date: {_gte: $now}
                 }
             }) {
-                is_coordinator
+                semester {
+                    title
+                }
             }
 
             # Is this user a small group mentor

@@ -27,6 +27,9 @@ pub struct DiscordConfig {
     /// bot API.
     pub bot_token: String,
 
+    /// The URL that Telescope is running at (to build links in discord embeds.)
+    pub telescope_url: String,
+
     /// The discord Guild IDs for the bot to add the commands to as needed.
     /// These commands will match the global versions but will be
     /// available immediately for testing (since they are guild commands)
