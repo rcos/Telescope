@@ -2,15 +2,13 @@
 
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::discord_bot::commands::InteractionResult;
-use futures::future::LocalBoxFuture;
-use serenity::builder::{CreateInteraction, CreateInteractionOption};
+use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption};
 use serenity::client::Context;
 use serenity::model::interactions::{
     ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
 };
-use serenity::model::prelude::{ApplicationCommandInteractionDataOption, InteractionResponseType};
 use serenity::model::user::User;
-use serenity::{Error as SerenityError, Result as SerenityResult};
+use serenity::{Result as SerenityResult};
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -19,7 +17,7 @@ pub const COMMAND_NAME: &'static str = "whois";
 pub const OPTION_NAME: &'static str = "user";
 
 /// Build the option for the /whois command.
-fn whois_option(obj: &mut CreateInteractionOption) -> &mut CreateInteractionOption {
+fn whois_option(obj: &mut CreateApplicationCommandOption) -> &mut CreateApplicationCommandOption {
     obj.name(OPTION_NAME)
         .kind(ApplicationCommandOptionType::User)
         .description("The user to get information about")
@@ -27,10 +25,10 @@ fn whois_option(obj: &mut CreateInteractionOption) -> &mut CreateInteractionOpti
 }
 
 /// Modify a builder object to add the info for the /whois command.
-pub fn create_whois(obj: &mut CreateInteraction) -> &mut CreateInteraction {
+pub fn create_whois(obj: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
     obj.name(COMMAND_NAME)
         .description("Get information about a member of RCOS")
-        .create_interaction_option(whois_option)
+        .create_option(whois_option)
 }
 
 /// Handle a user calling the /whois command from Discord.

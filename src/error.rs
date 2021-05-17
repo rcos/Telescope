@@ -105,20 +105,20 @@ pub enum TelescopeError {
     },
 
     #[error(ignore)]
-    #[display("Invalid form submission")]
+    #[display(fmt = "Invalid form submission")]
     /// The user submitted invalid data to a form. This should be reported as a
     /// bad request and the form should be displayed for the user to try again.
     /// The value here is the serde serialization of the form, since the [`Form`]
     /// type does not implement debug
     InvalidForm(Value),
 
-    #[display("Request not properly authenticated")]
+    #[display(fmt = "Request not properly authenticated")]
     /// An unauthenticated user is trying to access a page that requires
     /// authentication. Report as unauthorized and direct them to try again.
     NotAuthenticated,
 
     #[error(ignore)]
-    #[display("RPI CAS error: {}", _0)]
+    #[display(fmt = "RPI CAS error: {}", _0)]
     /// Error sending to or receiving from the RPI CAS system.
     /// This should report as a Gateway error.
     RpiCasError(String),

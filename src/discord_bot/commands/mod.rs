@@ -3,15 +3,11 @@
 use crate::discord_bot::event_handler::discord_client_id;
 use dashmap::DashMap;
 use futures::future::BoxFuture;
-use serenity::builder::CreateInteraction;
 use serenity::client::Context;
 use serenity::model::guild::Guild;
-use serenity::model::id::GuildId;
 use serenity::model::interactions::Interaction;
-use serenity::model::prelude::{ApplicationCommand, CommandId};
-use std::borrow::Borrow;
-use std::ops::Deref;
-use std::pin::Pin;
+use serenity::model::prelude::{ApplicationCommand};
+use serenity::builder::CreateApplicationCommand;
 
 mod whois;
 
@@ -24,7 +20,7 @@ type InteractionHandler = fn(Context, Interaction) -> InteractionResult;
 
 /// Command builder type. These builder function all act on serenity models
 /// and add the necessary info to them for each command.
-type CommandBuilder = fn(&mut CreateInteraction) -> &mut CreateInteraction;
+type CommandBuilder = fn(&mut CreateApplicationCommand) -> &mut CreateApplicationCommand;
 
 /// Telescope's concept of a discord command.
 /// A builder function and a handler function.
@@ -85,13 +81,19 @@ pub async fn register_commands_for_guild(ctx: &mut Context, guild: &Guild) -> se
 
     // Register each command to the whitelisted Guild ID.
     for cmd in COMMANDS {
-        let created: ApplicationCommand = Interaction::create_guild_application_command(
-            ctx.http.as_ref(),
-            guild.id,
-            app_id,
-            cmd.builder,
-        )
-        .await?;
+        // Create the default command application command object with no fields.
+        let mut command_builder: CreateApplicationCommand = CreateApplicationCommand::default();
+        // Populate the objects fields using the builder method for this command.
+        (cmd.builder)(&mut command_builder);
+        // Convert serenity's hashmap to a JSON map.
+        let json_map = serenity::utils::hashmap_to_json_map(command_builder.0);
+        // And put that map in a JSON value.
+        let json_value = serde_json::Value::Object(json_map);
+
+        // Send the HTTP request to create (or update) the guild command.
+        let created: ApplicationCommand = ctx.http
+            .create_guild_application_command(*guild.id.as_u64(), &json_value)
+            .await?;
 
         info!(
             "Registered '/{}' command for '{}' guild (command ID: {}) (guild ID: {})",

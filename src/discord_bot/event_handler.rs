@@ -61,7 +61,7 @@ impl EventHandler for Handler {
 
         // Get the list of global application commands.
         ctx.http
-            .get_global_application_commands(discord_client_id())
+            .get_global_application_commands()
             .await
             // Log them on success
             .map(|list| {
