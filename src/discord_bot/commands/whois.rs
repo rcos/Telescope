@@ -141,8 +141,8 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
                             // Add their RPI email if available
                             let rcs_id = u.rcs_id
                                 .get(0)
-                                .map(|o| o.account_id.as_str())
-                                .unwrap_or("RPI CAS not linked to this user.");
+                                .map(|o| format!("{}@rpi.edu", o.account_id))
+                                .unwrap_or("RPI CAS not linked to this user.".into());
 
                             create_embed.field("RPI Email", rcs_id, true)
                         } else {
