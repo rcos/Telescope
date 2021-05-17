@@ -1,6 +1,5 @@
 //! Event handling code for the telescope Discord Bot.
 
-use crate::discord_bot::commands;
 use crate::discord_bot::commands::{get_handler, register_commands_for_guild};
 use crate::env::global_config;
 use serenity::client::{Context, EventHandler};
@@ -46,7 +45,7 @@ impl EventHandler for Handler {
             register_commands_for_guild(&mut ctx, &guild)
                 .await
                 .unwrap_or_else(|err| {
-                    error!("Could not register a command on guild with ID {}", guild.id);
+                    error!("Could not register a command on guild with ID {}: {}", guild.id, err);
                 });
         }
     }

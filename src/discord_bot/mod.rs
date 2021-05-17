@@ -55,7 +55,7 @@ impl ActorFuture for ListeningFuture {
 
     fn poll(
         mut self: Pin<&mut Self>,
-        srv: &mut Self::Actor,
+        _: &mut Self::Actor,
         ctx: &mut <DiscordBot as Actor>::Context,
         task: &mut StdContext<'_>,
     ) -> Poll<Self::Output> {

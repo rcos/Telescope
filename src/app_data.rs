@@ -20,8 +20,6 @@ pub struct AppData {
 impl AppData {
     /// Create new App Data object using the global static config.
     fn new() -> Self {
-        let config: &ConcreteConfig = &*CONFIG;
-
         // Register handlebars templates
         let mut template_registry = Handlebars::new();
         template_registry
@@ -31,9 +29,11 @@ impl AppData {
                 e
             })
             .unwrap();
+
         // Use handlebars strict mode so that we get an error when we try to render a
         // non-existent field
         template_registry.set_strict_mode(true);
+
         // Register the helpers defined in the helpers module.
         register_helpers(&mut template_registry);
         info!("Handlebars templates registered.");

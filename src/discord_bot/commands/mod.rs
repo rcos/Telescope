@@ -76,9 +76,6 @@ pub fn get_handler(command_name: &str) -> Option<InteractionHandler> {
 
 /// Register all telescope slash command for a whitelisted guild.
 pub async fn register_commands_for_guild(ctx: &mut Context, guild: &Guild) -> serenity::Result<()> {
-    // Get the discord client ID.
-    let app_id: u64 = discord_client_id();
-
     // Register each command to the whitelisted Guild ID.
     for cmd in COMMANDS {
         // Create the default command application command object with no fields.
