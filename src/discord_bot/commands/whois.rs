@@ -75,8 +75,7 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
         // Unwrap because we expect discord not to give bad data.
         .unwrap();
 
-    // Lookup this user on the discord and RCOS API.
-    let discord_user_info: User = ctx.http.get_user(user_id).await?;
+    // Lookup this user on the RCOS API.
     let rcos_api_response = DiscordWhoIs::send(user_id)
         .await
         // Log the error if there is one.
