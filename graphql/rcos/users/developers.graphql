@@ -3,7 +3,9 @@ fragment UserInfo on users {
     username
     first_name
     last_name
-    role
+
+    # Role is removed for now since we don't use it anywhere
+    #role
 
     # RCS ID if available
     rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
@@ -14,15 +16,20 @@ fragment UserInfo on users {
     coordinating: enrollments(
         where: {
             is_coordinator: {_eq: true}
-        }
+        },
+        order_by: [
+            {semester: {start_date: desc}}
+        ]
     ) {
         semester {
             title
         }
     }
 
-    # What small groups does this user currently mentor?
-    mentoring: small_group_mentors {
+    # Semesters mentoring
+    mentoring: small_group_mentors(order_by: [
+        {small_group: {semester: {start_date: desc}}}
+    ]) {
         small_group {
             title
             semester {

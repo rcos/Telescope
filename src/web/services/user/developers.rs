@@ -111,6 +111,7 @@ pub async fn developers_page(
         // Extract from path if available.
         .map(|page_path| page_path.0)
         // Filter and subtract 1, since the page numbers in the UI index from 1.
+        // Filter first since subtracting first could result in underflow.
         .filter(|p| *p >= 1)
         .map(|p| p - 1)
         // Otherwise default to 0
@@ -123,18 +124,18 @@ pub async fn developers_page(
         // Get all the developers (including ones not active this semester).
         let query_response = AllDevelopers::get(page_num, query.search.clone()).await?;
         // Convert the response into a JSON value.
-        api_data = serde_json::to_value(query_response)
-            .expect("Could not serialize API response to JSON value.");
+        // Unwrap because this conversion should never fail.
+        api_data = serde_json::to_value(query_response).unwrap();
     } else {
         // Get only the current developers.
         let query_response = CurrentDevelopers::get(page_num, query.search.clone()).await?;
-        api_data = serde_json::to_value(query_response)
-            .expect("Could not serialize API response to JSON value.");
+        api_data = serde_json::to_value(query_response).unwrap();
     }
 
     // Get the viewers username
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
 
+    // Render the developers page template and return it inside a page.
     Template::new(TEMPLATE_PATH)
         // Add 1 to the page number for use in UI.
         .field(PAGINATION, get_page_numbers(&api_data, page_num as u64 + 1))
@@ -144,5 +145,4 @@ pub async fn developers_page(
         .field(PRESERVED_QUERY, req.query_string())
         .render_into_page(&req, "Developers")
         .await
-    // Render the developers page template and return it inside a page.
 }

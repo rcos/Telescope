@@ -98,6 +98,15 @@
                 {{first_name}} {{last_name}}
 
                 <span class="float-right">
+                    {{! Email if viewer is logged in and it's available }}
+                    {{#if ../identity}}
+                        {{#with rcs_id.[0].account_id}}
+                            <a class="btn btn-secondary mr-1" href="mailto:{{this}}@rpi.edu">
+                                <i data-feather="mail"></i> {{this}}@rpi.edu
+                            </a>
+                        {{/with}}
+                    {{/if}}
+
                     <a class="btn btn-primary" href="{{profile_for username}}">
                         Profile
                     </a>
@@ -105,9 +114,32 @@
             </h3>
         </div>
 
-        <div class="card-body">
-            
-        </div>
+        {{! Only render the card body if there's content in it }}
+        {{#if (or coordinating mentoring) }}
+            <div class="card-body">
+                {{! Coordinating history }}
+                {{#with coordinating}}
+                    <h5 class="card-title">Coordinating</h5>
+                    <ul>
+                        {{#each this}}
+                            <li>
+                                {{semester.title}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/with}}
+
+                {{! Mentoring history }}
+                {{#with mentoring}}
+                    <h5 class="card-title">Mentoring</h5>
+                    <ul>
+                        {{#each this}}
+                            <li>{{small_group.semester.title}}: {{small_group.title}}</li>
+                        {{/each}}
+                    </ul>
+                {{/with}}
+            </div>
+        {{/if}}
     </div>
 {{else}}
     {{! No users -- display a message }}
@@ -121,21 +153,3 @@
         {{/unless}}
     </div>
 {{/each}}
-
-
-{{!--
-<div class="row row-cols-lg-5 row-cols-sm-1 row-cols-md-3">
-    {{#each users}}
-        <div class="col p-2">
-            <a class="card h-100 text-dark" href="/profile/{{username}}">
-                <img src="{{pfp}}" alt="Profile Picture" class="card-img-top">
-                <div class="card-body card-text">
-                    <div class="card-title text-center h5">
-                        {{fist_name}} {{last_name}}
-                    </div>
-                </div>
-            </a>
-        </div>
-    {{/each}}
-</div>
---}}
