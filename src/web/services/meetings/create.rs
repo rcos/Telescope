@@ -9,7 +9,6 @@ use actix_web::HttpResponse;
 /// The path to the handlebars template to create a meeting.
 const TEMPLATE_PATH: &'static str = "forms/meeting/create";
 
-
 /// Endpoint to create a meeting.
 #[get("/meeting/create")]
 pub async fn create_meeting(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {

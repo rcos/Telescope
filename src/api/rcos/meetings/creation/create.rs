@@ -1,9 +1,6 @@
 //! GraphQL mutation to create a meeting.
 
-use crate::api::rcos::{
-    prelude::*,
-    send_query
-};
+use crate::api::rcos::{prelude::*, send_query};
 use crate::error::TelescopeError;
 
 #[derive(GraphQLQuery)]
@@ -14,6 +11,4 @@ use crate::error::TelescopeError;
 )]
 pub struct CreateMeeting;
 
-impl CreateMeeting {
-
-}
+impl CreateMeeting {}
