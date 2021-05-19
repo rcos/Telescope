@@ -10,7 +10,6 @@ use serenity::model::interactions::{
     ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
     InteractionResponseType,
 };
-use serenity::model::user::User;
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
 

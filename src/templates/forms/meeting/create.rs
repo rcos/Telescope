@@ -1,9 +1,5 @@
 //! Form to create a meeting.
 
-use crate::templates::forms::FormTemplate;
-use chrono::{NaiveDate, NaiveTime};
-use std::fmt::Display;
-
 /// The path to the handlebars template to create a meeting.
 const TEMPLATE_PATH: &'static str = "forms/meeting/create";
 

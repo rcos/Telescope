@@ -14,7 +14,6 @@ use actix_web::http::header::LOCATION;
 use actix_web::web::Form;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
-use std::collections::HashMap;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "user/forms/register";
