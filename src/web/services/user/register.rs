@@ -11,10 +11,10 @@ use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 use actix_web::http::header::LOCATION;
+use actix_web::web::Form;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
-use actix_web::web::Form;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "user/forms/register";
@@ -44,17 +44,16 @@ async fn empty_registration_form(id: &RootIdentity) -> Result<FormTemplate, Tele
     // Build the form out with info depending on the root identity.
     match id {
         RootIdentity::Discord(d) => {
-            form.template = d
-                .get_authenticated_user()
-                .await
-                .map(|discord_user| json!({
+            form.template = d.get_authenticated_user().await.map(|discord_user| {
+                json!({
                     "icon": UserAccountType::Discord,
                     "info": {
                         "username": discord_user.tag(),
                         "avatar_url": discord_user.face(),
                     }
-                }))?;
-        },
+                })
+            })?;
+        }
 
         RootIdentity::GitHub(g) => {
             form.template = g
@@ -62,15 +61,17 @@ async fn empty_registration_form(id: &RootIdentity) -> Result<FormTemplate, Tele
                 .get_authenticated_user()
                 .await
                 // Convert the info to a JSON object as necessary
-                .map(|gh_user| json!({
-                    "icon": UserAccountType::GitHub,
-                    "info": {
-                        "username": gh_user.login,
-                        "avatar_url": gh_user.avatar_url,
-                        "profile_url": gh_user.url
-                    }
-                }))?;
-        },
+                .map(|gh_user| {
+                    json!({
+                        "icon": UserAccountType::GitHub,
+                        "info": {
+                            "username": gh_user.login,
+                            "avatar_url": gh_user.avatar_url,
+                            "profile_url": gh_user.url
+                        }
+                    })
+                })?;
+        }
 
         RootIdentity::RpiCas(r) => {
             form.template = json!({
@@ -85,31 +86,41 @@ async fn empty_registration_form(id: &RootIdentity) -> Result<FormTemplate, Tele
 }
 
 /// Function to construct a form with existing invalid user input.
-async fn form_with_input(id: &RootIdentity, input: &RegistrationFormInput) -> Result<FormTemplate, TelescopeError> {
+async fn form_with_input(
+    id: &RootIdentity,
+    input: &RegistrationFormInput,
+) -> Result<FormTemplate, TelescopeError> {
     // Create the empty form.
     let mut form = empty_registration_form(id).await?;
 
     // Get a mutable reference to the json value of the form's template
-    let template = form.template
+    let template = form
+        .template
         .as_object_mut()
         .expect("The previous function should return a JSON object.");
 
     // Add the first and last name to the template.
-    template.insert("first_name".into(), json!({
-        "value": input.first_name,
-        "error": input.first_name
-            .is_empty()
-            .then(|| "Your first name cannot be empty.")
-            .unwrap_or("")
-    }));
+    template.insert(
+        "first_name".into(),
+        json!({
+            "value": input.first_name,
+            "error": input.first_name
+                .is_empty()
+                .then(|| "Your first name cannot be empty.")
+                .unwrap_or("")
+        }),
+    );
 
-    template.insert("last_name".into(), json!({
-        "value": input.last_name,
-        "error": input.last_name
-            .is_empty()
-            .then(|| "Your last name cannot be empty.")
-            .unwrap_or("")
-    }));
+    template.insert(
+        "last_name".into(),
+        json!({
+            "value": input.last_name,
+            "error": input.last_name
+                .is_empty()
+                .then(|| "Your last name cannot be empty.")
+                .unwrap_or("")
+        }),
+    );
 
     return Ok(form);
 }
@@ -162,7 +173,10 @@ pub async fn submit_registration(
     }
 
     // Deconstruct the input.
-    let RegistrationFormInput {first_name, last_name} = form_input.0;
+    let RegistrationFormInput {
+        first_name,
+        last_name,
+    } = form_input.0;
 
     // Make query variables to create user
     let query_vars: CreateOneUserVariables = match &identity_cookie.root {

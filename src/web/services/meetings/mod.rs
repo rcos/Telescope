@@ -1,19 +1,19 @@
 //! Meetings page and services
 
-use actix_web::{HttpRequest, HttpResponse};
 use actix_web::web::{Path, Query, ServiceConfig};
+use actix_web::{HttpRequest, HttpResponse};
 use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
 
+use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::api::rcos::meetings::{
     authorization_for::AuthorizationFor,
-    get::{Meetings, meetings::MeetingsMeetings},
-    get_by_id::{Meeting, meeting::MeetingMeeting},
+    get::{meetings::MeetingsMeetings, Meetings},
+    get_by_id::{meeting::MeetingMeeting, Meeting},
     MeetingType,
 };
-use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::error::TelescopeError;
 use crate::templates::{
-    forms::{FormTemplate, meeting::create as creation_form},
+    forms::{meeting::create as creation_form, FormTemplate},
     meetings, Template,
 };
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};

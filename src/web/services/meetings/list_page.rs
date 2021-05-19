@@ -1,5 +1,5 @@
-use actix_web::HttpRequest;
 use actix_web::web::Query;
+use actix_web::HttpRequest;
 use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
 
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
@@ -67,8 +67,7 @@ pub async fn meetings_list(
     let visible_meeting_types: Vec<MeetingType> = authorization.viewable_types();
 
     // Query the RCOS API to get meeting data.
-    let events: Vec<_> = Meetings::get(start, end, include_drafts, visible_meeting_types)
-        .await?;
+    let events: Vec<_> = Meetings::get(start, end, include_drafts, visible_meeting_types).await?;
 
     // Get the values to pre-fill in the filters.
     let query = params

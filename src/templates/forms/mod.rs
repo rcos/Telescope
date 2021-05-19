@@ -10,10 +10,10 @@ use actix_web::http::header::CONTENT_TYPE;
 use actix_web::web::Form as ActixForm;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use futures::future::LocalBoxFuture;
+use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::{Map, Value};
 use std::collections::HashMap;
-use serde::de::DeserializeOwned;
 
 pub mod meeting;
 
@@ -52,7 +52,6 @@ impl FormTemplate {
             .map_err(TelescopeError::RenderingError)
     }
 }
-
 
 impl Responder for FormTemplate {
     type Error = TelescopeError;
