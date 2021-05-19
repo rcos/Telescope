@@ -1,13 +1,10 @@
 //! Meetings page and services
 
-use actix_web::{HttpRequest, HttpResponse};
+use actix_web::HttpResponse;
 use actix_web::web::{Path, ServiceConfig};
-
-use crate::api::rcos::meetings::authorization_for::AuthorizationFor;
-use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::error::TelescopeError;
-use crate::templates::{forms::FormTemplate, Template};
-use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
+use crate::templates::forms::FormTemplate;
+use crate::web::services::auth::identity::AuthenticationCookie;
 
 mod list;
 mod view;
