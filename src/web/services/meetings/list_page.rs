@@ -1,13 +1,18 @@
+//! List of meetings page.
+
 use actix_web::web::Query;
 use actix_web::HttpRequest;
 use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
-
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
 use crate::api::rcos::meetings::get::Meetings;
 use crate::api::rcos::meetings::MeetingType;
 use crate::error::TelescopeError;
-use crate::templates::{meetings, Template};
+use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
+
+
+/// The path to the template's handlebars file.
+const TEMPLATE_NAME: &'static str = "meetings/list";
 
 /// Query parameters submitted via the form on the meetings page.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
@@ -79,8 +84,12 @@ pub async fn meetings_list(
             end: end.naive_local().date(),
         });
 
-    // Build a meetings page template, render it into a page for the user.
-    return meetings::list_page::make(events, Some(query), &authorization)
+    // Build a meetings page template
+    return Template::new(TEMPLATE_NAME)
+        .field("meetings", events)
+        .field("query", query)
+        .field("authorization", authorization)
+        // Render it into a page for the user.
         .render_into_page(&req, "RCOS Meetings")
         .await;
 }
