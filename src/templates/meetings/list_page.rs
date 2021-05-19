@@ -3,7 +3,7 @@
 use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::api::rcos::meetings::get::meetings::MeetingsMeetings;
 use crate::templates::Template;
-use crate::web::services::meetings::MeetingsQuery;
+use crate::web::services::meetings::list_page::MeetingsQuery;
 
 /// The path to the template's handlebars file.
 const TEMPLATE_NAME: &'static str = "meetings/list";
