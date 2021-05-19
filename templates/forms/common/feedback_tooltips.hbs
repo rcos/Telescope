@@ -1,12 +1,1 @@
 {{! Form partial for feedback tooltips }}
-{{#if error}}
-    <div id="{{id}}-invalid" class="invalid-feedback">
-        {{error}}
-    </div>
-{{else}}
-    {{#if success}}
-        <div id="{{id}}-valid" class="valid-feedback">
-            {{success}}
-        </div>
-    {{/if}}
-{{/if}}
