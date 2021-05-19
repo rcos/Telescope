@@ -1,13 +1,10 @@
 //! Service to view a meeting's details.
 
-use actix_web::HttpRequest;
 use actix_web::web::Path;
+use actix_web::HttpRequest;
 
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
-use crate::api::rcos::meetings::get_by_id::{
-    Meeting,
-    meeting::MeetingMeeting
-};
+use crate::api::rcos::meetings::get_by_id::{meeting::MeetingMeeting, Meeting};
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
@@ -71,4 +68,3 @@ pub async fn meeting(
         // Wait for page to render and return result.
         .await;
 }
-
