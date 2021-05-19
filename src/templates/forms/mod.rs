@@ -16,7 +16,6 @@ use std::collections::HashMap;
 use serde::de::DeserializeOwned;
 
 pub mod meeting;
-pub mod register;
 
 /// A form that the user must fill out. All forms submit by `POST` to
 /// the URL they are served at.

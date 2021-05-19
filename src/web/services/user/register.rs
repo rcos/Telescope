@@ -5,7 +5,7 @@ use crate::api::rcos::users::create::{
 };
 use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
-use crate::templates::forms::{register, FormTemplate};
+use crate::templates::forms::FormTemplate;
 use crate::templates::{auth, page, Template};
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
