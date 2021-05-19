@@ -16,7 +16,6 @@ use serde_json::{Map, Value};
 use std::collections::HashMap;
 use serde::de::DeserializeOwned;
 
-pub mod common;
 pub mod meeting;
 pub mod register;
 
