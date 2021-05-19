@@ -26,7 +26,7 @@ query Profile($username: String!) {
         # What semesters was this user a coordiator for
         coordinating: enrollments(
             where: {is_coordinator: {_eq: true}},
-            order_by: {semester_id: desc}
+            order_by: {semester: {start_date: desc}}
         ) {
             semester {
                 title
@@ -47,25 +47,24 @@ query Profile($username: String!) {
         }
 
         # Meedings this user has hosted
-#        hosting: meetings(order_by: {start_date_time: desc}) {
-#            semester {
-#                semester_id
-#                title
-#            }
-#
-#            meeting_id
-#            title
-#            type
-#            start_date_time
-#            end_date_time
-#            agenda
-#            location
-#            is_draft
-#            is_remote
-#            meeting_url
-#            external_presentation_url
-#            recording_url
-#
-#        }
+        hosting: meetings(order_by: {start_date_time: desc}) {
+            semester {
+                title
+            }
+
+            meeting_id
+            title
+            type
+            start_date_time
+            end_date_time
+            agenda
+            location
+            is_draft
+            is_remote
+            meeting_url
+            external_presentation_url
+            recording_url
+
+        }
     }
 }

@@ -44,10 +44,10 @@ pub async fn profile(
     let viewer_username: Option<String> = identity.get_rcos_username().await?;
 
     // Make a profile template
-    // Render it inside a page (with the user's name as the title)
     return Template::new(TEMPLATE_NAME)
         .field("target", &target_user)
         .field("viewer_username", viewer_username)
+        // Render it inside a page (with the user's name as the title)
         .render_into_page(
             &req,
             format!("{} {}", target_user.first_name, target_user.last_name),

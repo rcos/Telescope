@@ -2,6 +2,7 @@
 <span class="text-muted">
     Account created {{format_date target.created_at}} {{format_time target.created_at}}
 </span>
+
 {{! Account info -- RPI email, etc (Only visible to authenticated users)}}
 {{#if viewer_username}}
     <h3 class="mt-2">User Info</h3>
@@ -12,9 +13,9 @@
                 <h5 class="card-header">RPI E-Mail</h5>
                 <div class="card-body p-1">
                     {{! If the user has an email associated }}
-                    {{#if (lookup target.rcs_id 0)}}
+                    {{#if target.rcs_id.[0]}}
                         {{! Link the email }}
-                        {{#with (lookup target.rcs_id 0)}}
+                        {{#with target.rcs_id.[0]}}
                             <a href="mailto:{{account_id}}@rpi.edu">
                                 {{account_id}}@rpi.edu
                             </a>
@@ -40,3 +41,13 @@
         </div>
     </div>
 {{/if}}
+
+{{! Meetings the user has hosted }}
+{{#with target.hosting}}
+    <h3 class="mt-2">Meetings Hosted</h3>
+    {{#each self}}
+        <div class="card mt-2">
+            {{! TODO: MEETING CARDS }}
+        </div>
+    {{/each}}
+{{/with}}
