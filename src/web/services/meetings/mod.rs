@@ -16,12 +16,13 @@ use crate::templates::{
 };
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 
-pub mod list_page;
+mod list_page;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
+    list_page::register(config);
+
     config
-        .service(list_page::meetings_list)
         .service(edit_meeting)
         .service(delete_meeting)
         .service(submit_meeting_edit)

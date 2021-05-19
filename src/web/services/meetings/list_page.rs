@@ -1,6 +1,6 @@
 //! List of meetings page.
 
-use actix_web::web::Query;
+use actix_web::web::{Query, ServiceConfig};
 use actix_web::HttpRequest;
 use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
@@ -10,13 +10,17 @@ use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 
+/// Register the meetings page.
+pub fn register(c: &mut ServiceConfig) -> &mut ServiceConfig {
+    c.service(meetings_list)
+}
 
 /// The path to the template's handlebars file.
-const TEMPLATE_NAME: &'static str = "meetings/list";
+const TEMPLATE_PATH: &'static str = "meetings/list";
 
 /// Query parameters submitted via the form on the meetings page.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-pub struct MeetingsQuery {
+struct MeetingsQuery {
     /// The start time to get events from.
     pub start: NaiveDate,
     /// The end time to get events from.
@@ -25,7 +29,7 @@ pub struct MeetingsQuery {
 
 /// Meetings page
 #[get("/meetings")]
-pub async fn meetings_list(
+async fn meetings_list(
     req: HttpRequest,
     params: Option<Query<MeetingsQuery>>,
     identity: Identity,
@@ -85,7 +89,7 @@ pub async fn meetings_list(
         });
 
     // Build a meetings page template
-    return Template::new(TEMPLATE_NAME)
+    return Template::new(TEMPLATE_PATH)
         .field("meetings", events)
         .field("query", query)
         .field("authorization", authorization)
