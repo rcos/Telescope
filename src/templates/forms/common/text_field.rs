@@ -1,7 +1,5 @@
 //! Short text field in a form.
 
-use crate::templates::forms::{Form, FormField};
-
 /// Path to the text field template
 const TEMPLATE_PATH: &'static str = "forms/common/text_field";
 
@@ -53,14 +51,5 @@ impl TextField {
         let validator = self.validator.expect("Text field validator missing");
         // Call and return the validation function.
         return validator(value);
-    }
-}
-
-impl Form {
-    /// Add a text field to a form. Panic on trying to overwrite an existing field.
-    pub fn add_text_field(&mut self, text_field: TextField) -> &mut Form {
-        self.form_fields
-            .insert(text_field.name.clone(), FormField::TextField(text_field));
-        self
     }
 }

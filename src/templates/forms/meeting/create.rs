@@ -1,7 +1,7 @@
 //! Form to create a meeting.
 
 use crate::templates::forms::common::text_field::TextField;
-use crate::templates::forms::Form;
+use crate::templates::forms::FormTemplate;
 use chrono::{NaiveDate, NaiveTime};
 use std::fmt::Display;
 
@@ -94,9 +94,9 @@ fn time_field(name: &'static str) -> TextField {
 }
 
 /// Create a meeting creation form object.
-pub fn make() -> Form {
+pub fn make() -> FormTemplate {
     // Create the form
-    let mut f = Form::new(TEMPLATE_PATH, PAGE_TITLE);
+    let mut f = FormTemplate::new(TEMPLATE_PATH, PAGE_TITLE);
     // Add the title field
     f.add_text_field(title_field());
     // Add the date and time fields

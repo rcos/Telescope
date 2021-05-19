@@ -3,7 +3,7 @@
 use crate::api::rcos::users::UserAccountType;
 use crate::error::TelescopeError;
 use crate::templates::forms::common::text_field::TextField;
-use crate::templates::forms::Form;
+use crate::templates::forms::FormTemplate;
 use crate::web::services::auth::identity::RootIdentity;
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 
@@ -54,9 +54,9 @@ fn make_name_field(name: impl Into<String>) -> TextField {
 }
 
 /// Create registration form without user.
-fn userless() -> Form {
+fn userless() -> FormTemplate {
     // Create form.
-    let mut form: Form = Form::new(TEMPLATE_PATH, "Create Account");
+    let mut form: FormTemplate = FormTemplate::new(TEMPLATE_PATH, "Create Account");
 
     // Create text fields
     let first_name: TextField = make_name_field(FNAME_FIELD);
@@ -80,7 +80,7 @@ struct UserInfo {
 
 /// Create a registration page with the appropriate information depending on
 /// the user's identity.
-pub async fn for_identity(cookie: &RootIdentity) -> Result<Form, TelescopeError> {
+pub async fn for_identity(cookie: &RootIdentity) -> Result<FormTemplate, TelescopeError> {
     match cookie {
         // On authenticated github
         RootIdentity::GitHub(gh) => gh

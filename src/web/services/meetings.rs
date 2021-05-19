@@ -9,7 +9,7 @@ use crate::api::rcos::meetings::{
 };
 use crate::error::TelescopeError;
 use crate::templates::{
-    forms::{meeting::create as creation_form, Form},
+    forms::{meeting::create as creation_form, FormTemplate},
     meetings, Template,
 };
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
@@ -168,7 +168,7 @@ async fn meeting(
 async fn edit_meeting(
     Path(meeting_id): Path<i64>,
     auth: AuthenticationCookie,
-) -> Result<Form, TelescopeError> {
+) -> Result<FormTemplate, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
 
@@ -189,7 +189,7 @@ async fn submit_meeting_edit(Path(meeting_id): Path<i64>) -> Result<HttpResponse
 
 /// Endpoint to create a meeting.
 #[get("/meeting/create")]
-async fn create_meeting(auth: AuthenticationCookie) -> Result<Form, TelescopeError> {
+async fn create_meeting(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
     // Check that the authenticated user has perms to create meetings.
     let username: String = auth.get_rcos_username_or_error().await?;
     let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(username)).await?;
