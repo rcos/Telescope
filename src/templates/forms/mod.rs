@@ -20,51 +20,6 @@ pub mod common;
 pub mod meeting;
 pub mod register;
 
-/// Form input type that can be extracted from HTTP requests and is passed to
-/// the telescope form validation system.
-pub type FormInput = ActixForm<HashMap<String, String>>;
-
-/// Form trait to be implemented by all forms. This tells each individual form
-/// how to validate. Most implementors should be ZSTs since this trait
-/// does not have any functions that reference self.
-#[async_trait]
-pub trait Form {
-    /// The input to the form. This should be a struct or a hash map usually.
-    type Input: Serialize + DeserializeOwned;
-
-    /// The function to validate the input to this form. If the validation is
-    /// successful then the input is considered safe and passed on. If there
-    /// are issues with the input then an error should be returned. This error
-    /// can contain an invalid form to send back to the user for them to fix,
-    /// or can be any other telescope error variant.
-    async fn validate(input: Self::Input) -> Result<Self::Input, TelescopeError>;
-
-    /// Wrapper function used to convert Actix-web's form input object to this
-    /// form's input and pass it to the validation function.
-    async fn wrap(input: FormInput) -> Result<Self::Input, TelescopeError> {
-        // Convert input to json object
-        let json_value = serde_json::to_value(input.0)
-            // This should not fail.
-            .expect("Form input could not be serialized to a JSON object.");
-
-        // Convert json object to form input.
-        let form_input = serde_json::from_value::<Self::Input>(json_value)
-            .map_err(|err| {
-                error!("Form input could not be converted from JSON to rust object: {}", err);
-                TelescopeError::BadRequest {
-                    header: "Form Input Invalid".to_string(),
-                    message: format!("The input posted to this form does not match the form's \
-                    defined structure. Please contact a Coordinator and file a GitHub issue. \
-                    Internal error: {}", err),
-                    show_status_code: false
-                }
-            })?;
-
-        // Pass converted data to the validation function
-        return Self::validate(form_input).await;
-    }
-}
-
 /// A form that the user must fill out. All forms submit by `POST` to
 /// the URL they are served at.
 #[derive(Serialize, Deserialize, Debug)]
