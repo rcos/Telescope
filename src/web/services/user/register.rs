@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use actix_web::web::Form;
 
 /// The path from the templates directory to the registration template.
-const TEMPLATE_PATH: &'static str = "forms/register";
+const TEMPLATE_PATH: &'static str = "user/forms/register";
 
 /// Form submitted by users when creating an account.
 #[derive(Serialize, Deserialize, Debug)]
