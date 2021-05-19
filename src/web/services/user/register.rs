@@ -5,7 +5,7 @@ use crate::api::rcos::users::create::{
 };
 use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
-use crate::templates::forms::{register, FormInput, Form};
+use crate::templates::forms::{register, FormTemplate};
 use crate::templates::{auth, page, Template};
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
@@ -14,24 +14,74 @@ use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
+use actix_web::web::Form;
+
+/// The path from the templates directory to the registration template.
+const TEMPLATE_PATH: &'static str = "forms/register";
 
 /// Form submitted by users when creating an account.
 #[derive(Serialize, Deserialize, Debug)]
 struct RegistrationFormInput {
+    /// The new user's first name
     first_name: String,
+
+    /// The new user's last name
     last_name: String,
 }
 
-/// ZST representing the registration form.
-struct RegistrationForm;
-
-#[async_trait]
-impl Form for RegistrationForm {
-    type Input = RegistrationFormInput;
-
-    async fn validate(input: Self::Input) -> Result<Self::Input, TelescopeError> {
-
+impl RegistrationFormInput {
+    /// Check that neither the first name or last name is empty.
+    fn is_valid(&self) -> bool {
+        !self.first_name.is_empty() && !self.last_name.is_empty()
     }
+}
+
+/// Create an empty registration form.
+async fn empty_registration_form(id: &RootIdentity) -> Result<FormTemplate, TelescopeError> {
+    // Create the base form
+    let mut form = FormTemplate::new(TEMPLATE_PATH, "Create Account");
+
+    // Build the form out with info depending on the root identity.
+    match id {
+        RootIdentity::Discord(d) => {
+            form.template = d
+                .get_authenticated_user()
+                .await
+                .map(|discord_user| json!({
+                    "icon": UserAccountType::Discord,
+                    "info": {
+                        "username": discord_user.tag(),
+                        "avatar_url": discord_user.face(),
+                    }
+                }))?;
+        },
+
+        RootIdentity::GitHub(g) => {
+            form.template = g
+                // Get the authenticated user
+                .get_authenticated_user()
+                .await
+                // Convert the info to a JSON object as necessary
+                .map(|gh_user| json!({
+                    "icon": UserAccountType::GitHub,
+                    "info": {
+                        "username": gh_user.login,
+                        "avatar_url": gh_user.avatar_url,
+                        "profile_url": gh_user.url
+                    }
+                }))?;
+        },
+
+        RootIdentity::RpiCas(rcs_id) => {
+            form.template = json!({
+                "info": {
+                    "username": format!("{}@rpi.edu", rcs_id),
+                }
+            });
+        }
+    }
+
+    return Ok(form);
 }
 
 #[get("/register")]
@@ -60,7 +110,7 @@ pub async fn finish_registration(
     } else {
         // Otherwise create a form for the authenticated the user's cookie.
         // And convert it to an HttpResponse
-        return register::for_identity(&identity_cookie.root)
+        return empty_registration_form(&identity_cookie.root)
             .await
             .respond_to(&req)
             .await;
@@ -72,8 +122,10 @@ pub async fn finish_registration(
 /// authenticated.
 pub async fn submit_registration(
     identity_cookie: AuthenticationCookie,
-    form_input: FormInput,
+    form_input: Form<RegistrationFormInput>,
 ) -> Result<HttpResponse, TelescopeError> {
+
+
     // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
     // valid input.
     let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie.root)

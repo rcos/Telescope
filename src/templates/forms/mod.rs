@@ -9,7 +9,6 @@ use crate::templates::page;
 use actix_web::http::header::CONTENT_TYPE;
 use actix_web::web::Form as ActixForm;
 use actix_web::{HttpRequest, HttpResponse, Responder};
-use common::text_field::TextField;
 use futures::future::LocalBoxFuture;
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -24,13 +23,13 @@ pub mod register;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FormTemplate {
     /// The path from the template root to this form's handlebars template.
-    template_path: String,
+    pub template_path: String,
 
     /// The page title.
     pub page_title: String,
 
     /// Handlebars JSON value to render this form.
-    template: Value,
+    pub template: Value,
 }
 
 impl FormTemplate {

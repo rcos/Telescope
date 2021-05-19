@@ -1,6 +1,5 @@
 //! Form to create a meeting.
 
-use crate::templates::forms::common::text_field::TextField;
 use crate::templates::forms::FormTemplate;
 use chrono::{NaiveDate, NaiveTime};
 use std::fmt::Display;
@@ -25,7 +24,7 @@ pub const START_TIME: &'static str = "start_time";
 
 /// The form field for the meetings end time.
 pub const END_TIME: &'static str = "end_time";
-
+/*
 /// Create the title field.
 ///
 /// The title has no limits on its input currently.
@@ -107,3 +106,4 @@ pub fn make() -> FormTemplate {
     // Return the form.
     return f;
 }
+*/
