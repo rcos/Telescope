@@ -21,7 +21,7 @@ const TEMPLATE_PATH: &'static str = "forms/register";
 
 /// Form submitted by users when creating an account.
 #[derive(Serialize, Deserialize, Debug)]
-struct RegistrationFormInput {
+pub struct RegistrationFormInput {
     /// The new user's first name
     first_name: String,
 
@@ -72,14 +72,44 @@ async fn empty_registration_form(id: &RootIdentity) -> Result<FormTemplate, Tele
                 }))?;
         },
 
-        RootIdentity::RpiCas(rcs_id) => {
+        RootIdentity::RpiCas(r) => {
             form.template = json!({
                 "info": {
-                    "username": format!("{}@rpi.edu", rcs_id),
+                    "username": format!("{}@rpi.edu", r.rcs_id),
                 }
             });
         }
     }
+
+    return Ok(form);
+}
+
+/// Function to construct a form with existing invalid user input.
+async fn form_with_input(id: &RootIdentity, input: &RegistrationFormInput) -> Result<FormTemplate, TelescopeError> {
+    // Create the empty form.
+    let mut form = empty_registration_form(id).await?;
+
+    // Get a mutable reference to the json value of the form's template
+    let template = form.template
+        .as_object_mut()
+        .expect("The previous function should return a JSON object.");
+
+    // Add the first and last name to the template.
+    template.insert("first_name".into(), json!({
+        "value": input.first_name,
+        "error": input.first_name
+            .is_empty()
+            .then(|| "Your first name cannot be empty.")
+            .unwrap_or("")
+    }));
+
+    template.insert("last_name".into(), json!({
+        "value": input.last_name,
+        "error": input.last_name
+            .is_empty()
+            .then(|| "Your last name cannot be empty.")
+            .unwrap_or("")
+    }));
 
     return Ok(form);
 }
@@ -124,24 +154,15 @@ pub async fn submit_registration(
     identity_cookie: AuthenticationCookie,
     form_input: Form<RegistrationFormInput>,
 ) -> Result<HttpResponse, TelescopeError> {
+    // Check if the form is valid.
+    if !form_input.is_valid() {
+        // If not return the invalid form.
+        let form = form_with_input(&identity_cookie.root, &form_input).await?;
+        return Err(TelescopeError::invalid_form(&form));
+    }
 
-
-    // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
-    // valid input.
-    let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie.root)
-        .await?
-        .validate_input(form_input)
-        .await?;
-
-    // Extract the first and last name from the validated form input
-    let first_name: String = valid_form_input
-        .get(register::FNAME_FIELD)
-        .expect("Form should have validated first name.")
-        .clone();
-    let last_name: String = valid_form_input
-        .get(register::LNAME_FIELD)
-        .expect("Form should have validated last name.")
-        .clone();
+    // Deconstruct the input.
+    let RegistrationFormInput {first_name, last_name} = form_input.0;
 
     // Make query variables to create user
     let query_vars: CreateOneUserVariables = match &identity_cookie.root {
