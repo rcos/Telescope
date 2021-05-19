@@ -1,8 +1,5 @@
 //! Form to create a meeting.
 
-/// The path to the handlebars template to create a meeting.
-const TEMPLATE_PATH: &'static str = "forms/meeting/create";
-
 /// The title of the page to create a meeting.
 const PAGE_TITLE: &'static str = "Create Meeting";
 
