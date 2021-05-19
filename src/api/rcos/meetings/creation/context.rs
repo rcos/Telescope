@@ -1,6 +1,8 @@
 //! GraphQL query to get context for meeting creation.
 
 use crate::api::rcos::prelude::*;
+use crate::error::TelescopeError;
+use crate::api::rcos::send_query;
 
 /// ZST representing the GraphQL query to resolve meeting creation context.
 #[derive(GraphQLQuery)]
@@ -11,3 +13,11 @@ use crate::api::rcos::prelude::*;
 )]
 pub struct MeetingCreationContext;
 
+use meeting_creation_context::{ResponseData, Variables};
+
+impl MeetingCreationContext {
+    /// Get the meeting creation context.
+    pub async fn get() -> Result<ResponseData, TelescopeError> {
+        send_query::<Self>(Variables { now: chrono::Utc::today().naive_utc() }).await
+    }
+}

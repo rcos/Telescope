@@ -108,7 +108,7 @@ pub enum TelescopeError {
     #[display(fmt = "Invalid form submission")]
     /// The user submitted invalid data to a form. This should be reported as a
     /// bad request and the form should be displayed for the user to try again.
-    /// The value here is the serde serialization of the form, since the [`Form`]
+    /// The value here is the serde serialization of the form, since the [`FormTemplate`]
     /// type does not implement debug
     InvalidForm(Value),
 
