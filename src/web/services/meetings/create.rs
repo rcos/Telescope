@@ -29,7 +29,8 @@ pub async fn create_meeting(auth: AuthenticationCookie) -> Result<FormTemplate, 
 
 /// Endpoint to submit a meeting creation.
 #[post("/meeting/create")]
-pub async fn submit_new_meeting(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
+pub async fn submit_new_meeting(
+    auth: AuthenticationCookie,
+) -> Result<HttpResponse, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
-

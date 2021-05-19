@@ -1,12 +1,12 @@
 //! Service to view a meeting's details.
 
-use actix_web::web::Path;
-use actix_web::HttpRequest;
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
 use crate::api::rcos::meetings::get_by_id::{meeting::MeetingMeeting, Meeting};
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
+use actix_web::web::Path;
+use actix_web::HttpRequest;
 
 /// The path from the templates directory to this template.
 const TEMPLATE_PATH: &'static str = "meetings/page";

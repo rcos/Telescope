@@ -1,14 +1,14 @@
 //! Meetings page and services
 
-use actix_web::HttpResponse;
-use actix_web::web::{Path, ServiceConfig};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::web::services::auth::identity::AuthenticationCookie;
+use actix_web::web::{Path, ServiceConfig};
+use actix_web::HttpResponse;
 
+mod create;
 mod list;
 mod view;
-mod create;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
