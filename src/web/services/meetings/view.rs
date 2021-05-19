@@ -2,7 +2,6 @@
 
 use actix_web::web::Path;
 use actix_web::HttpRequest;
-
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
 use crate::api::rcos::meetings::get_by_id::{meeting::MeetingMeeting, Meeting};
 use crate::error::TelescopeError;
