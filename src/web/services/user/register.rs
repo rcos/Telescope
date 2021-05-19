@@ -5,7 +5,7 @@ use crate::api::rcos::users::create::{
 };
 use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
-use crate::templates::forms::{register, FormInput};
+use crate::templates::forms::{register, FormInput, Form};
 use crate::templates::{auth, page, Template};
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
@@ -14,6 +14,25 @@ use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
 use std::collections::HashMap;
+
+/// Form submitted by users when creating an account.
+#[derive(Serialize, Deserialize, Debug)]
+struct RegistrationFormInput {
+    first_name: String,
+    last_name: String,
+}
+
+/// ZST representing the registration form.
+struct RegistrationForm;
+
+#[async_trait]
+impl Form for RegistrationForm {
+    type Input = RegistrationFormInput;
+
+    async fn validate(input: Self::Input) -> Result<Self::Input, TelescopeError> {
+
+    }
+}
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
