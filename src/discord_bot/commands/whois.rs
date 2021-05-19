@@ -176,14 +176,8 @@ fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
         // Author links to telescope's github.
         .author(|create_author| {
             create_author
+                // Don't include the telescope icon - we only link to the github
                 .name("Telescope")
-                // FIXME:
-                // Link to GitHub asset here -- this is theoretically less
-                // volatile than linking to a hosted asset (since urls can
-                // change). This will break if this asset is removed from
-                // GitHub, so it should be changed to an RCOS url when
-                // telescope has stable hosting.
-                .icon_url("https://raw.githubusercontent.com/rcos/Telescope/master/static/icons/telescope/v3-black.png")
                 .url("https://github.com/rcos/Telescope")
         })
 }
