@@ -9,8 +9,11 @@ use crate::api::rcos::meetings::get_by_id::{
     meeting::MeetingMeeting
 };
 use crate::error::TelescopeError;
-use crate::templates::{meetings, Template};
+use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
+
+/// The path from the templates directory to this template.
+const TEMPLATE_PATH: &'static str = "meetings/page";
 
 /// Endpoint to preview a specific meeting.
 #[get("/meeting/{meeting_id}")]
@@ -60,7 +63,9 @@ pub async fn meeting(
     }
 
     // If the meeting is visible to the viewer, make and return the template.
-    return meetings::meeting_page::make(&meeting, &authorization)
+    return Template::new(TEMPLATE_PATH)
+        .field("meeting", &meeting)
+        .field("auth", authorization)
         // Rendered inside a page
         .render_into_page(&req, meeting.title())
         // Wait for page to render and return result.
