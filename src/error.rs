@@ -1,6 +1,6 @@
 //! Error handling.
 
-use crate::templates::forms::Form;
+use crate::templates::forms::FormTemplate;
 use crate::templates::{jumbotron, page, Template};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::error::Error as ActixError;
@@ -108,7 +108,7 @@ pub enum TelescopeError {
     #[display(fmt = "Invalid form submission")]
     /// The user submitted invalid data to a form. This should be reported as a
     /// bad request and the form should be displayed for the user to try again.
-    /// The value here is the serde serialization of the form, since the [`Form`]
+    /// The value here is the serde serialization of the form, since the [`FormTemplate`]
     /// type does not implement debug
     InvalidForm(Value),
 
@@ -157,7 +157,7 @@ impl TelescopeError {
     }
 
     /// Serialize an invalid form to send back to the user.
-    pub fn invalid_form(form: &Form) -> Self {
+    pub fn invalid_form(form: &FormTemplate) -> Self {
         // Convert the form to a JSON value.
         let value = serde_json::to_value(form)
             // Form should serialize without issue.
@@ -286,7 +286,7 @@ impl TelescopeError {
             TelescopeError::InvalidForm(form) => {
                 // Render the form.
                 // Start with a conversion.
-                let form: Form = serde_json::from_value(form.clone())
+                let form: FormTemplate = serde_json::from_value(form.clone())
                     // This should not fail.
                     .expect("Form serialization error.");
 

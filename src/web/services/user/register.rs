@@ -5,15 +5,124 @@ use crate::api::rcos::users::create::{
 };
 use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
-use crate::templates::forms::{register, FormInput};
+use crate::templates::forms::FormTemplate;
 use crate::templates::{auth, page, Template};
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 use actix_web::http::header::LOCATION;
+use actix_web::web::Form;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
-use std::collections::HashMap;
+
+/// The path from the templates directory to the registration template.
+const TEMPLATE_PATH: &'static str = "user/forms/register";
+
+/// Form submitted by users when creating an account.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegistrationFormInput {
+    /// The new user's first name
+    first_name: String,
+
+    /// The new user's last name
+    last_name: String,
+}
+
+impl RegistrationFormInput {
+    /// Check that neither the first name or last name is empty.
+    fn is_valid(&self) -> bool {
+        !self.first_name.is_empty() && !self.last_name.is_empty()
+    }
+}
+
+/// Create an empty registration form.
+async fn empty_registration_form(id: &RootIdentity) -> Result<FormTemplate, TelescopeError> {
+    // Create the base form
+    let mut form = FormTemplate::new(TEMPLATE_PATH, "Create Account");
+
+    // Build the form out with info depending on the root identity.
+    match id {
+        RootIdentity::Discord(d) => {
+            form.template = d.get_authenticated_user().await.map(|discord_user| {
+                json!({
+                    "icon": UserAccountType::Discord,
+                    "info": {
+                        "username": discord_user.tag(),
+                        "avatar_url": discord_user.face(),
+                    }
+                })
+            })?;
+        }
+
+        RootIdentity::GitHub(g) => {
+            form.template = g
+                // Get the authenticated user
+                .get_authenticated_user()
+                .await
+                // Convert the info to a JSON object as necessary
+                .map(|gh_user| {
+                    json!({
+                        "icon": UserAccountType::GitHub,
+                        "info": {
+                            "username": gh_user.login,
+                            "avatar_url": gh_user.avatar_url,
+                            "profile_url": gh_user.url
+                        }
+                    })
+                })?;
+        }
+
+        RootIdentity::RpiCas(r) => {
+            form.template = json!({
+                "info": {
+                    "username": format!("{}@rpi.edu", r.rcs_id),
+                }
+            });
+        }
+    }
+
+    return Ok(form);
+}
+
+/// Function to construct a form with existing invalid user input.
+async fn form_with_input(
+    id: &RootIdentity,
+    input: &RegistrationFormInput,
+) -> Result<FormTemplate, TelescopeError> {
+    // Create the empty form.
+    let mut form = empty_registration_form(id).await?;
+
+    // Get a mutable reference to the json value of the form's template
+    let template = form
+        .template
+        .as_object_mut()
+        .expect("The previous function should return a JSON object.");
+
+    // Add the first and last name to the template.
+    template.insert(
+        "first_name".into(),
+        json!({
+            "value": input.first_name,
+            "error": input.first_name
+                .is_empty()
+                .then(|| "Your first name cannot be empty.")
+                .unwrap_or("")
+        }),
+    );
+
+    template.insert(
+        "last_name".into(),
+        json!({
+            "value": input.last_name,
+            "error": input.last_name
+                .is_empty()
+                .then(|| "Your last name cannot be empty.")
+                .unwrap_or("")
+        }),
+    );
+
+    return Ok(form);
+}
 
 #[get("/register")]
 /// Service for the registration page. This page allows users to start the
@@ -41,7 +150,7 @@ pub async fn finish_registration(
     } else {
         // Otherwise create a form for the authenticated the user's cookie.
         // And convert it to an HttpResponse
-        return register::for_identity(&identity_cookie.root)
+        return empty_registration_form(&identity_cookie.root)
             .await
             .respond_to(&req)
             .await;
@@ -53,24 +162,20 @@ pub async fn finish_registration(
 /// authenticated.
 pub async fn submit_registration(
     identity_cookie: AuthenticationCookie,
-    form_input: FormInput,
+    form_input: Form<RegistrationFormInput>,
 ) -> Result<HttpResponse, TelescopeError> {
-    // Create and validate a registration form. This will send the form back to the users repeatedly until they submit
-    // valid input.
-    let valid_form_input: HashMap<String, String> = register::for_identity(&identity_cookie.root)
-        .await?
-        .validate_input(form_input)
-        .await?;
+    // Check if the form is valid.
+    if !form_input.is_valid() {
+        // If not return the invalid form.
+        let form = form_with_input(&identity_cookie.root, &form_input).await?;
+        return Err(TelescopeError::invalid_form(&form));
+    }
 
-    // Extract the first and last name from the validated form input
-    let first_name: String = valid_form_input
-        .get(register::FNAME_FIELD)
-        .expect("Form should have validated first name.")
-        .clone();
-    let last_name: String = valid_form_input
-        .get(register::LNAME_FIELD)
-        .expect("Form should have validated last name.")
-        .clone();
+    // Deconstruct the input.
+    let RegistrationFormInput {
+        first_name,
+        last_name,
+    } = form_input.0;
 
     // Make query variables to create user
     let query_vars: CreateOneUserVariables = match &identity_cookie.root {

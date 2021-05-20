@@ -12,7 +12,6 @@ pub mod auth;
 pub mod forms;
 pub mod helpers;
 pub mod jumbotron;
-pub mod meetings;
 pub mod navbar;
 pub mod page;
 pub mod static_pages;

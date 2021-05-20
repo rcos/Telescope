@@ -1,6 +1,7 @@
 //! Queries and mutations to the RCOS API for meeting data.
 
 pub mod authorization_for;
+pub mod creation;
 pub mod get;
 pub mod get_by_id;
 

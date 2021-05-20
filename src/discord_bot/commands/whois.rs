@@ -10,7 +10,6 @@ use serenity::model::interactions::{
     ApplicationCommandInteractionData, ApplicationCommandOptionType, Interaction,
     InteractionResponseType,
 };
-use serenity::model::user::User;
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
 
@@ -170,8 +169,7 @@ fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
         .timestamp(&chrono::Utc::now())
         // Footer is telescope version
         .footer(|create_footer| {
-            create_footer
-                .text(format!("Telescope {}", env!("CARGO_PKG_VERSION")))
+            create_footer.text(format!("Telescope {}", env!("CARGO_PKG_VERSION")))
         })
         // Author links to telescope's github.
         .author(|create_author| {

@@ -1,13 +1,5 @@
 //! Form to create a meeting.
 
-use crate::templates::forms::common::text_field::TextField;
-use crate::templates::forms::Form;
-use chrono::{NaiveDate, NaiveTime};
-use std::fmt::Display;
-
-/// The path to the handlebars template to create a meeting.
-const TEMPLATE_PATH: &'static str = "forms/meeting/create";
-
 /// The title of the page to create a meeting.
 const PAGE_TITLE: &'static str = "Create Meeting";
 
@@ -25,7 +17,7 @@ pub const START_TIME: &'static str = "start_time";
 
 /// The form field for the meetings end time.
 pub const END_TIME: &'static str = "end_time";
-
+/*
 /// Create the title field.
 ///
 /// The title has no limits on its input currently.
@@ -94,9 +86,9 @@ fn time_field(name: &'static str) -> TextField {
 }
 
 /// Create a meeting creation form object.
-pub fn make() -> Form {
+pub fn make() -> FormTemplate {
     // Create the form
-    let mut f = Form::new(TEMPLATE_PATH, PAGE_TITLE);
+    let mut f = FormTemplate::new(TEMPLATE_PATH, PAGE_TITLE);
     // Add the title field
     f.add_text_field(title_field());
     // Add the date and time fields
@@ -107,3 +99,4 @@ pub fn make() -> Form {
     // Return the form.
     return f;
 }
+*/

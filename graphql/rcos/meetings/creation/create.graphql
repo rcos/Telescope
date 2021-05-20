@@ -1,0 +1,7 @@
+mutation CreateMeeting {
+    insert_meetings_one(object: {
+        # TODO
+    }) {
+        meeting_id
+    }
+}
