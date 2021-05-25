@@ -25,7 +25,7 @@ pub async fn create_meeting(auth: AuthenticationCookie) -> Result<FormTemplate, 
         });
     }
 
-    unimplemented!()
+    return Err(TelescopeError::NotImplemented);
     // Otherwise return the meeting creation form.
     // return Ok(creation_form::make());
 }

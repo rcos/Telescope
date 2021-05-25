@@ -27,11 +27,14 @@
         <button type="submit" class="btn btn-primary mb-2">View</button>
     </form>
 
+    {{! Hide Meeting creation button for now since the form is not finalized. }}
+    {{!--
     {{#if (or authorization.is_current_coordinator (eq authorization.role "faculty_advisor"))}}
         <div class="col-12 col-md-3">
             <a href="/meeting/create" class="float-right btn btn-success">Create Meeting</a>
         </div>
     {{/if}}
+    --}}
 </div>
 
 {{#each meetings}}
