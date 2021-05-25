@@ -41,7 +41,7 @@ services:
         - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
 
     telescope:
-        image: docker.pkg.github.com/rcos/telescope/telescope:0.4.2
+        image: docker.pkg.github.com/rcos/telescope/telescope:0.5.0
         restart: unless-stopped
         depends_on:
             - hasura
