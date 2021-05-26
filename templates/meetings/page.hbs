@@ -1,4 +1,4 @@
-{{#if meeting.is_public}}
+{{#if (not meeting.is_draft)}}
     <h1>{{> meetings/title meeting}}</h1>
     <h3>
         <span class="badge" style="background: var(--meeting-{{meeting.type}}-bg); color: var(--meeting-{{meeting.type}}-text)">
@@ -7,7 +7,15 @@
     </h3>
 
     {{! If the meeting starts and ends on the same date, just put the date at the begining. }}
-    <span class="text-muted">
+    <span>
+        {{! Hosting info }}
+        {{#with meeting.host}}
+            Hosted by <a href="{{profile_for username}}">{{first_name}} {{last_name}}</a>.
+        {{else}}
+            {{! no hosting info}}
+        {{/with}}
+
+        {{! Date and time }}
         {{#with meeting}}
             {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
                 {{format_date start_date_time}} from {{format_time start_date_time}} to {{format_time end_date_time}}
@@ -17,7 +25,6 @@
             {{/if}}
         {{/with}}
     </span>
-
 
     {{#if (eq meeting.type "mentors")}}
     {{else}}
