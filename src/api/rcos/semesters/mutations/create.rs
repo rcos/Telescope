@@ -1,7 +1,7 @@
 //! GraphQL mutation to create a semester in the RCOS dataabse.
 
 use crate::api::rcos::prelude::*;
-use chrono::{Date, Utc, NaiveDate};
+use chrono::NaiveDate;
 use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
 
