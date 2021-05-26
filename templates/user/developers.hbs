@@ -106,7 +106,9 @@
                             <a class="btn btn-secondary mr-1" href="mailto:{{this}}@rpi.edu">
                                 <i data-feather="mail"></i> {{this}}@rpi.edu
                             </a>
-                        {{/with}}
+                        {{else}}
+                            {{! No RPI email -- render nothing}}
+                        {{~/with}}
                     {{/if}}
 
                     <a class="btn btn-primary" href="{{profile_for username}}">
