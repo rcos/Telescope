@@ -42,7 +42,7 @@
                 </label>
                 <div class="col-md-10">
                     <input id="fname" type="text" name="first_name" placeholder="John"
-                        {{#with first_name.value}} value="{{this}}" {{/with}}
+                        {{#with first_name.value}} value="{{this}}" {{else}} {{! Don't prefill no value }} {{/with}}
 
                         {{! Link feedback tooltip }}
                         {{#if first_name.error}}
@@ -59,6 +59,8 @@
                         <div id="fname-invalid" class="invalid-feedback">
                             {{this}}
                         </div>
+                    {{else}}
+                        {{! No tooltip }}
                     {{/with}}
                 </div>
             </div>
@@ -70,7 +72,7 @@
                 </label>
                 <div class="col-md-10">
                     <input id="lname" type="text" name="last_name" placeholder="Appleseed"
-                        {{#with last_name.value}} value="{{this}}" {{/with}}
+                        {{#with last_name.value}} value="{{this}}" {{else}} {{! no last name }} {{/with}}
 
                         {{! Link feedback tooltip }}
                         {{#if last_name.error}}
@@ -87,6 +89,8 @@
                         <div id="lname-invalid" class="invalid-feedback">
                             {{this}}
                         </div>
+                    {{else}}
+                        {{! No feedback tooltip }}
                     {{/with}}
                 </div>
             </div>
