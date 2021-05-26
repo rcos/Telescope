@@ -9,7 +9,7 @@
             </div>
         </div>
         <input type="text" name="search" class="form-control" placeholder="Search..." aria-label="Search"
-            {{#with query.search}} value="{{this}}" {{/with}}
+            {{#with query.search}} value="{{this}}" {{else}} {{! empty string -- no value }} {{/with}}
         >
     </div>
 
@@ -88,6 +88,8 @@
             {{/if}}
         </ul>
     </nav>
+{{else}}
+    {{! No pagination -- no code }}
 {{/with}}
 
 {{! User info }}
@@ -127,6 +129,8 @@
                             </li>
                         {{/each}}
                     </ul>
+                {{else}}
+                    {{! No coordinating history -- generate nothing }}
                 {{/with}}
 
                 {{! Mentoring history }}
@@ -137,6 +141,8 @@
                             <li>{{small_group.semester.title}}: {{small_group.title}}</li>
                         {{/each}}
                     </ul>
+                {{else}}
+                    {{! No mentoring history -- generate nothing }}
                 {{/with}}
             </div>
         {{/if}}
