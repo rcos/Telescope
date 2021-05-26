@@ -23,7 +23,7 @@ actix-files = "~0.5"
 actix-identity = "~0.3"
 
 # Handlebars for HTML rendering and templating.
-handlebars = {version = "~3.5", features = ["dir_source"]}
+handlebars = {version = "~4.0", features = ["dir_source"]}
 
 # Logging utilities
 log = "~0.4"
