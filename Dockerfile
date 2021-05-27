@@ -11,6 +11,7 @@ COPY ./Cargo.* ./
 RUN mkdir src
 RUN echo "fn main() {println!(\"BUILD ARTIFACT! \");}" > src/main.rs
 RUN cargo build --release
+RUN cargo doc
 RUN rm -r target/release/deps/telescope*
 
 # Build telescope proper
