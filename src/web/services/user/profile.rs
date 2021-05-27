@@ -28,8 +28,12 @@ pub async fn profile(
     // TODO: Switch to using Path here when we switch to user ids.
     Query(ProfileQuery { username }): Query<ProfileQuery>,
 ) -> Result<Template, TelescopeError> {
-    // Get the user's profile information from the RCOS API.
-    let response: ResponseData = Profile::for_user(username).await?;
+    // Get the viewer's username.
+    let viewer_username: Option<String> = identity.get_rcos_username().await?;
+
+    // Get the user's profile information (and viewer info) from the RCOS API.
+    let response: ResponseData = Profile::for_user(username, viewer_username).await?;
+
     // Throw an error if there is no user.
     if response.target.is_none() {
         return Err(TelescopeError::resource_not_found(
@@ -39,18 +43,14 @@ pub async fn profile(
     }
 
     // Get the target user's info.
-    let target_user: ProfileTarget = response.target.unwrap();
-    // Get the viewer's username.
-    let viewer_username: Option<String> = identity.get_rcos_username().await?;
+    let target_user: &ProfileTarget = response.target.as_ref().unwrap();
+    // And use it to make the page title
+    let page_title = format!("{} {}", target_user.first_name, target_user.last_name);
 
     // Make a profile template
     return Template::new(TEMPLATE_NAME)
-        .field("target", &target_user)
-        .field("viewer_username", viewer_username)
+        .field("data", response)
         // Render it inside a page (with the user's name as the title)
-        .render_into_page(
-            &req,
-            format!("{} {}", target_user.first_name, target_user.last_name),
-        )
+        .render_into_page(&req, page_title)
         .await;
 }

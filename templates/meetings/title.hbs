@@ -1,7 +1,11 @@
 {{! Template to render a meeting title}}
+{{! Italisize draft meetings }}
+{{#if is_draft}}<i>{{/if}}
 
 {{#if title}}
     {{title}}
 {{else}}
     {{format_meeting_type type}} {{format_date start_date_time}}
 {{/if}}
+
+{{#if is_draft}}</i>{{/if}}

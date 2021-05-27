@@ -1,6 +1,7 @@
-query Profile($username: String!) {
+# Profile query -- gets info about the target user and the viewer.
+query Profile($target: String!, $viewer: [String!]!, $now: date!) {
     # The owner of the profile.
-    target: users_by_pk(username: $username) {
+    target: users_by_pk(username: $target) {
         username
         first_name
         last_name
@@ -46,8 +47,11 @@ query Profile($username: String!) {
             }
         }
 
-        # Meedings this user has hosted
-        hosting: meetings(order_by: {start_date_time: desc}) {
+        # Public Meetings this user has hosted
+        hosting: meetings(
+            order_by: {start_date_time: desc},
+            where: {is_draft: {_eq: false}}
+        ) {
             semester {
                 title
             }
@@ -59,12 +63,45 @@ query Profile($username: String!) {
             end_date_time
             agenda
             location
-            is_draft
             is_remote
             meeting_url
             external_presentation_url
             recording_url
+        }
+    }
 
+    # Viewer info
+    viewer: users(
+        limit: 1,
+        where: {username: {_in: $viewer}}
+    ) {
+        username
+        role
+
+        # Is the viewer a coordinator?
+        is_current_coordinator: enrollments(
+            limit: 1,
+            where: {
+                is_coordinator: {_eq: true},
+                semester: {start_date: {_lte: $now}, end_date: {_gte: $now}},
+            }
+        ) {
+            is_coordinator
+        }
+
+        # Are they a mentor for a current small group the target is in?
+        mentors_target: small_group_mentors (
+            where: {
+                small_group: {
+                    semester: {start_date: {_lte: $now}, end_date: {_gte: $now}},
+                    small_group_projects: {project: {enrollments: {username: {_eq: $target}}}}
+                }
+            }
+        ) {
+            small_group {
+                small_group_id
+                title
+            }
         }
     }
 }
