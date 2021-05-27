@@ -30,31 +30,25 @@
     --meeting-other-text: var(--light);
 }
 
-/*
-RCOS themed buttons.
-*/
+/* RCOS themed buttons. */
 .btn.btn-rcos {
     background: var(--rcos-red);
     color: white;
 }
 
-/*
-GitHub themed buttons.
- */
+/* GitHub themed buttons. */
 .btn.btn-github {
     background: var(--github-blue);
     color: white;
 }
 
-/*
-RPI styled buttons.
- */
-
+/* RPI styled buttons. */
 .btn.btn-rpi {
     background: var(--rpi-red);
     color: white;
 }
 
+/* Discord styled button */
 .btn.btn-discord {
     background: var(--discord-blurple);
     color: white;
@@ -62,19 +56,6 @@ RPI styled buttons.
 
 .btn.btn-discord:hover {
     color: var(--discord-black);
-}
-/*
-Below is a set of rules to keep the footer at the bottom of the page.
-*/
-html {
-    position: relative;
-    min-height: 100%;
-}
-
-.footer {
-    position: relative;
-    width: 100%;
-    top: 0;
 }
 
 /*
