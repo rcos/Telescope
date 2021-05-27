@@ -1,0 +1,36 @@
+# Paginated project list querying for projects page.
+query Projects($limit: Int!, $offset: Int!, $search: String!) {
+    projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
+        _or: [
+            {title: {_ilike: $search}},
+            {description: {_ilike: $search}},
+        ]
+    }) {
+        project_id
+        title
+
+        # If externally owned, who owns it.
+        external_organization {
+            title
+            external_organization_id
+        }
+
+        # The most recent PM of the project.
+        most_recent_pm: enrollments(
+            limit: 1,
+            order_by: {semester: {end_date: desc}},
+            where: {is_project_lead: {_eq: true}}
+        ) {
+            user {
+                username
+                first_name
+                last_name
+            }
+
+            # What semester
+            semester {
+                title
+            }
+        }
+    }
+}
