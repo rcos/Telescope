@@ -23,6 +23,8 @@ pub enum UserRole {
     External,
     #[display(fmt = "External Mentor")]
     ExternalMentor,
+    #[display(fmt = "Telescope Admin")]
+    Sysadmin,
 }
 
 /// The valid account types for all user accounts stored in the RCOS database.
