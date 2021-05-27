@@ -13,14 +13,17 @@ pub mod user;
 pub fn register(config: &mut ServiceConfig) {
     // Register authentication related services
     auth::register(config);
+
     // Register user related services
     user::register(config);
+
     // Calendar related services.
     meetings::register(config);
 
+    // Project related services.
+    projects::register(config);
+
     config
         // Homepage
-        .service(index::index)
-        // Projects page
-        .service(projects::projects_page);
+        .service(index::index);
 }
