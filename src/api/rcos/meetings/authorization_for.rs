@@ -54,23 +54,24 @@ impl UserMeetingAuthorization {
 
     /// Can the user associated with this authorization view draft meetings?
     pub fn can_view_drafts(&self) -> bool {
-        self.role == UserRole::FacultyAdvisor || self.is_current_coordinator
+        self.is_current_coordinator
+            || self.role == UserRole::FacultyAdvisor
+            || self.role == UserRole::Sysadmin
+
     }
 
     /// Can the user associated with this authorization view meetings of a given type?
     pub fn can_view(&self, meeting_type: MeetingType) -> bool {
         match meeting_type {
-            // Coordinators can be viewed by just coordinators and faculty advisors
-            MeetingType::Coordinators => {
-                self.is_current_coordinator || self.role == UserRole::FacultyAdvisor
-            }
+            // Coordinator meetings can be viewed by just coordinators and faculty advisors
+            MeetingType::Coordinators => self.can_view_drafts(),
+
             // Mentor and Grading meetings can be viewed by mentors, coordinators,
             // and faculty advisors
             MeetingType::Mentors | MeetingType::Grading => {
-                self.is_current_mentor
-                    || self.is_current_coordinator
-                    || self.role == UserRole::FacultyAdvisor
+                self.is_current_mentor || self.can_view_drafts()
             }
+
             // All other meeting types (small groups, large groups, bonus sessions, etc)
             // are public.
             _ => true,
@@ -82,11 +83,11 @@ impl UserMeetingAuthorization {
     pub fn can_edit(&self, host_username: Option<&str>) -> bool {
         // If there is a host and viewer
         if let (Some(host), Some(viewer)) = (host_username, self.username.as_ref()) {
-            // and they are the same person
-            host == viewer
+            // and they are the same person (or the viewer has coordinator or higher perms)
+            host == viewer || self.can_view_drafts()
         } else {
             // of the viewer is a coordinator or faculty advisor
-            self.is_current_coordinator || self.role == UserRole::FacultyAdvisor
+            self.can_view_drafts()
         }
     }
 
