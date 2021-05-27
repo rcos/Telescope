@@ -1,0 +1,25 @@
+# Authentication to determine what tabs on the navbar the user should have access to.
+query Authentication($username: String!, $now: date!) {
+    users_by_pk(username: $username) {
+
+        # If a semester ID is returned here they're a current coordinator.
+        is_current_coordinator: enrollments(
+            where: {
+                is_coordinator: {_eq: true},
+                semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
+            },
+            limit: 1
+        ) { semester_id }
+
+        # If a small group ID is returned here then they're a current mentor.
+        is_current_mentor: small_group_mentors(
+            where: {small_group: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}},
+            limit: 1
+        ) {
+            small_group_id
+        }
+
+        # Get their role too
+        role
+    }
+}

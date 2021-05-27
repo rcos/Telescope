@@ -6,6 +6,8 @@ use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
+use crate::api::rcos::users::navbar_auth::Authentication;
+use serde_json::Value;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";
@@ -72,14 +74,51 @@ fn userless(req_path: &str) -> Template {
 }
 
 /// Construct a navbar for a given username
-fn for_user(req_path: &str, username: &str) -> Template {
+async fn for_user(req_path: &str, username: String) -> Result<Template, TelescopeError> {
+    // Get the navbar auth for this user
+    let navbar_auth = Authentication::get(username.clone()).await?;
+
     let right_items = vec![
-        item(req_path, "Profile", profile_for(username)).field(CLASS, "btn mr-2 mb-2 btn-primary"),
-        item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
+        item(req_path, "Profile", profile_for(username.as_str()))
+            .field(CLASS, "btn mr-2 mb-2 btn-primary"),
+        item(req_path, "Logout", "/logout")
+            .field(CLASS, "btn mr-2 mb-2 btn-secondary"),
     ];
 
     // Add items to right side of navbar
-    with_defaults(req_path).field(RIGHT_ITEMS, right_items)
+    let mut base_navbar = with_defaults(req_path)
+        .field(RIGHT_ITEMS, right_items);
+
+    // Get mutable ref to left side of navbar.
+    let left_items = base_navbar[LEFT_ITEMS].as_array_mut().unwrap();
+
+    // Make items to add for privileged users and convert to JSON values.
+    let admin_link = Value::Object(item(req_path, "Admin", "/admin").fields);
+    let coord_link = Value::Object(item(req_path, "Coordinate", "/coordinate").fields);
+    let mentor_link = Value::Object(item(req_path, "Mentor", "/mentor").fields);
+    let attend_link = Value::Object(item(req_path, "Attend", "/attend").fields);
+
+    // Add items as necessary based on authentication.
+    if navbar_auth.is_admin() {
+        left_items.push(admin_link);
+        left_items.push(coord_link);
+        left_items.push(mentor_link);
+        left_items.push(attend_link);
+    }
+    else if navbar_auth.is_coordinating() {
+        left_items.push(coord_link);
+        left_items.push(mentor_link);
+        left_items.push(attend_link);
+    }
+    else if navbar_auth.is_mentoring() {
+        left_items.push(mentor_link);
+        left_items.push(attend_link);
+    }
+    else if navbar_auth.is_student() {
+        left_items.push(attend_link);
+    }
+
+    return Ok(base_navbar);
 }
 
 /// Construct a navbar for a user who is partway through account creation and doesn't
@@ -102,7 +141,7 @@ pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> 
         // Check if there is an authenticated RCOS account
         if let Some(username) = authenticated.get_rcos_username().await? {
             // If there is make a navbar with the username.
-            return Ok(for_user(req.path(), username.as_str()));
+            return Ok(for_user(req.path(), username).await?);
         } else {
             // Otherwise the user is in the middle of creating an account.
             return Ok(for_auth(req.path()));
