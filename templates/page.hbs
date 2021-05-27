@@ -33,23 +33,25 @@
     </body>
 
     <footer class="footer text-center mt-auto py-3">
-        <div class="container">
-            <p>
-                <img src="/static/icons/telescope/v3-transparent.png"
-                     alt="Telescope icon"
-                     style="width:32px;height:32px;">
-                {{!-- Resize telescope logo to be small here --}}
-                <a href="https://github.com/rcos/Telescope/">Telescope</a>
-                |
-                <a href="https://github.com/rcos/">An RCOS Project</a>
-                | Version: <code>{{version}}</code>
-            </p>
-        </div>
-        <div class="container">
-            Created by RCOS developers, for RCOS developers.
-            <a href="https://github.com/rcos/Telescope/issues/new/choose">
-                Found an issue?
-            </a>
-        </div>
+        {{! Telescope logo }}
+        <img src="/static/icons/telescope/v3-transparent.png"
+             alt="Telescope icon"
+             style="width:48px;height:48px;">
+        <br>
+
+        {{! Link to GitHub }}
+        <a href="https://github.com/rcos/Telescope/">Telescope</a> {{version}}
+        <br>
+
+        {{! Issue tracker }}
+        <a href="https://github.com/rcos/Telescope/issues/new/choose">
+            Report an issue
+        </a> |
+
+        {{! Link rust docs }}
+        <a href="/static/internal_docs/telescope/index.html">
+            Docs for devs
+            <i data-feather="external-link" style="height: 1em; width: auto;"></i>
+        </a>
     </footer>
 </html>

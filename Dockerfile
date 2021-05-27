@@ -11,21 +11,26 @@ COPY ./Cargo.* ./
 RUN mkdir src
 RUN echo "fn main() {println!(\"BUILD ARTIFACT! \");}" > src/main.rs
 RUN cargo build --release
-RUN rm -rfv target/release/deps/telescope*
+RUN rm -r target/release/deps/telescope*
 
 # Build telescope proper
 COPY ./src ./src
 COPY ./graphql ./graphql
 RUN cargo build --release
+# Build documentation
+RUN cargo doc
 
-# Delete unneeded build artifacts;
-# Move the telescope executable to the working directory and delete
-# everything else.
+# Copy over statically served files.
+COPY ./static ./static
+
+# Move the telescope executable to the working directory
 RUN mv ./target/release/telescope ./telescope
+# Move generated docs to statically served folder
+RUN mv ./target/doc/ ./static/internal_docs
+# Remove all other build artifacts
 RUN rm -r ./target
 
-# Copy over remaining files needed to run.
-COPY ./static ./static
+# Copy over templates
 COPY ./templates ./templates
 
 # Expose telescope's ports
