@@ -8,6 +8,7 @@ use crate::api::rcos::{
     users::{UserAccountType, UserRole},
 };
 use chrono::{DateTime, NaiveDate, Utc};
+use url::Url;
 
 /// Timestamp with Timezone.
 pub type timestamptz = DateTime<Utc>;
@@ -25,5 +26,8 @@ pub type user_account = UserAccountType;
 /// Meeting variants.
 pub type meeting_type = MeetingType;
 
-/// List of strings for some reason not properly set in GraphQL.
+/// List of strings for some reason not properly set in Hasura.
 pub type _varchar = Vec<String>;
+
+/// List of urls for some reason not properly set in Hasura.
+pub type _url = Vec<Url>;
