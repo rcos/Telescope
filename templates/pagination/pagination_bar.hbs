@@ -1,0 +1,47 @@
+{{!
+This template expects a few variables to be defined:
+pagination -- the pagination info object, if not defined this generates nothing
+prefix -- the string to put prior to the pagination number in links, must be defined
+suffix -- the string to put after the pagination number in links, defaults empty
+preserved_query_string -- if defined, adds a "?" followed by this string to pagination links
+}}
+
+{{#if pagination}}
+    <nav aria-label="Page Navigation">
+        <ul class="pagination justify-content-center">
+            {{! If after the first page }}
+            {{#if (gt pagination.current 1) }}
+                {{> pagination/link prefix=prefix suffix=suffix preserved_query_string=preserved_query_string number=1}}
+            {{/if}}
+
+            {{! Left separator if necessary }}
+            {{#if pagination.left_sep}} {{> pagination/separator}} {{/if}}
+
+            {{! If first is before previous page, make previous page link }}
+            {{#if (gt pagination.prev 1)}}
+                {{> pagination/link prefix=prefix suffix=suffix preserved_query_string=preserved_query_string number=pagination.prev}}
+            {{/if}}
+
+            {{! Current page }}
+            <li class="page-item active" aria-current="page">
+                <span class="page-link">
+                    {{pagination.current}}
+                    <span class="sr-only">(current)</span>
+                </span>
+            </li>
+
+            {{! Next page if not last }}
+            {{#if (lt pagination.next pagination.last)}}
+                {{> pagination/link prefix=prefix suffix=suffix preserved_query_string=preserved_query_string number=pagination.next}}
+            {{/if}}
+
+            {{! Right separator if necessary }}
+            {{#if pagination.right_sep}} {{> pagination/separator}} {{/if}}
+
+            {{! Last page (if necessary) }}
+            {{#if (gt pagination.last pagination.current)}}
+                {{> pagination/link prefix=prefix suffix=suffix preserved_query_string=preserved_query_string number=pagination.last}}
+            {{/if}}
+        </ul>
+    </nav>
+{{/if}}

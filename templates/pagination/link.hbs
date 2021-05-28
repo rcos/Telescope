@@ -1,0 +1,6 @@
+{{! Template for pagination links. }}
+<li class="page-item">
+    <a class="page-link" href="{{prefix}}{{number}}{{#if suffix}}{{suffix}}{{/if}}{{#if preserved_query_string}}?{{preserved_query_string}}{{/if}}">
+        {{number}}
+    </a>
+</li>

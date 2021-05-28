@@ -26,71 +26,7 @@
 </form>
 
 {{! Pagination buttons }}
-{{#with pagination}}
-    <nav aria-label="Page Navigation">
-        <ul class="pagination justify-content-center">
-            {{! If after the first page }}
-            {{#if (lt first current) }}
-                <li class="page-item">
-                    <a class="page-link" href="/developers/{{first}}?{{../preserved_query_string}}">
-                        {{first}}
-                    </a>
-                </li>
-            {{/if}}
-
-            {{! Left separator if necessary }}
-            {{#if left_sep}}
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
-            {{/if}}
-
-            {{! If first is before previous page, make previous page link }}
-            {{#if (gt prev first)}}
-                <li class="page-item">
-                    <a class="page-link" href="/developers/{{prev}}?{{../preserved_query_string}}">
-                        {{prev}}
-                    </a>
-                </li>
-            {{/if}}
-
-            {{! Current page }}
-            <li class="page-item active" aria-current="page">
-                <span class="page-link">
-                    {{current}}
-                    <span class="sr-only">(current)</span>
-                </span>
-            </li>
-
-            {{! Next page if not last }}
-            {{#if (lt next last)}}
-                <li class="page-item">
-                    <a class="page-link" href="/developers/{{next}}?{{../preserved_query_string}}">
-                        {{next}}
-                    </a>
-                </li>
-            {{/if}}
-
-            {{! Right separator if necessary }}
-            {{#if right_sep }}
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
-            {{/if}}
-
-            {{! Last page (if necessary) }}
-            {{#if (gt last current)}}
-                <li class="page-item">
-                    <a class="page-link" href="/developers/{{last}}?{{../preserved_query_string}}">
-                        {{last}}
-                    </a>
-                </li>
-            {{/if}}
-        </ul>
-    </nav>
-{{else}}
-    {{! No pagination -- no code }}
-{{/with}}
+{{> pagination/pagination_bar pagination=pagination prefix="/developers/" preserved_query_string=preserved_query_string}}
 
 {{! User info }}
 {{#each data.users}}

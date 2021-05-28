@@ -1,12 +1,14 @@
 //! Developers page services
 
+use actix_web::HttpRequest;
+use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
+use serde_json::Value;
+
 use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};
 use crate::error::TelescopeError;
+use crate::templates::pagination::PaginationInfo;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
-use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
-use actix_web::HttpRequest;
-use serde_json::Value;
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "user/developers";
@@ -47,21 +49,8 @@ pub fn register_services(conf: &mut ServiceConfig) {
         .route("/developers/{page}", aweb::get().to(developers_page));
 }
 
-/// Pagination items for the developer page.
-#[derive(Serialize, Copy, Clone, Debug)]
-struct PaginationInfo {
-    first: u64,
-    /// Left side ellipsis/separator.
-    left_sep: bool,
-    prev: u64,
-    current: u64,
-    next: u64,
-    /// Right side ellipsis/separator
-    right_sep: bool,
-    last: u64,
-}
-
 /// Try to get the pagination bar to use based on the api data.
+/// Panics if `current_page` is 0.
 fn get_page_numbers(api_response: &Value, current_page: u64) -> Option<PaginationInfo> {
     api_response
         // Check for the JSON field user_count
@@ -72,30 +61,8 @@ fn get_page_numbers(api_response: &Value, current_page: u64) -> Option<Paginatio
         .get("count")?
         // As an unsigned integer
         .as_u64()
-        // Convert to range (or no range if less than 20 results)
-        .and_then(|count| {
-            // Calculate the number of pages required to display this many users.
-            let page_count = count / (PER_PAGE as u64) + 1;
-
-            // No page range if there's only one page
-            if page_count <= 1 {
-                None
-            } else {
-                // Otherwise range from 1
-                Some(1..=page_count)
-            }
-        })
-        // Map to the pagination info object.
-        // Add separators on non-contiguous numbers.
-        .map(|range| PaginationInfo {
-            first: *range.start(),
-            left_sep: current_page - 1 > *range.start() + 1,
-            prev: current_page - 1,
-            current: current_page,
-            next: current_page + 1,
-            right_sep: current_page + 1 < *range.end() - 1,
-            last: *range.end(),
-        })
+        // Convert to pagination info
+        .and_then(|count| PaginationInfo::new(count, PER_PAGE as u64, current_page))
 }
 
 /// The developer catalogue. This page displays all of the users in the
