@@ -1,36 +1,64 @@
-# Paginated project list querying for projects page.
-query Projects($limit: Int!, $offset: Int!, $search: String!) {
+fragment ProjectInfo on projects {
+    project_id
+    title
+
+    # If externally owned, who owns it.
+    external_organization {
+        title
+        external_organization_id
+    }
+
+    # The most recent PM of the project.
+    most_recent_pm: enrollments(
+        limit: 1,
+        order_by: {semester: {end_date: desc}},
+        where: {is_project_lead: {_eq: true}}
+    ) {
+        user {
+            username
+            first_name
+            last_name
+        }
+
+        # What semester
+        semester {
+            title
+        }
+    }
+}
+
+# Paginated current project list querying for projects page.
+query CurrentProjects($limit: Int!, $offset: Int!, $search: String!, $now: date!) {
+    projects_aggregate(where: {
+        _or: [
+            {title: {_ilike: $search}},
+            {description: {_ilike: $search}},
+        ],
+        enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
+    }) { aggregate { count } }
+
     projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
         _or: [
             {title: {_ilike: $search}},
             {description: {_ilike: $search}},
+        ],
+        enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
+    }) { ...ProjectInfo }
+}
+
+# Paginated project list querying for projects page
+query AllProjects($limit: Int!, $offset: Int!, $search: String!) {
+    projects_aggregate(where: {
+        _or: [
+            {title: {_ilike: $search}},
+            {description: {_ilike: $search}},
         ]
-    }) {
-        project_id
-        title
+    }) { aggregate { count } }
 
-        # If externally owned, who owns it.
-        external_organization {
-            title
-            external_organization_id
-        }
-
-        # The most recent PM of the project.
-        most_recent_pm: enrollments(
-            limit: 1,
-            order_by: {semester: {end_date: desc}},
-            where: {is_project_lead: {_eq: true}}
-        ) {
-            user {
-                username
-                first_name
-                last_name
-            }
-
-            # What semester
-            semester {
-                title
-            }
-        }
-    }
+    projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
+        _or: [
+            {title: {_ilike: $search}},
+            {description: {_ilike: $search}},
+        ]}
+    ) {... ProjectInfo}
 }
