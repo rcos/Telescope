@@ -14,6 +14,7 @@ pub mod prelude;
 pub mod semesters;
 pub mod users;
 pub mod projects;
+pub mod search_strings;
 
 /// The name of this API in error messages.
 const API_NAME: &'static str = "RCOS Central Hasura GraphQL API";
