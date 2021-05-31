@@ -117,6 +117,11 @@ pub enum TelescopeError {
     /// authentication. Report as unauthorized and direct them to try again.
     NotAuthenticated,
 
+    #[display(fmt = "Authenticated Request Forbidden")]
+    /// An authenticated user tried to access a resource that they do not have
+    /// sufficient permissions to access.
+    Forbidden,
+
     #[error(ignore)]
     #[display(fmt = "RPI CAS error: {}", _0)]
     /// Error sending to or receiving from the RPI CAS system.
@@ -307,6 +312,12 @@ impl TelescopeError {
                 account, please restart. Otherwise please sign in. If you have logged in, and this \
                 page is unexpected, please contact a coordinator and create a GitHub issue.",
             ),
+
+            TelescopeError::Forbidden => jumbotron::new(
+                format!("{} - {}", status_code, canonical_reason),
+                "You do not have the necessary permissions to access this page. If you \
+                think this is in error, please contact a coordinator or faculty advisor."
+            ),
         };
 
         // Put jumbotron in a page and return the content.
@@ -347,6 +358,7 @@ impl ResponseError for TelescopeError {
             TelescopeError::CsrfTokenMismatch => StatusCode::BAD_REQUEST,
             TelescopeError::InvalidForm(_) => StatusCode::BAD_REQUEST,
             TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,
+            TelescopeError::Forbidden => StatusCode::FORBIDDEN,
             TelescopeError::RpiCasError(_) => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
