@@ -7,6 +7,7 @@ pub mod discord_whois;
 pub mod enrollments;
 pub mod profile;
 pub mod navbar_auth;
+pub mod role_lookup;
 
 /// The valid user roles for all users in the RCOS database.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Hash, Display)]
@@ -44,4 +45,11 @@ pub enum UserAccountType {
     GitLab,
     #[display(fmt = "BitBucket")]
     BitBucket,
+}
+
+impl UserRole {
+    /// Faculty advisors and sysadmins are considered admin users.
+    pub fn is_admin(self) -> bool {
+        self == UserRole::Sysadmin || self == UserRole::FacultyAdvisor
+    }
 }

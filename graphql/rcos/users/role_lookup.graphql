@@ -1,0 +1,6 @@
+# GraphQL query to lookup a user's role.
+query RoleLookup($username: String!) {
+    users_by_pk(username: $username) {
+        role
+    }
+}
