@@ -57,11 +57,6 @@ fn global_command_map() -> &'static DashMap<String, InteractionHandler> {
     &COMMAND_MAP
 }
 
-/// Clear the global command map. This should only be done if the Discord bot crashes.
-pub fn clear_command_map() {
-    global_command_map().clear()
-}
-
 /// Get the handler for a given interaction by its command name.
 pub fn get_handler(command_name: &str) -> Option<InteractionHandler> {
     global_command_map()

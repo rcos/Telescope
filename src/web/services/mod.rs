@@ -8,6 +8,7 @@ pub mod meetings;
 pub mod not_found;
 mod projects;
 pub mod user;
+mod admin;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {
@@ -22,6 +23,9 @@ pub fn register(config: &mut ServiceConfig) {
 
     // Project related services.
     projects::register(config);
+
+    // Admin panel services.
+    admin::register(config);
 
     config
         // Homepage

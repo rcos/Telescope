@@ -14,7 +14,7 @@ use crate::api::rcos::send_query;
 pub struct RoleLookup;
 
 impl RoleLookup {
-    /// Get a user's role.
+    /// Get a user's role. Return `Ok(None)` if there is no user record for this username.
     pub async fn get(username: String) -> Result<Option<UserRole>, TelescopeError> {
         send_query::<Self>(role_lookup::Variables { username })
             .await
