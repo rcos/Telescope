@@ -79,7 +79,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(IdentityService::new(cookie_policy))
             // Logger middleware
             .wrap(middleware::Logger::default())
-            // register Services
+            // Register Services
             .configure(web::services::register)
             // static files service
             .service(

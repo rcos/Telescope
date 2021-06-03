@@ -14,10 +14,17 @@ use actix_web::web as aweb;
 use actix_web::dev::{ServiceRequest, Service};
 use actix_identity::RequestIdentity;
 use crate::web::services::admin::middleware::AdminAuthorization;
+use actix_web::guard;
 
 /// Register admin panel services.
 pub fn register(config: &mut ServiceConfig) {
-    // Route everything through the admin scope.
+    // Admin panel index page.
+    config.service(aweb::resource("/admin")
+        .guard(guard::Get())
+        .wrap(AdminAuthorization)
+        .to(index));
+
+    // Route every sub-service through the admin scope.
     config.service(
         // Create the admin scope.
         aweb::scope("/admin/")
@@ -26,14 +33,10 @@ pub fn register(config: &mut ServiceConfig) {
 
             // Semester services
             .configure(semesters::register)
-            // Admin page index.
-            .service(index)
     );
 }
 
-
 /// Admin page index.
-#[get("/")]
 async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
     // Access is pre-checked by the scope this is in.
     // Return the admin page (currently just a static template).
