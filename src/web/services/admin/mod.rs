@@ -1,5 +1,8 @@
 //! Services for the admin panel.
 
+mod semesters;
+mod middleware;
+
 use actix_web::web::ServiceConfig;
 use crate::web::services::auth::identity::AuthenticationCookie;
 use crate::templates::Template;
@@ -7,29 +10,33 @@ use crate::error::TelescopeError;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use crate::api::rcos::users::UserRole;
 use actix_web::HttpRequest;
+use actix_web::web as aweb;
+use actix_web::dev::{ServiceRequest, Service};
+use actix_identity::RequestIdentity;
+use crate::web::services::admin::middleware::AdminAuthorization;
 
 /// Register admin panel services.
 pub fn register(config: &mut ServiceConfig) {
-    config.service(index);
+    // Route everything through the admin scope.
+    config.service(
+        // Create the admin scope.
+        aweb::scope("/admin/")
+            // Verify that the viewer has the admin role.
+            .wrap(AdminAuthorization)
+
+            // Semester services
+            .configure(semesters::register)
+            // Admin page index.
+            .service(index)
+    );
 }
 
+
 /// Admin page index.
-#[get("/admin")]
-async fn index(req: HttpRequest, auth: AuthenticationCookie) -> Result<Template, TelescopeError> {
-    // Get the viewers username.
-    let viewer: String = auth.get_rcos_username_or_error().await?;
-    // Get the viewers role.
-    let role: UserRole = RoleLookup::get(viewer)
-        .await?
-        // We can unwrap this because if the viewer has a username, their account exists.
-        .expect("Viewer's account exists");
-
-    // If the user is not an admin they are forbidden from viewing the admin page.
-    if !role.is_admin() {
-        return Err(TelescopeError::Forbidden);
-    }
-
-    // Otherwise return the admin page (currently just a static template).
+#[get("/")]
+async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
+    // Access is pre-checked by the scope this is in.
+    // Return the admin page (currently just a static template).
     return Template::new("admin/index")
         // Rendered in a page of course.
         .render_into_page(&req, "RCOS Admin")
