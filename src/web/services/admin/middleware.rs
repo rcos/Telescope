@@ -18,7 +18,10 @@ use std::cell::RefCell;
 /// Middleware to require admin authorization on requests.
 pub struct AdminAuthorization;
 
-/// A service with only admin access.
+/// A service with only admin access. Every call to a service wrapped in this
+/// middleware queries the RCOS API twice
+/// (once to get the username and once to check the user's role). Only users with an admin role
+/// are authorized (all other requests error out before reaching the inner service).
 pub struct AdminOnly<S: 'static> {
     // Keep the inner service in an Rc RefCell so it can be passed to
     // the future without lifetime/ownership issues (or mutability issues)

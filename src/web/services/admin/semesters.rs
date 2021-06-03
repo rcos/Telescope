@@ -1,8 +1,6 @@
 //! Services for the semester records management page.
 
 use actix_web::web::ServiceConfig;
-use actix_web::HttpRequest;
-use crate::web::services::auth::identity::AuthenticationCookie;
 use crate::templates::Template;
 use crate::error::TelescopeError;
 
@@ -12,6 +10,6 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 #[get("/semesters")]
-async fn index(req: HttpRequest, auth: AuthenticationCookie) -> Result<Template, TelescopeError> {
+async fn index() -> Result<Template, TelescopeError> {
     Err(TelescopeError::NotImplemented)
 }
