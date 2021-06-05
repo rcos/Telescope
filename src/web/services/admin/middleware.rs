@@ -62,27 +62,17 @@ where
 
     fn call(&mut self, req: Self::Request) -> Self::Future {
         // Clone a reference to the inner service, so that self is not referenced by the future.
-        let mut service = self.service.clone();
+        let mut service: Rc<RefCell<S>> = self.service.clone();
 
         // Box and pin the async value.
         return Box::pin(async move {
             // Verify the request originator is an admin.
             let verification_result = verify_is_admin(&req).await;
 
-            // If the verification failed, render and return the error. We cannot leave this to
-            // the error rendering middleware because if this middleware errors the other
-            // middlewares are skipped.
+            // Check for an error. We have to explicitly convert to a response here otherwise
+            // actix error handling will skip upstream middlewares.
             if let Err(telescope_error) = verification_result {
-                // Destructure request so that we can borrow the headers to render the error page.
-                let (request, body) = req.into_parts();
-
-                // Render the error page.
-                let rendered_page = telescope_error
-                    .render_error_page(&request)
-                    .await?;
-
-
-
+                Ok(req.error_response(telescope_error))
             } else {
                 // Otherwise, we are authorized! Go on to call the service.
                 service.call(req).await
