@@ -14,6 +14,7 @@ use crate::api::rcos::users::UserRole;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::borrow::Borrow;
 
 /// Middleware to require admin authorization on requests.
 pub struct AdminAuthorization;
@@ -66,10 +67,26 @@ where
         // Box and pin the async value.
         return Box::pin(async move {
             // Verify the request originator is an admin.
-            verify_is_admin(&req).await?;
+            let verification_result = verify_is_admin(&req).await;
 
-            // Authorized! Go on to call the service.
-            service.call(req).await
+            // If the verification failed, render and return the error. We cannot leave this to
+            // the error rendering middleware because if this middleware errors the other
+            // middlewares are skipped.
+            if let Err(telescope_error) = verification_result {
+                // Destructure request so that we can borrow the headers to render the error page.
+                let (request, body) = req.into_parts();
+
+                // Render the error page.
+                let rendered_page = telescope_error
+                    .render_error_page(&request)
+                    .await?;
+
+
+
+            } else {
+                // Otherwise, we are authorized! Go on to call the service.
+                service.call(req).await
+            }
         });
     }
 }

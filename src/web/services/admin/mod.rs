@@ -15,6 +15,7 @@ use actix_web::dev::{ServiceRequest, Service};
 use actix_identity::RequestIdentity;
 use crate::web::services::admin::middleware::AdminAuthorization;
 use actix_web::guard;
+use crate::web::error_rendering_middleware::TelescopeErrorHandler;
 
 /// Register admin panel services.
 pub fn register(config: &mut ServiceConfig) {
