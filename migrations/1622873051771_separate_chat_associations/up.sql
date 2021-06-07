@@ -6,11 +6,9 @@ CREATE TABLE project_channels (
     project_id INTEGER NOT NULL REFERENCES projects(project_id),
 
     -- The ID of this Discord channel.
-    channel_id VARCHAR NOT NULL UNIQUE,
+    channel_id VARCHAR PRIMARY KEY,
 
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-
-    PRIMARY KEY (project_id, channel_id)
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE project_channels IS 'The Discord channel IDs associated with projects.';
@@ -19,5 +17,8 @@ COMMENT ON COLUMN project_channels.channel_id IS 'The Discord channel ID for thi
 
 -- Add all the project channels to the new table.
 INSERT INTO project_channels(project_id, channel_id, created_at)
-SELECT source_id, target_id, created_at FROM chat_associations
-WHERE target_type = 'discord_text_channel' OR target_type = 'discord_voice_channel';
+SELECT projects.project_id, chat_associations.target_id, chat_associations.created_at
+FROM projects INNER JOIN chat_associations ON projects.project_id = chat_associations.source_id
+WHERE (target_type = 'discord_text_channel' OR target_type = 'discord_voice_channel');
+
+
