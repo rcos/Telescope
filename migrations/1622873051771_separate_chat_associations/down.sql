@@ -1,9 +1,7 @@
 -- Undo everything in up.sql.
 
 -- Start by recreating chat association types
-
 CREATE TYPE chat_association_source AS ENUM ('project', 'small_group');
-
 COMMENT ON TYPE chat_association_source IS 'The kind of group this chat is for';
 
 CREATE TYPE chat_association_target AS ENUM (
@@ -12,7 +10,6 @@ CREATE TYPE chat_association_target AS ENUM (
     'discord_voice_channel',
     'discord_category',
     'discord_role');
-
 COMMENT ON TYPE chat_association_target IS 'The kind of chat that this refers to';
 
 -- And then recreate the chat associations table.
@@ -23,7 +20,6 @@ CREATE TABLE chat_associations (
     source_id VARCHAR NOT NULL,
     target_id VARCHAR NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
     PRIMARY KEY (source_type, target_type, source_id)
 );
 
@@ -40,9 +36,33 @@ Discord channel ID';
 
 -- Merge all data from other tables into chat_associations.
 
--- INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
--- SELECT 'project', ''project_id,
--- FROM project_channels;
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'project', 'discord_text_channel', CAST(project_id AS VARCHAR), channel_id, created_at
+FROM project_channels WHERE kind = 'discord_text';
+
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'project', 'discord_voice_channel', CAST(project_id AS VARCHAR), channel_id, created_at
+FROM project_channels WHERE kind = 'discord_voice';
+
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'project', 'discord_role', CAST(project_id AS VARCHAR), role_id, created_at
+FROM project_roles;
+
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'small_group', 'discord_text_channel', CAST(small_group_id AS VARCHAR), channel_id, created_at
+FROM small_group_channels WHERE kind = 'discord_text';
+
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'small_group', 'discord_voice_channel', CAST(small_group_id AS VARCHAR), channel_id, created_at
+FROM small_group_channels WHERE kind = 'discord_voice';
+
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'small_group', 'discord_role', CAST(small_group_id AS VARCHAR), role_id, created_at
+FROM small_group_roles;
+
+INSERT INTO chat_associations(source_type, target_type, source_id, target_id, created_at)
+SELECT 'small_group', 'discord_category', CAST(small_group_id AS VARCHAR), category_id, created_at
+FROM small_group_categories;
 
 -- Drop old tables.
 DROP TABLE project_channels;
@@ -50,3 +70,6 @@ DROP TABLE project_roles;
 DROP TABLE small_group_channels;
 DROP TABLE small_group_roles;
 DROP TABLE small_group_categories;
+
+-- Drop old channel variant type.
+DROP TYPE channel_type;
