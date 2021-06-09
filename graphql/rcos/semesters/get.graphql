@@ -3,7 +3,7 @@ query Semesters($offset: Int!, $limit: Int!) {
     # Also get the number of semester records for pagination reasons.
     semesters_aggregate { aggregate { count } }
 
-    semesters(offset: $offset, limit: $limit) {
+    semesters(offset: $offset, limit: $limit, order_by: [{start_date: desc}]) {
         semester_id
         title
         start_date

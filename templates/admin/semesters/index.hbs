@@ -1,0 +1,48 @@
+<h1>Semester Records</h1>
+
+{{! Pagination }}
+{{> pagination/pagination_bar pagination=pagination prefix="./"}}
+
+{{! Display actual data in a table}}
+{{#if data.semesters}}
+    <table class="table table-striped table-light">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Title</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Enrollments</th>
+                <th scope="col">Projects</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{#each data.semesters}}
+                <tr>
+                    <th scope="row">{{semester_id}}</th>
+                    <td>{{title}}</td>
+                    <td>{{format_date start_date}}</td>
+                    <td>{{format_date end_date}}</td>
+
+                    {{! Stats }}
+
+                    {{#with enrollments_aggregate.aggregate}}
+                        <td>{{count}}</td>
+                    {{else}}
+                        <td>unavailable</td>
+                    {{/with}}
+
+                    {{#with projects.aggregate}}
+                        <td>{{count}}</td>
+                    {{else}}
+                        <td>unavailable</td>
+                    {{/with}}
+
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+{{else}}
+    No semester records found.
+{{/if}}
