@@ -2,3 +2,4 @@
 
 pub mod current;
 pub mod mutations;
+pub mod get;

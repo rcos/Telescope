@@ -9,7 +9,9 @@ pub fn register(config: &mut ServiceConfig) {
     config.service(index);
 }
 
+/// Page to display previous semesters and allow edits.
 #[get("/semesters")]
 async fn index() -> Result<Template, TelescopeError> {
+
     Err(TelescopeError::NotImplemented)
 }

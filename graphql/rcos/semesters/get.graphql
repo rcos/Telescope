@@ -1,0 +1,28 @@
+# Paginated semester querying.
+query Semesters($offset: Int!, $limit: Int!) {
+    # Also get the number of semester records for pagination reasons.
+    semesters_aggregate { aggregate { count } }
+
+    semesters(offset: $offset, limit: $limit) {
+        semester_id
+        title
+        start_date
+        end_date
+
+        # Get some stats too
+
+        # Enrollments
+        enrollments_aggregate {
+            aggregate {
+                count
+            }
+        }
+
+        # Projects
+        projects: enrollments_aggregate(distinct_on: [project_id], where: {project_id: {_is_null: false}}) {
+            aggregate {
+                count
+            }
+        }
+    }
+}
