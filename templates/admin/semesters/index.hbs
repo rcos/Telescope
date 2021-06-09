@@ -8,7 +8,6 @@
     <table class="table table-striped table-light">
         <thead>
             <tr>
-                <th scope="col">ID</th>
                 <th scope="col">Title</th>
                 <th scope="col">Start</th>
                 <th scope="col">End</th>
@@ -20,7 +19,6 @@
         <tbody>
             {{#each data.semesters}}
                 <tr>
-                    <th scope="row">{{semester_id}}</th>
                     <td>{{title}}</td>
                     <td>{{format_date start_date}}</td>
                     <td>{{format_date end_date}}</td>
