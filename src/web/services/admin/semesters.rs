@@ -1,19 +1,24 @@
 //! Services for the semester records management page.
 
-use actix_web::web::{ServiceConfig, Path};
+use actix_web::web::{ServiceConfig, Path, Form};
 use crate::templates::Template;
 use crate::error::TelescopeError;
-use actix_web::web as aweb;
+use actix_web::{web as aweb, HttpResponse};
 use crate::api::rcos::semesters::get::{
     Semesters,
     PER_PAGE
 };
 use crate::templates::pagination::PaginationInfo;
 use actix_web::HttpRequest;
+use chrono::NaiveDate;
+use crate::templates::forms::FormTemplate;
+use regex::Regex;
 
 /// Register semester services.
 pub fn register(config: &mut ServiceConfig) {
     config
+        .service(new)
+        .service(submit_new)
         .route("/semesters", aweb::get().to(index))
         .route("/semesters/{page}", aweb::get().to(index));
 }
@@ -38,4 +43,44 @@ async fn index(req: HttpRequest, page_num: Option<Path<u32>>) -> Result<Template
         // Render in page
         .render_into_page(&req, "Semester Records")
         .await
+}
+
+fn new_semester_form_empty() -> FormTemplate {
+    FormTemplate::new("admin/semesters/forms/create", "Create Semester")
+}
+
+/// Semester creation.
+#[get("/semesters/create")]
+async fn new() -> FormTemplate {
+    new_semester_form_empty()
+}
+
+/// Form fields submitted when creating a semester record.
+#[derive(Debug, Deserialize, Serialize)]
+struct CreateSemester {
+    /// Semester IDs should be 6 digit strings, as used by the RPI registrar.
+    id: String,
+    title: String,
+    start: NaiveDate,
+    end: NaiveDate,
+}
+
+lazy_static!{
+    static ref SEMESTER_ID_REGEX: Regex = Regex::new(r"^[[:digit:]]{6}$").expect("Bad Regex");
+}
+
+/// Check if a semester ID is properly formatted (6 digit form) via regex.
+fn check_semester_id(id: &str) -> bool {
+    SEMESTER_ID_REGEX.is_match(id)
+}
+
+/// Semester creation forms are submitted here.
+#[post("/semesters/create")]
+async fn submit_new(Form(input): Form<CreateSemester>) -> Result<HttpResponse, TelescopeError> {
+    // Destructure form submission
+    let CreateSemester {id, title, start, end} = input;
+
+
+
+    Err(TelescopeError::NotImplemented)
 }
