@@ -2,15 +2,12 @@
 
 mod create;
 
-use actix_web::http::header::LOCATION;
-use actix_web::web::{Form, Path, ServiceConfig};
+use actix_web::web::{Path, ServiceConfig};
 use actix_web::HttpRequest;
 use actix_web::{web as aweb, HttpResponse};
-use chrono::NaiveDate;
 use regex::Regex;
 
 use crate::api::rcos::semesters::get::{Semesters, PER_PAGE};
-use crate::api::rcos::semesters::mutations::create::CreateSemester;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::pagination::PaginationInfo;

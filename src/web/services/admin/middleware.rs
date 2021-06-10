@@ -9,7 +9,6 @@ use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::Error as ActixError;
 use futures::future::ok;
 use futures::prelude::future::Ready;
-use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;

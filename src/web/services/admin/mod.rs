@@ -3,15 +3,9 @@
 mod middleware;
 mod semesters;
 
-use crate::api::rcos::users::role_lookup::RoleLookup;
-use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::error_rendering_middleware::TelescopeErrorHandler;
 use crate::web::services::admin::middleware::AdminAuthorization;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use actix_identity::RequestIdentity;
-use actix_web::dev::{Service, ServiceRequest};
 use actix_web::guard;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
