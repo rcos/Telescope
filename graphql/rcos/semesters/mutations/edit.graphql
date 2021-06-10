@@ -1,0 +1,9 @@
+# Change Semester Details
+mutation EditSemester($semester_id: String!, $set_title: String, $set_start: date, $set_end: date) {
+    update_semesters_by_pk(
+        pk_columns: {semester_id: $semester_id},
+        _set: {end_date: $set_end, start_date: $set_start, title: $set_title}
+    ) {
+        semester_id
+    }
+}

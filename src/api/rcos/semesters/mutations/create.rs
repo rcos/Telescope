@@ -5,7 +5,7 @@ use crate::api::rcos::send_query;
 use crate::error::TelescopeError;
 use chrono::NaiveDate;
 
-/// Type representing GraphQL query for current semester data.
+/// Type representing GraphQL mutation to create semester.
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",

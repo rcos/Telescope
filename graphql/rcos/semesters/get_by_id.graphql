@@ -1,0 +1,9 @@
+# Get semester info by id.
+query Semester($id: String!) {
+    semesters_by_pk(semester_id: $id) {
+        semester_id
+        title
+        start_date
+        end_date
+    }
+}

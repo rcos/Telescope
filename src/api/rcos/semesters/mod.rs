@@ -3,3 +3,4 @@
 pub mod current;
 pub mod get;
 pub mod mutations;
+pub mod get_by_id;
