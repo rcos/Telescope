@@ -27,23 +27,31 @@ pub struct AllProjects;
 
 impl CurrentProjects {
     /// Get projects for a given page number (zero indexed).
-    pub async fn get(page: u32, search: Option<String>) -> Result<current_projects::ResponseData, TelescopeError> {
+    pub async fn get(
+        page: u32,
+        search: Option<String>,
+    ) -> Result<current_projects::ResponseData, TelescopeError> {
         send_query::<Self>(current_projects::Variables {
             limit: PER_PAGE as i64,
-            offset: (PER_PAGE*page) as i64,
+            offset: (PER_PAGE * page) as i64,
             search: resolve_search_string(search),
             now: Utc::today().naive_utc(),
-        }).await
+        })
+        .await
     }
 }
 
 impl AllProjects {
     /// Get projects for a given page number (zero indexed).
-    pub async fn get(page: u32, search: Option<String>) -> Result<all_projects::ResponseData, TelescopeError> {
+    pub async fn get(
+        page: u32,
+        search: Option<String>,
+    ) -> Result<all_projects::ResponseData, TelescopeError> {
         send_query::<Self>(all_projects::Variables {
             limit: PER_PAGE as i64,
-            offset: (PER_PAGE*page) as i64,
-            search: resolve_search_string(search)
-        }).await
+            offset: (PER_PAGE * page) as i64,
+            search: resolve_search_string(search),
+        })
+        .await
     }
 }

@@ -5,8 +5,8 @@ pub mod create;
 pub mod developers_page;
 pub mod discord_whois;
 pub mod enrollments;
-pub mod profile;
 pub mod navbar_auth;
+pub mod profile;
 pub mod role_lookup;
 
 /// The valid user roles for all users in the RCOS database.

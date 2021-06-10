@@ -1,10 +1,7 @@
 //! RCOS API query to get list of developers to display on the developers page.
 
-use crate::api::rcos::{
-    prelude::*,
-    search_strings::resolve_search_string
-};
 use crate::api::rcos::send_query;
+use crate::api::rcos::{prelude::*, search_strings::resolve_search_string};
 use crate::error::TelescopeError;
 use chrono::Utc;
 use graphql_client::GraphQLQuery;

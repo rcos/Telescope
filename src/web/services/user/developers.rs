@@ -1,7 +1,7 @@
 //! Developers page services
 
-use actix_web::HttpRequest;
 use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
+use actix_web::HttpRequest;
 use serde_json::Value;
 
 use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};

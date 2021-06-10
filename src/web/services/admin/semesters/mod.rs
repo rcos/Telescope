@@ -2,17 +2,14 @@
 
 mod create;
 
-use actix_web::{HttpResponse, web as aweb};
 use actix_web::http::header::LOCATION;
-use actix_web::HttpRequest;
 use actix_web::web::{Form, Path, ServiceConfig};
+use actix_web::HttpRequest;
+use actix_web::{web as aweb, HttpResponse};
 use chrono::NaiveDate;
 use regex::Regex;
 
-use crate::api::rcos::semesters::get::{
-    PER_PAGE,
-    Semesters
-};
+use crate::api::rcos::semesters::get::{Semesters, PER_PAGE};
 use crate::api::rcos::semesters::mutations::create::CreateSemester;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
@@ -39,20 +36,24 @@ async fn index(req: HttpRequest, page_num: Option<Path<u32>>) -> Result<Template
     let semester_data = Semesters::get(page_num - 1).await?;
 
     // Extract the semester count if available.
-    let semester_count = semester_data.semester_count()
+    let semester_count = semester_data
+        .semester_count()
         .ok_or(TelescopeError::ise("Semester count not returned by API"))?
         as u64;
 
     // Render template and send back to user.
     Template::new("admin/semesters/index")
-        .field("pagination", PaginationInfo::new(semester_count, PER_PAGE as u64, page_num as u64))
+        .field(
+            "pagination",
+            PaginationInfo::new(semester_count, PER_PAGE as u64, page_num as u64),
+        )
         .field("data", semester_data)
         // Render in page
         .render_into_page(&req, "Semester Records")
         .await
 }
 
-lazy_static!{
+lazy_static! {
     static ref SEMESTER_ID_REGEX: Regex = Regex::new(r"^[[:digit:]]{6}$").expect("Bad Regex");
 }
 

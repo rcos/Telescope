@@ -14,8 +14,8 @@ pub mod helpers;
 pub mod jumbotron;
 pub mod navbar;
 pub mod page;
-pub mod static_pages;
 pub mod pagination;
+pub mod static_pages;
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]

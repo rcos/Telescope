@@ -55,7 +55,6 @@ where
     }
 
     fn call(&mut self, req: Self::Request) -> Self::Future {
-
         // Call wrapped service.
         let service_response_future = self.service.call(req);
 

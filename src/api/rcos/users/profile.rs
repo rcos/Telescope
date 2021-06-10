@@ -17,12 +17,19 @@ use profile::{ResponseData, Variables};
 
 impl Profile {
     /// Get the profile data for a given username.
-    pub async fn for_user(target: String, viewer: Option<String>) -> Result<ResponseData, TelescopeError> {
+    pub async fn for_user(
+        target: String,
+        viewer: Option<String>,
+    ) -> Result<ResponseData, TelescopeError> {
         // Convert viewer to a vec with one or zero usernames in it.
         let viewer = viewer.map(|v| vec![v]).unwrap_or(Vec::new());
 
         // Send the query and await the response.
-        send_query::<Self>(Variables { target, viewer, now: Utc::today().naive_utc() })
-            .await
+        send_query::<Self>(Variables {
+            target,
+            viewer,
+            now: Utc::today().naive_utc(),
+        })
+        .await
     }
 }

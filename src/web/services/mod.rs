@@ -2,13 +2,13 @@
 
 use actix_web::web::ServiceConfig;
 
+mod admin;
 pub mod auth;
 mod index;
 pub mod meetings;
 pub mod not_found;
 mod projects;
 pub mod user;
-mod admin;
 
 /// Register all of the routs to the actix app.
 pub fn register(config: &mut ServiceConfig) {

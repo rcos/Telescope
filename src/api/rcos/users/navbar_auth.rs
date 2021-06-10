@@ -1,10 +1,10 @@
 //! GraphQL query to get navbar authentication info on a user.
 
 use crate::api::rcos::prelude::*;
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
-use chrono::Utc;
 use crate::api::rcos::users::UserRole;
+use crate::error::TelescopeError;
+use chrono::Utc;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -17,8 +17,11 @@ pub struct Authentication;
 impl Authentication {
     /// Get the navbar authentication object for a user.
     pub async fn get(username: String) -> Result<authentication::ResponseData, TelescopeError> {
-        send_query::<Self>(authentication::Variables { username, now: Utc::today().naive_utc() })
-            .await
+        send_query::<Self>(authentication::Variables {
+            username,
+            now: Utc::today().naive_utc(),
+        })
+        .await
     }
 }
 

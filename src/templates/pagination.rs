@@ -6,7 +6,6 @@ use std::num::NonZeroU64;
 #[derive(Serialize, Copy, Clone, Debug)]
 pub struct PaginationInfo {
     // first field excluded, first page is always page 1
-
     /// Flag to include left side ellipsis/separator.
     left_sep: bool,
 

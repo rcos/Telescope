@@ -1,20 +1,20 @@
 //! Definition for the admin scope middleware. This authorizes all access to the admin pages.
 
-use actix_web::dev::{Transform, Service, ServiceRequest, ServiceResponse};
-use actix_web::Error as ActixError;
-use std::future::Future;
-use futures::prelude::future::Ready;
-use futures::future::ok;
-use std::task::{Context, Poll};
-use std::pin::Pin;
-use crate::error::TelescopeError;
-use actix_identity::RequestIdentity;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use crate::api::rcos::users::UserRole;
 use crate::api::rcos::users::role_lookup::RoleLookup;
-use std::rc::Rc;
-use std::cell::RefCell;
+use crate::api::rcos::users::UserRole;
+use crate::error::TelescopeError;
+use crate::web::services::auth::identity::AuthenticationCookie;
+use actix_identity::RequestIdentity;
+use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
+use actix_web::Error as ActixError;
+use futures::future::ok;
+use futures::prelude::future::Ready;
 use std::borrow::Borrow;
+use std::cell::RefCell;
+use std::future::Future;
+use std::pin::Pin;
+use std::rc::Rc;
+use std::task::{Context, Poll};
 
 /// Middleware to require admin authorization on requests.
 pub struct AdminAuthorization;
@@ -26,13 +26,13 @@ pub struct AdminAuthorization;
 pub struct AdminOnly<S: 'static> {
     // Keep the inner service in an Rc RefCell so it can be passed to
     // the future without lifetime/ownership issues (or mutability issues)
-    service: Rc<RefCell<S>>
+    service: Rc<RefCell<S>>,
 }
 
 impl<S> Transform<S> for AdminAuthorization
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse, Error = ActixError> + 'static,
-    S::Future: 'static
+    S::Future: 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse;
@@ -42,14 +42,16 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(AdminOnly { service: Rc::new(RefCell::new(service)) })
+        ok(AdminOnly {
+            service: Rc::new(RefCell::new(service)),
+        })
     }
 }
 
 impl<S> Service for AdminOnly<S>
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse, Error = ActixError> + 'static,
-    S::Future: 'static
+    S::Future: 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse;

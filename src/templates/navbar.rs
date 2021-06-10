@@ -1,12 +1,12 @@
 //! Navbar template constants and functions.
 
+use crate::api::rcos::users::navbar_auth::Authentication;
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
-use crate::api::rcos::users::navbar_auth::Authentication;
 use serde_json::Value;
 
 /// The handlebars key for the links on the left side of the navbar.
@@ -81,13 +81,11 @@ async fn for_user(req_path: &str, username: String) -> Result<Template, Telescop
     let right_items = vec![
         item(req_path, "Profile", profile_for(username.as_str()))
             .field(CLASS, "btn mr-2 mb-2 btn-primary"),
-        item(req_path, "Logout", "/logout")
-            .field(CLASS, "btn mr-2 mb-2 btn-secondary"),
+        item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
     ];
 
     // Add items to right side of navbar
-    let mut base_navbar = with_defaults(req_path)
-        .field(RIGHT_ITEMS, right_items);
+    let mut base_navbar = with_defaults(req_path).field(RIGHT_ITEMS, right_items);
 
     // Get mutable ref to left side of navbar.
     let left_items = base_navbar[LEFT_ITEMS].as_array_mut().unwrap();
@@ -104,17 +102,14 @@ async fn for_user(req_path: &str, username: String) -> Result<Template, Telescop
         left_items.push(coord_link);
         left_items.push(mentor_link);
         left_items.push(attend_link);
-    }
-    else if navbar_auth.is_coordinating() {
+    } else if navbar_auth.is_coordinating() {
         left_items.push(coord_link);
         left_items.push(mentor_link);
         left_items.push(attend_link);
-    }
-    else if navbar_auth.is_mentoring() {
+    } else if navbar_auth.is_mentoring() {
         left_items.push(mentor_link);
         left_items.push(attend_link);
-    }
-    else if navbar_auth.is_student() {
+    } else if navbar_auth.is_student() {
         left_items.push(attend_link);
     }
 

@@ -1,7 +1,7 @@
 //! Project page.
 
-use actix_web::HttpResponse;
 use crate::error::TelescopeError;
+use actix_web::HttpResponse;
 
 #[get("/projects")]
 pub async fn get() -> Result<HttpResponse, TelescopeError> {

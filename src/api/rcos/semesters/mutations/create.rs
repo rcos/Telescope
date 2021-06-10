@@ -1,9 +1,9 @@
 //! GraphQL mutation to create a semester in the RCOS dataabse.
 
 use crate::api::rcos::prelude::*;
-use chrono::NaiveDate;
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
+use chrono::NaiveDate;
 
 /// Type representing GraphQL query for current semester data.
 #[derive(GraphQLQuery)]
@@ -16,10 +16,20 @@ pub struct CreateSemester;
 
 impl CreateSemester {
     /// Create a semester. Return the semester ID or an error.
-    pub async fn execute(id: String, title: String, start: NaiveDate, end: NaiveDate) -> Result<String, TelescopeError> {
-        return send_query::<Self>(create_semester::Variables { id, title, start, end })
-            .await
-            // Extract semester ID.
-            .map(|r| r.insert_semesters_one.unwrap().semester_id)
+    pub async fn execute(
+        id: String,
+        title: String,
+        start: NaiveDate,
+        end: NaiveDate,
+    ) -> Result<String, TelescopeError> {
+        return send_query::<Self>(create_semester::Variables {
+            id,
+            title,
+            start,
+            end,
+        })
+        .await
+        // Extract semester ID.
+        .map(|r| r.insert_semesters_one.unwrap().semester_id);
     }
 }

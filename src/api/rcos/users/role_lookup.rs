@@ -1,9 +1,9 @@
 //! GraphQL lookup to get a user's role.
 
 use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
 use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
-use crate::api::rcos::send_query;
 
 #[derive(GraphQLQuery)]
 #[graphql(

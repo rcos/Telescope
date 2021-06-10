@@ -3,12 +3,9 @@
 use crate::api::rcos::semesters::mutations::create::CreateSemester;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
-use actix_web::{
-    web::Form,
-    HttpResponse
-};
 use crate::web::services::admin::semesters::semester_id_valid;
 use actix_web::http::header::LOCATION;
+use actix_web::{web::Form, HttpResponse};
 use chrono::NaiveDate;
 
 /// Create an empty form template for semester creation.
@@ -34,9 +31,16 @@ pub struct CreateSemesterForm {
 
 /// Semester creation forms are submitted here.
 #[post("/semesters/create")]
-pub async fn submit_new(Form(input): Form<CreateSemesterForm>) -> Result<HttpResponse, TelescopeError> {
+pub async fn submit_new(
+    Form(input): Form<CreateSemesterForm>,
+) -> Result<HttpResponse, TelescopeError> {
     // Destructure form submission
-    let CreateSemesterForm {id, title, start, end} = input;
+    let CreateSemesterForm {
+        id,
+        title,
+        start,
+        end,
+    } = input;
 
     // Validate ID.
     if !semester_id_valid(&id) {
@@ -89,4 +93,3 @@ pub async fn submit_new(Form(input): Form<CreateSemesterForm>) -> Result<HttpRes
         .header(LOCATION, "/admin/semesters")
         .finish())
 }
-

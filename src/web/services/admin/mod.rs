@@ -1,29 +1,31 @@
 //! Services for the admin panel.
 
-mod semesters;
 mod middleware;
+mod semesters;
 
-use actix_web::web::ServiceConfig;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use crate::templates::Template;
-use crate::error::TelescopeError;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use crate::api::rcos::users::UserRole;
-use actix_web::HttpRequest;
-use actix_web::web as aweb;
-use actix_web::dev::{ServiceRequest, Service};
-use actix_identity::RequestIdentity;
-use crate::web::services::admin::middleware::AdminAuthorization;
-use actix_web::guard;
+use crate::error::TelescopeError;
+use crate::templates::Template;
 use crate::web::error_rendering_middleware::TelescopeErrorHandler;
+use crate::web::services::admin::middleware::AdminAuthorization;
+use crate::web::services::auth::identity::AuthenticationCookie;
+use actix_identity::RequestIdentity;
+use actix_web::dev::{Service, ServiceRequest};
+use actix_web::guard;
+use actix_web::web as aweb;
+use actix_web::web::ServiceConfig;
+use actix_web::HttpRequest;
 
 /// Register admin panel services.
 pub fn register(config: &mut ServiceConfig) {
     // Admin panel index page.
-    config.service(aweb::resource("/admin")
-        .guard(guard::Get())
-        .wrap(AdminAuthorization)
-        .to(index));
+    config.service(
+        aweb::resource("/admin")
+            .guard(guard::Get())
+            .wrap(AdminAuthorization)
+            .to(index),
+    );
 
     // Route every sub-service through the admin scope.
     config.service(
@@ -32,7 +34,7 @@ pub fn register(config: &mut ServiceConfig) {
             // Verify that the viewer has the admin role.
             .wrap(AdminAuthorization)
             // Semester services
-            .configure(semesters::register)
+            .configure(semesters::register),
     );
 }
 

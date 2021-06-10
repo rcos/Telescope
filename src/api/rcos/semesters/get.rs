@@ -20,8 +20,9 @@ impl Semesters {
     pub async fn get(page_num: u32) -> Result<semesters::ResponseData, TelescopeError> {
         send_query::<Self>(semesters::Variables {
             limit: PER_PAGE as i64,
-            offset: (page_num*PER_PAGE) as i64
-        }).await
+            offset: (page_num * PER_PAGE) as i64,
+        })
+        .await
     }
 }
 

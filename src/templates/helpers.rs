@@ -1,13 +1,13 @@
 //! Handlebars helpers.
 
 use crate::api::rcos::meetings::MeetingType;
+use crate::api::rcos::users::UserRole;
 use crate::web::profile_for;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
 };
 use url::Url;
-use crate::api::rcos::users::UserRole;
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
@@ -197,9 +197,7 @@ fn format_user_role(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
         // One parameter required.
         .param(0)
         // Parse to user role
-        .and_then(|param| {
-            serde_json::from_value::<UserRole>(param.value().clone()).ok()
-        })
+        .and_then(|param| serde_json::from_value::<UserRole>(param.value().clone()).ok())
         .ok_or(RenderError::new("format_user_role expects a user's role"))?;
 
     out.write(user_role.to_string().as_str())?;

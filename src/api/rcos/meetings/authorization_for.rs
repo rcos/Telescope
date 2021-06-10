@@ -57,7 +57,6 @@ impl UserMeetingAuthorization {
         self.is_current_coordinator
             || self.role == UserRole::FacultyAdvisor
             || self.role == UserRole::Sysadmin
-
     }
 
     /// Can the user associated with this authorization view meetings of a given type?

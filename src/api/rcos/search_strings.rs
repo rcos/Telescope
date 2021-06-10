@@ -1,7 +1,7 @@
 //! Utility functions for handling search strings before being sent to Hasura.
 
-use std::borrow::Cow;
 use regex::Regex;
+use std::borrow::Cow;
 
 lazy_static! {
     static ref SEARCH_REGEX: Regex = Regex::new(r"[@%\\]").unwrap();
