@@ -34,7 +34,8 @@ impl FormTemplate {
         Self {
             template_path: template_path.into(),
             page_title: page_title.into(),
-            template: Value::Null,
+            // Use an empty map here instead of null so that keys can be added more readily.
+            template: json!({}),
         }
     }
 

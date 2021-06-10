@@ -91,5 +91,5 @@ pub async fn submit_edit(
     }
 
     // Edit success! Redirect user.
-    Ok(HttpResponse::Found().header(LOCATION, "admin/semesters").finish())
+    Ok(HttpResponse::Found().header(LOCATION, "/admin/semesters").finish())
 }
