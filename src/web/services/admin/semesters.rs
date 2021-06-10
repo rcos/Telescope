@@ -13,6 +13,8 @@ use actix_web::HttpRequest;
 use chrono::NaiveDate;
 use crate::templates::forms::FormTemplate;
 use regex::Regex;
+use crate::api::rcos::semesters::mutations::create::CreateSemester;
+use actix_web::http::header::LOCATION;
 
 /// Register semester services.
 pub fn register(config: &mut ServiceConfig) {
@@ -58,7 +60,7 @@ async fn new() -> FormTemplate {
 
 /// Form fields submitted when creating a semester record.
 #[derive(Debug, Deserialize, Serialize)]
-struct CreateSemester {
+struct CreateSemesterForm {
     /// Semester IDs should be 6 digit strings, as used by the RPI registrar.
     id: String,
     title: String,
@@ -77,9 +79,9 @@ fn semester_id_valid(id: &str) -> bool {
 
 /// Semester creation forms are submitted here.
 #[post("/semesters/create")]
-async fn submit_new(Form(input): Form<CreateSemester>) -> Result<HttpResponse, TelescopeError> {
+async fn submit_new(Form(input): Form<CreateSemesterForm>) -> Result<HttpResponse, TelescopeError> {
     // Destructure form submission
-    let CreateSemester {id, title, start, end} = input;
+    let CreateSemesterForm {id, title, start, end} = input;
 
     // Validate ID.
     if !semester_id_valid(&id) {
@@ -98,7 +100,37 @@ async fn submit_new(Form(input): Form<CreateSemester>) -> Result<HttpResponse, T
         return Err(TelescopeError::invalid_form(&return_form));
     }
 
+    // Validate title.
+    if title.trim().is_empty() {
+        let mut return_form: FormTemplate = new_semester_form_empty();
+        return_form.template = json!({
+            "id": {"value": id},
+            "title": {"issue": "Title cannot be empty."},
+            "start": {"value": start},
+            "end": {"value": end}
+        });
 
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
 
-    Err(TelescopeError::NotImplemented)
+    // Validate dates.
+    if start >= end {
+        let mut return_form: FormTemplate = new_semester_form_empty();
+        return_form.template = json!({
+            "id": {"value": id},
+            "title": {"value": title},
+            "start": {"value": start, "issue": "Semester cannot end before it starts."},
+            "end": {"value": end}
+        });
+
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    // Everything is valid -- create the semester.
+    CreateSemester::execute(id, title, start, end).await?;
+
+    // Redirect back to semesters page.
+    Ok(HttpResponse::Found()
+        .header(LOCATION, "/admin/semesters")
+        .finish())
 }
