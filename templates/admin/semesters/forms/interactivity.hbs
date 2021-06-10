@@ -1,0 +1,18 @@
+{{!
+This Handlebars partial is included on form feilds to link to the feedback
+div when necessary. Also prefills the value.
+
+Params:
+value: Nullable previously entered value.
+issue: Nullable feedback message.
+feedback_id: Id of the feedback div.
+}}
+
+{{#if value}} value="{{value}}" {{/if}}
+
+{{#if issue}}
+    aria-labelledby="{{feedback_id}}"
+    class="form-control is-invalid"
+{{else}}
+    class="form-control"
+{{/if}}

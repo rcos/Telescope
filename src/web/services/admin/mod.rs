@@ -31,7 +31,6 @@ pub fn register(config: &mut ServiceConfig) {
         aweb::scope("/admin/")
             // Verify that the viewer has the admin role.
             .wrap(AdminAuthorization)
-
             // Semester services
             .configure(semesters::register)
     );

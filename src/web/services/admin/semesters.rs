@@ -45,6 +45,7 @@ async fn index(req: HttpRequest, page_num: Option<Path<u32>>) -> Result<Template
         .await
 }
 
+/// Create an empty form template for semester creation.
 fn new_semester_form_empty() -> FormTemplate {
     FormTemplate::new("admin/semesters/forms/create", "Create Semester")
 }
@@ -70,7 +71,7 @@ lazy_static!{
 }
 
 /// Check if a semester ID is properly formatted (6 digit form) via regex.
-fn check_semester_id(id: &str) -> bool {
+fn semester_id_valid(id: &str) -> bool {
     SEMESTER_ID_REGEX.is_match(id)
 }
 
@@ -79,6 +80,23 @@ fn check_semester_id(id: &str) -> bool {
 async fn submit_new(Form(input): Form<CreateSemester>) -> Result<HttpResponse, TelescopeError> {
     // Destructure form submission
     let CreateSemester {id, title, start, end} = input;
+
+    // Validate ID.
+    if !semester_id_valid(&id) {
+        // Create the form returned to the user.
+        let mut return_form: FormTemplate = new_semester_form_empty();
+        return_form.template = json!({
+            "id": {
+                "value": id,
+                "issue": "Malformed ID. Please use the 6 digit format."
+            },
+            "title": {"value": title},
+            "start": {"value": start},
+            "end": {"value": end}
+        });
+
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
 
 
 

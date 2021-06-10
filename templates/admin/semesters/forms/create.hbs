@@ -1,44 +1,64 @@
-{{! Semester creation template }}
 
-<h1>Create Semester Record</h1>
+{{! Semester creation form template }}
+<div class="row justify-content-center no-gutters">
+    <div class="card col-sm-11 col-md-9 col-lg-7 col-xl-6 text-dark">
+        <div class="card-header">
+            <h1 class="card-title">
+                Create Semester Record
+            </h1>
+        </div>
 
-<form>
-    <div class="form-group row">
-        <label for="id-input" class="col-sm-2 col-form-label">
-            Semester ID:
-        </label>
-        <div class="col-sm-10">
-            <input id="id-input" type="text" name="id" aria-describedby="id-help" required>
+        <div class="card-body">
+            <form method="post">
+                <div class="form-group">
+                    <label for="id-input">
+                        Semester ID:
+                    </label>
 
-            <small id="id-help" class="form-text text-muted">
-                This should be the 6 digit semester code from the registrar. "202101" for example.
-            </small>
+                    <input id="id-input" type="text" name="id" aria-describedby="id-help"
+                        {{> admin/semesters/forms/interactivity issue=id.issue value=id.value feedback_id="id-issue"}}
+                        required>
+                    {{> admin/semesters/forms/feedback issue=id.issue id="id-issue"}}
+
+                    <small id="id-help" class="form-text text-muted">
+                        This should be the 6 digit semester code from the registrar. "202101" for example.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="title-input">
+                        Title:
+                    </label>
+
+                    <input name="title" id="title-input" type="text"
+                            {{> admin/semesters/forms/interactivity
+                                    issue=title.issue value=title.value feedback_id="title-issue"}}
+                           required>
+                    {{> admin/semesters/forms/feedback issue=title.issue id="title-issue"}}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="start-input">Start:</label>
+                        <input type="date" name="start" id="start-input"
+                            {{> admin/semesters/forms/interactivity
+                                    issue=start.issue value=start.value feedback_id="start-issue"}}
+                               required>
+                        {{> admin/semesters/forms/feedback issue=start.issue id="start-issue"}}
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="end-input">End:</label>
+                        <input type="date" name="end" id="end-input" class="form-control"
+                            {{#if end.value}} value="{{end.value}}" {{/if}}
+                               required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Submit
+                </button>
+            </form>
         </div>
     </div>
-
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="title-input">
-            Title
-        </label>
-
-        <div class="col-sm-10">
-            <input name="title" id="title-input" type="text" required>
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <div class="col-auto">
-            <label for="start-input">Start:</label>
-            <input type="date" name="start" id="start-input" required>
-        </div>
-
-        <div class="col-auto">
-            <label for="end-input">End:</label>
-            <input type="date" name="end" id="end-input" required>
-        </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Submit
-    </button>
-</form>
+</div>

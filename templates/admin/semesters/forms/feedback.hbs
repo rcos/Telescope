@@ -1,0 +1,13 @@
+{{!
+Part of the form to show feedback. This is included as a partial and
+called with two parameters.
+
+id: The ID of the feedback div.
+issue: The nullable field containing feedback message.
+}}
+
+{{#if issue}}
+    <div class="invalid-feedback" id="{{id}}">
+        {{issue}}
+    </div>
+{{/if}}
