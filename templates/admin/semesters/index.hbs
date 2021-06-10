@@ -1,11 +1,10 @@
-<div>
-    <h1>Semester Records</h1>
-    <a class="float-right btn btn-primary" href="./create">Create Semester</a>
-</div>
-
+<h1>Semester Records</h1>
 
 {{! Pagination }}
 {{> pagination/pagination_bar pagination=pagination prefix="./"}}
+
+{{! Semester Creation link }}
+<a class="btn btn-primary w-100 mb-1" href="/admin/semesters/create">Create Semester</a>
 
 {{! Display actual data in a table}}
 {{#if data.semesters}}

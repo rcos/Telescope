@@ -21,6 +21,8 @@ pub fn register(config: &mut ServiceConfig) {
     config
         .service(new)
         .service(submit_new)
+        .service(edit)
+        .service(submit_edit)
         .route("/semesters", aweb::get().to(index))
         .route("/semesters/{page}", aweb::get().to(index));
 }
@@ -133,4 +135,14 @@ async fn submit_new(Form(input): Form<CreateSemesterForm>) -> Result<HttpRespons
     Ok(HttpResponse::Found()
         .header(LOCATION, "/admin/semesters")
         .finish())
+}
+
+#[get("/semesters/edit/{semester_id}")]
+async fn edit(Path(semester_id): Path<String>) -> Result<FormTemplate, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
+}
+
+#[get("/semesters/edit/{semester_id}")]
+async fn submit_edit(Path(semester_id): Path<String>) -> Result<HttpResponse, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
 }
