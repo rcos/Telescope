@@ -16,17 +16,14 @@ pub struct EditSemester;
 
 impl EditSemester {
     /// Send a semester edit mutation. Return a semester ID if there was a semester found and edited.
-    pub async fn execute(
-        id: String,
-        new_title: Option<String>,
-        new_start: Option<NaiveDate>,
-        new_end: Option<NaiveDate>
-    ) -> Result<Option<String>, TelescopeError> {
+    pub async fn execute(id: String, new_title: String, new_start: NaiveDate, new_end: NaiveDate)
+        -> Result<Option<String>, TelescopeError>
+    {
         send_query::<Self>(edit_semester::Variables {
             semester_id: id,
-            set_title: new_title,
-            set_start: new_start,
-            set_end: new_end,
+            set_title: Some(new_title),
+            set_start: Some(new_start),
+            set_end: Some(new_end),
         })
             .await
             .map(|data| data.update_semesters_by_pk.map(|obj| obj.semester_id))

@@ -1,0 +1,43 @@
+{{! Semester edit form }}
+<div class="row no-gutters justify-content-center">
+    <div class="card col-sm-11 col-md-9 col-lg-7 col-xl-6 text-dark">
+        <div class="card-header">
+            <h1>Edit {{title.value}} Record</h1>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                <span class="form-group">Semester ID: {{id}}</span>
+
+                <div class="form-group">
+                    <label for="title-input">Title:</label>
+                    <input id="title-input" type="text" name="title"
+                           {{> admin/semesters/forms/interactivity
+                                   issue=title.issue value=title.value feedback_id="title-issue"}}
+                           required>
+                    {{> admin/semesters/forms/feedback issue=title.issue id="title-issue"}}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="start-input">Start:</label>
+                        <input type="date" name="start" id="start-input"
+                            {{> admin/semesters/forms/interactivity
+                                    issue=start.issue value=start.value feedback_id="start-issue"}}
+                               required>
+                        {{> admin/semesters/forms/feedback issue=start.issue id="start-issue"}}
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="end-input">End:</label>
+                        <input type="date" name="end" id="end-input" class="form-control"
+                            {{#if end.value}} value="{{end.value}}" {{/if}}
+                               required>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+</div>

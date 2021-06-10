@@ -1,25 +1,25 @@
 //! Services for the semester records management page.
 
-mod create;
-
-use actix_web::web::{Path, ServiceConfig};
+use actix_web::web as aweb;
 use actix_web::HttpRequest;
-use actix_web::{web as aweb, HttpResponse};
+use actix_web::web::{Path, ServiceConfig};
 use regex::Regex;
 
-use crate::api::rcos::semesters::get::{Semesters, PER_PAGE};
+use crate::api::rcos::semesters::get::{PER_PAGE, Semesters};
 use crate::error::TelescopeError;
-use crate::templates::forms::FormTemplate;
 use crate::templates::pagination::PaginationInfo;
 use crate::templates::Template;
+
+mod create;
+mod edit;
 
 /// Register semester services.
 pub fn register(config: &mut ServiceConfig) {
     config
         .service(create::new)
         .service(create::submit_new)
-        .service(edit)
-        .service(submit_edit)
+        .service(edit::edit)
+        .service(edit::submit_edit)
         .route("/semesters", aweb::get().to(index))
         .route("/semesters/{page}", aweb::get().to(index));
 }
@@ -57,14 +57,4 @@ lazy_static! {
 /// Check if a semester ID is properly formatted (6 digit form) via regex.
 fn semester_id_valid(id: &str) -> bool {
     SEMESTER_ID_REGEX.is_match(id)
-}
-
-#[get("/semesters/edit/{semester_id}")]
-async fn edit(Path(semester_id): Path<String>) -> Result<FormTemplate, TelescopeError> {
-    Err(TelescopeError::NotImplemented)
-}
-
-#[get("/semesters/edit/{semester_id}")]
-async fn submit_edit(Path(semester_id): Path<String>) -> Result<HttpResponse, TelescopeError> {
-    Err(TelescopeError::NotImplemented)
 }
