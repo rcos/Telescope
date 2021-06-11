@@ -12,8 +12,8 @@ use crate::api::{
 };
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{Identity, RootIdentity};
-use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
+use crate::web::services::auth::identity::{Identity, RootIdentity, AuthenticationCookie};
+use crate::web::services::auth::oauth2_providers::{Oauth2IdentityProvider, Oauth2Identity};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
@@ -50,8 +50,8 @@ lazy_static! {
 }
 
 impl Oauth2IdentityProvider for GitHubOauth {
+    type IdentityType = GitHubIdentity;
     const SERVICE_NAME: &'static str = "github";
-    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::GitHub;
 
     fn get_client() -> Arc<BasicClient> {
         GITHUB_CLIENT.clone()
@@ -65,19 +65,25 @@ impl Oauth2IdentityProvider for GitHubOauth {
             //Scope::new("user:email".into()),
         ]
     }
+}
 
-    fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
-        // Extract the identity and build the identity cookie.
-        RootIdentity::GitHub(GitHubIdentity {
-            access_token: token_response.access_token().clone(),
-        })
+impl Oauth2Identity for GitHubIdentity {
+    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::GitHub;
+
+    fn from_basic_token(token: &BasicTokenResponse) -> Self {
+        Self { access_token: token.access_token().clone() }
     }
 
-    fn add_to_identity<'a>(
-        token_response: &'a BasicTokenResponse,
-        identity: &'a mut Identity,
-    ) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
-        unimplemented!()
+    fn platform_user_id(&self) -> LocalBoxFuture<'_, Result<String, TelescopeError>> {
+        Box::pin(async move { self.get_user_id().await })
+    }
+
+    fn into_root(self) -> RootIdentity {
+        RootIdentity::GitHub(self)
+    }
+
+    fn add_to_cookie(self, cookie: &mut AuthenticationCookie) {
+        cookie.github = Some(self);
     }
 }
 

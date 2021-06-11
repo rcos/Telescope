@@ -6,7 +6,7 @@ use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
-use crate::web::services::auth::oauth2_providers::Oauth2IdentityProvider;
+use crate::web::services::auth::oauth2_providers::{Oauth2IdentityProvider, Oauth2Identity};
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;
 use chrono::{DateTime, Duration, Utc};
@@ -54,8 +54,8 @@ lazy_static! {
 }
 
 impl Oauth2IdentityProvider for DiscordOAuth {
+    type IdentityType = DiscordIdentity;
     const SERVICE_NAME: &'static str = "discord";
-    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::Discord;
 
     fn get_client() -> Arc<BasicClient> {
         DISCORD_CLIENT.clone()
@@ -67,26 +67,25 @@ impl Oauth2IdentityProvider for DiscordOAuth {
             Scope::new("identify".to_owned()),
         ]
     }
+}
 
-    fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity {
-        RootIdentity::Discord(DiscordIdentity::from_response(token_response))
+impl Oauth2Identity for DiscordIdentity {
+    const USER_ACCOUNT_TY: UserAccountType = UserAccountType::Discord;
+
+    fn from_basic_token(token: &BasicTokenResponse) -> Self {
+        Self::from_response(token)
     }
 
-    fn add_to_identity<'a>(
-        token_response: &'a BasicTokenResponse,
-        identity: &'a mut Identity,
-    ) -> LocalBoxFuture<'a, Result<(), TelescopeError>> {
-        return Box::pin(async move {
-            //  Make the discord access token.
-            let access_token: DiscordIdentity = DiscordIdentity::from_response(token_response);
-            // Get the authenticated identity cookie or produce an error
-            let authenticated: AuthenticationCookie = identity
-                .identity()
-                .await
-                .ok_or(TelescopeError::NotAuthenticated)?;
+    fn platform_user_id(&self) -> LocalBoxFuture<'_, Result<String, TelescopeError>> {
+        Box::pin(async move { self.get_user_id().await })
+    }
 
-            unimplemented!()
-        });
+    fn into_root(self) -> RootIdentity {
+        RootIdentity::Discord(self)
+    }
+
+    fn add_to_cookie(self, cookie: &mut AuthenticationCookie) {
+        cookie.discord = Some(self);
     }
 }
 

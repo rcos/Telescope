@@ -2,7 +2,7 @@ use super::{make_redirect_url, IdentityProvider};
 use crate::api::rcos::users::UserAccountType;
 use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{Identity, RootIdentity};
+use crate::web::services::auth::identity::{Identity, RootIdentity, AuthenticationCookie};
 use crate::web::{csrf, profile_for};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
@@ -13,6 +13,7 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
+use crate::api::rcos::users::accounts::link::LinkUserAccount;
 
 pub mod discord;
 pub mod github;
@@ -27,31 +28,39 @@ struct AuthResponse {
     state: CsrfToken,
 }
 
+/// Trait for identity types provided by OAuth2 Identity Providers.
+pub trait Oauth2Identity {
+    /// The type of user account provided by this authentication cookie.
+    const USER_ACCOUNT_TY: UserAccountType;
+
+    /// Convert a basic token response into this identity type.
+    fn from_basic_token(token: &BasicTokenResponse) -> Self;
+
+    /// Get the on-platform user ID for the authenticated user.
+    fn platform_user_id<'a>(&'a self) -> LocalBoxFuture<'a, Result<String, TelescopeError>>;
+
+    /// Create a root identity object from this platform identity.
+    fn into_root(self) -> RootIdentity;
+
+    /// Add this platform identity to the user's auth cookie.
+    fn add_to_cookie(self, cookie: &mut AuthenticationCookie);
+}
+
 /// Special trait specifically for OAuth2 Identity providers that implements
 /// certain methods in the IdentityProvider trait automatically.
 pub trait Oauth2IdentityProvider {
+    /// The type of identity produced by this provider.
+    type IdentityType: Oauth2Identity;
+
     /// Name of this identity provider. See the documentation on the
     /// [`IdentityProvider`] trait for requirements.
     const SERVICE_NAME: &'static str;
-
-    /// The type of user account supported by this authentication method.
-    const USER_ACCOUNT_TY: UserAccountType;
 
     /// Get the client configuration for this Identity Provider.
     fn get_client() -> Arc<BasicClient>;
 
     /// Add the appropriate scopes for the OAuth authentication request.
     fn scopes() -> Vec<Scope>;
-
-    /// Create a user identity struct from an auth token response to save
-    /// in the user's cookies and identify them in future requests.
-    fn make_identity(token_response: &BasicTokenResponse) -> RootIdentity;
-
-    /// Add the authenticated identity to a user's token.
-    fn add_to_identity<'a>(
-        token_response: &'a BasicTokenResponse,
-        identity: &'a mut Identity,
-    ) -> LocalBoxFuture<'a, Result<(), TelescopeError>>;
 
     /// Get the redirect URL for the associated client and build an HTTP response to take the user
     /// there. Saves the CSRF token in the process.
@@ -142,7 +151,7 @@ where
     T: Oauth2IdentityProvider + 'static,
 {
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
-    const USER_ACCOUNT_TY: UserAccountType = <Self as Oauth2IdentityProvider>::USER_ACCOUNT_TY;
+    const USER_ACCOUNT_TY: UserAccountType = <Self as Oauth2IdentityProvider>::IdentityType::USER_ACCOUNT_TY;
 
     type LoginResponse = Result<HttpResponse, TelescopeError>;
     type RegistrationResponse = Result<HttpResponse, TelescopeError>;
@@ -178,9 +187,6 @@ where
 
     fn link_handler(req: HttpRequest, ident: Identity) -> Self::LinkFut {
         return Box::pin(async move {
-            // Explicitly return unimplemented here to avoid exposing unfinished service.
-            return Err(TelescopeError::NotImplemented);
-
             // Check that the user is already authenticated with another service.
             if ident.identity().await.is_some() {
                 // If so, make the redirect url and send the user there.
@@ -199,9 +205,12 @@ where
         return Box::pin(async move {
             // Get the redirect URL.
             let redir_uri: RedirectUrl = make_redirect_url(&req, Self::login_redirect_path());
-            // Get the API access token (in an identity cookie).
+            // Get the API access token.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let root: RootIdentity = Self::make_identity(&token_response);
+            // Into the platform identity.
+            let platform_identity: T::IdentityType = T::IdentityType::from_basic_token(&token_response);
+            // Into a root identity.
+            let root: RootIdentity = platform_identity.into_root();
             // Get the on-platform ID of the user's identity.
             let platform_id: String = root.get_platform_id().await?;
 
@@ -239,9 +248,12 @@ where
             // Get the redirect URL.
             let redir_uri: RedirectUrl =
                 make_redirect_url(&req, Self::registration_redirect_path());
+
             // Get the object to store in the user's cookie.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let root: RootIdentity = Self::make_identity(&token_response);
+            let platform_identity: T::IdentityType = T::IdentityType::from_basic_token(&token_response);
+            let root: RootIdentity = platform_identity.into_root();
+
             // Extract the identity object from the request and store the cookie in it.
             let identity: Identity = Identity::extract(&req).await?;
             identity.save(&root.make_authenticated_cookie());
@@ -258,25 +270,34 @@ where
         mut ident: Identity,
     ) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
-            // Explicitly return unimplemented to avoid exposing unfinished service.
-            return Err(TelescopeError::NotImplemented);
-
             // Get the redirect url.
             let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
             // Token exchange.
             let token: BasicTokenResponse = Self::token_exchange(redir_url, &req)?;
-            // Add to the user's identity.
-            Self::add_to_identity(&token, &mut ident).await?;
 
-            // Redirect the user to their profile page
-            // Get the RCOS username
-            let username: String = ident
-                .get_rcos_username()
-                .await?
-                // Or respond with a not authenticated error.
+            // Extract the auth cookie from the identity.
+            let mut cookie: AuthenticationCookie = ident
+                .identity()
+                .await
                 .ok_or(TelescopeError::NotAuthenticated)?;
 
-            unimplemented!()
+            // Make platform identity.
+            let platform_identity: T::IdentityType = T::IdentityType::from_basic_token(&token);
+
+            // Get the platform ID.
+            let platform_id: String = platform_identity.platform_user_id().await?;
+
+            // Add/update user account record in the RCOS database.
+            // First get the authenticated user's username.
+            let rcos_username: String = cookie.get_rcos_username_or_error().await?;
+            // Send the link mutation.
+            let rcos_username: String = LinkUserAccount::send(rcos_username, Self::USER_ACCOUNT_TY, platform_id).await?;
+
+            // Add identity to auth cookie.
+            platform_identity.add_to_cookie(&mut cookie);
+
+            // Redirect the user to their profile page
+            Ok(HttpResponse::Found().header(LOCATION, profile_for(&rcos_username)).finish())
         });
     }
 }
