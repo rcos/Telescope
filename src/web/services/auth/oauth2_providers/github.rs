@@ -74,7 +74,7 @@ impl Oauth2Identity for GitHubIdentity {
         Self { access_token: token.access_token().clone() }
     }
 
-    fn platform_user_id(&self) -> LocalBoxFuture<'_, Result<String, TelescopeError>> {
+    fn platform_user_id(&self) -> LocalBoxFuture<Result<String, TelescopeError>> {
         Box::pin(async move { self.get_user_id().await })
     }
 

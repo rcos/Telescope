@@ -37,7 +37,7 @@ pub trait Oauth2Identity {
     fn from_basic_token(token: &BasicTokenResponse) -> Self;
 
     /// Get the on-platform user ID for the authenticated user.
-    fn platform_user_id<'a>(&'a self) -> LocalBoxFuture<'a, Result<String, TelescopeError>>;
+    fn platform_user_id(&self) -> LocalBoxFuture<Result<String, TelescopeError>>;
 
     /// Create a root identity object from this platform identity.
     fn into_root(self) -> RootIdentity;

@@ -76,7 +76,7 @@ impl Oauth2Identity for DiscordIdentity {
         Self::from_response(token)
     }
 
-    fn platform_user_id(&self) -> LocalBoxFuture<'_, Result<String, TelescopeError>> {
+    fn platform_user_id(&self) -> LocalBoxFuture<Result<String, TelescopeError>> {
         Box::pin(async move { self.get_user_id().await })
     }
 

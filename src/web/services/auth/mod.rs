@@ -196,7 +196,6 @@ pub trait IdentityProvider: 'static {
 
     /// Actix-web handler for the route that unlinks an identity service.
     fn unlink_handler(
-        req: HttpRequest,
         id: Identity,
         mut cookie: AuthenticationCookie,
     ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
