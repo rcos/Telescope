@@ -5,7 +5,7 @@ use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
+use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::oauth2_providers::{Oauth2IdentityProvider, Oauth2Identity};
 use crate::web::services::auth::IdentityProvider;
 use actix_web::http::header::ACCEPT;

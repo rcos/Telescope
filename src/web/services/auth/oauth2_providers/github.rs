@@ -12,7 +12,7 @@ use crate::api::{
 };
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{Identity, RootIdentity, AuthenticationCookie};
+use crate::web::services::auth::identity::{RootIdentity, AuthenticationCookie};
 use crate::web::services::auth::oauth2_providers::{Oauth2IdentityProvider, Oauth2Identity};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};

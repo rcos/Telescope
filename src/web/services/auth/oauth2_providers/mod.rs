@@ -265,10 +265,7 @@ where
         });
     }
 
-    fn linking_authenticated_handler(
-        req: HttpRequest,
-        mut ident: Identity,
-    ) -> Self::LinkAuthenticatedFut {
+    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
             // Get the redirect url.
             let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
