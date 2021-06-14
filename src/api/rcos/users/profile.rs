@@ -33,3 +33,14 @@ impl Profile {
         .await
     }
 }
+
+impl ResponseData {
+    /// Get the target user's Discord ID if available.
+    pub fn discord(&self) -> Option<&str> {
+        self.target
+            .as_ref()?
+            .discord
+            .get(0)
+            .map(|disc| disc.account_id.as_str())
+    }
+}

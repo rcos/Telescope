@@ -47,6 +47,8 @@ pub async fn profile(
     // And use it to make the page title
     let page_title = format!("{} {}", target_user.first_name, target_user.last_name);
 
+    // Get the target user's discord info.
+
     // Make a profile template
     return Template::new(TEMPLATE_NAME)
         .field("data", response)
