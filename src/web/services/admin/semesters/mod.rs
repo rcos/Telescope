@@ -1,11 +1,11 @@
 //! Services for the semester records management page.
 
 use actix_web::web as aweb;
-use actix_web::HttpRequest;
 use actix_web::web::{Path, ServiceConfig};
+use actix_web::HttpRequest;
 use regex::Regex;
 
-use crate::api::rcos::semesters::get::{PER_PAGE, Semesters};
+use crate::api::rcos::semesters::get::{Semesters, PER_PAGE};
 use crate::error::TelescopeError;
 use crate::templates::pagination::PaginationInfo;
 use crate::templates::Template;

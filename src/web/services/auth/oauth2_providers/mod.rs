@@ -1,8 +1,9 @@
 use super::{make_redirect_url, IdentityProvider};
+use crate::api::rcos::users::accounts::link::LinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
 use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{Identity, RootIdentity, AuthenticationCookie};
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
 use crate::web::{csrf, profile_for};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
@@ -13,7 +14,6 @@ use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
 use std::sync::Arc;
-use crate::api::rcos::users::accounts::link::LinkUserAccount;
 
 pub mod discord;
 pub mod github;
@@ -151,7 +151,8 @@ where
     T: Oauth2IdentityProvider + 'static,
 {
     const SERVICE_NAME: &'static str = <Self as Oauth2IdentityProvider>::SERVICE_NAME;
-    const USER_ACCOUNT_TY: UserAccountType = <Self as Oauth2IdentityProvider>::IdentityType::USER_ACCOUNT_TY;
+    const USER_ACCOUNT_TY: UserAccountType =
+        <Self as Oauth2IdentityProvider>::IdentityType::USER_ACCOUNT_TY;
 
     type LoginResponse = Result<HttpResponse, TelescopeError>;
     type RegistrationResponse = Result<HttpResponse, TelescopeError>;
@@ -208,7 +209,8 @@ where
             // Get the API access token.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
             // Into the platform identity.
-            let platform_identity: T::IdentityType = T::IdentityType::from_basic_token(&token_response);
+            let platform_identity: T::IdentityType =
+                T::IdentityType::from_basic_token(&token_response);
             // Into a root identity.
             let root: RootIdentity = platform_identity.into_root();
             // Get the on-platform ID of the user's identity.
@@ -251,7 +253,8 @@ where
 
             // Get the object to store in the user's cookie.
             let token_response: BasicTokenResponse = Self::token_exchange(redir_uri, &req)?;
-            let platform_identity: T::IdentityType = T::IdentityType::from_basic_token(&token_response);
+            let platform_identity: T::IdentityType =
+                T::IdentityType::from_basic_token(&token_response);
             let root: RootIdentity = platform_identity.into_root();
 
             // Extract the identity object from the request and store the cookie in it.
@@ -265,7 +268,10 @@ where
         });
     }
 
-    fn linking_authenticated_handler(req: HttpRequest, ident: Identity) -> Self::LinkAuthenticatedFut {
+    fn linking_authenticated_handler(
+        req: HttpRequest,
+        ident: Identity,
+    ) -> Self::LinkAuthenticatedFut {
         return Box::pin(async move {
             // Get the redirect url.
             let redir_url: RedirectUrl = make_redirect_url(&req, Self::link_redirect_path());
@@ -288,13 +294,16 @@ where
             // First get the authenticated user's username.
             let rcos_username: String = cookie.get_rcos_username_or_error().await?;
             // Send the link mutation.
-            let rcos_username: String = LinkUserAccount::send(rcos_username, Self::USER_ACCOUNT_TY, platform_id).await?;
+            let rcos_username: String =
+                LinkUserAccount::send(rcos_username, Self::USER_ACCOUNT_TY, platform_id).await?;
 
             // Add identity to auth cookie.
             platform_identity.add_to_cookie(&mut cookie);
 
             // Redirect the user to their profile page
-            Ok(HttpResponse::Found().header(LOCATION, profile_for(&rcos_username)).finish())
+            Ok(HttpResponse::Found()
+                .header(LOCATION, profile_for(&rcos_username))
+                .finish())
         });
     }
 }

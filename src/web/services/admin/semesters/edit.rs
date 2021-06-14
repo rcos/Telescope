@@ -1,19 +1,13 @@
 //! Semester Edit services.
 
-use actix_web::{
-    web::Path,
-    HttpResponse
-};
+use crate::api::rcos::semesters::get_by_id::{semester::SemesterSemestersByPk, Semester};
+use crate::api::rcos::semesters::mutations::edit::EditSemester;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
-use crate::api::rcos::semesters::get_by_id::{
-    Semester,
-    semester::SemesterSemestersByPk
-};
-use chrono::NaiveDate;
-use actix_web::web::Form;
-use crate::api::rcos::semesters::mutations::edit::EditSemester;
 use actix_web::http::header::LOCATION;
+use actix_web::web::Form;
+use actix_web::{web::Path, HttpResponse};
+use chrono::NaiveDate;
 
 /// Make the form template for the semester edits.
 fn make_edit_form(id: String, title: String, start: NaiveDate, end: NaiveDate) -> FormTemplate {
@@ -34,7 +28,7 @@ fn make_edit_form(id: String, title: String, start: NaiveDate, end: NaiveDate) -
 pub struct SemesterEdits {
     title: String,
     start: NaiveDate,
-    end: NaiveDate
+    end: NaiveDate,
 }
 
 /// Service to display the semester edit form.
@@ -47,11 +41,17 @@ pub async fn edit(Path(semester_id): Path<String>) -> Result<FormTemplate, Teles
     if semester_data.is_none() {
         return Err(TelescopeError::resource_not_found(
             "Semester Not Found",
-            "Could not find a semester by this ID."));
+            "Could not find a semester by this ID.",
+        ));
     }
 
     // It does, we can unwrap it and deconstruct it.
-    let SemesterSemestersByPk { semester_id, title, start_date, end_date } = semester_data.unwrap();
+    let SemesterSemestersByPk {
+        semester_id,
+        title,
+        start_date,
+        end_date,
+    } = semester_data.unwrap();
     // Build and return the form with it.
     return Ok(make_edit_form(semester_id, title, start_date, end_date));
 }
@@ -60,7 +60,7 @@ pub async fn edit(Path(semester_id): Path<String>) -> Result<FormTemplate, Teles
 #[post("/semesters/edit/{semester_id}")]
 pub async fn submit_edit(
     Path(semester_id): Path<String>,
-    Form(SemesterEdits { title, start, end}): Form<SemesterEdits>
+    Form(SemesterEdits { title, start, end }): Form<SemesterEdits>,
 ) -> Result<HttpResponse, TelescopeError> {
     // Assume the semester exist. Return an error later if the GraphQL mutation fails.
     // Start by validating the changes.
@@ -80,16 +80,18 @@ pub async fn submit_edit(
     }
 
     // Data is valid. Execute changes.
-    let edited = EditSemester::execute(semester_id, title, start, end)
-        .await?;
+    let edited = EditSemester::execute(semester_id, title, start, end).await?;
 
     // Check if there was a semester for this ID.
     if edited.is_none() {
         return Err(TelescopeError::resource_not_found(
             "Semester not found.",
-            "Could not find a semester by this ID."));
+            "Could not find a semester by this ID.",
+        ));
     }
 
     // Edit success! Redirect user.
-    Ok(HttpResponse::Found().header(LOCATION, "/admin/semesters").finish())
+    Ok(HttpResponse::Found()
+        .header(LOCATION, "/admin/semesters")
+        .finish())
 }

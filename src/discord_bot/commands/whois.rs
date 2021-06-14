@@ -38,13 +38,21 @@ pub fn create_whois(obj: &mut CreateApplicationCommand) -> &mut CreateApplicatio
 }
 
 /// Handle a user calling the /whois command from Discord.
-pub fn handle_whois<'a>(ctx: &'a Context, interaction: &'a Interaction, data: &'a ApplicationCommandInteractionData) -> InteractionResult<'a> {
+pub fn handle_whois<'a>(
+    ctx: &'a Context,
+    interaction: &'a Interaction,
+    data: &'a ApplicationCommandInteractionData,
+) -> InteractionResult<'a> {
     // Wrap the inner async function in a pinned box.
     return Box::pin(async move { handle(ctx, interaction, data).await });
 }
 
 /// Inner async fn to handle /whois commands without dealing with annoying types.
-async fn handle(ctx: &Context, interaction: &Interaction, data: &ApplicationCommandInteractionData) -> SerenityResult<()> {
+async fn handle(
+    ctx: &Context,
+    interaction: &Interaction,
+    data: &ApplicationCommandInteractionData,
+) -> SerenityResult<()> {
     // Extract the user ID from the payload.
     let user_id = data
         .options

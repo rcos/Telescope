@@ -12,8 +12,8 @@ use crate::api::{
 };
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::{RootIdentity, AuthenticationCookie};
-use crate::web::services::auth::oauth2_providers::{Oauth2IdentityProvider, Oauth2Identity};
+use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
+use crate::web::services::auth::oauth2_providers::{Oauth2Identity, Oauth2IdentityProvider};
 use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
@@ -71,7 +71,9 @@ impl Oauth2Identity for GitHubIdentity {
     const USER_ACCOUNT_TY: UserAccountType = UserAccountType::GitHub;
 
     fn from_basic_token(token: &BasicTokenResponse) -> Self {
-        Self { access_token: token.access_token().clone() }
+        Self {
+            access_token: token.access_token().clone(),
+        }
     }
 
     fn platform_user_id(&self) -> LocalBoxFuture<Result<String, TelescopeError>> {
