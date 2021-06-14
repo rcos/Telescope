@@ -38,20 +38,13 @@ pub fn create_whois(obj: &mut CreateApplicationCommand) -> &mut CreateApplicatio
 }
 
 /// Handle a user calling the /whois command from Discord.
-pub fn handle_whois(ctx: Context, interaction: Interaction) -> InteractionResult {
+pub fn handle_whois<'a>(ctx: &'a Context, interaction: &'a Interaction, data: &'a ApplicationCommandInteractionData) -> InteractionResult<'a> {
     // Wrap the inner async function in a pinned box.
-    return Box::pin(async move { handle(ctx, interaction).await });
+    return Box::pin(async move { handle(ctx, interaction, data).await });
 }
 
 /// Inner async fn to handle /whois commands without dealing with annoying types.
-async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
-    // Get the interaction data reference
-    let data: &ApplicationCommandInteractionData = interaction
-        .data
-        .as_ref()
-        // This should exist and be checked for before now.
-        .unwrap();
-
+async fn handle(ctx: &Context, interaction: &Interaction, data: &ApplicationCommandInteractionData) -> SerenityResult<()> {
     // Extract the user ID from the payload.
     let user_id = data
         .options
@@ -86,7 +79,7 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
     // Respond with an embed indicating an error on RCOS API error.
     if let Err(err) = rcos_api_response {
         return interaction
-            .create_interaction_response(ctx.http, |create_response| {
+            .create_interaction_response(&ctx.http, |create_response| {
                 create_response
                     // Sent the response to be a message
                     .kind(InteractionResponseType::ChannelMessageWithSource)
@@ -95,7 +88,7 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
                         rdata
                             // Do not allow any mentions
                             .allowed_mentions(|am| am.empty_parse())
-                            .embed(|embed| {
+                            .create_embed(|embed| {
                                 // Add common attributes
                                 embed_common(embed)
                                     .color(ERROR_COLOR)
@@ -118,14 +111,14 @@ async fn handle(ctx: Context, interaction: Interaction) -> SerenityResult<()> {
 
     // Respond to the discord interaction.
     return interaction
-        .create_interaction_response(ctx.http, |create_response| {
+        .create_interaction_response(&ctx.http, |create_response| {
             create_response
                 .kind(InteractionResponseType::ChannelMessageWithSource)
                 .interaction_response_data(|rdata| {
                     rdata
                         // Allow no mentions
                         .allowed_mentions(|am| am.empty_parse())
-                        .embed(|create_embed| {
+                        .create_embed(|create_embed| {
                             // Set common embed fields (author, footer, timestamp)
                             embed_common(create_embed);
 

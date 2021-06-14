@@ -5,7 +5,9 @@ use crate::env::global_config;
 use serenity::client::{Context, EventHandler};
 use serenity::model::gateway::Ready;
 use serenity::model::guild::Guild;
-use serenity::model::interactions::{InteractionResponseType, InteractionType};
+use serenity::model::interactions::{
+    InteractionResponseType, InteractionType, InteractionData
+};
 use serenity::model::prelude::Interaction;
 
 /// Get the global config's discord client ID parsed to a u64.
@@ -99,38 +101,35 @@ impl EventHandler for Handler {
             // Application commands. These map to one of the commands registered
             // in the global command ID map.
             InteractionType::ApplicationCommand => {
-                // The data field should always be available on this variant.
-                let command_name = interaction.data.as_ref().map(|data| data.name.as_str());
+                // Match the application command data variant.
+                if let Some(InteractionData::ApplicationCommand(data)) = interaction.data.as_ref() {
+                    // Extract the command name.
+                    let command_name = data.name.as_str();
+                    // Get the command's handler
+                    let handler = get_handler(command_name);
 
-                // If we receive a command without a name, throw an error and return.
-                if command_name.is_none() {
-                    error!("Received command without name: {:#?}", interaction);
+                    // Error if the handler doesn't exist.
+                    if handler.is_none() {
+                        error!(
+                            "Handler not found for '/{}'. Interaction: {:#?}",
+                            command_name, interaction
+                        );
+                        return;
+                    }
+
+                    // Otherwise unwrap the handler and call it on the interaction.
+                    let handler = handler.unwrap();
+                    // Clone the command name first to avoid use-after-move.
+                    let command_name = command_name.to_string();
+                    // Call the handler on the interaction.
+                    let handler_result: serenity::Result<()> = handler(&ctx, &interaction, &data).await;
+                    // Log any errors from the handler.
+                    if let Err(err) = handler_result {
+                        error!("'/{}' handler returned an error: {}", command_name, err);
+                    }
+                } else {
+                    error!("Application command interaction did not have data with it.");
                     return;
-                }
-
-                // Unwrap the existing value
-                let command_name: &str = command_name.unwrap();
-                // Get the command's handler
-                let handler = get_handler(command_name);
-
-                // Error if the handler doesn't exist.
-                if handler.is_none() {
-                    error!(
-                        "Handler not found for '/{}'. Interaction: {:#?}",
-                        command_name, interaction
-                    );
-                    return;
-                }
-
-                // Otherwise unwrap the handler and call it on the interaction.
-                let handler = handler.unwrap();
-                // Clone the command name first to avoid use-after-move.
-                let command_name = command_name.to_string();
-                // Call the handler on the interaction.
-                let handler_result: serenity::Result<()> = handler(ctx, interaction).await;
-                // Log any errors from the handler.
-                if let Err(err) = handler_result {
-                    error!("'/{}' handler returned an error: {}", command_name, err);
                 }
             }
 

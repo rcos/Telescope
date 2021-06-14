@@ -5,17 +5,17 @@ use futures::future::BoxFuture;
 use serenity::builder::CreateApplicationCommand;
 use serenity::client::Context;
 use serenity::model::guild::Guild;
-use serenity::model::interactions::Interaction;
+use serenity::model::interactions::{Interaction, ApplicationCommandInteractionData};
 use serenity::model::prelude::ApplicationCommand;
 
 mod whois;
 
 /// Interactions return a boxed future of a serenity result.
-type InteractionResult = BoxFuture<'static, serenity::Result<()>>;
+type InteractionResult<'a> = BoxFuture<'a, serenity::Result<()>>;
 
 /// Interaction handler type. All interaction handlers are references to
 /// async functions that act on context and interaction data.
-type InteractionHandler = fn(Context, Interaction) -> InteractionResult;
+type InteractionHandler = for<'a> fn(&'a Context, &'a Interaction, &'a ApplicationCommandInteractionData) -> InteractionResult<'a>;
 
 /// Command builder type. These builder function all act on serenity models
 /// and add the necessary info to them for each command.
