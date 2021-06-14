@@ -34,7 +34,7 @@ impl Default for UserMeetingAuthorization {
     fn default() -> Self {
         UserMeetingAuthorization {
             username: None,
-            role: UserRole::Student,
+            role: UserRole::External,
             is_current_coordinator: false,
             is_current_mentor: false,
         }
@@ -142,7 +142,8 @@ impl AuthorizationFor {
         let user_role: UserRole = api_response
             .users_by_pk
             .map(|user| user.role)
-            .unwrap_or(UserRole::Student);
+            .unwrap_or(UserRole::External);
+
         if user_role == UserRole::FacultyAdvisor {
             return Ok(UserMeetingAuthorization::faculty_advisor(username));
         }
