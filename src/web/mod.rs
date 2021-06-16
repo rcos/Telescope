@@ -5,8 +5,8 @@ use reqwest::header::HeaderValue;
 use crate::web::services::user::profile::ProfileQuery;
 
 pub mod csrf;
-pub mod services;
 pub mod middlewares;
+pub mod services;
 
 lazy_static! {
     static ref TELESCOPE_USER_AGENT: String =

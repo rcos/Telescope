@@ -1,18 +1,18 @@
 //! Middleware for resource access management (authorization).
 
 use crate::error::TelescopeError;
-use std::rc::Rc;
-use std::cell::RefCell;
-use actix_web::{
-    error::Error as ActixError,
-    dev::{Service, Transform, ServiceRequest, ServiceResponse}
-};
-use futures::future::{Ready, ok, LocalBoxFuture};
-use std::pin::Pin;
-use std::future::Future;
-use std::task::{Poll, Context};
-use actix_identity::RequestIdentity;
 use crate::web::services::auth::identity::AuthenticationCookie;
+use actix_identity::RequestIdentity;
+use actix_web::{
+    dev::{Service, ServiceRequest, ServiceResponse, Transform},
+    error::Error as ActixError,
+};
+use futures::future::{ok, LocalBoxFuture, Ready};
+use std::cell::RefCell;
+use std::future::Future;
+use std::pin::Pin;
+use std::rc::Rc;
+use std::task::{Context, Poll};
 
 /// The type returned by authorization functions.
 pub type AuthorizationResult = Result<(), TelescopeError>;
@@ -30,7 +30,7 @@ pub type AuthorizationCheck = fn(String) -> LocalBoxFuture<'static, Authorizatio
 #[derive(Copy, Clone)]
 pub struct Authorization {
     /// The function to check authorization before calling the service.
-    check: AuthorizationCheck
+    check: AuthorizationCheck,
 }
 
 /// Wrapper type that provides authorization gated access to a service.
@@ -41,7 +41,7 @@ pub struct AuthorizedAccess<S: 'static> {
     /// The service. This is stored in an [`Rc`]'d [`RefCell`] to allow the
     /// service response future to keep a cloned reference to the service after
     /// the transform exits.
-    service: Rc<RefCell<S>>
+    service: Rc<RefCell<S>>,
 }
 
 impl Authorization {
@@ -66,11 +66,10 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
         ok(AuthorizedAccess {
             service: Rc::new(RefCell::new(service)),
-            check: self.check
+            check: self.check,
         })
     }
 }
-
 
 impl<S> Service for AuthorizedAccess<S>
 where

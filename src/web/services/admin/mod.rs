@@ -2,6 +2,8 @@
 
 mod semesters;
 
+use crate::api::rcos::users::role_lookup::RoleLookup;
+use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
@@ -10,9 +12,6 @@ use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
-use crate::api::rcos::users::UserRole;
-use crate::api::rcos::users::role_lookup::RoleLookup;
-
 
 /// Check that a user is an admin.
 fn admin_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
@@ -31,7 +30,6 @@ fn admin_authorization(username: String) -> LocalBoxFuture<'static, Authorizatio
         }
     })
 }
-
 
 /// Register admin panel services.
 pub fn register(config: &mut ServiceConfig) {
