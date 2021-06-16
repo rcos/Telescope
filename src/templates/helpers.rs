@@ -8,6 +8,8 @@ use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
 };
 use url::Url;
+use std::collections::HashMap;
+use serde_json::Value;
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
@@ -207,17 +209,18 @@ fn format_user_role(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
 }
 
 /// Helper to urlencode a query string.
+/// This accepts a series of hash arguments and encodes all of them.
 fn url_encode_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
-    // Extract the parameter.
-    let object = h
-        // Expect one param.
-        .param(0)
-        // Expect it to be a json object.
-        .and_then(|param| param.value().as_object())
-        .ok_or(RenderError::new("url_encode expects a JSON object"))?;
+    // Map the Helper's hash params into just JSON values (we do not use the paths).
+    let map: HashMap<&str, &Value> = h.hash()
+        .iter()
+        // Use just the value.
+        .map(|(key, val)| (*key, val.value()))
+        // Collect into hashmap.
+        .collect();
 
-    // Url-encode the object as pairs.
-    let encoded: String = serde_urlencoded::to_string(object)
+    // Url-encode the map.
+    let encoded: String = serde_urlencoded::to_string(map)
         // Report any errors.
         .map_err(|e| RenderError::new(format!("Could not url-encode object: {}", e)))?;
 
