@@ -55,12 +55,13 @@ struct ListeningFuture {
     inner: LocalBoxFuture<'static, SerenityResult<()>>,
 }
 
-impl ActorFuture<DiscordBot> for ListeningFuture {
+impl ActorFuture for ListeningFuture {
     type Output = ();
+    type Actor = DiscordBot;
 
     fn poll(
         mut self: Pin<&mut Self>,
-        _: &mut DiscordBot,
+        _: &mut Self::Actor,
         ctx: &mut <DiscordBot as Actor>::Context,
         task: &mut StdContext<'_>,
     ) -> Poll<Self::Output> {
