@@ -14,11 +14,9 @@ use actix_web::web::{ServiceConfig, Query};
 use futures::future::LocalBoxFuture;
 use crate::web::middlewares::authorization::{AuthorizationResult, Authorization};
 use actix_web::web as aweb;
-use actix_web::guard;
 use crate::templates::Template;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use actix_web::HttpRequest;
-use serde_json::Value;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
