@@ -1,0 +1,49 @@
+fragment HostInfo on users {
+    username
+    first_name
+    last_name
+
+    rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+        account_id
+    }
+}
+
+# GraphQL query for host selection.
+query HostSelection($search: String!, $now: date!) {
+    # If search is empty, we default to suggestions -- this should include
+    # faculty advisors, current coordinators, and current mentors.
+    suggested_users: users(
+        # Limit to top 10 suggestions.
+        limit: 10,
+        where: {
+            _or: [
+                # Faculty advisors
+                {role: {_eq: "faculty_advisor"}},
+                # Current coordinators
+                {enrollments: {is_coordinator: {_eq: true}, semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}}
+                # Current mentors
+                {small_group_mentors: {small_group: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}}}
+            ],
+        },
+        order_by: [
+            {first_name: asc},
+            {last_name: asc}
+        ]
+    ) { ... HostInfo }
+
+    users(
+        # 50 users max. This should be more than enough.
+        limit: 50,
+        order_by: [
+            {first_name: asc},
+            {last_name: asc},
+        ],
+        where: {
+            _or: [
+                {first_name: {_ilike: $search}},
+                {last_name: {_ilike: $search}},
+                {username: {_ilike: $search}}
+            ]
+        }
+    ) { ... HostInfo }
+}
