@@ -4,6 +4,33 @@ This page allows the user to search for a host and redirects them to the
 meeting creation form once they have selected a user or no host.
 }}
 
+{{! Inline partial to render a row with a selectable host }}
+{{#*inline "render_host"}}
+    <tr>
+        <th scope="row">
+            {{! Link to profile open in new tab }}
+            <a href="{{profile_for username}}" target="_blank" rel="noopener noreferrer">
+                {{first_name}} {{last_name}}
+            </a>
+        </th>
+
+        <td>
+            {{#with rcs_id.[0].account_id}}
+                <a href="mailto:{{this}}@rpi.edu">{{this}}@rpi.edu</a>
+            {{else}}
+                <i>Not available</i>
+            {{/with}}
+        </td>
+
+        <td>
+            <a href="/meeting/create/finish?{{url_encode host=username}}" class="btn btn-primary">
+                Select...
+            </a>
+        </td>
+    </tr>
+{{/inline}}
+
+
 <h1>Select Host</h1>
 
 {{! No Host }}
@@ -24,5 +51,58 @@ meeting creation form once they have selected a user or no host.
 
 {{! Select User }}
 <div class="card text-dark">
+    <div class="card-header">
+        <h2 class="card-title">Select User</h2>
+    </div>
+    <div class="card-body">
+        {{! Search }}
+        <form class="form-inline mb-2" method="get">
+            <label for="search-input">Search:</label>
+            <input type="text" name="search" id="search-input" class="form-control mx-2" {{#if search}} value="{{search}}" {{/if}} required>
+            <button class="ml-2 btn btn-primary" type="submit">Search</button>
+        </form>
 
+        {{! User display }}
+        {{#if search}}
+            {{! Display results }}
+            {{#if data.users}}
+                <h3>Results</h3>
+                <table class="table table-striped table-responsive">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">RPI E-Mail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each data.users}}
+                            {{>render_host this.host_info}}
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                No results for this search term.
+            {{/if}}
+        {{else}}
+            {{! Display suggestions }}
+            {{#if data.suggested_users}}
+                <h3>Suggested Users</h3>
+                <table class="table table-striped table-responsive">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">RPI E-Mail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each data.suggested_users}}
+                            {{>render_host this.host_info}}
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                No suggested users available.
+            {{/if}}
+        {{/if}}
+    </div>
 </div>
