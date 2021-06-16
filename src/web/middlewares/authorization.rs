@@ -93,35 +93,47 @@ where
 
         // Box and pin the async value.
         return Box::pin(async move {
-            // Extract the RCOS username from the request.
-            let rcos_username: String = req
-                // Get the identity of the service request -- this should be a json encoded authentication
-                // cookie if it exists.
-                .get_identity()
-                // Deserialize the authentication cookie object if it exists.
-                .and_then(|ident| serde_json::from_str::<AuthenticationCookie>(ident.as_str()).ok())
-                // If not authenticated, return an error indicating so.
-                .ok_or(TelescopeError::NotAuthenticated)?
-                // Refresh the cookie if necessary.
-                .refresh()
-                .await?
-                // Get the RCOS username associated with the authenticated user.
-                .get_rcos_username()
-                .await?
-                // Respond with an error if the user is not found.
-                .ok_or(TelescopeError::NotAuthenticated)?;
+            // Extract the RCOS username.
+            let rcos_username = extract_rcos_username(&req).await;
 
-            // Call the authorization check.
-            let authorization_result: AuthorizationResult = (check)(rcos_username).await;
-
-            // Check for an error. We have to explicitly convert to a response here otherwise
-            // actix error handling will skip upstream middlewares.
-            if let Err(telescope_error) = authorization_result {
-                Ok(req.error_response(telescope_error))
+            // Properly propagate any errors.
+            if let Err(error) = rcos_username {
+                Ok(req.error_response(error))
             } else {
-                // Otherwise, we are authorized! Go on to call the service.
-                service.call(req).await
+                let rcos_username = rcos_username.unwrap();
+
+                // Call the authorization check.
+                let authorization_result: AuthorizationResult = (check)(rcos_username).await;
+
+                // Check for an error. We have to explicitly convert to a response here otherwise
+                // actix error handling will skip upstream middlewares.
+                if let Err(telescope_error) = authorization_result {
+                    Ok(req.error_response(telescope_error))
+                } else {
+                    // Otherwise, we are authorized! Go on to call the service.
+                    service.call(req).await
+                }
             }
         });
     }
+}
+
+/// Extract the RCOS username authenticated with a request or error.
+async fn extract_rcos_username(req: &ServiceRequest) -> Result<String, TelescopeError> {
+    req
+        // Get the identity of the service request -- this should be a json encoded authentication
+        // cookie if it exists.
+        .get_identity()
+        // Deserialize the authentication cookie object if it exists.
+        .and_then(|ident| serde_json::from_str::<AuthenticationCookie>(ident.as_str()).ok())
+        // If not authenticated, return an error indicating so.
+        .ok_or(TelescopeError::NotAuthenticated)?
+        // Refresh the cookie if necessary.
+        .refresh()
+        .await?
+        // Get the RCOS username associated with the authenticated user.
+        .get_rcos_username()
+        .await?
+        // Respond with an error if the user is not found.
+        .ok_or(TelescopeError::NotAuthenticated)
 }
