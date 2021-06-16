@@ -74,7 +74,7 @@ pub trait Oauth2IdentityProvider {
             // Randomly generate a CSRF token.
             .authorize_url(CsrfToken::new_random)
             // Add the redirect URL.
-            .set_redirect_url(Cow::Owned(redir_url));
+            .set_redirect_uri(Cow::Owned(redir_url));
 
         // Add the scopes defined by this Identity provider and convert the
         // request into the target URL and assocated CSRF token.
