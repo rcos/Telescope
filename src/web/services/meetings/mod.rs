@@ -12,7 +12,11 @@ mod view;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {
+    // Meetings list page
     list::register(config);
+
+    // Meeting creation services
+    create::register(config);
 
     config
         // Hide meeting mutations services until ready.

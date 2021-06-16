@@ -3,3 +3,21 @@ Host selection page.
 This page allows the user to search for a host and redirects them to the
 meeting creation form once they have selected a user or no host.
 }}
+
+<h1>Select Host</h1>
+
+{{! No Host }}
+<div class="card text-dark">
+    <div class="card-header">
+        <h2 class="card-title">No Host</h2>
+    </div>
+    <div class="card-body">
+        If there is more than one person leading the meeting or if the host does
+        not have a Telescope account, select no host. You can change this later.
+    </div>
+    <div class="card-footer">
+        <a href="/meeting/create/finish" class="btn btn-primary w-100 card-footer">
+            No Host
+        </a>
+    </div>
+</div>

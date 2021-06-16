@@ -27,9 +27,9 @@
         <button type="submit" class="btn btn-primary mb-2">View</button>
     </form>
 
-    {{#if (or authorization.is_current_coordinator (eq authorization.role "faculty_advisor") (eq authorization.role "sysadmin"))}}
+    {{#if (or authorization.is_current_coordinator (or (eq authorization.role "faculty_advisor") (eq authorization.role "sysadmin")))}}
         <div class="col-12 col-md-3">
-            <a href="/meeting/create/host_selection" class="float-right btn btn-success">Create Meeting</a>
+            <a href="/meeting/create/select_host" class="float-right btn btn-success">Create Meeting</a>
         </div>
     {{/if}}
 </div>

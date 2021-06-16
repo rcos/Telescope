@@ -34,7 +34,7 @@ fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, A
 }
 
 /// Register meeting creation services.
-fn register(config: &mut ServiceConfig) {
+pub fn register(config: &mut ServiceConfig) {
     // Create meeting creation auth middleware.
     let authorization = Authorization::new(meeting_creation_authorization);
 
@@ -51,7 +51,7 @@ struct HostSelectionQuery {
 
 /// Page to select a host for a meeting creation.
 /// Authorized to meeting creation perms.
-#[get("/host_selection")]
+#[get("/select_host")]
 async fn host_selection_page(req: HttpRequest, query: Option<Query<HostSelectionQuery>>) -> Result<Template, TelescopeError> {
     // Extract the query parameter.
     let search: Option<String> = query.map(|q| q.search.clone());
