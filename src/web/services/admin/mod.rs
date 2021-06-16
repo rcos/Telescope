@@ -5,7 +5,7 @@ mod semesters;
 
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::services::admin::middleware::AdminAuthorization;
+use crate::web::middlewares::authorization::Authorization;
 use actix_web::guard;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
@@ -17,7 +17,7 @@ pub fn register(config: &mut ServiceConfig) {
     config.service(
         aweb::resource("/admin")
             .guard(guard::Get())
-            .wrap(AdminAuthorization)
+            //.wrap(Authorization)
             .to(index),
     );
 
@@ -26,7 +26,7 @@ pub fn register(config: &mut ServiceConfig) {
         // Create the admin scope.
         aweb::scope("/admin/")
             // Verify that the viewer has the admin role.
-            .wrap(AdminAuthorization)
+            //.wrap(AdminAuthorization)
             // Semester services
             .configure(semesters::register),
     );
