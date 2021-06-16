@@ -16,6 +16,8 @@ use crate::web::middlewares::authorization::{AuthorizationResult, Authorization}
 use actix_web::web as aweb;
 use actix_web::guard;
 use crate::templates::Template;
+use crate::api::rcos::meetings::creation::host_selection::HostSelection;
+use actix_web::HttpRequest;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
@@ -36,11 +38,9 @@ fn register(config: &mut ServiceConfig) {
     // Create meeting creation auth middleware.
     let authorization = Authorization::new(meeting_creation_authorization);
 
-    // Host selection page.
-    config.service(aweb::resource("/meeting/create")
+    config.service(aweb::scope("/meeting/create")
         .wrap(authorization)
-        .guard(guard::Get())
-        .to(host_selection_page));
+        .service(host_selection_page));
 }
 
 /// Query on the host selection page.
@@ -51,8 +51,19 @@ struct HostSelectionQuery {
 
 /// Page to select a host for a meeting creation.
 /// Authorized to meeting creation perms.
-async fn host_selection_page(query: Option<Query<HostSelectionQuery>>) -> Result<Template, TelescopeError> {
-    Err(TelescopeError::NotImplemented)
+#[get("/host_selection")]
+async fn host_selection_page(req: HttpRequest, query: Option<Query<HostSelectionQuery>>) -> Result<Template, TelescopeError> {
+    // Extract the query parameter.
+    let search: Option<String> = query.map(|q| q.search.clone());
+    // Query the RCOS API for host selection data.
+    let data = HostSelection::get(search.clone()).await?;
+
+    // Make and return a template.
+    Template::new("meetings/creation/host_selection")
+        .field("search", search)
+        .field("data", data)
+        .render_into_page(&req, "Select Host")
+        .await
 }
 
 /// Endpoint to create a meeting.
