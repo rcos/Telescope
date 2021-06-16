@@ -58,8 +58,8 @@ meeting creation form once they have selected a user or no host.
         {{! Search }}
         <form class="form-inline mb-2" method="get">
             <label for="search-input">Search:</label>
-            <input type="text" name="search" id="search-input" class="form-control mx-2" {{#if search}} value="{{search}}" {{/if}} required>
-            <button class="ml-2 btn btn-primary" type="submit">Search</button>
+            <input type="text" name="search" id="search-input" class="form-control mx-2 my-1" {{#if search}} value="{{search}}" {{/if}} required>
+            <button class="btn btn-primary" type="submit">Search</button>
         </form>
 
         {{! User display }}
@@ -67,11 +67,12 @@ meeting creation form once they have selected a user or no host.
             {{! Display results }}
             {{#if data.users}}
                 <h3>Results</h3>
-                <table class="table table-striped table-responsive">
+                <table class="table table-striped w-100">
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
                             <th scope="col">RPI E-Mail</th>
+                            <th scope="col">Select</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,11 +88,12 @@ meeting creation form once they have selected a user or no host.
             {{! Display suggestions }}
             {{#if data.suggested_users}}
                 <h3>Suggested Users</h3>
-                <table class="table table-striped table-responsive">
+                <table class="table table-striped w-100">
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
                             <th scope="col">RPI E-Mail</th>
+                            <th scope="col">Select</th>
                         </tr>
                     </thead>
                     <tbody>
