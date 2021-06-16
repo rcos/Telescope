@@ -11,18 +11,23 @@ use futures::future::{Ready, ok, LocalBoxFuture};
 use std::pin::Pin;
 use std::future::Future;
 use std::task::{Poll, Context};
+use actix_identity::RequestIdentity;
+use crate::web::services::auth::identity::AuthenticationCookie;
 
 /// The type returned by authorization functions.
 pub type AuthorizationResult = Result<(), TelescopeError>;
 
 /// The type representing an authorization function reference.
-pub type AuthorizationCheck = fn(&ServiceRequest) -> LocalBoxFuture<AuthorizationResult>;
+/// Authorization functions accept an RCOS username and respond with
+/// `Ok(())` on success or a telescope error preventing access.
+pub type AuthorizationCheck = fn(String) -> LocalBoxFuture<'static, AuthorizationResult>;
 
 /// Authorization middleware check's a user's credentials using a stored function
 /// before calling the sub-service. This function may return any telescope error,
 /// including [`TelescopeError::Forbidden`] to stop access to a resource.
 ///
 /// This middleware is intended for use at the scope level.
+#[derive(Copy, Clone)]
 pub struct Authorization {
     /// The function to check authorization before calling the service.
     check: AuthorizationCheck
@@ -89,8 +94,26 @@ where
 
         // Box and pin the async value.
         return Box::pin(async move {
+            // Extract the RCOS username from the request.
+            let rcos_username: String = req
+                // Get the identity of the service request -- this should be a json encoded authentication
+                // cookie if it exists.
+                .get_identity()
+                // Deserialize the authentication cookie object if it exists.
+                .and_then(|ident| serde_json::from_str::<AuthenticationCookie>(ident.as_str()).ok())
+                // If not authenticated, return an error indicating so.
+                .ok_or(TelescopeError::NotAuthenticated)?
+                // Refresh the cookie if necessary.
+                .refresh()
+                .await?
+                // Get the RCOS username associated with the authenticated user.
+                .get_rcos_username()
+                .await?
+                // Respond with an error if the user is not found.
+                .ok_or(TelescopeError::NotAuthenticated)?;
+
             // Call the authorization check.
-            let authorization_result: AuthorizationResult = check(&req).await;
+            let authorization_result: AuthorizationResult = (check)(rcos_username).await;
 
             // Check for an error. We have to explicitly convert to a response here otherwise
             // actix error handling will skip upstream middlewares.
