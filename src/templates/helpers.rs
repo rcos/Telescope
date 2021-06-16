@@ -20,6 +20,7 @@ pub fn register_helpers(registry: &mut Handlebars) {
     );
     registry.register_helper("format_user_role", wrap_helper(format_user_role));
     registry.register_helper("domain_of", wrap_helper(domain_of_helper));
+    registry.register_helper("url_encode", wrap_helper(url_encode_helper));
 }
 
 /// Wrap a two-argument helper function into a helper object to add to the
@@ -191,6 +192,7 @@ fn domain_of_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
     Ok(())
 }
 
+/// Helper to render a user role variant via Display trait.
 fn format_user_role(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
     // Extract the parameter
     let user_role = h
@@ -201,5 +203,25 @@ fn format_user_role(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
         .ok_or(RenderError::new("format_user_role expects a user's role"))?;
 
     out.write(user_role.to_string().as_str())?;
+    Ok(())
+}
+
+/// Helper to urlencode a query string.
+fn url_encode_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
+    // Extract the parameter.
+    let object = h
+        // Expect one param.
+        .param(0)
+        // Expect it to be a json object.
+        .and_then(|param| param.value().as_object())
+        .ok_or(RenderError::new("url_encode expects a JSON object"))?;
+
+    // Url-encode the object as pairs.
+    let encoded: String = serde_urlencoded::to_string(object)
+        // Report any errors.
+        .map_err(|e| RenderError::new(format!("Could not url-encode object: {}", e)))?;
+
+    // Write the url-encoded string.
+    out.write(encoded.as_str())?;
     Ok(())
 }
