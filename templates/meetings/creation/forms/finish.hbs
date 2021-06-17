@@ -1,0 +1,31 @@
+{{! Meeting creation form }}
+<div class="row justify-content-center no-gutters">
+    <div class="card text-dark col-sm-11 col-md-9 col-lg-7 col-xl-6">
+        <div class="card-header">
+            <h1 class="card-title">
+                Create Meeting
+            </h1>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                {{! Semester Dropdown }}
+                <div class="form-group">
+                    <label for="semester-select">Semester:</label>
+                    <select class="form-control" id="semester-select">
+                        {{#each context.available_semesters}}
+                            <option value="{{semester_id}}">{{title}} ({{format_date start_date}} - {{format_date end_date}})</option>
+                        {{else}}
+                            <option disabled>No Semesters Available</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                {{! Submit button }}
+                <button type="submit" class="btn btn-primary w-100">
+                    Create
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

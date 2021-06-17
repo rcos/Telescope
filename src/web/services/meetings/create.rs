@@ -8,8 +8,6 @@
 use crate::api::rcos::meetings::authorization_for::AuthorizationFor;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use actix_web::HttpResponse;
 use actix_web::web::{ServiceConfig, Query};
 use futures::future::LocalBoxFuture;
 use crate::web::middlewares::authorization::{AuthorizationResult, Authorization};
@@ -17,6 +15,7 @@ use actix_web::web as aweb;
 use crate::templates::Template;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use actix_web::HttpRequest;
+use crate::api::rcos::meetings::creation::context::CreationContext;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
@@ -39,7 +38,8 @@ pub fn register(config: &mut ServiceConfig) {
 
     config.service(aweb::scope("/meeting/create")
         .wrap(authorization)
-        .service(host_selection_page));
+        .service(host_selection_page)
+        .service(finish));
 }
 
 /// Query on the host selection page.
@@ -65,15 +65,31 @@ async fn host_selection_page(req: HttpRequest, query: Option<Query<HostSelection
         .await
 }
 
-/// Endpoint to create a meeting.
-pub async fn create_meeting() -> Result<FormTemplate, TelescopeError> {
-    return Err(TelescopeError::NotImplemented);
+/// Query on finish meeting page.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct FinishQuery {
+    host: String
 }
 
-/// Endpoint to submit a meeting creation.
-#[post("/meeting/create")]
-pub async fn submit_new_meeting(
-    auth: AuthenticationCookie,
-) -> Result<HttpResponse, TelescopeError> {
-    Err(TelescopeError::NotImplemented)
+fn finish_form() -> FormTemplate {
+    FormTemplate::new("meetings/creation/forms/finish", "Create Meeting")
+}
+
+/// Endpoint to finish meeting creation.
+#[get("/finish")]
+async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, TelescopeError> {
+    // Extract query parameter.
+    let host: Option<String> = query.map(|q| q.host.clone());
+    // Query RCOS API for meeting creation context.
+    let context = CreationContext::get(host).await?;
+    // Create the form template to finish meeting creation.
+    let mut form: FormTemplate = finish_form();
+
+    // Add context to form.
+    form.template = json!({
+        "context": context,
+    });
+
+    // Return form.
+    return Ok(form);
 }

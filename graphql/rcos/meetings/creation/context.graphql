@@ -1,8 +1,18 @@
-query MeetingCreationContext($now: date!) {
+query CreationContext($now: date!, $host_filter: String_comparison_exp!) {
     # Semesters in which a meeting can be created. This will be
     # all current and duture semesters in ascending order.
     available_semesters: semesters(where: {end_date: {_gte: $now}}, order_by: {start_date: asc}) {
         semester_id
         title
+        start_date
+        end_date
+    }
+
+    # We get around the possibity of no host by letting the rust side make the filter.
+    # Setting _is_null to true when there's no host, or specifying otherwise.
+    host: users(where: {username: $host_filter}, limit: 1) {
+        username
+        first_name
+        last_name
     }
 }

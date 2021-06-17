@@ -23,8 +23,7 @@ pub fn register(config: &mut ServiceConfig) {
         // .service(edit_meeting)
         // .service(delete_meeting)
         // .service(submit_meeting_edit)
-        // .service(create::create_meeting)
-        // .service(create::submit_new_meeting)
+
         // The meeting viewing endpoint must be registered after the meeting creation endpoint,
         // so that the ID path doesn't match the create path.
         .service(view::meeting);
