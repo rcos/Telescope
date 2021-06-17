@@ -8,7 +8,7 @@
 use crate::api::rcos::meetings::authorization_for::AuthorizationFor;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
-use actix_web::web::{ServiceConfig, Query};
+use actix_web::web::{ServiceConfig, Query, Form};
 use futures::future::LocalBoxFuture;
 use crate::web::middlewares::authorization::{AuthorizationResult, Authorization};
 use actix_web::web as aweb;
@@ -16,7 +16,11 @@ use crate::templates::Template;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use actix_web::HttpRequest;
 use crate::api::rcos::meetings::creation::context::CreationContext;
-use crate::api::rcos::meetings::ALL_MEETING_TYPES;
+use crate::api::rcos::meetings::{ALL_MEETING_TYPES, MeetingType};
+use actix_web::HttpResponse;
+use chrono::{NaiveDate, NaiveTime};
+use url::Url;
+use std::collections::HashMap;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
@@ -40,7 +44,8 @@ pub fn register(config: &mut ServiceConfig) {
     config.service(aweb::scope("/meeting/create")
         .wrap(authorization)
         .service(host_selection_page)
-        .service(finish));
+        .service(finish)
+        .service(submit_meeting));
 }
 
 /// Query on the host selection page.
@@ -94,4 +99,55 @@ async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, Teles
 
     // Return form.
     return Ok(form);
+}
+
+/// Form submitted by users to create meeting.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct FinishForm {
+    /// Selected semester ID.
+    semester: String,
+
+    /// What type of meeting is being created.
+    kind: MeetingType,
+
+    /// The optional meeting title. Default empty.
+    #[serde(default)]
+    title: String,
+
+    start_date: NaiveDate,
+    start_time: String,
+    end_date: NaiveDate,
+    end_time: String,
+
+    /// The markdown description of the meeting. Default empty.
+    #[serde(default)]
+    description: String,
+
+    #[serde(default)]
+    is_remote: Option<bool>,
+
+    #[serde(default)]
+    meeting_url: Option<String>,
+
+    #[serde(default)]
+    location: Option<String>,
+
+    #[serde(default)]
+    recording_url: Option<String>,
+
+    #[serde(default)]
+    external_slides_url: Option<String>,
+
+    #[serde(default)]
+    is_draft: Option<bool>,
+}
+
+/// Endpoint that users submit meeting creation forms to.
+#[post("/finish")]
+async fn submit_meeting(query: Option<Query<FinishQuery>>, Form(form): Form<FinishForm>) -> Result<HttpResponse, TelescopeError> {
+    // Resolve host username.
+    let host: Option<String> = query.map(|q| q.host.clone());
+
+
+    Err(TelescopeError::NotImplemented)
 }
