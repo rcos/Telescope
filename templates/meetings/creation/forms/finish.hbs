@@ -94,9 +94,8 @@
                     <small class="text-muted form-text" id="description-description">
                         Descriptions are rendered as markdown. Supported features and syntax are described
                         <a href="https://github.com/raphlinus/pulldown-cmark" target="_blank" rel="noopener noreferrer">
-                            here
+                            here.
                         </a>
-                        .
                     </small>
                 </div>
 
@@ -130,12 +129,6 @@
                     <input type="text" name="location" id="location-input" class="form-control" required>
                 </div>
 
-                {{! Draft checkbox }}
-                <div class="form-check">
-                    <input type="checkbox" name="is_draft" id="is-draft-check" class="form-check-input" value="true">
-                    <label for="is-draft-check">Draft (not public)</label>
-                </div>
-
                 {{! Recording URL }}
                 <div class="form-group">
                     <label for="recording-url-input">Recording URL:</label>
@@ -151,6 +144,12 @@
                         <a href="https://revealjs.com/" rel="noopener noreferrer" target="_blank">revealjs</a>
                         will be supported in a future release.
                     </small>
+                </div>
+
+                {{! Draft checkbox }}
+                <div class="form-check">
+                    <input type="checkbox" name="is_draft" id="is-draft-check" class="form-check-input" value="true">
+                    <label for="is-draft-check">Draft (not public)</label>
                 </div>
 
                 {{! Submit button }}

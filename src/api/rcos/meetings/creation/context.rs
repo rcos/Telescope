@@ -42,12 +42,14 @@ impl CreationContext {
     pub async fn get(host: Option<String>) -> Result<creation_context::ResponseData, TelescopeError> {
         // Convert host into filter to send in query.
         let filter = host
+            .clone()
             .map(|username| Filter { eq: Some(username), ..Default::default() })
             .unwrap_or(Filter { is_null: Some(true), ..Default::default() });
 
         send_query::<Self>(creation_context::Variables {
             now: chrono::Utc::today().naive_utc(),
-            host_filter: filter
+            host_filter: filter,
+            host_username: host
         })
         .await
     }

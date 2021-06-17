@@ -1,7 +1,18 @@
-query CreationContext($now: date!, $host_filter: String_comparison_exp!) {
+query CreationContext($now: date!, $host_filter: String_comparison_exp!, $host_username: String) {
     # Semesters in which a meeting can be created. This will be
     # all current and duture semesters in ascending order.
-    available_semesters: semesters(where: {end_date: {_gte: $now}}, order_by: {start_date: asc}) {
+    available_semesters: semesters(
+        where: {
+            end_date: {_gte: $now},
+
+            # Require that the semester is one the host is enrolled in.
+            # This has the side effect of requireing that there is at least
+            # one enrollment for a semester
+            enrollments: {username: {_eq: $host_username}},
+
+        },
+        order_by: {start_date: asc}
+    ) {
         semester_id
         title
         start_date
