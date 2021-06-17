@@ -17491,18 +17491,6 @@
             {
               "args": [],
               "deprecationReason": null,
-              "description": "List of agenda items that will be covered in the meeting",
-              "isDeprecated": false,
-              "name": "agenda",
-              "type": {
-                "kind": "SCALAR",
-                "name": "_varchar",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
               "description": null,
               "isDeprecated": false,
               "name": "attendance_code",
@@ -17524,6 +17512,22 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "timestamptz",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "Description of the meeting in CommonMark markdown or plaintext.",
+              "isDeprecated": false,
+              "name": "description",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 }
               }
@@ -18418,16 +18422,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "agenda",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "_varchar_comparison_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "attendance_code",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -18442,6 +18436,16 @@
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "timestamptz_comparison_exp",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "description",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "String_comparison_exp",
                 "ofType": null
               }
             },
@@ -18677,16 +18681,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "agenda",
-              "type": {
-                "kind": "SCALAR",
-                "name": "_varchar",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "attendance_code",
               "type": {
                 "kind": "SCALAR",
@@ -18701,6 +18695,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "timestamptz",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "description",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -18923,6 +18927,18 @@
               "deprecationReason": null,
               "description": null,
               "isDeprecated": false,
+              "name": "description",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": null,
+              "isDeprecated": false,
               "name": "end_date_time",
               "type": {
                 "kind": "SCALAR",
@@ -19085,6 +19101,16 @@
             {
               "defaultValue": null,
               "description": null,
+              "name": "description",
+              "type": {
+                "kind": "ENUM",
+                "name": "order_by",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
               "name": "end_date_time",
               "type": {
                 "kind": "ENUM",
@@ -19223,6 +19249,18 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "timestamptz",
+                "ofType": null
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": null,
+              "isDeprecated": false,
+              "name": "description",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -19384,6 +19422,16 @@
               "defaultValue": null,
               "description": null,
               "name": "created_at",
+              "type": {
+                "kind": "ENUM",
+                "name": "order_by",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "description",
               "type": {
                 "kind": "ENUM",
                 "name": "order_by",
@@ -19657,16 +19705,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "agenda",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "attendance_code",
               "type": {
                 "kind": "ENUM",
@@ -19678,6 +19716,16 @@
               "defaultValue": null,
               "description": null,
               "name": "created_at",
+              "type": {
+                "kind": "ENUM",
+                "name": "order_by",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "description",
               "type": {
                 "kind": "ENUM",
                 "name": "order_by",
@@ -19902,12 +19950,6 @@
               "deprecationReason": null,
               "description": "column name",
               "isDeprecated": false,
-              "name": "agenda"
-            },
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
               "name": "attendance_code"
             },
             {
@@ -19915,6 +19957,12 @@
               "description": "column name",
               "isDeprecated": false,
               "name": "created_at"
+            },
+            {
+              "deprecationReason": null,
+              "description": "column name",
+              "isDeprecated": false,
+              "name": "description"
             },
             {
               "deprecationReason": null,
@@ -20016,16 +20064,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "agenda",
-              "type": {
-                "kind": "SCALAR",
-                "name": "_varchar",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "attendance_code",
               "type": {
                 "kind": "SCALAR",
@@ -20040,6 +20078,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "timestamptz",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "description",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -20372,12 +20420,6 @@
               "deprecationReason": null,
               "description": "column name",
               "isDeprecated": false,
-              "name": "agenda"
-            },
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
               "name": "attendance_code"
             },
             {
@@ -20385,6 +20427,12 @@
               "description": "column name",
               "isDeprecated": false,
               "name": "created_at"
+            },
+            {
+              "deprecationReason": null,
+              "description": "column name",
+              "isDeprecated": false,
+              "name": "description"
             },
             {
               "deprecationReason": null,
