@@ -10,6 +10,10 @@ use handlebars::{
 use url::Url;
 use std::collections::HashMap;
 use serde_json::Value;
+use pulldown_cmark::{
+    Parser as MarkdownParser,
+    Options as MarkdownOptions,
+};
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
@@ -23,6 +27,7 @@ pub fn register_helpers(registry: &mut Handlebars) {
     registry.register_helper("format_user_role", wrap_helper(format_user_role));
     registry.register_helper("domain_of", wrap_helper(domain_of_helper));
     registry.register_helper("url_encode", wrap_helper(url_encode_helper));
+    registry.register_helper("render_markdown", wrap_helper(markdown_renderer_helper));
 }
 
 /// Wrap a two-argument helper function into a helper object to add to the
@@ -227,4 +232,21 @@ fn url_encode_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
     // Write the url-encoded string.
     out.write(encoded.as_str())?;
     Ok(())
+}
+
+/// Helper to parse and render a markdown string.
+fn markdown_renderer_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
+    // Expect one parameter with the markdown payload.
+    let markdown_source: &str = h.param(0)
+        .and_then(|param| param.value().as_str())
+        .ok_or(RenderError::new("render_markdown expects a markdown string parameter."))?;
+    // Make a new parser with all options enabled.
+    let parser = MarkdownParser::new_ext(markdown_source, MarkdownOptions::all());
+    // Make and write an html buffer with the rendered markdown.
+    // Set the initial capacity at at least the length of the source markdown.
+    let mut buffer = String::with_capacity(markdown_source.len());
+    pulldown_cmark::html::push_html(&mut buffer, parser);
+    // Write the rendered HTML to the handlebars output.
+    out.write(buffer.as_str())?;
+    return Ok(());
 }

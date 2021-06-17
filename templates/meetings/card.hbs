@@ -55,14 +55,12 @@
             </div>
         {{/if}}
 
-        {{#if agenda}}
+        {{#if description}}
             <div class="list-group-item">
-                <h5>Agenda:</h5>
-                <ul>
-                    {{#each agenda}}
-                        <li> {{this}} </li>
-                    {{/each}}
-                </ul>
+                <small class="text-muted mb-2">
+                    User supplied description:
+                </small>
+                {{render_markdown description}}
             </div>
         {{/if}}
 
