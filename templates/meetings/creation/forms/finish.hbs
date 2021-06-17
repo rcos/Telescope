@@ -21,7 +21,7 @@
                 {{! Semester Dropdown }}
                 <div class="form-group">
                     <label for="semester-select">Semester:</label>
-                    <select class="form-control" id="semester-select" name="semester" required>
+                    <select class="form-control" id="semester-select" name="semester" aria-describedby="semester-description" required>
                         {{#each context.available_semesters}}
                             <option value="{{semester_id}}">
                                 {{title}} ({{format_date start_date}} - {{format_date end_date}})
@@ -32,6 +32,10 @@
                             </option>
                         {{/each}}
                     </select>
+                    <small class="form-text text-muted" id="semester-description">
+                        The host (if there is one) must be enrolled in the selected semester. Semesters must have
+                        at least one enrollment to appear in this list.
+                    </small>
                 </div>
 
                 {{! Meeting types dropdown }}
@@ -107,13 +111,9 @@
 
                 <script>
                     function is_remote_changed() {
-                        if ($('#is-remote-check').prop('checked')) {
-                            $('#location-input').prop('required', false);
-                            $('#meeting-url-input').prop('required', true);
-                        } else {
-                            $('#location-input').prop('required', true);
-                            $('#meeting-url-input').prop('required', false);
-                        }
+                        const checked = $('#is-remote-check').prop('checked');
+                        $('#meeting-url-input').prop('required', checked);
+                        $('#location-input').prop('required', !checked);
                     }
                 </script>
 

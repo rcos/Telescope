@@ -47,6 +47,44 @@
         </div>
     {{/if}}
 
+    {{! Enrollments }}
+    <h3 class="mt-2">
+        Enrollments
+    </h3>
+    {{#each target.enrollments}}
+        <div class="card mt-1 text-dark">
+            <div class="card-header">
+                <h4 class="card-title">{{semester.title}}</h4>
+            </div>
+            <div class="card-body">
+                {{! Badges }}
+                {{! Coordinating }}
+                {{#if is_coordinator}}
+                    <span class="badge badge-primary">Coordinator</span>
+                {{/if}}
+
+                {{! Mentoring }}
+                {{#each semester.small_groups}}
+                    <span class="badge badge-info">{{title}} mentor</span>
+                {{else}}
+                    {{! No render }}
+                {{/each}}
+
+                <br>
+                {{! Project info }}
+                {{#if project.title}}
+                    {{project.title}}
+                    {{#if is_project_lead}}
+                        · <span class="badge badge-success">Project Lead</span>
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    {{else}}
+        No enrollment history.
+    {{/each}}
+
+
     {{! Meetings the user has hosted }}
     {{#if target.hosting}}
         <h3 class="mt-3">Meetings Hosted</h3>

@@ -9,6 +9,26 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
         created_at
         cohort
 
+        enrollments(order_by: [{semester: {start_date: desc}}]) {
+            semester {
+                title
+
+                # Small groups for this semester that the target user mentors
+                small_groups(where: {small_group_mentors: {username: {_eq: $target}}}) {
+                    title
+                }
+            }
+
+            project {
+                title
+            }
+
+            is_coordinator
+            credits
+            is_for_pay
+            is_project_lead
+        }
+
         # The user's discord, if it exists
         discord: user_accounts(where: {type: {_eq: "discord"}}, limit: 1) {
             account_id
@@ -22,16 +42,6 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
         # The user's RCS ID if they have linkled RPI CAS.
         rcs_id: user_accounts(where: {type: {_eq: "rpi"}}, limit: 1) {
             account_id
-        }
-
-        # What semesters was this user a coordiator for
-        coordinating: enrollments(
-            where: {is_coordinator: {_eq: true}},
-            order_by: {semester: {start_date: desc}}
-        ) {
-            semester {
-                title
-            }
         }
 
         # What semesters was this user a small group mentor?
