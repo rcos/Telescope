@@ -16,6 +16,7 @@ use crate::templates::Template;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use actix_web::HttpRequest;
 use crate::api::rcos::meetings::creation::context::CreationContext;
+use crate::api::rcos::meetings::ALL_MEETING_TYPES;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
@@ -88,6 +89,7 @@ async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, Teles
     // Add context to form.
     form.template = json!({
         "context": context,
+        "meeting_types": &ALL_MEETING_TYPES
     });
 
     // Return form.
