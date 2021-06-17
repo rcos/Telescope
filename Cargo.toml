@@ -1,6 +1,6 @@
 [package]
 name = "telescope"
-version = "0.5.3"
+version = "0.6.0"
 authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
 edition = "2018"
@@ -71,6 +71,9 @@ reqwest = {version = "0.10", features = ["json"]}
 
 # Fast Concurrent HashMap. (this is used for CSRF tokens)
 dashmap = "~4.0"
+
+# CommonMark markdown rendering.
+pulldown-cmark = "0.8.0"
 
 # API stuff
 
