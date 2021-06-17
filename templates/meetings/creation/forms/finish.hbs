@@ -86,7 +86,73 @@
                 <small class="text-muted form-text text-center mb-2">
                     Enter all dates and times in New York time.
                 </small>
-                
+
+                {{! Description input }}
+                <div class="form-group">
+                    <label for="description-input">Description:</label>
+                    <textarea name="description" id="description-input" aria-describedby="description-description" rows="10" class="form-control"></textarea>
+                    <small class="text-muted form-text" id="description-description">
+                        Descriptions are rendered as markdown. Supported features and syntax are described
+                        <a href="https://github.com/raphlinus/pulldown-cmark" target="_blank" rel="noopener noreferrer">
+                            here
+                        </a>
+                        .
+                    </small>
+                </div>
+
+                {{! Remote toggle }}
+                <div class="form-check">
+                    <input type="checkbox" name="is_remote" value="true" class="form-check-input" id="is-remote-check" onchange="is_remote_changed()">
+                    <label for="is-remote-check">Remote meeting</label>
+                </div>
+
+                <script>
+                    function is_remote_changed() {
+                        if ($('#is-remote-check').prop('checked')) {
+                            $('#location-input').prop('required', false);
+                            $('#meeting-url-input').prop('required', true);
+                        } else {
+                            $('#location-input').prop('required', true);
+                            $('#meeting-url-input').prop('required', false);
+                        }
+                    }
+                </script>
+
+                {{! Meeting URL input }}
+                <div class="form-group">
+                    <label for="meeting-url-input">Meeting URL:</label>
+                    <input type="url" name="meeting_url" id="meeting-url-input" class="form-control">
+                </div>
+
+                {{! Location input }}
+                <div class="form-group">
+                    <label for="location-input">Location:</label>
+                    <input type="text" name="location" id="location-input" class="form-control" required>
+                </div>
+
+                {{! Draft checkbox }}
+                <div class="form-check">
+                    <input type="checkbox" name="is_draft" id="is-draft-check" class="form-check-input" value="true">
+                    <label for="is-draft-check">Draft (not public)</label>
+                </div>
+
+                {{! Recording URL }}
+                <div class="form-group">
+                    <label for="recording-url-input">Recording URL:</label>
+                    <input type="url" name="recording_url" id="recording-url-input" class="form-control">
+                </div>
+
+                {{! External Presentation URL }}
+                <div class="form-group">
+                    <label for="external-slides-url-input">Slides URL:</label>
+                    <input type="url" class="form-control" name="external_slides_url" id="external-slides-url-input" aria-describedby="external-slides-description">
+                    <small class="text-muted form-text" id="external-slides-description">
+                        Natively hosted slides using
+                        <a href="https://revealjs.com/" rel="noopener noreferrer" target="_blank">revealjs</a>
+                        will be supported in a future release.
+                    </small>
+                </div>
+
                 {{! Submit button }}
                 <button type="submit" class="btn btn-primary w-100">
                     Create
