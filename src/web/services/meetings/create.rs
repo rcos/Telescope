@@ -115,8 +115,13 @@ struct FinishForm {
     title: String,
 
     start_date: NaiveDate,
+
+    /// Cannot be a [`NaiveTime`], since seconds are not included.
     start_time: String,
+
     end_date: NaiveDate,
+
+    /// Cannot be a [`NaiveTime`], since seconds are not included.
     end_time: String,
 
     /// The markdown description of the meeting. Default empty.
