@@ -15,7 +15,8 @@ query Meeting($id: Int!) {
 
         external_presentation_url
         location
-        agenda
+
+        description
 
         # Info on the host
         host: user {

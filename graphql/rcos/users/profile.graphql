@@ -61,7 +61,7 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
             type
             start_date_time
             end_date_time
-            agenda
+            description
             location
             is_remote
             meeting_url

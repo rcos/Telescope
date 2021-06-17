@@ -27,7 +27,8 @@ query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolea
         is_draft
 
         location
-        agenda
+
+        description
 
         # Get info about the host
         host: user {
