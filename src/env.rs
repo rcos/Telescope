@@ -6,7 +6,7 @@ use structopt::StructOpt;
 
 /// Credentials granted by GitHub for the OAuth application.
 /// Generated these by creating an application at
-/// https://github.com/settings/applications/new/.
+/// <https://github.com/settings/applications/new/>.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GithubOauthConfig {
     /// The GitHub OAuth application client id.
@@ -40,7 +40,7 @@ pub struct DiscordConfig {
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 struct TelescopeConfig {
     /// Set the log level.
-    /// See https://docs.rs/env_logger/0.8.1/env_logger/ for reference.
+    /// See <https://docs.rs/env_logger/0.8.1/env_logger/> for reference.
     log_level: Option<String>,
 
     /// GitHub OAuth application credentials.
