@@ -1,16 +1,8 @@
-query CreationContext($now: date!, $host_filter: String_comparison_exp!, $host_username: String) {
+query CreationContext($now: date!, $host_username: [String!]!, $semester_filter: semesters_bool_exp!) {
     # Semesters in which a meeting can be created. This will be
     # all current and duture semesters in ascending order.
     available_semesters: semesters(
-        where: {
-            end_date: {_gte: $now},
-
-            # Require that the semester is one the host is enrolled in.
-            # This has the side effect of requireing that there is at least
-            # one enrollment for a semester
-            enrollments: {username: {_eq: $host_username}},
-
-        },
+        where: $semester_filter,
         order_by: {start_date: asc}
     ) {
         semester_id
@@ -21,7 +13,7 @@ query CreationContext($now: date!, $host_filter: String_comparison_exp!, $host_u
 
     # We get around the possibity of no host by letting the rust side make the filter.
     # Setting _is_null to true when there's no host, or specifying otherwise.
-    host: users(where: {username: $host_filter}, limit: 1) {
+    host: users(where: {username: {_in: $host_username}}, limit: 1) {
         username
         first_name
         last_name
