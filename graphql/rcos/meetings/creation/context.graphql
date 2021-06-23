@@ -1,4 +1,4 @@
-query CreationContext($now: date!, $host_username: [String!]!, $semester_filter: semesters_bool_exp!) {
+query CreationContext($host_username: [String!]!, $semester_filter: semesters_bool_exp!) {
     # Semesters in which a meeting can be created. This will be
     # all current and duture semesters in ascending order.
     available_semesters: semesters(

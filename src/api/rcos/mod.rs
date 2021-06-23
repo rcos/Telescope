@@ -6,6 +6,7 @@ use crate::env::global_config;
 use crate::error::TelescopeError;
 use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
 use reqwest::{header::HeaderValue, header::ACCEPT, Client};
+use serde_json::Value;
 
 mod auth;
 pub mod landing_page_stats;
@@ -68,4 +69,11 @@ pub async fn send_query<T: GraphQLQuery>(
         })
         // Convert any GraphQL errors.
         .and_then(|response| handle_graphql_response::<T>(API_NAME, response));
+}
+
+
+/// Send an API query using the GraphQL JSON format. This is useful for avoiding issues in the
+/// macro-generated GraphQL types
+pub async fn send_json_query(query: &str, variables: Value) -> Result<Value, TelescopeError> {
+    todo!()
 }
