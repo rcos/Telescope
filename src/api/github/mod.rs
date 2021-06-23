@@ -62,5 +62,5 @@ pub async fn send_query<T: GraphQLQuery>(
                 })
         })
         // Convert any errors in the response
-        .and_then(|response| handle_graphql_response::<T>(API_NAME, response));
+        .and_then(|response| handle_graphql_response(API_NAME, response));
 }

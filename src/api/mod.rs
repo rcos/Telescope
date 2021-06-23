@@ -8,10 +8,10 @@ pub mod rcos;
 
 /// Handle a response from a GraphQL API. Convert any errors as necessary and
 /// extract the returned data if possible.
-fn handle_graphql_response<T: GraphQLQuery>(
+fn handle_graphql_response<T>(
     api_name: &'static str,
-    response: Response<T::ResponseData>,
-) -> Result<T::ResponseData, TelescopeError> {
+    response: Response<T>,
+) -> Result<T, TelescopeError> {
     // Match on the response structure.
     match response {
         // If errors and data are both non-null
