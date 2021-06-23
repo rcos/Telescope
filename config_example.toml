@@ -20,7 +20,7 @@
 # [REQUIRED]
 # specify the log level of the telescope server instance
 # see https://docs.rs/env_logger/0.8.1/env_logger/ for syntax and options.
-log_level = "info"
+log_level = "warn,telescope=trace,actix_server=info,actix_web=info,actix=info,reqwest=info"
 
 # [REQUIRED]
 # Specify the URL of the RCOS central API. This default value is okay for
