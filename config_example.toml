@@ -4,7 +4,7 @@
 # For anyone using or developing telescope, this configuration template should
 # be copied to config.toml and then modified to your needs.
 #
-# This file only contains 3 profiles (development, prodcution)
+# This file only contains 2 profiles (dev, live)
 # but users may specify more arbirarilty using the profile objects.
 # Profiles may override any/all of the global settings.
 #
