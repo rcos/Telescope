@@ -1,5 +1,7 @@
 //! GraphQL mutation to create a meeting.
 
+use crate::api::rcos::prelude::*;
+
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",

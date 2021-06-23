@@ -1,6 +1,31 @@
-mutation CreateMeeting {
+# Mutation to add a meeting to the RCOS database
+mutation CreateMeeting(
+    $host_username: String,
+    $title: String,
+    $start: timestamptz!,
+    $end: timestamptz!,
+    $description: String,
+    $is_draft: Boolean!,
+    $is_remote: Boolean!,
+    $location: String,
+    $meeting_url: String,
+    $recording_url: String,
+    $semester_id: String,
+    $kind: meeting_type!
+) {
     insert_meetings_one(object: {
-        # TODO
+        host_username: $host_username,
+        title: $title,
+        start_date_time: $start,
+        end_date_time: $end,
+        description: $description,
+        is_draft: $is_draft,
+        is_remote: $is_remote,
+        location: $location,
+        meeting_url: $meeting_url,
+        recording_url: $recording_url,
+        semester_id: $semester_id,
+        type: $kind,
     }) {
         meeting_id
     }
