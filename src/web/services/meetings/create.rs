@@ -6,23 +6,25 @@
 //! to finish meeting creation.
 
 use crate::api::rcos::meetings::authorization_for::AuthorizationFor;
+use crate::api::rcos::meetings::creation;
+use crate::api::rcos::meetings::creation::host_selection::HostSelection;
+use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
-use actix_web::web::{ServiceConfig, Query, Form};
-use futures::future::LocalBoxFuture;
-use crate::web::middlewares::authorization::{AuthorizationResult, Authorization};
-use actix_web::web as aweb;
 use crate::templates::Template;
-use crate::api::rcos::meetings::creation::host_selection::HostSelection;
+use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
+use actix_web::web as aweb;
+use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::HttpRequest;
-use crate::api::rcos::meetings::creation;
-use crate::api::rcos::meetings::{ALL_MEETING_TYPES, MeetingType};
 use actix_web::HttpResponse;
 use chrono::NaiveDate;
+use futures::future::LocalBoxFuture;
 use serde_json::Value;
 
 /// Authorization function for meeting creation.
-fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
+fn meeting_creation_authorization(
+    username: String,
+) -> LocalBoxFuture<'static, AuthorizationResult> {
     Box::pin(async move {
         // Get the meeting authorization
         AuthorizationFor::get(Some(username))
@@ -40,23 +42,28 @@ pub fn register(config: &mut ServiceConfig) {
     // Create meeting creation auth middleware.
     let authorization = Authorization::new(meeting_creation_authorization);
 
-    config.service(aweb::scope("/meeting/create")
-        .wrap(authorization)
-        .service(host_selection_page)
-        .service(finish)
-        .service(submit_meeting));
+    config.service(
+        aweb::scope("/meeting/create")
+            .wrap(authorization)
+            .service(host_selection_page)
+            .service(finish)
+            .service(submit_meeting),
+    );
 }
 
 /// Query on the host selection page.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct HostSelectionQuery {
-    search: String
+    search: String,
 }
 
 /// Page to select a host for a meeting creation.
 /// Authorized to meeting creation perms.
 #[get("/select_host")]
-async fn host_selection_page(req: HttpRequest, query: Option<Query<HostSelectionQuery>>) -> Result<Template, TelescopeError> {
+async fn host_selection_page(
+    req: HttpRequest,
+    query: Option<Query<HostSelectionQuery>>,
+) -> Result<Template, TelescopeError> {
     // Extract the query parameter.
     let search: Option<String> = query.map(|q| q.search.clone());
     // Query the RCOS API for host selection data.
@@ -73,7 +80,7 @@ async fn host_selection_page(req: HttpRequest, query: Option<Query<HostSelection
 /// Query on finish meeting page.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct FinishQuery {
-    host: String
+    host: String,
 }
 
 fn finish_form() -> FormTemplate {
@@ -150,11 +157,12 @@ struct FinishForm {
 
 /// Endpoint that users submit meeting creation forms to.
 #[post("/finish")]
-async fn submit_meeting(query: Option<Query<FinishQuery>>, Form(form): Form<FinishForm>) -> Result<HttpResponse, TelescopeError> {
+async fn submit_meeting(
+    query: Option<Query<FinishQuery>>,
+    Form(form): Form<FinishForm>,
+) -> Result<HttpResponse, TelescopeError> {
     // Resolve host username.
     let host: Option<String> = query.map(|q| q.host.clone());
-
-
 
     Err(TelescopeError::NotImplemented)
 }

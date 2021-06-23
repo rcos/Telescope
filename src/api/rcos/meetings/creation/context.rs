@@ -2,11 +2,12 @@
 
 use crate::api::rcos::send_json_query;
 use crate::error::TelescopeError;
-use serde_json::Value;
 use chrono::Utc;
+use serde_json::Value;
 
 /// The GraphQL query.
-const QUERY_STRING: &'static str = include_str!("../../../../../graphql/rcos/meetings/creation/context.graphql");
+const QUERY_STRING: &'static str =
+    include_str!("../../../../../graphql/rcos/meetings/creation/context.graphql");
 
 /// Get the meeting creation context. This is done in JSON format because the typed version was
 /// causing the compiler to stack overflow.

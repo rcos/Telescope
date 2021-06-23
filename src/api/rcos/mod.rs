@@ -4,7 +4,7 @@ use crate::api::handle_graphql_response;
 use crate::api::rcos::auth::ApiJwtClaims;
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use graphql_client::{GraphQLQuery, Response as GraphQlResponse, QueryBody};
+use graphql_client::{GraphQLQuery, QueryBody, Response as GraphQlResponse};
 use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 use serde_json::Value;
 
@@ -27,26 +27,37 @@ pub async fn send_query<T: GraphQLQuery>(
     // Build the GraphQL query.
     let query = T::build_query(variables);
     // Destructure the fields of the query.
-    let QueryBody { operation_name, query, variables } = query;
+    let QueryBody {
+        operation_name,
+        query,
+        variables,
+    } = query;
     // Serialize the query variables to a JSON object.
-    let variables: Value = serde_json::to_value(variables)
-        .map_err(|e| TelescopeError::ise(format!("Could not serialize GraphQL variables to JSON object: {}", e)))?;
+    let variables: Value = serde_json::to_value(variables).map_err(|e| {
+        TelescopeError::ise(format!(
+            "Could not serialize GraphQL variables to JSON object: {}",
+            e
+        ))
+    })?;
 
     // Send the query and await the response.
-    let response: Value = send_json_query(operation_name, query, variables)
-        .await?;
+    let response: Value = send_json_query(operation_name, query, variables).await?;
 
     // Deserialize the response into the typed value and return.
-    serde_json::from_value::<T::ResponseData>(response)
-        .map_err(|e| TelescopeError::ise(format!("Could not deserialize GraphQL API response: {}", e)))
+    serde_json::from_value::<T::ResponseData>(response).map_err(|e| {
+        TelescopeError::ise(format!("Could not deserialize GraphQL API response: {}", e))
+    })
 }
-
 
 /// Send an API query using the GraphQL JSON format. This is useful for avoiding issues in the
 /// macro-generated GraphQL types.
 ///
 /// The typed version should generally be used instead to avoid runtime type errors.
-pub async fn send_json_query(query_name: &str, query_document: &str, variables: Value) -> Result<Value, TelescopeError> {
+pub async fn send_json_query(
+    query_name: &str,
+    query_document: &str,
+    variables: Value,
+) -> Result<Value, TelescopeError> {
     // Build the GraphQL request body.
     let request_body: Value = json!({
         "query": query_document,
@@ -70,7 +81,8 @@ pub async fn send_json_query(query_name: &str, query_document: &str, variables: 
         // Add the Accept header so that the server sends back JSON.
         .header(ACCEPT, HeaderValue::from_static("application/json"))
         // Send the request and wait for the response
-        .send().await
+        .send()
+        .await
         // Convert and propagate any errors.
         .map_err(TelescopeError::rcos_api_error)?
         // Wait for the body to receive as a string

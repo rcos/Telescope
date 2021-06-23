@@ -7,13 +7,10 @@ use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
 };
-use url::Url;
-use std::collections::HashMap;
+use pulldown_cmark::{Options as MarkdownOptions, Parser as MarkdownParser};
 use serde_json::Value;
-use pulldown_cmark::{
-    Parser as MarkdownParser,
-    Options as MarkdownOptions,
-};
+use std::collections::HashMap;
+use url::Url;
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
@@ -217,7 +214,8 @@ fn format_user_role(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
 /// This accepts a series of hash arguments and encodes all of them.
 fn url_encode_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
     // Map the Helper's hash params into just JSON values (we do not use the paths).
-    let map: HashMap<&str, &Value> = h.hash()
+    let map: HashMap<&str, &Value> = h
+        .hash()
         .iter()
         // Use just the value.
         .map(|(key, val)| (*key, val.value()))
@@ -237,9 +235,12 @@ fn url_encode_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
 /// Helper to parse and render a markdown string.
 fn markdown_renderer_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
     // Expect one parameter with the markdown payload.
-    let markdown_source: &str = h.param(0)
-        .and_then(|param| param.value().as_str())
-        .ok_or(RenderError::new("render_markdown expects a markdown string parameter."))?;
+    let markdown_source: &str =
+        h.param(0)
+            .and_then(|param| param.value().as_str())
+            .ok_or(RenderError::new(
+                "render_markdown expects a markdown string parameter.",
+            ))?;
     // Make a new parser with all options enabled.
     let parser = MarkdownParser::new_ext(markdown_source, MarkdownOptions::all());
     // Make and write an html buffer with the rendered markdown.
