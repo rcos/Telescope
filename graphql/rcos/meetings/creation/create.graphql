@@ -4,13 +4,14 @@ mutation CreateMeeting(
     $title: String,
     $start: timestamptz!,
     $end: timestamptz!,
-    $description: String,
+    $description: String!,
     $is_draft: Boolean!,
     $is_remote: Boolean!,
     $location: String,
     $meeting_url: String,
     $recording_url: String,
-    $semester_id: String,
+    $external_slides_url: String,
+    $semester_id: String!,
     $kind: meeting_type!
 ) {
     insert_meetings_one(object: {
@@ -24,6 +25,7 @@ mutation CreateMeeting(
         location: $location,
         meeting_url: $meeting_url,
         recording_url: $recording_url,
+        external_presentation_url: $external_slides_url,
         semester_id: $semester_id,
         type: $kind,
     }) {
