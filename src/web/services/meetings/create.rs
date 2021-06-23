@@ -83,21 +83,13 @@ struct FinishQuery {
     host: String,
 }
 
-fn finish_form() -> FormTemplate {
-    FormTemplate::new("meetings/creation/forms/finish", "Create Meeting")
-}
-
-/// Endpoint to finish meeting creation.
-#[get("/finish")]
-async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, TelescopeError> {
-    // Extract query parameter.
-    let host: Option<String> = query.map(|q| q.host.clone());
-
+/// Create an empty instance of the form to finish meeting creation.
+async fn finish_form(host_username: Option<String>) -> Result<FormTemplate, TelescopeError> {
     // Query RCOS API for meeting creation context.
-    let context: Value = creation::context::get_context(host).await?;
+    let context: Value = creation::context::get_context(host_username).await?;
 
-    // Create the form template to finish meeting creation.
-    let mut form: FormTemplate = finish_form();
+    // Create form.
+    let mut form = FormTemplate::new("meetings/creation/forms/finish", "Create Meeting");
 
     // Add context to form.
     form.template = json!({
@@ -105,8 +97,17 @@ async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, Teles
         "meeting_types": &ALL_MEETING_TYPES
     });
 
-    // Return form.
+    // Return form with context.
     return Ok(form);
+}
+
+/// Endpoint to finish meeting creation.
+#[get("/finish")]
+async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, TelescopeError> {
+    // Extract query parameter.
+    let host: Option<String> = query.map(|q| q.host.clone());
+    // Return form.
+    return finish_form(host).await;
 }
 
 /// Form submitted by users to create meeting.
@@ -164,5 +165,48 @@ async fn submit_meeting(
     // Resolve host username.
     let host: Option<String> = query.map(|q| q.host.clone());
 
-    Err(TelescopeError::NotImplemented)
+    // Create a form instance to send back to the user if the one they submitted was invalid.
+    let mut return_form: FormTemplate = finish_form(host).await?;
+    // Add previously selected fields to the form.
+    return_form.template["selections"] = json!(&form);
+
+    // Validate form fields.
+    // Start by destructuring form:
+    let FinishForm {
+        semester,
+        kind,
+        title,
+        start_date,
+        start_time,
+        end_date,
+        end_time,
+        description,
+        is_remote,
+        meeting_url,
+        location,
+        recording_url,
+        external_slides_url,
+        is_draft,
+    } = form;
+
+    // We assume that semester_id is valid, since it includes only options from the creation
+    // context. If it is not valid, the API will throw a foreign key constraint error on
+    // meeting creation and we will return it straight to the user. This should not happen
+    // if the user is using the web interface, and if they are not then the consequences are not
+    // to severe, so we accept that behavior.
+    //
+    // TL;DR: Semester ID validation is handled client side and enforced enough API side that we
+    // don't touch it here.
+    //
+    // Same thing with meeting type variant and host username.
+
+
+    // The title should be null (Option::None) if it is all whitespace or empty.
+    // If it is, we don't bother user for this -- they can change the title later and
+    // they know if they put in all whitespace. This also decreases form resubmission
+    // and template complexity.
+    let title: Option<String> = (!title.trim().is_empty()).then(|| title);
+
+
+    Err(TelescopeError::invalid_form(&return_form))
 }
