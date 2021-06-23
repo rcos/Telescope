@@ -20,7 +20,7 @@ pub mod users;
 /// The name of this API in error messages.
 const API_NAME: &'static str = "RCOS Central Hasura GraphQL API";
 
-/// Send a GraphQL query to the central RCOS API for a given subject (or anonymously).
+/// Send a GraphQL query to the central RCOS API.
 pub async fn send_query<T: GraphQLQuery>(
     variables: T::Variables,
 ) -> Result<T::ResponseData, TelescopeError> {
@@ -48,7 +48,9 @@ pub async fn send_query<T: GraphQLQuery>(
 
 
 /// Send an API query using the GraphQL JSON format. This is useful for avoiding issues in the
-/// macro-generated GraphQL types
+/// macro-generated GraphQL types.
+///
+/// The typed version should generally be used instead to avoid runtime type errors.
 pub async fn send_json_query(query_name: &str, query_document: &str, variables: Value) -> Result<Value, TelescopeError> {
     // Build the GraphQL request body.
     let request_body: Value = json!({

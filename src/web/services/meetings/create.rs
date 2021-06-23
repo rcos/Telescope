@@ -15,12 +15,13 @@ use actix_web::web as aweb;
 use crate::templates::Template;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use actix_web::HttpRequest;
-use crate::api::rcos::meetings::creation::context::CreationContext;
+use crate::api::rcos::meetings::creation;
 use crate::api::rcos::meetings::{ALL_MEETING_TYPES, MeetingType};
 use actix_web::HttpResponse;
 use chrono::{NaiveDate, NaiveTime};
 use url::Url;
 use std::collections::HashMap;
+use serde_json::Value;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
@@ -86,8 +87,10 @@ fn finish_form() -> FormTemplate {
 async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, TelescopeError> {
     // Extract query parameter.
     let host: Option<String> = query.map(|q| q.host.clone());
+
     // Query RCOS API for meeting creation context.
-    let context = CreationContext::get(host).await?;
+    let context: Value = creation::context::get_context(host).await?;
+
     // Create the form template to finish meeting creation.
     let mut form: FormTemplate = finish_form();
 
