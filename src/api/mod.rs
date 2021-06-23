@@ -1,7 +1,7 @@
 //! Different API services that Telescope consumes.
 
 use crate::error::TelescopeError;
-use graphql_client::{GraphQLQuery, Response};
+use graphql_client::Response;
 
 pub mod github;
 pub mod rcos;

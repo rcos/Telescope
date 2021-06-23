@@ -18,9 +18,7 @@ use actix_web::HttpRequest;
 use crate::api::rcos::meetings::creation;
 use crate::api::rcos::meetings::{ALL_MEETING_TYPES, MeetingType};
 use actix_web::HttpResponse;
-use chrono::{NaiveDate, NaiveTime};
-use url::Url;
-use std::collections::HashMap;
+use chrono::NaiveDate;
 use serde_json::Value;
 
 /// Authorization function for meeting creation.

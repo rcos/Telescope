@@ -1,6 +1,5 @@
 //! GraphQL query to get context for meeting creation.
 
-use crate::api::rcos::prelude::*;
 use crate::api::rcos::send_json_query;
 use crate::error::TelescopeError;
 use serde_json::Value;

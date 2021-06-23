@@ -32,11 +32,6 @@ pub async fn send_query<T: GraphQLQuery>(
     let variables: Value = serde_json::to_value(variables)
         .map_err(|e| TelescopeError::ise(format!("Could not serialize GraphQL variables to JSON object: {}", e)))?;
 
-    // Build a JWT token to authenticate with the RCOS API.
-    // Use no subject because currently we do not track the subject on
-    // the other end.
-    let jwt: String = ApiJwtClaims::new(None);
-
     // Send the query and await the response.
     let response: Value = send_json_query(operation_name, query, variables)
         .await?;
