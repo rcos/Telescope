@@ -12,8 +12,6 @@ use futures::future::LocalBoxFuture;
 use serde::Serialize;
 use serde_json::Value;
 
-pub mod meeting;
-
 /// A form that the user must fill out. All forms submit by `POST` to
 /// the URL they are served at.
 #[derive(Serialize, Deserialize, Debug)]
