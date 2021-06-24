@@ -3,7 +3,7 @@ use std::ops::{Index, IndexMut};
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use futures::future::{ready, Ready};
 use serde::Serialize;
-use serde_json::{Map, Value};
+use serde_json::Value;
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
@@ -12,7 +12,6 @@ pub mod auth;
 pub mod forms;
 pub mod helpers;
 pub mod jumbotron;
-pub mod navbar;
 pub mod page;
 pub mod pagination;
 pub mod static_pages;
@@ -48,22 +47,6 @@ impl Template {
             .render(self.handlebars_file, self)
             // Convert any rendering errors that occur.
             .map_err(TelescopeError::RenderingError)
-    }
-}
-
-impl<T: Into<String>> Index<T> for Template {
-    type Output = Value;
-
-    fn index(&self, index: T) -> &Self::Output {
-        // Immutable indexing for fields.
-        &self.fields[&index.into()]
-    }
-}
-
-impl<T: Into<String>> IndexMut<T> for Template {
-    fn index_mut(&mut self, index: T) -> &mut Self::Output {
-        // Mutable indexing for fields.
-        &mut self.fields[&index.into()]
     }
 }
 

@@ -30,7 +30,137 @@
     </head>
     <body class="bg-dark text-light d-flex flex-column min-vh-100">
         <header>
-            {{> navbar/navbar navbar}}
+            <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
+                <a class="navbar-brand" href="/">
+                    <img src="/static/icons/rcos-branding/img/logo-square-red.png" style="height: 32px;" alt="RCOS Logo">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <nav id="navbar" class="navbar-collapse collapse">
+                    <ul class="navbar-nav mr-auto">
+                        {{! Home }}
+                        <li class="nav-item {{#if (eq navbar.req_path "/")}} active {{/if}}">
+                            <a href="/" class="nav-link">
+                                Home
+                            </a>
+                        </li>
+
+                        {{! Projects }}
+                        <li class="nav-item {{#if (eq navbar.req_path "/projects")}} active {{/if}}">
+                            <a href="/projects" class="nav-link">
+                                Projects
+                            </a>
+                        </li>
+
+                        {{! Developers }}
+                        <li class="nav-item {{#if (eq navbar.req_path "/developers")}} active {{/if}}">
+                            <a href="/developers" class="nav-link">
+                                Developers
+                            </a>
+                        </li>
+
+                        {{! Sponsors }}
+                        <li class="nav-item {{#if (eq navbar.req_path "/sponsors")}} active {{/if}}">
+                            <a href="/sponsors" class="nav-link">
+                                Sponsors
+                            </a>
+                        </li>
+
+                        {{! Meetings }}
+                        <li class="nav-item {{#if (eq navbar.req_path "/meetings")}} active {{/if}}">
+                            <a href="/meetings" class="nav-link">
+                                Meetings
+                            </a>
+                        </li>
+
+                        {{! The remaining nav links are authentication dependent }}
+                        {{! Admin }}
+                        {{#if navbar.is_admin}}
+                            <li class="nav-item {{#if (eq navbar.req_path "/admin")}} active {{/if}}">
+                                <a href="/admin" class="nav-link">
+                                    Admin
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{! These are commented out since there is no backend yet }}
+                        {{!--
+                        {{! Coordinator tools }}
+                        {{#if (or navbar.is_admin navbar.is_coordinator)}}
+                            <li class="nav-item {{#if (eq navbar.req_path "/coordinate")}} active {{/if}}">
+                                <a href="/coordinate" class="nav-link">
+                                    Coordinate
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{! Mentor tools }}
+                        {{#if (or (or navbar.is_admin navbar.is_coordinator) navbar.is_mentor)}}
+                            <li class="nav-item {{#if (eq navbar.req_path "/mentor")}} active {{/if}}">
+                                <a href="/mentor" class="nav-link">
+                                    Mentor
+                                </a>
+                            </li>
+                        {{/if}}
+                        --}}
+
+                        {{! We'll add attendance at a later date if we support it }}
+                    </ul>
+                    <ul class="navbar-nav">
+                        {{! Handbook link should be available to all users }}
+                        <li class="nav-item">
+                            <a href="https://handbook.rcos.io" class="btn btn-outline-info mr-2 mb-2" target="_blank" rel="noreferrer noopener">
+                                Handbook <i data-feather="external-link" style="height: 1em; width: auto;"></i>
+                            </a>
+                        </li>
+
+                        {{! If no user is authenticated }}
+                        {{#if (eq navbar.variant "unauthenticated")}}
+                            {{! Sign in }}
+                            <li class="nav-item {{#if (eq navbar.req_path "/login")}} active {{/if}}">
+                                <a href="/login" class="btn btn-primary mr-2 mb-2">
+                                    Sign In
+                                </a>
+                            </li>
+
+                            {{! Register new account }}
+                            <li class="nav-item {{#if (eq navbar.req_path "/register")}} active {{/if}}">
+                                <a href="/register" class="btn btn-success mr-2 mb-2">
+                                    Register
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{! If in the account creation process }}
+                        {{#if (eq navbar.variant "account_creation")}}
+                            <li class="nav-item">
+                                <a href="/logout" class="btn btn-danger mr-2 mb-2">
+                                    Cancel Account Creation
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{! If there is a user signed in }}
+                        {{#if (eq navbar.variant "authenticated")}}
+                            {{! Profile }}
+                            <li class="nav-item">
+                                <a href="{{profile_for navbar.username}}" class="btn btn-primary mr-2 mb-2">
+                                    Profile
+                                </a>
+                            </li>
+
+                            {{! Logout }}
+                            <li class="nav-item">
+                                <a href="/logout" class="btn btn-secondary mr-2 mb-2">
+                                    Logout
+                                </a>
+                            </li>
+                        {{/if}}
+
+                    </ul>
+                </nav>
+            </nav>
         </header>
         <div class="container px-1 align-items-center mb-2">
             {{> content }}
