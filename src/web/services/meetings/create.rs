@@ -307,9 +307,6 @@ async fn submit_meeting(
             show_status_code: false,
         })?;
 
-    // // Trim description similar to title (except it's not an Option<String>).
-    // let description: String = description.trim().to_string();
-
     // The rest of the fields are managed pretty tersely in the API call and do not need validation
     // or feedback.
     let created_meeting_id: i64 = CreateMeeting::execute(

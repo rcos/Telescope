@@ -27,8 +27,6 @@ pub const CLASS: &'static str = "class";
 /// The handlebars key for the text inside a link on the navbar.
 pub const TEXT: &'static str = "text";
 
-/// The handlebars key for an icon next to the text on an item in the navbar.
-pub const ICON: &'static str = "icon";
 
 /// Create an empty navbar template with a reference to the navbar handlebars
 /// file.
