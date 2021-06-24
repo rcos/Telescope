@@ -26,7 +26,7 @@ pub struct Template {
 
     /// The fields to render.
     #[serde(flatten)]
-    fields: Map<String, Value>,
+    pub fields: Value,
 }
 
 impl Template {
@@ -35,22 +35,8 @@ impl Template {
     pub fn new(path: &'static str) -> Self {
         Self {
             handlebars_file: path,
-            fields: Map::new(),
+            fields: Value::Null,
         }
-    }
-
-    /// Builder style method to add a field to this template instance.
-    /// This will panic if there is a serialization failure.
-    pub fn field(mut self, key: impl Into<String>, val: impl Serialize) -> Self {
-        self.set_field(key, val);
-        self
-    }
-
-    /// Setter method for fields on this template instance.
-    /// This will panic if there is a serialization failure.
-    pub fn set_field(&mut self, key: impl Into<String>, val: impl Serialize) {
-        let serialized_val = serde_json::to_value(val).expect("Failed to serialize value");
-        self.fields.insert(key.into(), serialized_val);
     }
 
     /// Render this template using the global handlebars registry.
@@ -62,15 +48,6 @@ impl Template {
             .render(self.handlebars_file, self)
             // Convert any rendering errors that occur.
             .map_err(TelescopeError::RenderingError)
-    }
-
-    /// Render this template as the content of a page.
-    pub async fn render_into_page(
-        &self,
-        req: &HttpRequest,
-        title: impl Into<Value>,
-    ) -> Result<Template, TelescopeError> {
-        page::of(req, title, self).await
     }
 }
 

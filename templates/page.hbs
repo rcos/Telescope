@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>
-            {{title}}
-        </title>
+
+        <title>{{title}}</title>
+
+        {{! Open Graph Protocol Properties }}
+        {{#each og_properties}}
+            <meta property="og:{{@key}}" content="{{this}}">
+        {{/each}}
+
         <link rel="stylesheet" href="/static/styles/base.css" type="text/css">
         <link rel="shortcut icon" type="image/png" href="/static/icons/rcos-branding/img/logo-circle-red.png">
 
@@ -25,10 +30,10 @@
     </head>
     <body class="bg-dark text-light d-flex flex-column min-vh-100">
         <header>
-            {{> navbar/navbar this.navbar}}
+            {{> navbar/navbar navbar}}
         </header>
         <div class="container px-1 align-items-center mb-2">
-            {{{ content }}}
+            {{> content }}
         </div>
 
         <footer class="footer text-center mt-auto py-3 bg-light text-dark">
