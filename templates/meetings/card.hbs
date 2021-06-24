@@ -67,19 +67,19 @@
         <div class="list-group-item">
             <div class="row row-cols-1 row-cols-md-3">
                 <div class="col align-content-center my-1">
-                    {{#if is_remote}}
-                        {{#if meeting_url}}
-                            {{> meetings/link url=meeting_url text="Join" class="primary"}}
+                    {{#if meeting_url}}
+                        {{> meetings/link url=meeting_url text="Join" class="primary"}}
+                    {{else}}
+                        {{#if is_remote}}
+                            <span class="btn btn-outline-danger disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                                <i>Meeting URL missing</i>
+                            </span>
                         {{else}}
+                            {{! Meeting is not remote }}
                             <span class="btn btn-outline-primary disabled w-100 h-100 d-flex align-items-center justify-content-center">
-                                Cannot join meeting
+                                Meeting is not remote
                             </span>
                         {{/if}}
-                    {{else}}
-                        {{! Meeting is not remote }}
-                        <span class="btn btn-outline-primary disabled w-100 h-100 d-flex align-items-center justify-content-center">
-                            Meeting is not remote
-                        </span>
                     {{/if}}
                 </div>
 
@@ -95,19 +95,19 @@
                 </div>
 
                 <div class="col align-content-center my-1">
-                    {{#if is_remote}}
-                        {{#if recording_url}}
-                            {{> meetings/link url=recording_url text="View Recording" class="secondary"}}
-                        {{else}}
+                    {{#if recording_url}}
+                        {{> meetings/link url=recording_url text="View Recording" class="secondary"}}
+                    {{else}}
+                        {{#if is_remote}}
                             <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
                                 Recording unavailable
                             </span>
+                        {{else}}
+                            {{! Meeting is not remote }}
+                            <span class="btn btn-outline-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                                Meeting is not remote
+                            </span>
                         {{/if}}
-                    {{else}}
-                        {{! Meeting is not remote }}
-                        <span class="btn btn-outline-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
-                            Meeting is not remote
-                        </span>
                     {{/if}}
                 </div>
             </div>
