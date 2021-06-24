@@ -21,7 +21,7 @@ pub mod static_pages;
 pub struct Template {
     /// The file to use to render this template.
     #[serde(skip)]
-    handlebars_file: &'static str,
+    pub handlebars_file: &'static str,
 
     /// The fields to render.
     #[serde(flatten)]

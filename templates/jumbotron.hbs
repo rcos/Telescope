@@ -1,6 +1,16 @@
-<div class="jumbotron jumbotron-fluid bg-dark text-light container-md pl-3 pl-md-0">
-    <h1 class="text-info display-4">{{heading}}</h1>
-    <p class="lead pt-2">
-        {{message}}
-    </p>
-</div>
+{{#*inline "content"}}
+    <div class="jumbotron jumbotron-fluid bg-dark text-light container-md pl-3 pl-md-0">
+        <h1 class="text-info display-4">{{heading}}</h1>
+        <p class="lead pt-2">
+            {{message}}
+        </p>
+    </div>
+{{/inline}}
+
+{{! If the page data is available, render the error in a page (with a navbar etc). Otherwise just render it as-is. }}
+{{#if page}}
+    {{> page }}
+{{else}}
+    <h1>{{heading}}</h1>
+    {{message}}
+{{/if}}

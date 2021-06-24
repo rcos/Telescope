@@ -73,3 +73,4 @@ pub struct Page {
     /// The state of the navbar.
     pub navbar: NavbarState
 }
+
