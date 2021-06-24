@@ -1,6 +1,6 @@
 {{! Meeting creation form }}
 <div class="row justify-content-center no-gutters">
-    <div class="card text-dark col-sm-11 col-md-9 col-lg-7">
+    <div class="card text-dark col-sm-11 col-md-9 col-lg-8">
         <div class="card-header">
             <h1 class="card-title">
                 Create Meeting
@@ -66,27 +66,46 @@
                     {{! Start }}
                     <div class="form-group col-md-3">
                         <label for="start-date-input">Start date:</label>
-                        <input name="start_date" type="date" id="start-date-input" class="form-control"
-                            {{#if selections.start_date}} value="{{selections.start_date}}" {{/if}} required>
+                        <input name="start_date" type="date" id="start-date-input"
+                            {{#if selections.start_date}} value="{{selections.start_date}}" {{/if}}
+                            {{#if issues.start_date}} class="form-control is-invalid" aria-labelledby="start-date-invalid" {{else}} class="form-control" {{/if}} required>
+                        {{#if issues.start_date}}
+                            <span class="invalid-feedback" id="start-date-invalid">
+                                {{issues.start_date}}
+                            </span>
+                        {{/if}}
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="start-time-input">Start time:</label>
                         <input type="time" name="start_time" id="start-time-input" class="form-control"
                             {{#if selections.start_time}} value="{{selections.start_time}}" {{/if}} required>
+                        {{! Start time doesn't ever get invalid feedback }}
                     </div>
 
                     {{! End }}
                     <div class="form-group col-md-3">
                         <label for="end-date-input">End date:</label>
-                        <input type="date" id="end-date-input" name="end_date" class="form-control"
-                               {{#if selections.end_date}} value="{{selections.end_date}}" {{/if}} required>
+                        <input type="date" id="end-date-input" name="end_date"
+                            {{#if selections.end_date}} value="{{selections.end_date}}" {{/if}}
+                            {{#if issues.end_date}} class="form-control is-invalid" aria-labelledby="end-date-invalid" {{else}} class="form-control" {{/if}} required>
+                        {{#if issues.end_date}}
+                            <span class="invalid-feedback" id="end-date-invalid">
+                                {{issues.end_date}}
+                            </span>
+                        {{/if}}
                     </div>
 
                     <div class="form-group col-md-3">
                         <label for="end-time-input">End time:</label>
-                        <input type="time" id="end-time-input" name="end_time" class="form-control"
-                               {{#if selections.end_time}} value="{{selections.end_time}}" {{/if}} required>
+                        <input type="time" id="end-time-input" name="end_time"
+                            {{#if selections.end_time}} value="{{selections.end_time}}" {{/if}}
+                            {{#if issues.end_time}} class="form-control is-invalid" aria-labelledby="end-time-invalid" {{else}} class="form-control" {{/if}} required>
+                        {{#if issues.end_time}}
+                            <span class="invalid-feedback" id="end-time-invalid">
+                                {{issues.end_time}}
+                            </span>
+                        {{/if}}
                     </div>
                 </div>
 

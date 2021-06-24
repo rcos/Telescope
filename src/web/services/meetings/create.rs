@@ -17,9 +17,11 @@ use actix_web::web as aweb;
 use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
-use chrono::NaiveDate;
+use chrono::{NaiveDate, NaiveTime, NaiveDateTime, DateTime, Local, TimeZone, Utc};
 use futures::future::LocalBoxFuture;
 use serde_json::Value;
+use crate::api::rcos::meetings::creation::create::CreateMeeting;
+use actix_web::http::header::LOCATION;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(
@@ -166,7 +168,7 @@ async fn submit_meeting(
     let host: Option<String> = query.map(|q| q.host.clone());
 
     // Create a form instance to send back to the user if the one they submitted was invalid.
-    let mut return_form: FormTemplate = finish_form(host).await?;
+    let mut return_form: FormTemplate = finish_form(host.clone()).await?;
     // Add previously selected fields to the form.
     return_form.template["selections"] = json!(&form);
 
@@ -200,13 +202,135 @@ async fn submit_meeting(
     //
     // Same thing with meeting type variant and host username.
 
-
     // The title should be null (Option::None) if it is all whitespace or empty.
     // If it is, we don't bother user for this -- they can change the title later and
     // they know if they put in all whitespace. This also decreases form resubmission
     // and template complexity.
     let title: Option<String> = (!title.trim().is_empty()).then(|| title);
+    return_form.template["selections"]["title"] = json!(&title);
 
+    // Check that the start date and end dates are during the semester selected.
+    let selected_semester: &Value = return_form.template["context"]["available_semesters"]
+        // This should be a JSON array
+        .as_array()
+        .expect("This value should be set as an array")
+        // Find by semester ID.
+        .iter()
+        .find(|available_semester| available_semester["semester_id"] == semester.as_str())
+        // If the submitted semester is not an available one, return an error.
+        .ok_or(TelescopeError::BadRequest {
+            header: "Malformed Meeting Creation Form".into(),
+            message: "Could not find selected semester ID in meeting creation context.".into(),
+            show_status_code: false
+        })?;
 
-    Err(TelescopeError::invalid_form(&return_form))
+    let semester_start = selected_semester["start_date"]
+        .as_str()
+        .and_then(|string| string.parse::<NaiveDate>().ok())
+        .expect("Semester from context has good start date.");
+
+    let semester_end = selected_semester["end_date"]
+        .as_str()
+        .and_then(|string| string.parse::<NaiveDate>().ok())
+        .expect("Semester from context has good end date.");
+
+    // If meeting starts before semester, save to issues and return form.
+    if start_date < semester_start {
+        return_form.template["issues"]["start_date"] = json!("Start date is before the semester starts.");
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    // Same if meeting starts after the end of the semester.
+    if start_date > semester_end {
+        return_form.template["issues"]["start_date"] = json!("Start date is after the semester ends.");
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    // Same with end date.
+    if end_date < semester_start {
+        return_form.template["issues"]["end_date"] = json!("End date is before the semester starts.");
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    if end_date > semester_end {
+        return_form.template["issues"]["end_date"] = json!("End date is after the semester ends.");
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    // Also check if the end is before the start.
+    if end_date < start_date {
+        return_form.template["issues"]["end_date"] = json!("End date is before start date.");
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    // Dates are validated, let's check the times. Start by converting the times from strings.
+    let start_time: NaiveTime = format!("{}:00", start_time).parse::<NaiveTime>()
+        .map_err(|e| TelescopeError::BadRequest {
+            header: "Malformed Meeting Creation Form".into(),
+            message: format!("Could not parse start time. Internal error: {}", e),
+            show_status_code: false
+        })?;
+
+    let end_time: NaiveTime = format!("{}:00", end_time).parse::<NaiveTime>()
+        .map_err(|e| TelescopeError::BadRequest {
+            header: "Malformed Meeting Creation Form".into(),
+            message: format!("Could not parse end time. Internal error: {}", e),
+            show_status_code: false
+        })?;
+
+    // Now combine them with the dates.
+    let start: NaiveDateTime = start_date.and_time(start_time);
+    let end: NaiveDateTime = end_date.and_time(end_time);
+
+    // Check the ordering.
+    if start > end {
+        return_form.template["issues"]["end_time"] = json!("End time is before start time.");
+        return Err(TelescopeError::invalid_form(&return_form));
+    }
+
+    // Ascribe local timezone.
+    let start: DateTime<Local> = Local.from_local_datetime(&start)
+        // Expect that there is only one valid local time for this.
+        .single()
+        .ok_or(TelescopeError::BadRequest {
+            header: "Malformed Meeting Creation Form".into(),
+            message: "Could not ascribe local timezone to start timestamp.".into(),
+            show_status_code: false,
+        })?;
+
+    let end: DateTime<Local> = Local.from_local_datetime(&end)
+        // Expect that there is only one valid local time for this.
+        .single()
+        .ok_or(TelescopeError::BadRequest {
+            header: "Malformed Meeting Creation Form".into(),
+            message: "Could not ascribe local timezone to end timestamp.".into(),
+            show_status_code: false,
+        })?;
+
+    // // Trim description similar to title (except it's not an Option<String>).
+    // let description: String = description.trim().to_string();
+
+    // The rest of the fields are managed pretty tersely in the API call and do not need validation
+    // or feedback.
+    let created_meeting_id: i64 = CreateMeeting::execute(
+        host,
+        title,
+        start.with_timezone(&Utc),
+        end.with_timezone(&Utc),
+        description.trim().to_string(),
+        is_draft.unwrap_or(false),
+        is_remote.unwrap_or(false),
+        location.and_then(|string| (!string.trim().is_empty()).then(|| string.trim().to_string())),
+        meeting_url,
+        recording_url,
+        external_slides_url,
+        semester,
+        kind,
+    ).await?
+        .ok_or(TelescopeError::ise("Meeting creation call did not return ID."))?;
+
+    // Redirect the user to the page for the meeting they created.
+    return Ok(HttpResponse::Found()
+        .header(LOCATION, format!("/meeting/{}", created_meeting_id))
+        .finish());
 }
