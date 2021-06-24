@@ -3,10 +3,10 @@
 use actix_web::web::ServiceConfig;
 
 mod create;
+mod delete;
+mod edit;
 mod list;
 mod view;
-mod edit;
-mod delete;
 
 /// Register calendar related services.
 pub fn register(config: &mut ServiceConfig) {

@@ -1,10 +1,10 @@
 //! GraphQL mutation to create a meeting.
 
-use crate::api::rcos::prelude::*;
-use crate::error::TelescopeError;
-use crate::api::rcos::send_query;
-use chrono::{DateTime, Utc};
 use crate::api::rcos::meetings::MeetingType;
+use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
+use chrono::{DateTime, Utc};
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -29,7 +29,7 @@ impl CreateMeeting {
         recording_url: Option<String>,
         external_slides_url: Option<String>,
         semester_id: String,
-        kind: MeetingType
+        kind: MeetingType,
     ) -> Result<Option<i64>, TelescopeError> {
         send_query::<Self>(create_meeting::Variables {
             host_username,
@@ -44,7 +44,9 @@ impl CreateMeeting {
             recording_url,
             external_slides_url,
             semester_id,
-            kind
-        }).await.map(|response| response.insert_meetings_one.map(|obj| obj.meeting_id))
+            kind,
+        })
+        .await
+        .map(|response| response.insert_meetings_one.map(|obj| obj.meeting_id))
     }
 }

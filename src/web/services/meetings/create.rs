@@ -7,21 +7,21 @@
 
 use crate::api::rcos::meetings::authorization_for::AuthorizationFor;
 use crate::api::rcos::meetings::creation;
+use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
 use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
+use actix_web::http::header::LOCATION;
 use actix_web::web as aweb;
 use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
-use chrono::{NaiveDate, NaiveTime, NaiveDateTime, DateTime, Local, TimeZone, Utc};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use futures::future::LocalBoxFuture;
 use serde_json::Value;
-use crate::api::rcos::meetings::creation::create::CreateMeeting;
-use actix_web::http::header::LOCATION;
 
 /// Authorization function for meeting creation.
 fn meeting_creation_authorization(
@@ -221,7 +221,7 @@ async fn submit_meeting(
         .ok_or(TelescopeError::BadRequest {
             header: "Malformed Meeting Creation Form".into(),
             message: "Could not find selected semester ID in meeting creation context.".into(),
-            show_status_code: false
+            show_status_code: false,
         })?;
 
     let semester_start = selected_semester["start_date"]
@@ -236,19 +236,22 @@ async fn submit_meeting(
 
     // If meeting starts before semester, save to issues and return form.
     if start_date < semester_start {
-        return_form.template["issues"]["start_date"] = json!("Start date is before the semester starts.");
+        return_form.template["issues"]["start_date"] =
+            json!("Start date is before the semester starts.");
         return Err(TelescopeError::invalid_form(&return_form));
     }
 
     // Same if meeting starts after the end of the semester.
     if start_date > semester_end {
-        return_form.template["issues"]["start_date"] = json!("Start date is after the semester ends.");
+        return_form.template["issues"]["start_date"] =
+            json!("Start date is after the semester ends.");
         return Err(TelescopeError::invalid_form(&return_form));
     }
 
     // Same with end date.
     if end_date < semester_start {
-        return_form.template["issues"]["end_date"] = json!("End date is before the semester starts.");
+        return_form.template["issues"]["end_date"] =
+            json!("End date is before the semester starts.");
         return Err(TelescopeError::invalid_form(&return_form));
     }
 
@@ -264,18 +267,20 @@ async fn submit_meeting(
     }
 
     // Dates are validated, let's check the times. Start by converting the times from strings.
-    let start_time: NaiveTime = format!("{}:00", start_time).parse::<NaiveTime>()
+    let start_time: NaiveTime = format!("{}:00", start_time)
+        .parse::<NaiveTime>()
         .map_err(|e| TelescopeError::BadRequest {
             header: "Malformed Meeting Creation Form".into(),
             message: format!("Could not parse start time. Internal error: {}", e),
-            show_status_code: false
+            show_status_code: false,
         })?;
 
-    let end_time: NaiveTime = format!("{}:00", end_time).parse::<NaiveTime>()
+    let end_time: NaiveTime = format!("{}:00", end_time)
+        .parse::<NaiveTime>()
         .map_err(|e| TelescopeError::BadRequest {
             header: "Malformed Meeting Creation Form".into(),
             message: format!("Could not parse end time. Internal error: {}", e),
-            show_status_code: false
+            show_status_code: false,
         })?;
 
     // Now combine them with the dates.
@@ -289,7 +294,8 @@ async fn submit_meeting(
     }
 
     // Ascribe local timezone.
-    let start: DateTime<Local> = Local.from_local_datetime(&start)
+    let start: DateTime<Local> = Local
+        .from_local_datetime(&start)
         // Expect that there is only one valid local time for this.
         .single()
         .ok_or(TelescopeError::BadRequest {
@@ -298,7 +304,8 @@ async fn submit_meeting(
             show_status_code: false,
         })?;
 
-    let end: DateTime<Local> = Local.from_local_datetime(&end)
+    let end: DateTime<Local> = Local
+        .from_local_datetime(&end)
         // Expect that there is only one valid local time for this.
         .single()
         .ok_or(TelescopeError::BadRequest {
@@ -323,8 +330,11 @@ async fn submit_meeting(
         external_slides_url,
         semester,
         kind,
-    ).await?
-        .ok_or(TelescopeError::ise("Meeting creation call did not return ID."))?;
+    )
+    .await?
+    .ok_or(TelescopeError::ise(
+        "Meeting creation call did not return ID.",
+    ))?;
 
     // Redirect the user to the page for the meeting they created.
     return Ok(HttpResponse::Found()
