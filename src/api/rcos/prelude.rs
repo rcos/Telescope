@@ -3,13 +3,13 @@
 // Ignore compiler warnings for lowercase typenames.
 #![allow(nonstandard_style)]
 
+use crate::api::rcos::discord_assoications::ChannelType;
 use crate::api::rcos::{
     meetings::MeetingType,
     users::{UserAccountType, UserRole},
 };
 use chrono::{DateTime, NaiveDate, Utc};
 use url::Url;
-use crate::api::rcos::discord_assoications::ChannelType;
 
 /// Timestamp with Timezone.
 pub type timestamptz = DateTime<Utc>;

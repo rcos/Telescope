@@ -46,8 +46,12 @@ pub struct AuthorizedAccess<S: 'static> {
 
 impl Authorization {
     /// Construct a new authorization transform.
-    pub fn new<F: 'static + Fn(String) -> LocalBoxFuture<'static, AuthorizationResult>>(func: F) -> Self {
-        Self { check: Rc::new(func) }
+    pub fn new<F: 'static + Fn(String) -> LocalBoxFuture<'static, AuthorizationResult>>(
+        func: F,
+    ) -> Self {
+        Self {
+            check: Rc::new(func),
+        }
     }
 }
 
@@ -103,7 +107,8 @@ where
                 let rcos_username = rcos_username.unwrap();
 
                 // Call the authorization check.
-                let authorization_result: AuthorizationResult = (check.as_ref())(rcos_username).await;
+                let authorization_result: AuthorizationResult =
+                    (check.as_ref())(rcos_username).await;
 
                 // Check for an error. We have to explicitly convert to a response here otherwise
                 // actix error handling will skip upstream middlewares.

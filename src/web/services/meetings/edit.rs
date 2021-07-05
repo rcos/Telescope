@@ -3,6 +3,4 @@
 use actix_web::web::ServiceConfig;
 
 /// Register the meeting edit services.
-pub fn register(config: &mut ServiceConfig) {
-
-}
+pub fn register(config: &mut ServiceConfig) {}

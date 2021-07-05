@@ -13,6 +13,7 @@ use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
+use crate::web::services::meetings::make_meeting_auth_middleware;
 use actix_web::http::header::LOCATION;
 use actix_web::web as aweb;
 use actix_web::web::{Form, Query, ServiceConfig};
@@ -20,12 +21,12 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
-use crate::web::services::meetings::make_meeting_auth_middleware;
 
 /// Register meeting creation services.
 pub fn register(config: &mut ServiceConfig) {
     // Create meeting creation auth middleware.
-    let authorization = make_meeting_auth_middleware(&UserMeetingAuthorization::can_create_meetings);
+    let authorization =
+        make_meeting_auth_middleware(&UserMeetingAuthorization::can_create_meetings);
 
     config.service(
         aweb::scope("/meeting/create")
