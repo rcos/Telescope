@@ -1,9 +1,21 @@
 //! GraphQL query to get context for meeting creation.
 
-use crate::api::rcos::send_json_query;
+use crate::api::rcos::{
+    send_json_query,
+    prelude::*
+};
 use crate::error::TelescopeError;
 use chrono::Utc;
 use serde_json::Value;
+
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/meetings/creation/context.graphql",
+    response_derives = "Debug,Clone,Serialize"
+)]
+pub struct CreationContext;
 
 /// The GraphQL query.
 const QUERY_STRING: &'static str =

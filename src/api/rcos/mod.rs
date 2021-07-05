@@ -16,6 +16,7 @@ pub mod projects;
 pub mod search_strings;
 pub mod semesters;
 pub mod users;
+pub mod discord_assoications;
 
 /// The name of this API in error messages.
 const API_NAME: &'static str = "RCOS Central Hasura GraphQL API";

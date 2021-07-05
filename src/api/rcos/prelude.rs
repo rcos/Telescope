@@ -9,6 +9,7 @@ use crate::api::rcos::{
 };
 use chrono::{DateTime, NaiveDate, Utc};
 use url::Url;
+use crate::api::rcos::discord_assoications::ChannelType;
 
 /// Timestamp with Timezone.
 pub type timestamptz = DateTime<Utc>;
@@ -31,3 +32,6 @@ pub type _varchar = Vec<String>;
 
 /// List of urls for some reason not properly set in Hasura.
 pub type _url = Vec<Url>;
+
+/// Discord channel association variants.
+pub type channel_type = ChannelType;
