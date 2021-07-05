@@ -78,7 +78,7 @@ pulldown-cmark = "0.8.0"
 # API stuff
 
 # GraphQL client and queries
-graphql_client = "0.9.0"
+graphql_client = "0.10.0"
 
 # Discord API and integration
 # Serenity for sharding and models
