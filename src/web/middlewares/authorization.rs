@@ -20,14 +20,14 @@ pub type AuthorizationResult = Result<(), TelescopeError>;
 /// The type representing an authorization function reference.
 /// Authorization functions accept an RCOS username and respond with
 /// `Ok(())` on success or a telescope error preventing access.
-pub type AuthorizationCheck = fn(String) -> LocalBoxFuture<'static, AuthorizationResult>;
+type AuthorizationCheck = Rc<dyn Fn(String) -> LocalBoxFuture<'static, AuthorizationResult>>;
 
 /// Authorization middleware check's a user's credentials using a stored function
 /// before calling the sub-service. This function may return any telescope error,
 /// including [`TelescopeError::Forbidden`] to stop access to a resource.
 ///
 /// This middleware is intended for use at the scope level.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Authorization {
     /// The function to check authorization before calling the service.
     check: AuthorizationCheck,
@@ -46,8 +46,8 @@ pub struct AuthorizedAccess<S: 'static> {
 
 impl Authorization {
     /// Construct a new authorization transform.
-    pub fn new(func: AuthorizationCheck) -> Self {
-        Self { check: func }
+    pub fn new<F: 'static + Fn(String) -> LocalBoxFuture<'static, AuthorizationResult>>(func: F) -> Self {
+        Self { check: Rc::new(func) }
     }
 }
 
@@ -66,7 +66,7 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
         ok(AuthorizedAccess {
             service: Rc::new(RefCell::new(service)),
-            check: self.check,
+            check: self.check.clone(),
         })
     }
 }
@@ -89,7 +89,7 @@ where
         // Clone a reference to the inner service, so that self is not referenced by the future.
         let mut service: Rc<RefCell<S>> = self.service.clone();
         // Copy the function pointer to the authorization check to avoid moving self.
-        let check: AuthorizationCheck = self.check;
+        let check: AuthorizationCheck = self.check.clone();
 
         // Box and pin the async value.
         return Box::pin(async move {
@@ -103,7 +103,7 @@ where
                 let rcos_username = rcos_username.unwrap();
 
                 // Call the authorization check.
-                let authorization_result: AuthorizationResult = (check)(rcos_username).await;
+                let authorization_result: AuthorizationResult = (check.as_ref())(rcos_username).await;
 
                 // Check for an error. We have to explicitly convert to a response here otherwise
                 // actix error handling will skip upstream middlewares.

@@ -40,7 +40,7 @@ pub fn register(config: &mut ServiceConfig) {
     config.service(
         aweb::resource("/admin")
             .guard(guard::Get())
-            .wrap(admin_authorization_middleware)
+            .wrap(admin_authorization_middleware.clone())
             .to(index),
     );
 

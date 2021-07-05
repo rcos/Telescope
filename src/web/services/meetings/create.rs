@@ -5,7 +5,7 @@
 //! all users. Once the meeting creator has made a decision, they are directed to a form
 //! to finish meeting creation.
 
-use crate::api::rcos::meetings::authorization_for::AuthorizationFor;
+use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::api::rcos::meetings::creation;
 use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
@@ -13,36 +13,19 @@ use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
-use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
 use actix_web::http::header::LOCATION;
 use actix_web::web as aweb;
 use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
-use futures::future::LocalBoxFuture;
 use serde_json::Value;
-
-/// Authorization function for meeting creation.
-fn meeting_creation_authorization(
-    username: String,
-) -> LocalBoxFuture<'static, AuthorizationResult> {
-    Box::pin(async move {
-        // Get the meeting authorization
-        AuthorizationFor::get(Some(username))
-            .await?
-            .can_create_meetings()
-            // On true, Ok(())
-            .then(|| ())
-            // Otherwise forbidden
-            .ok_or(TelescopeError::Forbidden)
-    })
-}
+use crate::web::services::meetings::make_meeting_auth_middleware;
 
 /// Register meeting creation services.
 pub fn register(config: &mut ServiceConfig) {
     // Create meeting creation auth middleware.
-    let authorization = Authorization::new(meeting_creation_authorization);
+    let authorization = make_meeting_auth_middleware(&UserMeetingAuthorization::can_create_meetings);
 
     config.service(
         aweb::scope("/meeting/create")

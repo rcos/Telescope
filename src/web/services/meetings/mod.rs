@@ -1,6 +1,9 @@
 //! Meetings page and services
 
 use actix_web::web::ServiceConfig;
+use crate::api::rcos::meetings::authorization_for::{UserMeetingAuthorization, AuthorizationFor};
+use crate::web::middlewares::authorization::Authorization;
+use crate::error::TelescopeError;
 
 mod create;
 mod delete;
@@ -26,4 +29,19 @@ pub fn register(config: &mut ServiceConfig) {
         // The meeting viewing endpoint must be registered after the meeting creation endpoint,
         // so that the ID path doesn't match the create path.
         .service(view::meeting);
+}
+
+/// Create an authorization middleware based on a meeting authorization function.
+fn make_meeting_auth_middleware<F: 'static + Fn(&UserMeetingAuthorization) -> bool>(f: &'static F) -> Authorization {
+    Authorization::new(move |username: String| {
+        Box::pin(async move {
+            // Get the user meeting access authorization object.
+            let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(username)).await?;
+
+            // Call the verification function on the access authorization object.
+            (f)(&auth)
+                .then(|| ())
+                .ok_or(TelescopeError::Forbidden)
+        })
+    })
 }
