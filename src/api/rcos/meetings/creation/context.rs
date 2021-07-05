@@ -1,28 +1,17 @@
 //! GraphQL query to get context for meeting creation.
 
-use crate::api::rcos::{
-    send_json_query,
-    prelude::*
-};
+use crate::api::rcos::send_json_query;
 use crate::error::TelescopeError;
 use chrono::Utc;
 use serde_json::Value;
-
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/meetings/creation/context.graphql",
-    response_derives = "Debug,Clone,Serialize"
-)]
-pub struct CreationContext;
 
 /// The GraphQL query.
 const QUERY_STRING: &'static str =
     include_str!("../../../../../graphql/rcos/meetings/creation/context.graphql");
 
-/// Get the meeting creation context. This is done in JSON format because the typed version was
-/// causing the compiler to stack overflow.
+/// Get the meeting creation context. This is done in JSON format because the typed version of
+/// the query variables is bulky and difficult to work with. If there are issues doing this in JSON
+/// it may be converted to a strongly typed implementation in the future.
 pub async fn get_context(host_username: Option<String>) -> Result<Value, TelescopeError> {
     // Make query variables.
     let mut variables: Value = json!({
