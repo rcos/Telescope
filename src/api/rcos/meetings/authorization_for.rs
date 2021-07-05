@@ -16,6 +16,7 @@ use chrono::Local;
 pub struct AuthorizationFor;
 
 use authorization_for::{ResponseData, Variables};
+use crate::api::rcos::meetings::get_host::MeetingHost;
 
 /// Info on the user that dictates their ability to access meeting data.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -87,6 +88,26 @@ impl UserMeetingAuthorization {
         } else {
             // of the viewer is a coordinator or faculty advisor
             self.can_view_drafts()
+        }
+    }
+
+    /// Can the user associated with this authorization edit the meeting
+    pub async fn can_edit_by_id(&self, meeting_id: i64) -> Result<bool, TelescopeError> {
+        // If the authenticated user is a coordinator or professor, then they can edit this meeting.
+        if self.can_view_drafts() {
+            Ok(true)
+        } else {
+            // Otherwise lookup the meeting and check if the authenticated username matches the host
+            // username.
+            let meeting_host: Option<String> = MeetingHost::get(meeting_id).await?;
+            match (meeting_host, self.username.as_ref()) {
+                // If there is both a host and a viewer, and they're the same,
+                // the meeting can be edited.
+                (Some(host), Some(viewer)) => Ok(host == *viewer),
+
+                // In any other case, the meeting is not to be edited by the viewer.
+                _ => Ok(false)
+            }
         }
     }
 
