@@ -22,6 +22,12 @@ use actix_web::HttpResponse;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
 
+/// The handlebars template for the user to select a host.
+const HOST_SELECTION_TEMPLATE: &'static str = "meetings/creation/host_selection";
+
+/// The handlebars template to finish the meeting creation process.
+const FINISH_CREATION_TEMPLATE: &'static str = "meetings/creation/finish";
+
 /// Register meeting creation services.
 pub fn register(config: &mut ServiceConfig) {
     // Create meeting creation auth middleware.
@@ -56,7 +62,7 @@ async fn host_selection_page(
     let data = HostSelection::get(search.clone()).await?;
 
     // Make and return a template.
-    Template::new("meetings/creation/host_selection")
+    Template::new(HOST_SELECTION_TEMPLATE)
         .field("search", search)
         .field("data", data)
         .render_into_page(&req, "Select Host")
@@ -75,7 +81,7 @@ async fn finish_form(host_username: Option<String>) -> Result<FormTemplate, Tele
     let context: Value = creation::context::get_context(host_username).await?;
 
     // Create form.
-    let mut form = FormTemplate::new("meetings/creation/forms/finish", "Create Meeting");
+    let mut form = FormTemplate::new(FINISH_CREATION_TEMPLATE, "Create Meeting");
 
     // Add context to form.
     form.template = json!({
