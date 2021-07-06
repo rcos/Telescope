@@ -64,7 +64,7 @@ derive_more = "~0.99"
 jsonwebtoken = "~7.2"
 
 # OAuth2 models and flows
-oauth2 = "4.0.0"
+oauth2 = "4.1.0"
 
 # HTTP client alternative to the one that ships with actix-web
 reqwest = {version = "0.10", features = ["json"]}
