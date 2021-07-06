@@ -1,44 +1,146 @@
-{{#if (not meeting.is_draft)}}
-    <h1>{{> meetings/title meeting}}</h1>
-    <h3>
-        <span class="badge" style="background: var(--meeting-{{meeting.type}}-bg); color: var(--meeting-{{meeting.type}}-text)">
-            {{format_meeting_type meeting.type}}
-        </span>
-    </h3>
-
-    {{! If the meeting starts and ends on the same date, just put the date at the begining. }}
-    <span>
-        {{! Hosting info }}
-        {{#with meeting.host}}
-            Hosted by <a href="{{profile_for username}}">{{first_name}} {{last_name}}</a>.
-        {{else}}
-            {{! no hosting info}}
-        {{/with}}
-
-        {{! Date and time }}
-        {{#with meeting}}
-            {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
-                {{format_date start_date_time}} from {{format_time start_date_time}} to {{format_time end_date_time}}
-            {{else}}
-                From {{format_date start_date_time}} at {{format_time start_date_time}}
-                to {{format_date end_date_time}} at {{format_time end_date_time}}
-            {{/if}}
-        {{/with}}
+{{! Meeting page template }}
+<h1>{{> meetings/title meeting}}</h1>
+<h3>
+    <span class="badge" style="background: var(--meeting-{{meeting.type}}-bg); color: var(--meeting-{{meeting.type}}-text)">
+        {{format_meeting_type meeting.type}}
     </span>
 
-    {{#if (eq meeting.type "mentors")}}
-    {{else}}
+    {{! Draft badge if this meeting is a draft }}
+    {{#if meeting.is_draft}}
+        <span class="badge badge-info">
+            <i>
+                Draft - Not publicly listed.
+            </i>
+        </span>
     {{/if}}
-{{else}}
-    {{!
-    If the viewer is a faculty advisor or is a coordinator during the most recent semester, show them the draft.
-    Otherwise display the meeting title and a "coming soon" message.
-    }}
-    <h1 class="font-italic">{{> meetings/title meeting}}</h1>
-    {{#if (or (eq viewer.role "faculty_advisor") (eq current_semester.semester_id (lookup (lookup viewer.coordinating 0) "semester_id")) )}}
+</h3>
 
+{{! If the meeting starts and ends on the same date, just put the date at the begining. }}
+<span>
+    {{! Hosting info }}
+    {{#with meeting.host}}
+        Hosted by <a href="{{profile_for username}}">{{first_name}} {{last_name}}</a>.
     {{else}}
-        This meeting is a draft, and is not visible to anyone except current coordinators and faculty advisors. If you
-        think this is in error, please contact a coordinator.
+        {{! no hosting info}}
+    {{/with}}
+
+    {{! Date and time }}
+    {{#with meeting}}
+        {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
+            {{format_date start_date_time}}
+            from {{format_time start_date_time}} to {{format_time end_date_time}}
+        {{else}}
+            From {{format_date start_date_time}} at {{format_time start_date_time}}
+            to {{format_date end_date_time}} at {{format_time end_date_time}}
+        {{/if}}
+    {{/with}}
+
+    {{! Location }}
+    {{#if meeting.location}}
+        at <strong>{{meeting.location}}</strong>.
     {{/if}}
-{{/if}}
+</span>
+
+{{! Meeting links and description }}
+<div class="row justify-content-center mt-2">
+    {{! Links card }}
+    <div class="col-12 col-lg-4 mb-2">
+        <div class="card text-dark">
+            <div class="card-header">
+                <h4 class="m-0">Links</h4>
+            </div>
+
+            <div class="card-body">
+                {{! Meeting URL }}
+                {{#if meeting.meeting_url}}
+                    {{> meetings/link url=meeting.meeting_url text="Join" class="primary"}}
+                {{else}}
+                    {{#if meeting.is_remote}}
+                        <span class="btn btn-outline-danger disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                            <i>Meeting URL missing</i>
+                        </span>
+                    {{else}}
+                        {{! Meeting is not remote }}
+                        <span class="btn btn-outline-primary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                            Meeting is not remote
+                        </span>
+                    {{/if}}
+                {{/if}}
+
+                {{! Recording URL }}
+                <div class="mt-1">
+                    {{#if meeting.recording_url}}
+                        {{> meetings/link url=meeting.recording_url text="View Recording" class="secondary"}}
+                    {{else}}
+                        {{#if meeting.is_remote}}
+                            <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                                Recording unavailable
+                            </span>
+                        {{else}}
+                            {{! Meeting is not remote }}
+                            <span class="btn btn-outline-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                                Meeting is not remote
+                            </span>
+                        {{/if}}
+                    {{/if}}
+                </div>
+
+                {{!
+                Slides URL
+                TODO: Support native slide decks.
+                }}
+                <div class="mt-1">
+                    {{#if meeting.external_presentation_url}}
+                        {{> meetings/link url=meeting.external_presentation_url text="Slides" class="info"}}
+                    {{else}}
+                        <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                            Slides unavailable
+                        </span>
+                    {{/if}}
+                </div>
+
+                {{! Edit button if the user has perms }}
+                {{! We have to use multiple nested if statements here because the undefined variables error in strict mode. }}
+                {{! Eventually I would like to simplifiy this signifigantly and reduce the repetition }}
+                {{#if meeting.host.username}}
+                    {{#if (eq auth.username meeting.host.username)}}
+                        <div class="mt-1">
+                            <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
+                                Edit
+                            </a>
+                        </div>
+                    {{else}}
+                        {{#if (or auth.is_current_coordinator (or (eq auth.role "faculty_advisor") (eq auth.role "sysadmin")))}}
+                            <div class="mt-1">
+                                <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
+                                    Edit
+                                </a>
+                            </div>
+                        {{/if}}
+                    {{/if}}
+                {{else}}
+                    {{#if (or auth.is_current_coordinator (or (eq auth.role "faculty_advisor") (eq auth.role "sysadmin")))}}
+                        <div class="mt-1">
+                            <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
+                                Edit
+                            </a>
+                        </div>
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    {{! Description Card }}
+    <div class="col-12 col-lg-8">
+        <div class="card text-dark">
+            <div class="card-header">
+                <h4 class="m-0">Description</h4>
+            </div>
+
+            <div class="card-body">
+                {{render_markdown meeting.description}}
+            </div>
+        </div>
+    </div>
+</div>

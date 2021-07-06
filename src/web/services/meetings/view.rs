@@ -58,6 +58,8 @@ pub async fn meeting(
         });
     }
 
+    info!("{:#?}", &authorization);
+
     // If the meeting is visible to the viewer, make and return the template.
     return Template::new(TEMPLATE_PATH)
         .field("meeting", &meeting)
