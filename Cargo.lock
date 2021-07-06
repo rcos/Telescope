@@ -1478,15 +1478,15 @@ dependencies = [
 
 [[package]]
 name = "hyper-tls"
-version = "0.4.3"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d979acc56dcb5b8dddba3917601745e877576475aa046df3226eabdecef78eed"
+checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
 dependencies = [
- "bytes 0.5.6",
- "hyper 0.13.10",
+ "bytes 1.0.1",
+ "hyper 0.14.5",
  "native-tls",
- "tokio 0.2.25",
- "tokio-tls",
+ "tokio 1.7.0",
+ "tokio-native-tls",
 ]
 
 [[package]]
@@ -2320,14 +2320,12 @@ dependencies = [
  "http-body 0.3.1",
  "hyper 0.13.10",
  "hyper-rustls 0.21.0",
- "hyper-tls",
  "ipnet",
  "js-sys",
  "lazy_static",
  "log",
  "mime",
  "mime_guess",
- "native-tls",
  "percent-encoding",
  "pin-project-lite 0.2.4",
  "rustls 0.18.1",
@@ -2336,7 +2334,6 @@ dependencies = [
  "serde_urlencoded",
  "tokio 0.2.25",
  "tokio-rustls 0.14.1",
- "tokio-tls",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -2360,17 +2357,21 @@ dependencies = [
  "http-body 0.4.2",
  "hyper 0.14.5",
  "hyper-rustls 0.22.1",
+ "hyper-tls",
  "ipnet",
  "js-sys",
  "lazy_static",
  "log",
  "mime",
+ "native-tls",
  "percent-encoding",
  "pin-project-lite 0.2.4",
  "rustls 0.19.1",
  "serde",
+ "serde_json",
  "serde_urlencoded",
  "tokio 1.7.0",
+ "tokio-native-tls",
  "tokio-rustls 0.22.0",
  "url",
  "wasm-bindgen",
@@ -2855,7 +2856,7 @@ dependencies = [
  "pulldown-cmark",
  "rand 0.8.4",
  "regex",
- "reqwest 0.10.10",
+ "reqwest 0.11.3",
  "serde",
  "serde_json",
  "serde_urlencoded",
@@ -3040,6 +3041,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-native-tls"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
+dependencies = [
+ "native-tls",
+ "tokio 1.7.0",
+]
+
+[[package]]
 name = "tokio-rustls"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3060,16 +3071,6 @@ dependencies = [
  "rustls 0.19.1",
  "tokio 1.7.0",
  "webpki",
-]
-
-[[package]]
-name = "tokio-tls"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a70f4fcd7b3b24fb194f837560168208f669ca8cb70d0c4b862944452396343"
-dependencies = [
- "native-tls",
- "tokio 0.2.25",
 ]
 
 [[package]]
