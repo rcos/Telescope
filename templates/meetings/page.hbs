@@ -20,8 +20,6 @@
     {{! Hosting info }}
     {{#with meeting.host}}
         Hosted by <a href="{{profile_for username}}">{{first_name}} {{last_name}}</a>.
-    {{else}}
-        {{! no hosting info}}
     {{/with}}
 
     {{! Date and time }}
@@ -123,7 +121,13 @@
             </div>
 
             <div class="card-body">
-                {{render_markdown meeting.description}}
+                {{#if meeting.description}}
+                    {{render_markdown meeting.description}}
+                {{else}}
+                    <span class="font-italic text-muted">
+                        No Description Available.
+                    </span>
+                {{/if}}
             </div>
         </div>
     </div>
