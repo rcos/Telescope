@@ -40,9 +40,10 @@ impl CreateMeeting {
             is_draft,
             is_remote,
             location,
-            meeting_url,
-            recording_url,
-            external_slides_url,
+            // Coerce an empty or whitespace string to none.
+            meeting_url: meeting_url.and_then(|url| (!url.trim().is_empty()).then(|| url)),
+            recording_url: recording_url.and_then(|url| (!url.trim().is_empty()).then(|| url)),
+            external_slides_url: external_slides_url.and_then(|url| (!url.trim().is_empty()).then(|| url)),
             semester_id,
             kind,
         })
