@@ -100,32 +100,16 @@
                 </div>
 
                 {{! Edit button if the user has perms }}
-                {{! We have to use multiple nested if statements here because the undefined variables error in strict mode. }}
-                {{! Eventually I would like to simplifiy this signifigantly and reduce the repetition }}
-                {{#if meeting.host.username}}
-                    {{#if (eq auth.username meeting.host.username)}}
-                        <div class="mt-1">
-                            <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
-                                Edit
-                            </a>
-                        </div>
-                    {{else}}
-                        {{#if (or auth.is_current_coordinator (or (eq auth.role "faculty_advisor") (eq auth.role "sysadmin")))}}
-                            <div class="mt-1">
-                                <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
-                                    Edit
-                                </a>
-                            </div>
-                        {{/if}}
-                    {{/if}}
-                {{else}}
-                    {{#if (or auth.is_current_coordinator (or (eq auth.role "faculty_advisor") (eq auth.role "sysadmin")))}}
-                        <div class="mt-1">
-                            <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
-                                Edit
-                            </a>
-                        </div>
-                    {{/if}}
+                {{#if (or
+                          (or (and meeting.host.username (eq meeting.host.username auth.username))
+                              auth.is_current_coordinator)
+                          (or (eq auth.role "faculty_advisor") (eq auth.role "sysadmin")))
+                }}
+                    <div class="mt-1">
+                        <a href="/meeting/{{meeting.meeting_id}}/edit" class="btn btn-primary w-100 justify-content-center">
+                            Edit
+                        </a>
+                    </div>
                 {{/if}}
             </div>
         </div>

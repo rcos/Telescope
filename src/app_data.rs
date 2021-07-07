@@ -29,9 +29,9 @@ impl AppData {
             })
             .unwrap();
 
-        // Use handlebars strict mode so that we get an error when we try to render a
-        // non-existent field
-        template_registry.set_strict_mode(true);
+        // We do not use handlebars strict mode anymore since it increasingly breaks templates
+        // without warning.
+        // template_registry.set_strict_mode(true);
 
         // Register the helpers defined in the helpers module.
         register_helpers(&mut template_registry);
