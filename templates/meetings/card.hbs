@@ -7,20 +7,25 @@
         <span class="float-right">
 
             {{! Meeting-type badge }}
-            <h4 class="badge mr-2"
+            <span class="badge mr-2 mt-1 h4"
                 style="background: var(--meeting-{{type}}-bg);
                         color: var(--meeting-{{type}}-text);
                         border-color: var(--meeting-{{type}}-text);
                         border-width: 2px;
                         border-style: solid;">
                 {{format_meeting_type type}}
-            </h4>
+            </span>
 
             {{! Draft badge if necessary }}
             {{#if is_draft}}
-                <h4 class="badge-secondary mr-2 font-italic">
+                <span class="badge mr-2 mt-1 h4 font-italic" style="
+                        background: var(--meeting-{{type}}-bg);
+                        color: var(--meeting-{{type}}-text);
+                        border-color: var(--meeting-{{type}}-text);
+                        border-width: 2px;
+                        border-style: dashed;">
                     Draft
-                </h4>
+                </span>
             {{/if}}
 
             <a href="/meeting/{{meeting_id}}" class="btn btn-primary">
