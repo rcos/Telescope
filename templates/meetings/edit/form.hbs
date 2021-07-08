@@ -31,7 +31,7 @@
                     <label for="semester-select">Semester:</label>
                     <select class="form-control" id="semester-select" name="semester" aria-describedby="semester-description" required>
                         {{#each context.available_semesters}}
-                            <option value="{{semester_id}}" {{#if (eq semester_id ../selections.semester)}} selected {{/if}}>
+                            <option value="{{semester_id}}" {{#if (eq semester_id ../data.semester.semester_id)}} selected {{/if}}>
                                 {{title}} ({{format_date start_date}} - {{format_date end_date}})
                             </option>
                         {{else}}
@@ -63,8 +63,7 @@
                     <input name="title" class="form-control" type="text" id="title-input" aria-describedby="title-description"
                         {{#if data.title}} value="{{data.title}}" {{/if}}>
                     <small id="title-description" class="form-text text-muted">
-                        If left out, a title will be auto-generated from the meeting type and date. It is
-                        strongly recommended to include a title for workshops, since there are sometimes several
+                        It is strongly recommended to include a title for workshops, since there are sometimes several
                         daily and they focus on different topics.
                     </small>
                 </div>

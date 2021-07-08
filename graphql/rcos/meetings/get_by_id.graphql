@@ -18,6 +18,11 @@ query Meeting($id: Int!) {
 
         description
 
+        semester {
+            semester_id
+            title
+        }
+
         # Info on the host
         host: user {
             first_name

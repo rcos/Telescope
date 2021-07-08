@@ -4,11 +4,15 @@ use actix_web::web::{ServiceConfig, Path, Query};
 use crate::templates::Template;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::AuthenticationCookie;
-use crate::api::rcos::meetings::authorization_for::{UserMeetingAuthorization, AuthorizationFor};
+use crate::api::rcos::meetings::{
+    authorization_for::{UserMeetingAuthorization, AuthorizationFor},
+    creation::context::get_context,
+};
 use crate::templates::forms::FormTemplate;
 use crate::api::rcos::meetings::get_by_id::Meeting;
 use chrono::{DateTime, Utc, Local};
 use crate::api::rcos::meetings::ALL_MEETING_TYPES;
+use serde_json::Value;
 
 /// The Handlebars file for the meeting edit form.
 const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
@@ -67,14 +71,22 @@ async fn edit_page(
         "meeting_types": ALL_MEETING_TYPES
     });
 
+    // Get the creation context so we know what semesters are available.
+    let context: Value = get_context(meeting_host.map(|s| s.to_string())).await?;
+    // Add the creation context to the template.
+    form.template["context"] = context;
+
     // Add fields to the template converting the timestamps in the meeting data to the HTML versions.
     let meeting_start: &DateTime<Utc> = &meeting_data.start_date_time;
-    form.template["data"]["start_date"] = json!(meeting_start.with_timezone(&Local).format("%Y-%m-%d").to_string());
-    form.template["data"]["start_time"] = json!(meeting_start.with_timezone(&Local).format("%H:%M").to_string());
+    let meeting_start_local: DateTime<Local> = meeting_start.with_timezone(&Local);
+    form.template["data"]["start_date"] = json!(meeting_start_local.format("%Y-%m-%d").to_string());
+    form.template["data"]["start_time"] = json!(meeting_start_local.format("%H:%M").to_string());
 
     let meeting_end: &DateTime<Utc> = &meeting_data.end_date_time;
-    form.template["data"]["end_date"] = json!(meeting_end.naive_local().format("%Y-%m-%d").to_string());
-    form.template["data"]["end_time"] = json!(meeting_end.naive_local().format("%H:%M").to_string());
+    let meeting_end_local: DateTime<Local> = meeting_end.with_timezone(&Local);
+    form.template["data"]["end_date"] = json!(meeting_end_local.format("%Y-%m-%d").to_string());
+    form.template["data"]["end_time"] = json!(meeting_end_local.format("%H:%M").to_string());
+
 
     return Ok(form);
 }
