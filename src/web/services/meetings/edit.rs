@@ -1,9 +1,6 @@
 //! Services to support meeting edits.
 
-use actix_web::{
-    web::{ServiceConfig, Path, Query},
-    HttpResponse
-};
+use actix_web::{web::{ServiceConfig, Path, Query}, HttpResponse, HttpRequest};
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::AuthenticationCookie;
 use crate::api::rcos::meetings::{
@@ -24,9 +21,13 @@ use actix_web::web::Form;
 use crate::api::rcos::meetings::creation::create::normalize_url;
 use actix_web::http::header::LOCATION;
 use crate::templates::Template;
+use crate::api::rcos::meetings::edit::EditHostSelection;
 
 /// The Handlebars file for the meeting edit form.
 const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
+
+/// The Handlebars file for the host selection page.
+const HOST_SELECTION_TEMPLATE: &'static str = "meetings/edit/host_selection";
 
 /// Register the meeting edit services.
 pub fn register(config: &mut ServiceConfig) {
@@ -342,6 +343,22 @@ async fn submit_meeting_edits(
 
 /// Host selection page.
 #[get("/meeting/{meeting_id}/edit/select_host")]
-async fn host_selection() -> Result<Template, TelescopeError> {
-    Err(TelescopeError::NotImplemented)
+async fn host_selection(
+    Path(meeting_id): Path<i64>,
+    auth: AuthenticationCookie,
+    req: HttpRequest,
+) -> Result<Template, TelescopeError> {
+    // Check that the user can edit this meeting.
+    let viewer = auth.get_rcos_username_or_error().await?;
+    if !AuthorizationFor::get(Some(viewer)).await?.can_edit_by_id(meeting_id).await? {
+        return Err(TelescopeError::Forbidden);
+    }
+
+    // Get host selection.
+    let data = EditHostSelection::get(meeting_id).await?;
+
+    // Create host selection page template.
+    let mut template: Template = Template::new(HOST_SELECTION_TEMPLATE);
+    template.set_field("data", data);
+    return template.render_into_page(&req, "Select Host").await;
 }

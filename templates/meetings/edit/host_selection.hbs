@@ -1,0 +1,25 @@
+{{! Template for selecting a host while editing a meeting }}
+
+{{#with data.meetings_by_pk}}
+    {{! No Host }}
+    <div class="card text-dark mb-2">
+        <div class="card-body">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-4">
+                    <h2>No Host</h2>
+                </div>
+
+                <div class="col-12 col-md-8">
+                    <a href="/meeting/{{meeting_id}}/edit?{{url_encode set_host=""}}" class="btn btn-primary w-100">
+                        Select no host.
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{{else}}
+    Meeting Not Found. Please contact a coordinator or create a GitHub Issue.
+    This should never happen.
+{{/with}}
