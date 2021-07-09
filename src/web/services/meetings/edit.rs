@@ -23,6 +23,7 @@ use crate::web::services::meetings::create::{FinishForm, get_semester_bounds};
 use actix_web::web::Form;
 use crate::api::rcos::meetings::creation::create::normalize_url;
 use actix_web::http::header::LOCATION;
+use crate::templates::Template;
 
 /// The Handlebars file for the meeting edit form.
 const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
@@ -31,7 +32,8 @@ const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
 pub fn register(config: &mut ServiceConfig) {
     config
         .service(edit_page)
-        .service(submit_meeting_edits);
+        .service(submit_meeting_edits)
+        .service(host_selection);
 }
 
 /// Structure for query which can optionally be passed to the edit page to set a new host.
@@ -80,7 +82,10 @@ async fn meeting_data_checked(auth: &AuthenticationCookie, meeting_id: i64) -> R
 fn resolve_host_username(meeting_data: &MeetingMeeting, set_host: Option<Query<HostQuery>>) -> Option<String> {
     let existing_host: Option<String> = meeting_data.host.as_ref().map(|h| h.username.clone());
     let new_host: Option<String> = set_host.map(|q| q.0.set_host);
-    return new_host.or(existing_host);
+    return new_host
+        .or(existing_host)
+        // Require that host string is not empty. If it is, no host.
+        .filter(|host| !host.trim().is_empty());
 }
 
 /// Resolve the meeting title value. This is the supplied title or a combination of the meeting
@@ -333,4 +338,10 @@ async fn submit_meeting_edits(
     return Ok(HttpResponse::Found()
         .header(LOCATION, format!("/meeting/{}", meeting_id))
         .finish());
+}
+
+/// Host selection page.
+#[get("/meeting/{meeting_id}/edit/select_host")]
+async fn host_selection() -> Result<Template, TelescopeError> {
+    Err(TelescopeError::NotImplemented)
 }

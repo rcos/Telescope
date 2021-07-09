@@ -1,0 +1,44 @@
+fragment HostInfo on users {
+    username
+    first_name
+    last_name
+
+    # User's RPI email
+    rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+        account_id
+    }
+}
+
+# Host selection for the edit page.
+query EditHostSelection($meeting_id: Int!) {
+    # Limit to enrolled students in the semester the meeting is already
+    meetings_by_pk(meeting_id: $meeting_id) {
+        meeting_id
+
+        semester {
+            title
+
+            # Coordinators sorted alphabetically
+            coordinators: enrollments(
+                where: {is_coordinator: {_eq: true}},
+                order_by: [{user: {first_name: asc}}, {user: {last_name: asc}}]
+            ) {
+                user { ...HostInfo }
+            }
+
+            # Mentors by small group and then alphabetically
+            mentors: small_groups(order_by: [{title: asc}]) {
+                title
+
+                small_group_mentors(order_by: [{user: {first_name: asc}}, {user: {last_name: asc}}]) {
+                    user { ... HostInfo }
+                }
+            }
+
+            # Everyone else alphabetically
+            enrollments(order_by: [{user: {first_name: asc}}, {user: {last_name: asc}}]) {
+                user { ... HostInfo }
+            }
+        }
+    }
+}
