@@ -316,7 +316,12 @@ async fn submit_meeting_edits(
         meeting_url: normalize_url(meeting_url),
         location,
         external_slides_url: normalize_url(external_slides_url),
-        recording_url: normalize_url(recording_url)
+        recording_url: normalize_url(recording_url),
+        // Extract the host from context object.
+        host: form.template["context"]
+            .get("host")
+            .and_then(|host| host["username"].as_str())
+            .map(|host| host.to_string())
     };
 
     // The returned meeting ID should match the existing one but we don't check.
