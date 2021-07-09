@@ -14,6 +14,11 @@ use chrono::{DateTime, Utc};
 )]
 pub struct CreateMeeting;
 
+/// Trim the whitespace off a string. If the trimmed string is empty default to None.
+pub fn normalize_url(url: Option<String>) -> Option<String> {
+    url.and_then(|string| (!string.trim().is_empty()).then(|| string))
+}
+
 impl CreateMeeting {
     /// Execute a meeting creation mutation. Return the created meeting's ID.
     pub async fn execute(
@@ -41,9 +46,9 @@ impl CreateMeeting {
             is_remote,
             location,
             // Coerce an empty or whitespace string to none.
-            meeting_url: meeting_url.and_then(|url| (!url.trim().is_empty()).then(|| url)),
-            recording_url: recording_url.and_then(|url| (!url.trim().is_empty()).then(|| url)),
-            external_slides_url: external_slides_url.and_then(|url| (!url.trim().is_empty()).then(|| url)),
+            meeting_url: normalize_url(meeting_url),
+            recording_url: normalize_url(recording_url),
+            external_slides_url: normalize_url(external_slides_url),
             semester_id,
             kind,
         })

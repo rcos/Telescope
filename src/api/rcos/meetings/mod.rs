@@ -5,6 +5,7 @@ pub mod creation;
 pub mod get;
 pub mod get_by_id;
 pub mod get_host;
+pub mod edit;
 
 /// List of all existing meeting type variants.
 pub const ALL_MEETING_TYPES: [MeetingType; 8] = [

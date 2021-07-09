@@ -104,48 +104,48 @@ async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, Teles
 
 /// Form submitted by users to create meeting.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct FinishForm {
+pub struct FinishForm {
     /// Selected semester ID.
-    semester: String,
+    pub semester: String,
 
     /// What type of meeting is being created.
-    kind: MeetingType,
+    pub kind: MeetingType,
 
     /// The optional meeting title. Default empty.
     #[serde(default)]
-    title: String,
+    pub title: String,
 
-    start_date: NaiveDate,
-
-    /// Cannot be a [`chrono::NaiveTime`], since seconds are not included.
-    start_time: String,
-
-    end_date: NaiveDate,
+    pub start_date: NaiveDate,
 
     /// Cannot be a [`chrono::NaiveTime`], since seconds are not included.
-    end_time: String,
+    pub start_time: String,
+
+    pub end_date: NaiveDate,
+
+    /// Cannot be a [`chrono::NaiveTime`], since seconds are not included.
+    pub end_time: String,
 
     /// The markdown description of the meeting. Default empty.
     #[serde(default)]
-    description: String,
+    pub description: String,
 
     #[serde(default)]
-    is_remote: Option<bool>,
+    pub is_remote: Option<bool>,
 
     #[serde(default)]
-    meeting_url: Option<String>,
+    pub meeting_url: Option<String>,
 
     #[serde(default)]
-    location: Option<String>,
+    pub location: Option<String>,
 
     #[serde(default)]
-    recording_url: Option<String>,
+    pub recording_url: Option<String>,
 
     #[serde(default)]
-    external_slides_url: Option<String>,
+    pub external_slides_url: Option<String>,
 
     #[serde(default)]
-    is_draft: Option<bool>,
+    pub is_draft: Option<bool>,
 }
 
 /// Endpoint that users submit meeting creation forms to.
@@ -214,15 +214,8 @@ async fn submit_meeting(
             show_status_code: false,
         })?;
 
-    let semester_start = selected_semester["start_date"]
-        .as_str()
-        .and_then(|string| string.parse::<NaiveDate>().ok())
-        .expect("Semester from context has good start date.");
-
-    let semester_end = selected_semester["end_date"]
-        .as_str()
-        .and_then(|string| string.parse::<NaiveDate>().ok())
-        .expect("Semester from context has good end date.");
+    // Get the semester bounds.
+    let (semester_start, semester_end) = get_semester_bounds(selected_semester);
 
     // If meeting starts before semester, save to issues and return form.
     if start_date < semester_start {
@@ -330,4 +323,19 @@ async fn submit_meeting(
     return Ok(HttpResponse::Found()
         .header(LOCATION, format!("/meeting/{}", created_meeting_id))
         .finish());
+}
+
+/// Get the start and end dates of a selected semester object from the meeting creation context.
+pub fn get_semester_bounds(selected_semester: &Value) -> (NaiveDate, NaiveDate) {
+    let semester_start = selected_semester["start_date"]
+        .as_str()
+        .and_then(|string| string.parse::<NaiveDate>().ok())
+        .expect("Semester from context has good start date.");
+
+    let semester_end = selected_semester["end_date"]
+        .as_str()
+        .and_then(|string| string.parse::<NaiveDate>().ok())
+        .expect("Semester from context has good end date.");
+
+    return (semester_start, semester_end);
 }
