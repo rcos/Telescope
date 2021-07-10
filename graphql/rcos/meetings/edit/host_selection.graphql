@@ -27,7 +27,11 @@ query EditHostSelection($meeting_id: Int!) {
             }
 
             # Mentors by small group and then alphabetically
-            mentors: small_groups(order_by: [{title: asc}]) {
+            small_groups(
+                order_by: [{title: asc}],
+                # This where clause requires the small group to have at least one mentor.
+                where: {small_group_mentors: {}}
+            ) {
                 title
 
                 # Adding an extra order-by argument here causes hasura to error

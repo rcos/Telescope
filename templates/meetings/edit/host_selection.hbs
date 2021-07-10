@@ -18,7 +18,163 @@
         </div>
     </div>
 
+    {{! Coordinators }}
+    <div class="card text-dark mb-2">
+        <div class="card-header">
+            <h2>{{semester.title}} coordinators</h2>
+        </div>
+        <div class="card-body">
+            {{#if semester.coordinators}}
+                <table class="table table-striped w-100">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">RPI Email</th>
+                            <th scope="col">Select</th>
+                        </tr>
+                    </thead>
 
+                    <tbody>
+                        {{#each semester.coordinators}}
+                            {{#with user}}
+                                <tr>
+                                    <th scope="row">
+                                        {{! Link to profile open in new tab }}
+                                        <a href="{{profile_for username}}" target="_blank" rel="noopener noreferrer">
+                                            {{first_name}} {{last_name}}
+                                        </a>
+                                    </th>
+
+                                    <td>
+                                        {{#with rcs_id.[0].account_id}}
+                                            <a href="mailto:{{this}}@rpi.edu">{{this}}@rpi.edu</a>
+                                        {{else}}
+                                            <i>Not available</i>
+                                        {{/with}}
+                                    </td>
+
+                                    <td>
+                                        <a href="/meeting/{{../../meeting_id}}/edit?{{url_encode set_host=username}}" class="btn btn-primary">
+                                            Select...
+                                        </a>
+                                    </td>
+                                </tr>
+                            {{/with}}
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                No coordinators enrolled for {{semester.title}}.
+            {{/if}}
+        </div>
+    </div>
+
+    {{! Mentors }}
+    <div class="card text-dark mb-2">
+        <div class="card-header">
+            <h2>{{semester.title}} mentors</h2>
+        </div>
+        <div class="card-body">
+            {{#if semester.small_groups}}
+                <table class="table table-striped w-100">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Small Group</th>
+                            <th scope="col">RPI Email</th>
+                            <th scope="col">Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each semester.small_groups}}
+                            {{#each small_group_mentors}}
+                                {{#with user}}
+                                    <tr>
+                                        <th scope="row">
+                                            {{! Link to profile open in new tab }}
+                                            <a href="{{profile_for username}}" target="_blank" rel="noopener noreferrer">
+                                                {{first_name}} {{last_name}}
+                                            </a>
+                                        </th>
+
+                                        <td>
+                                            {{../../title}}
+                                        </td>
+
+                                        <td>
+                                            {{#with rcs_id.[0].account_id}}
+                                                <a href="mailto:{{this}}@rpi.edu">{{this}}@rpi.edu</a>
+                                            {{else}}
+                                                <i>Not available</i>
+                                            {{/with}}
+                                        </td>
+
+                                        <td>
+                                            <a href="/meeting/{{../../../meeting_id}}/edit?{{url_encode set_host=username}}" class="btn btn-primary">
+                                                Select...
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {{/with}}
+                            {{/each}}
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                No small groups associated with the {{semester.title}} semester.
+            {{/if}}
+        </div>
+    </div>
+
+    {{! All othet enrollments }}
+    <div class="card text-dark mb-2">
+        <div class="card-header">
+            <h2>All {{semester.title}} enrollments</h2>
+        </div>
+        <div class="card-body">
+            {{#if semester.enrollments}}
+                <table class="table table-striped w-100">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">RPI Email</th>
+                            <th scope="col">Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each semester.enrollments}}
+                            {{#with user}}
+                                <tr>
+                                    <th scope="row">
+                                        {{! Link to profile open in new tab }}
+                                        <a href="{{profile_for username}}" target="_blank" rel="noopener noreferrer">
+                                            {{first_name}} {{last_name}}
+                                        </a>
+                                    </th>
+
+                                    <td>
+                                        {{#with rcs_id.[0].account_id}}
+                                            <a href="mailto:{{this}}@rpi.edu">{{this}}@rpi.edu</a>
+                                        {{else}}
+                                            <i>Not available</i>
+                                        {{/with}}
+                                    </td>
+
+                                    <td>
+                                        <a href="/meeting/{{../../meeting_id}}/edit?{{url_encode set_host=username}}" class="btn btn-primary">
+                                            Select...
+                                        </a>
+                                    </td>
+                                </tr>
+                            {{/with}}
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                No enrollments available for the {{semester.title}} semester.
+            {{/if}}
+        </div>
+    </div>
 {{else}}
     Meeting Not Found. Please contact a coordinator or create a GitHub Issue.
     This should never happen.

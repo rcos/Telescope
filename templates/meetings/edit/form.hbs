@@ -12,7 +12,7 @@
                 {{! Host info }}
                 <div class="form-row">
                     <div class="col-md-7 col-lg-9">
-                        {{#with context.host}}
+                        {{#with context.host.[0]}}
                             Hosted by: <a href="{{profile_for username}}" target="_blank" rel="noopener noreferrer">{{first_name}} {{last_name}}</a>
                         {{else}}
                             No host.
