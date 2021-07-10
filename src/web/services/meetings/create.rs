@@ -78,7 +78,7 @@ struct FinishQuery {
 /// Create an empty instance of the form to finish meeting creation.
 async fn finish_form(host_username: Option<String>) -> Result<FormTemplate, TelescopeError> {
     // Query RCOS API for meeting creation context.
-    let context: Value = creation::context::get_context(host_username).await?;
+    let context: Value = creation::context::get_context(host_username, Vec::new()).await?;
 
     // Create form.
     let mut form = FormTemplate::new(FINISH_CREATION_TEMPLATE, "Create Meeting");

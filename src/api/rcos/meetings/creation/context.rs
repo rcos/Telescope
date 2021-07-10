@@ -12,15 +12,19 @@ const QUERY_STRING: &'static str =
 /// Get the meeting creation context. This is done in JSON format because the typed version of
 /// the query variables is bulky and difficult to work with. If there are issues doing this in JSON
 /// it may be converted to a strongly typed implementation in the future.
-pub async fn get_context(host_username: Option<String>) -> Result<Value, TelescopeError> {
+///
+/// For meeting edits, semesters may be manually included by ID. otherwise, only ongoing and
+/// future semesters will be included.
+pub async fn get_context(host_username: Option<String>, include_semesters: Vec<String>) -> Result<Value, TelescopeError> {
     // Make query variables.
     let mut variables: Value = json!({
         // Use an empty or single item list as a work around for non-nullable types.
         "host_username": host_username.clone().map(|username| vec![username]).unwrap_or(Vec::new()),
         "semester_filter": {
-            "end_date": {
-                "_gte": Utc::today().naive_utc()
-            }
+            "_or": [
+                { "end_date": { "_gte": Utc::today().naive_utc() }},
+                { "semester_id": {"_in": include_semesters }}
+            ]
         }
     });
 

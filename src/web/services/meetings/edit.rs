@@ -122,7 +122,7 @@ async fn edit_page(
     let host: Option<String> = resolve_host_username(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
-    let context: Value = get_context(host).await?;
+    let context: Value = get_context(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
     let mut form: FormTemplate = make_form(&meeting_data);
@@ -162,7 +162,7 @@ async fn submit_meeting_edits(
     let host: Option<String> = resolve_host_username(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
-    let context: Value = get_context(host).await?;
+    let context: Value = get_context(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
     let mut form: FormTemplate = make_form(&meeting_data);
