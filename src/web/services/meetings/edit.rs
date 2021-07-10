@@ -326,7 +326,7 @@ async fn submit_meeting_edits(
         // Extract the host from context object.
         host: form.template["context"]
             .get("host")
-            .and_then(|host| host["username"].as_str())
+            .and_then(|host| host[0]["username"].as_str())
             .map(|host| host.to_string())
     };
 
