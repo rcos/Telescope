@@ -36,7 +36,9 @@ pub async fn meeting(
     let meeting: MeetingMeeting = meeting.unwrap();
     // Make sure that the meeting is visible to the user.
     // First check for draft status.
-    if meeting.is_draft && !authorization.can_view_drafts() {
+    let meeting_host: Option<&str> = meeting.host.as_ref().map(|host| host.username.as_str());
+    let can_edit: bool = authorization.can_edit(meeting_host);
+    if !can_edit && meeting.is_draft && !authorization.can_view_drafts() {
         return Err(TelescopeError::BadRequest {
             header: "Meeting Not Visible".into(),
             message: "This meeting is currently marked as a draft and is only visible to \
