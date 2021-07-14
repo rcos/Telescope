@@ -5,6 +5,8 @@ use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_web::HttpResponse;
 use crate::error::TelescopeError;
 use crate::api::rcos::meetings::authorization_for::{UserMeetingAuthorization, AuthorizationFor};
+use crate::api::rcos::meetings::delete::DeleteMeeting;
+use actix_web::http::header::LOCATION;
 
 /// Register meeting deletion services.
 pub fn register(config: &mut ServiceConfig) {
@@ -23,5 +25,12 @@ async fn delete_meeting(auth: AuthenticationCookie, Path( meeting_id ): Path<i64
     }
 
     // Authorized. Delete the meeting and associated attendances.
-    Err(TelescopeError::NotImplemented)
+    let api_response = DeleteMeeting::execute(meeting_id).await?;
+    // Check that there was a meeting delete.
+    if api_response.delete_meetings_by_pk.is_none() {
+        return Err(TelescopeError::ise("Meeting Deletion did not return meeting ID."));
+    }
+
+    // Meeting deleted successfully. Redirect user back to meetings page.
+    Ok(HttpResponse::Found().header(LOCATION, "/meetings").finish())
 }
