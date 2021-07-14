@@ -29,5 +29,12 @@ query Meeting($id: Int!) {
             last_name
             username
         }
+
+        # Attendance count
+        attendances: meeting_attendances_aggregate {
+            aggregate {
+                count
+            }
+        }
     }
 }
