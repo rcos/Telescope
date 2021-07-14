@@ -130,16 +130,24 @@
                                     <div class="modal-body">
                                         Are you sure you want to delete this meeting? This will delete all associated
                                         attendance records. This operation is not reversible.
+                                        Currently there are <strong>{{meeting.attendances.aggregate.count}}</strong>
+                                        attendance records associated with this meeting.
                                     </div>
 
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                            Cancel
-                                        </button>
+                                        {{!
+                                        Use a form here so that the delete meeting request is sent as a post and
+                                        cannot be bookmarked or linked anywhere.
+                                        }}
+                                        <form method="post" action="/meeting/{{meeting.meeting_id}}/delete">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                Cancel
+                                            </button>
 
-                                        <a href="/meeting/{{meeting.meeting_id}}/delete" class="btn btn-danger">
-                                            Delete Meeting
-                                        </a>
+                                            <button type="submit" class="btn btn-danger">
+                                                Delete Meeting
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
