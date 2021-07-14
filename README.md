@@ -42,17 +42,22 @@ gets updated, Telescopes schema needs to get updated to match. After merging wha
 or migrations have been made to the `telescope-dev-version` branch of the `rcos-data` repository,
 update Telescope's git `rcos-data` submodule to point to the newest commit on the 
 `telescope-dev-version` branch. After you have done this and pulled the submodule,
-update the local database using the hasura client. The command should look like this:
+update the local database using the hasura client. The commands should look like this:
 ```shell
 $ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
+$ hasura --project rcos-data/ metadata --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 reload
 ``` 
 where `xxxxxxxxxxxxxxxxxxxxxxxx` is replaced by the hasura admin secret in your `.env` file.
 After applying the migrations, go to the hasura console to make sure that all the proper
-tables are being tracked, and all the types and queries are available. 
+tables are tracked, and all the types and queries are available. 
+To go to the hasura console on your local machine, navigate to 
+[http://localhost:8000/console/settings/metadata-actions](http://localhost:8000/console/settings/metadata-actions)
+in your browser. 
+
 If you haven't already, you should install a GraphQL client to introspect the schema. 
 There are several of these that are probably acceptable, but for consistency we use 
 the [`graphql-rust client`](https://github.com/graphql-rust/graphql-client/tree/master/graphql_client_cli). 
-Install this usinf the command from its README.
+Install this using the command from its README.
 ```shell
 $ cargo install graphql_client_cli --force
 ```
