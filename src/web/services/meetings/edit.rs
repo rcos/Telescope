@@ -219,7 +219,7 @@ async fn submit_meeting_edits(
     // Don't bother trimming URLs, since the GraphQL mutation will normalize them.
     form.template["data"]["meeting_url"] = json!(&meeting_url);
     form.template["data"]["recording_url"] = json!(&recording_url);
-    form.template["data"]["external_slides_url"] = json!(&external_slides_url);
+    form.template["data"]["external_presentation_url"] = json!(&external_slides_url);
 
     // Handle flags.
     let is_remote: bool = is_remote.unwrap_or(false);
