@@ -1,0 +1,12 @@
+# Mutation to delete meetings
+mutation DeleteMeeting($meeting_id: Int!) {
+    # Delete attendances
+    delete_meeting_attendances(where: {meeting_id: {_eq: $meeting_id}}) {
+        affected_rows
+    }
+
+    # Delete meeting itself
+    delete_meetings_by_pk(meeting_id: $meeting_id) {
+        meeting_id
+    }
+}
