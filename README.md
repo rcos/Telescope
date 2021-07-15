@@ -105,6 +105,7 @@ where `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` is replaced by your PAT.
 4. Copy the configuration templates as follows:
     - `config_example.toml` -> `config.toml`
     - `.env.example` -> `.env`
+    (note: the `config.toml` and `.env` files must be created yourself.) 
     
     Then modify them to match your environment. You may need to generate the 
     GitHub related credentials. Go [here](https://github.com/settings/applications/new)
@@ -118,12 +119,13 @@ where `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` is replaced by your PAT.
     ```
 
 6. Run the database migrations. Replace the "xx.." in the command with the admin 
-   secret from your `.env` file. 
+   secret from your `.env` file. Make sure the `admin-secret` is at least 32 characters long.
     ```shell
     $ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
     ``` 
-
-7. At this point Postgres, the Hasura GraphQL API, Caddy, and Telescope should 
+7. Track the Hasura tables:
+    In Hasura (http://localhost:8000), enter your `admin-secret` when prompted. Navigate to the "Data" tab, and click "Create Table". Track all tables, and hit "Add Table".
+9. At this point Postgres, the Hasura GraphQL API, Caddy, and Telescope should 
    all be running on your system in individual docker containers. Docker 
    exposes the Hasura console at http://localhost:8000 and https://localhost:8001, 
    and Telescope is exposed at https://localhost:8443. To shut them all down, run
