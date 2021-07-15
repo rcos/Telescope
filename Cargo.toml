@@ -27,7 +27,7 @@ handlebars = {version = "~4.1", features = ["dir_source"]}
 
 # Logging utilities
 log = "~0.4"
-env_logger = "~0.8"
+env_logger = "~0.9"
 
 # (de)serialization
 serde = {version = "1", features = ["derive"]}
