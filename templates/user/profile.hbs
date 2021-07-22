@@ -1,7 +1,17 @@
-
 {{! Everything is sourced from the API response data currently }}
 {{#with data}}
-    <h1>{{target.first_name}} {{target.last_name}}</h1>
+    <div class="row justify-content-between">
+        <h1 class="col-12 col-md-auto">{{target.first_name}} {{target.last_name}}</h1>
+
+        {{! Edit profile link }}
+        {{#if (and viewer.[0].username (eq target.username viewer.[0].username))}}
+            <div class="col-12 col-md-3 d-flex align-items-center">
+                <a class="btn btn-primary w-100 my-1" href="/user/settings?{{url_encode username=target.username}}">
+                    Edit Profile
+                </a>
+            </div>
+        {{/if}}
+    </div>
     <span>{{format_user_role target.role}}</span>
     <br>
     <span class="text-muted">
