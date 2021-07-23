@@ -14,6 +14,9 @@ use crate::templates::forms::FormTemplate;
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
 
+/// The path from the templates directory to the user settings form template.
+const SETTINGS_FORM: &'static str = "user/settings";
+
 /// Wrapper struct for deserializing username.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProfileQuery {
@@ -65,11 +68,27 @@ async fn profile(
         .await;
 }
 
+/// Create a form template for the user settings page.
+fn make_settings_form(title: impl Into<String>) -> FormTemplate {
+    FormTemplate::new(SETTINGS_FORM, title)
+}
+
 /// User settings form.
 #[get("/user/settings")]
 async fn settings(
     auth: AuthenticationCookie,
     Query(ProfileQuery { username }): Query<ProfileQuery>,
 ) -> Result<FormTemplate, TelescopeError> {
+    // Get viewers username.
+    let viewer: String = auth.get_rcos_username_or_error().await?;
+
+    // Check that it matches the target profile's username.
+    if viewer != username {
+        return Err(TelescopeError::Forbidden);
+    }
+
+    // At this point it's been checked that the viewer is editing their own profile.
+    // Show them the form.
+
     return Err(TelescopeError::NotImplemented);
 }
