@@ -16,7 +16,7 @@ use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
 
 /// The path from the templates directory to the registration template.
-const TEMPLATE_PATH: &'static str = "user/forms/register";
+const TEMPLATE_PATH: &'static str = "user/register";
 
 /// Form submitted by users when creating an account.
 #[derive(Serialize, Deserialize, Debug)]
