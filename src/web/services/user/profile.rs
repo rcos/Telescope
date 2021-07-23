@@ -6,9 +6,10 @@ use crate::api::rcos::users::profile::{
 };
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::services::auth::identity::Identity;
-use actix_web::web::Query;
+use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
+use actix_web::web::{Query, ServiceConfig};
 use actix_web::HttpRequest;
+use crate::templates::forms::FormTemplate;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -20,9 +21,16 @@ pub struct ProfileQuery {
     pub username: String,
 }
 
+/// Register services into actix app.
+pub fn register(config: &mut ServiceConfig) {
+    config
+        .service(profile)
+        .service(settings);
+}
+
 /// User profile service. The username in the path is url-encoded.
 #[get("/user")]
-pub async fn profile(
+async fn profile(
     req: HttpRequest,
     identity: Identity,
     // TODO: Switch to using Path here when we switch to user ids.
@@ -55,4 +63,13 @@ pub async fn profile(
         // Render it inside a page (with the user's name as the title)
         .render_into_page(&req, page_title)
         .await;
+}
+
+/// User settings form.
+#[get("/user/settings")]
+async fn settings(
+    auth: AuthenticationCookie,
+    Query(ProfileQuery { username }): Query<ProfileQuery>,
+) -> Result<FormTemplate, TelescopeError> {
+    return Err(TelescopeError::NotImplemented);
 }
