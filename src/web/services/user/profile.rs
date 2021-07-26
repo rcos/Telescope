@@ -8,7 +8,7 @@ use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
 use actix_web::web::{Query, ServiceConfig};
-use actix_web::HttpRequest;
+use actix_web::{HttpRequest, HttpResponse};
 use crate::templates::forms::FormTemplate;
 
 /// The path from the template directory to the profile template.
@@ -28,7 +28,8 @@ pub struct ProfileQuery {
 pub fn register(config: &mut ServiceConfig) {
     config
         .service(profile)
-        .service(settings);
+        .service(settings)
+        .service(save_changes);
 }
 
 /// User profile service. The username in the path is url-encoded.
@@ -69,26 +70,26 @@ async fn profile(
 }
 
 /// Create a form template for the user settings page.
-fn make_settings_form(title: impl Into<String>) -> FormTemplate {
-    FormTemplate::new(SETTINGS_FORM, title)
+fn make_settings_form() -> FormTemplate {
+    FormTemplate::new(SETTINGS_FORM, "Edit Profile")
 }
 
 /// User settings form.
-#[get("/user/settings")]
-async fn settings(
-    auth: AuthenticationCookie,
-    Query(ProfileQuery { username }): Query<ProfileQuery>,
-) -> Result<FormTemplate, TelescopeError> {
-    // Get viewers username.
+#[get("/edit_profile")]
+async fn settings(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
+    // Get viewers username. You have to be authenticated to edit your own profile.
     let viewer: String = auth.get_rcos_username_or_error().await?;
 
-    // Check that it matches the target profile's username.
-    if viewer != username {
-        return Err(TelescopeError::Forbidden);
-    }
+    let mut form: FormTemplate = make_settings_form();
 
-    // At this point it's been checked that the viewer is editing their own profile.
-    // Show them the form.
+    return Ok(form);
+}
 
-    return Err(TelescopeError::NotImplemented);
+/// Submission endpoint for the user settings form.
+#[post("/edit_profile")]
+async fn save_changes(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
+    // Check that the user is authenticated. Get the username of the target profile (always their own).
+    let viewer: String = auth.get_rcos_username_or_error().await?;
+
+    Err(TelescopeError::NotImplemented)
 }

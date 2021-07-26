@@ -6,7 +6,7 @@
         {{! Edit profile link }}
         {{#if (and viewer.[0].username (eq target.username viewer.[0].username))}}
             <div class="col-12 col-md-3 d-flex align-items-center">
-                <a class="btn btn-primary w-100 my-1" href="/user/settings?{{url_encode username=target.username}}">
+                <a class="btn btn-primary w-100 my-1" href="/edit_profile">
                     Edit Profile
                 </a>
             </div>
