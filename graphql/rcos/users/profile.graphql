@@ -57,10 +57,16 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
             }
         }
 
-        # Public Meetings this user has hosted
+        # The number of public meetings hosted
+        public_meetings_hosted: meetings_aggregate(where: {is_draft: {_eq: false}}) {
+            aggregate {
+                count
+            }
+        }
+
+        # Meetings this user has hosted
         hosting: meetings(
-            order_by: {start_date_time: desc},
-            where: {is_draft: {_eq: false}}
+            order_by: {is_draft: desc, start_date_time: desc},
         ) {
             semester {
                 title
@@ -77,6 +83,7 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
             meeting_url
             external_presentation_url
             recording_url
+            is_draft
         }
     }
 
