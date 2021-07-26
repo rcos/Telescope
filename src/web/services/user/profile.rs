@@ -11,7 +11,7 @@ use actix_web::web::{Query, ServiceConfig, Form};
 use actix_web::{HttpRequest, HttpResponse};
 use crate::templates::forms::FormTemplate;
 use chrono::{Local, Datelike};
-use crate::api::rcos::users::UserRole;
+use crate::api::rcos::users::{UserRole, UserAccountType};
 use crate::api::rcos::users::edit_profile::EditProfileContext;
 use std::collections::HashMap;
 
@@ -86,9 +86,8 @@ fn make_settings_form() -> FormTemplate {
     return form;
 }
 
-/// User settings form.
-#[get("/edit_profile")]
-async fn settings(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
+/// Get the viewer's username and make a profile edit from for them.
+async fn get_context_and_make_form(auth: &AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
     // Get viewers username. You have to be authenticated to edit your own profile.
     let viewer: String = auth.get_rcos_username_or_error().await?;
     // Get the context for the edit form.
@@ -127,6 +126,12 @@ async fn settings(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeE
     return Ok(form);
 }
 
+/// User settings form.
+#[get("/edit_profile")]
+async fn settings(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
+    return get_context_and_make_form(&auth).await;
+}
+
 /// Edits to the user's profile submitted through the form.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 struct ProfileEdits {
@@ -145,11 +150,27 @@ async fn save_changes(
     auth: AuthenticationCookie,
     Form(ProfileEdits { first_name, last_name, role, cohort }): Form<ProfileEdits>
 ) -> Result<HttpResponse, TelescopeError> {
-    // Check that the user is authenticated. Get the username of the target profile (always their own).
-    let viewer: String = auth.get_rcos_username_or_error().await?;
+    // Pass most of the handling here to the GET handler. This will get the context and make
+    // and fill the form.
+    let mut form: FormTemplate = get_context_and_make_form(&auth).await?;
 
     // Convert the cohort to a number or default to no cohort input. This should be checked client side.
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
+
+    // Lambda function to reduce string to None if all whitespace or trim otherwise.
+    let reduce = |s: String| {
+        Some(s.trim().to_string()).filter(|s| !s.is_empty())
+    };
+
+    // Trim the first and last names and then reduce to None if empty.
+    let first_name = reduce(first_name);
+    let last_name = reduce(last_name);
+
+    // Fill the form with the submitted info.
+    form.template["context"]["first_name"] = json!(&first_name);
+    form.template["context"]["last_name"] = json!(&last_name);
+    form.template["context"]["cohort"] = json!(&cohort);
+    form.template["context"]["role"] = json!(role);
 
     Err(TelescopeError::NotImplemented)
 }

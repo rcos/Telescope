@@ -12,7 +12,14 @@
             </div>
         {{/if}}
     </div>
-    <span>{{format_user_role target.role}}</span>
+    <span class="badge badge-info">{{format_user_role target.role}}</span>
+    {{! Cohort info }}
+    {{#if target.cohort}}
+        <span class="badge" style="background: var(--rpi-red);">
+            RPI freshman class of {{target.cohort}}
+        </span>
+    {{/if}}
+
     <br>
     <span class="text-muted">
         Account created {{format_date target.created_at}} {{format_time target.created_at}}
