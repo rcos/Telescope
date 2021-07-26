@@ -1,14 +1,65 @@
 {{! User settings form. Users can change their name and role here }}
 
 <div class="row justify-content-center no-gutters">
-    <div class="text-dark card col-sm-11 col-md-8 col-lg-7 col-xl-5">
+    <div class="text-dark card col-sm-10 col-md-7 col-lg-6 col-xl-4">
         <div class="card-header">
             <h1>Edit Profile</h1>
         </div>
 
         <div class="card-body">
             <form method="post">
+                {{! First name }}
+                <div class="form-group">
+                    <label for="first-name-input">
+                        First name:
+                    </label>
 
+                    <input class="form-control" name="first_name" type="text" id="first-name-input" value="{{context.first_name}}" required>
+                </div>
+
+                {{! Last name }}
+                <div class="form-group">
+                    <label for="last-name-input">Last name:</label>
+
+                    <input type="text" class="form-control" name="last_name" id="last-name-input" value="{{context.last_name}}" required>
+                </div>
+
+                {{! Role }}
+                <div class="form-group">
+                    <label for="role-select">Role:</label>
+
+                    <select class="form-control" id="role-select" name="role" aria-describedby="role-description" required>
+                        {{#each roles}}
+                            <option value="{{@key}}" {{#if (eq @key ../context.role)}}selected{{/if}} {{#if (not this)}}disabled{{/if}}>
+                                {{format_user_role @key}}
+                            </option>
+                        {{/each}}
+                    </select>
+
+                    <small class="form-text text-muted" id="role-description">
+                        Some roles are only available to more privileged users. External users must link an RCS ID
+                        before changing to an internal role (such as student or alum).
+                    </small>
+                </div>
+
+                {{! Cohort }}
+                <div class="form-group">
+                    <label for="cohort-input">Entry year:</label>
+
+                    {{! Entry Year. Minimum 1824 (RPI founded). Max: Current year. }}
+                    <input aria-describedby="cohort-description" name="cohort" id="cohort-input" class="form-control"
+                           type="number" min="1824" max="{{max_entry_year}}" value="{{context.cohort}}"
+                           {{! Diabled on no RCS ID }}
+                           {{#if (not context.rcs_id.[0].account_id)}}disabled{{/if}}>
+
+                    <small id="cohort-description" class="form-text text-muted">
+                        Entry year is only available to users with RPI CAS linked.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn w-100 btn-success">
+                    Save changes
+                </button>
             </form>
         </div>
     </div>

@@ -94,13 +94,30 @@
         No enrollment history.
     {{/each}}
 
-
     {{! Meetings the user has hosted }}
-    {{#if target.hosting}}
-        <h3 class="mt-3">Meetings Hosted</h3>
-        {{#each target.hosting}}
-            {{! There should be no drafts in here }}
-            {{> meetings/card this}}
-        {{/each}}
+    {{! Include drafts if the viewer can see them }}
+    {{#if (or
+              (eq viewer.[0].username target.username)
+              (or viewer.[0].is_current_coordinator.[0].is_coordinator
+                  (or
+                      (eq viewer.[0].role "sysadmin")
+                      (eq viewer.[0].role "faculty_advisor"))))}}
+
+        {{! Include drafts }}
+        {{#if target.hosting}}
+            <h3 class="mt-3">Meetings Hosted</h3>
+            {{#each target.hosting}}
+                {{> meetings/card this}}
+            {{/each}}
+        {{/if}}
+
+    {{else}}
+        {{! Do not include drafts }}
+        {{#if (gt target.public_meetings_hosted.aggregate.count 0)}}
+            <h3 class="mt-3">Meetings Hosted</h3>
+            {{#each target.hosting}}
+                {{> meetings/card this}}
+            {{/each}}
+        {{/if}}
     {{/if}}
 {{/with}}

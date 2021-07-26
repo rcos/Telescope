@@ -7,9 +7,13 @@ use crate::api::rcos::users::profile::{
 use crate::error::TelescopeError;
 use crate::templates::Template;
 use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
-use actix_web::web::{Query, ServiceConfig};
+use actix_web::web::{Query, ServiceConfig, Form};
 use actix_web::{HttpRequest, HttpResponse};
 use crate::templates::forms::FormTemplate;
+use chrono::{Local, Datelike};
+use crate::api::rcos::users::UserRole;
+use crate::api::rcos::users::edit_profile::EditProfileContext;
+use std::collections::HashMap;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -71,7 +75,15 @@ async fn profile(
 
 /// Create a form template for the user settings page.
 fn make_settings_form() -> FormTemplate {
-    FormTemplate::new(SETTINGS_FORM, "Edit Profile")
+    // Create the base form.
+    let mut form: FormTemplate = FormTemplate::new(SETTINGS_FORM, "Edit Profile");
+
+    // The max entry year should always be the current year.
+    form.template = json!({
+        "max_entry_year": Local::today().year()
+    });
+
+    return form;
 }
 
 /// User settings form.
@@ -79,17 +91,65 @@ fn make_settings_form() -> FormTemplate {
 async fn settings(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
     // Get viewers username. You have to be authenticated to edit your own profile.
     let viewer: String = auth.get_rcos_username_or_error().await?;
+    // Get the context for the edit form.
+    let context = EditProfileContext::get(viewer.clone()).await?;
+    // Ensure that the context exists.
+    if context.is_none() {
+        // Use an ISE since we should be able to get an edit context as long as there is an
+        // authenticated username.
+        return Err(TelescopeError::ise(format!("Could not get edit context for username {}.", viewer)));
+    }
 
+    // Unwrap the context.
+    let context = context.unwrap();
+
+    // Create the form to edit the profile.
     let mut form: FormTemplate = make_settings_form();
+    // Add the context to the form.
+    form.template["context"] = json!(&context);
+
+    // Add the list of roles (and whether the current role can switch to them).
+    let role_list = UserRole::ALL_ROLES
+        .iter()
+        // Add availability data
+        .map(|role| (*role, UserRole::can_switch_to(context.role, *role)))
+        // Collect into map
+        .collect::<HashMap<_, _>>();
+
+    // Add to form.
+    form.template["roles"] = json!(role_list);
+
+    // Disable student role if the current role is external and there is no RCS ID in the context.
+    if context.role.is_external() && context.rcs_id.first().is_none() {
+        form.template["roles"]["student"] = json!(false);
+    }
 
     return Ok(form);
 }
 
+/// Edits to the user's profile submitted through the form.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct ProfileEdits {
+    first_name: String,
+    last_name: String,
+    role: UserRole,
+
+    /// Entry year for RPI students.
+    #[serde(default)]
+    cohort: String,
+}
+
 /// Submission endpoint for the user settings form.
 #[post("/edit_profile")]
-async fn save_changes(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
+async fn save_changes(
+    auth: AuthenticationCookie,
+    Form(ProfileEdits { first_name, last_name, role, cohort }): Form<ProfileEdits>
+) -> Result<HttpResponse, TelescopeError> {
     // Check that the user is authenticated. Get the username of the target profile (always their own).
     let viewer: String = auth.get_rcos_username_or_error().await?;
+
+    // Convert the cohort to a number or default to no cohort input. This should be checked client side.
+    let cohort: Option<i64> = cohort.parse::<i64>().ok();
 
     Err(TelescopeError::NotImplemented)
 }
