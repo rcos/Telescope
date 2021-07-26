@@ -1,0 +1,20 @@
+# Queries and mutations for editing profile information.
+
+query EditProfileContext($username: String!) {
+    users_by_pk(username: $username) {
+        first_name
+        last_name
+        cohort
+        role
+
+        rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+            account_id
+        }
+    }
+}
+
+mutation SaveProfileEdits($username: String!, $fname: String!, $lname: String!, $cohort: Int, $role: user_role!) {
+    update_users_by_pk(pk_columns: {username: $username}, _set: {first_name: $fname, last_name: $lname, role: $role, cohort: $cohort}) {
+        username
+    }
+}
