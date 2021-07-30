@@ -1611,9 +1611,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.89"
+version = "0.2.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "538c092e5586f4cdd7dd8078c4a79220e3e168880218124dcbce860f0ea938c6"
+checksum = "320cfe77175da3a483efed4bc0adc1968ca050b098ce4f2f1c13a56626128790"
 
 [[package]]
 name = "linked-hash-map"
@@ -2891,7 +2891,7 @@ dependencies = [
  "serde_urlencoded",
  "serenity",
  "structopt",
- "time 0.2.27",
+ "time 0.3.0",
  "toml",
  "url",
 ]
@@ -2980,6 +2980,15 @@ dependencies = [
  "time-macros",
  "version_check 0.9.2",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "time"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cf2535c6456e772ad756a0854ec907ede55d73d0b5a34855d808cb2d2f0942e"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
