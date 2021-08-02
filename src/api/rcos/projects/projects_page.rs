@@ -1,4 +1,4 @@
-//! GraphQL query to get a paginated list of RCOS projects.
+  //! GraphQL query to get a paginated list of RCOS projects.
 
 use crate::api::rcos::{prelude::*, search_strings::resolve_search_string, send_query};
 use crate::error::TelescopeError;

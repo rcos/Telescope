@@ -1,0 +1,11 @@
+# Get some info about a project and the viewer based on the project ID and
+# the viewer's username.
+query Project($id: Int!) {
+    project: projects_by_pk(project_id: $id) {
+        project_id
+        title
+        description
+
+        }
+    }
+}

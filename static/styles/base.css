@@ -28,6 +28,24 @@
     --meeting-coordinators-text: var(--dark);
     --meeting-other-bg: black;
     --meeting-other-text: var(--light);
+
+    /* Project Colors */
+    --project-large_group-bg: #ff4c3e;
+    --project-large_group-text: var(--light);
+    --project-small_group-bg: dodgerblue;
+    --project-small_group-text: var(--dark);
+    --project-presentations-bg: forestgreen;
+    --project-presentations-text: var(--light);
+    --project-bonus_session-bg: #eeba32;
+    --project-bonus_session-text: var(--dark);
+    --project-grading-bg: firebrick;
+    --project-grading-text: var(--light);
+    --project-mentors-bg: indigo;
+    --project-mentors-text: var(--light);
+    --project-coordinators-bg: orchid;
+    --project-coordinators-text: var(--dark);
+    --project-other-bg: black;
+    --project-other-text: var(--light);
 }
 
 /* RCOS themed buttons. */

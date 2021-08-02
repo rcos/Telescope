@@ -64,7 +64,7 @@ struct TelescopeConfig {
 /// for items from the narrowest up.
 ///
 /// The fields of this struct should match up closely to the fields of the
-/// TelescopeConfig struct.
+/// Tel nescopeConfig struct.
 #[derive(Serialize, Debug)]
 pub struct ConcreteConfig {
     /// The log level. Private because the logger is initialized in this module.
