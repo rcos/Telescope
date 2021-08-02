@@ -131,7 +131,7 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{#with stats.total_students.aggregate}}
                             User Count:
-                            <a class="badge badge-secondary" href="/developers">{{count}}</a>
+                            <a class="badge badge-secondary" href="/developers?{{url_encode include_old="true"}}">{{count}}</a>
                         {{else}}
                             Could not retrieve user count from RCOS API.
                         {{/with}}
