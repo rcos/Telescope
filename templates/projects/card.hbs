@@ -13,53 +13,16 @@
                         border-color: var(--project-small_group-text);
                         border-width: 2px;
                         border-style: solid;">
-                {{!-- {{format_project_type type}} --}}
             </span>
 
-            {{! Draft badge if necessary }}
-            {{!-- {{#if is_draft}}
-                <span class="badge mr-2 mt-1 h4 font-italic" style="
-                        background: var(--project-small_group-bg);
-                        color: var(--project-small_group-text);
-                        border-color: var(--project-small_group-text);
-                        border-width: 2px;
-                        border-style: dashed;">
-                    Draft
-                </span>
-            {{/if}} --}}
 
             <a href="/project/{{project_id}}" class="btn btn-primary">
                 View Details
             </a>
         </span>
     </h3>
-
+{{description}}
     <div class="list-group list-group-flush text-dark">
-        {{!-- {{#if host}}
-            <div class="list-group-item">
-                    <span class="text-muted">
-                        Hosted by <a href="{{profile_for host.username}}">{{host.first_name}} {{host.last_name}}</a>
-                    </span>
-            </div>
-        {{/if}} --}}
-
-        {{!-- <div class="list-group-item"> --}}
-            {{! If the event does not span multiple days}}
-            {{!-- {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
-                {{format_date start_date_time}}: {{format_time start_date_time}} to {{format_time end_date_time}}
-            {{else}}
-                Start: {{format_date start_date_time}} at {{format_time start_date_time}} <br>
-                End: {{format_date end_date_time}} {{format_time end_date_time}}
-            {{/if}} --}}
-        {{!-- </div> --}}
-
-
-        {{!-- {{#if location}}
-            <div class="list-group-item">
-                Location: {{location}}
-            </div> --}}
-        {{!-- {{/if}} --}}
-
         {{#if description}}
             <div class="list-group-item">
                 <small class="text-muted mb-2">
@@ -124,11 +87,11 @@
 
 
 
-{{!-- 
-<div class="card my-2" id="project-44" style="border-color: var(--project-large_group-bg); border-width: 4px;">
+
+{{!-- <div class="card my-2" id="project-44" style="border-color: var(--project-large_group-bg); border-width: 4px;">
     <h3 class="card-header"
-        style="background: var(--project-large_group-bg); color: var(--project-large_group-text); border-radius: 0;">
-        {{!-- {{> projects/title "TEST"}} --}}
+        style="background: var(--project-large_group-bg); color: var(--project-large_group-text); border-radius: 0;"> --}}
+        {{!-- {{> projects/title "TEST"}}
         <span class="float-right">
 
             {{! project-type badge }}
@@ -139,7 +102,7 @@
                         border-width: 2px;
                         border-style: solid;">
                 {{!-- {{format_project_type 'large_group"}} --}}
-            </span>
+            {{!-- </span>
 
 
             <a href="/project/44" class="btn btn-primary">
@@ -150,35 +113,35 @@
 
     <div class="list-group list-group-flush text-dark">
 
-        <div class="list-group-item">
+        <div class="list-group-item"> --}}
             {{! If the event does not span multiple days}}
             {{!-- {{#if (eq (format_date start_date_time) (format_date end_date_time))}}
                 {{format_date start_date_time}}: {{format_time start_date_time}} to {{format_time end_date_time}}
             {{else}} --}}
-                Start: 5 at 5 <br>
-                End: 5
+                {{!-- Start: 5 at 5 <br>
+                End: 5 --}}
             {{!-- {{/if}} --}}
-        </div>
+        {{!-- </div> --}}
 
 
         {{!-- {{#if location}} --}}
-            <div class="list-group-item">
+            {{!-- <div class="list-group-item">
                 Location: home
-            </div>
+            </div> --}}
         {{!-- {{/if}} --}}
 
         {{!-- {{#if description}} --}}
-            <div class="list-group-item">
+            {{!-- <div class="list-group-item">
                 <small class="text-muted mb-2">
                     User supplied description:
                 </small>
                 jjjjjjjjjj
-            </div>
+            </div> --}}
         {{!-- {{/if}} --}}
-
+{{!-- 
         <div class="list-group-item">
             <div class="row row-cols-1 row-cols-md-3">
-                <div class="col align-content-center my-1">
+                <div class="col align-content-center my-1"> --}}
                     {{!-- {{#if project_url}}
                         {{> projects/link url=project_url text="Join" class="primary"}}
                     {{else}}
@@ -188,41 +151,41 @@
                             </span>
                         {{else}} --}}
                             {{! project is not remote }}
-                            <span class="btn btn-outline-primary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                            {{!-- <span class="btn btn-outline-primary disabled w-100 h-100 d-flex align-items-center justify-content-center">
                                 project is not remote
-                            </span>
+                            </span> --}}
                         {{!-- {{/if}}
                     {{/if}} --}}
-                </div>
+                {{!-- </div>
 
-                <div class="col align-content-center my-1">
+                <div class="col align-content-center my-1"> --}}
                     {{!-- {{#if external_presentation_url}}
                         {{! TODO: Support hosted native slides }}
                         {{> projects/link url=external_presentation_url text="Slides" class="info"}}
                     {{else}} --}}
-                        <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                        {{!-- <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
                             Slides unavailable
-                        </span>
+                        </span> --}}
                     {{!-- {{/if}} --}}
-                </div>
+                {{!-- </div>
 
-                <div class="col align-content-center my-1">
+                <div class="col align-content-center my-1"> --}}
                     {{!-- {{#if recording_url}}
                         {{> projects/link url=recording_url text="View Recording" class="secondary"}}
                     {{else}}
                         {{#if is_remote}} --}}
-                            <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                            {{!-- <span class="btn btn-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
                                 Recording unavailable
-                            </span>
+                            </span> --}}
                         {{!-- {{else}} --}}
                             {{! project is not remote }}
-                            <span class="btn btn-outline-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
+                            {{!-- <span class="btn btn-outline-secondary disabled w-100 h-100 d-flex align-items-center justify-content-center">
                                 project is not remote
                             </span>
-                        {{!-- {{/if}}
-                    {{/if}} --}}
-                </div>
-            </div>
-        </div>
-    </div>
-</div> --}}
+                        {{!-- {{/if}} --}}
+                    {{!-- {{/if}} --}}
+                {{!-- </div> --}}
+            {{!-- </div> --}}
+        {{!-- </div> --}}
+    {{!-- </div> --}}
+{{!-- </div> --}}

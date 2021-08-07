@@ -1,7 +1,8 @@
 fragment ProjectInfo on projects {
     project_id
     title
-
+    description
+    stack
     cover_image_url
     homepage_url
     repository_urls

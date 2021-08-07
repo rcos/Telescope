@@ -3,8 +3,8 @@
 use crate::error::TelescopeError;
 use actix_web::HttpResponse;
 use crate::api::rcos::projects::projects_page::CurrentProjects;
+use crate::api::rcos::projects::projects_page::AllProjects;
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
-use crate::api::rcos::meetings::get::Meetings;
 use crate::api::rcos::meetings::MeetingType;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
@@ -26,10 +26,12 @@ async fn projects_list(
     identity: Identity,
     
 ) -> Result<Template, TelescopeError> {
-    let page=0;
-    let search: Option<String> =Some(" ".to_string());
-    let projects = CurrentProjects::get(page, search).await?;
-    
+    let search: Option<String> =Some("test".to_string());
+    // let limit:u32=5;
+    // let offset:u32=0;
+    let page:u32=0;
+    // $limit: Int!, $offset: Int!, $search: String!
+    let projects = AllProjects::get(page, search).await?;
     return Template::new(TEMPLATE_PATH)
         .field("projects", projects)
         .render_into_page(&req, "RCOS Projects")

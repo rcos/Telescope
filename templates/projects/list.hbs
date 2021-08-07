@@ -16,16 +16,14 @@
         <input class="form-check-input" type="checkbox" name="include_old" id="include-old" value="true"
             {{#if query.include_old}} checked {{/if}}
         >
-        <label for="include-old" class="form-check-label">
-            Include previous members
-        </label>
     </div>
-
+  
     {{!-- <button class="btn btn-primary" type="submit">View</button> --}}
 </form>
 <select class="browser-default custom-select" aria-label="Default select example">
   <option value="active">Active</option>
   <option value="inactive">Inactive</option>
+  <option value="inactive">Both</option>
 </select>
 <button type="submit" class="btn btn-primary mb-2">View</button>
     {{#if (or authorization.is_current_coordinator (or (eq authorization.role "faculty_advisor") (eq authorization.role "sysadmin")))}}
@@ -34,7 +32,7 @@
         </div>
     {{/if}}
     
-{{#each projects}}
+{{#each projects.projects}}
     {{> projects/card this}}
 {{else}}
     {{! No meetings -- display a message }}
