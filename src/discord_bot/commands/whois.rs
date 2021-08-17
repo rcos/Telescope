@@ -16,6 +16,7 @@ use serenity::model::interactions::{
 };
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -44,21 +45,20 @@ pub fn create_whois(obj: &mut CreateApplicationCommand) -> &mut CreateApplicatio
 /// Handle a user calling the /whois command from Discord.
 pub fn handle_whois<'a>(
     ctx: &'a Context,
-    interaction: &'a Interaction,
-    data: &'a ApplicationCommandInteractionData,
+    interaction: &'a ApplicationCommandInteraction,
 ) -> InteractionResult<'a> {
     // Wrap the inner async function in a pinned box.
-    return Box::pin(async move { handle(ctx, interaction, data).await });
+    return Box::pin(async move { handle(ctx, interaction).await });
 }
 
 /// Inner async fn to handle /whois commands without dealing with annoying types.
 async fn handle(
     ctx: &Context,
-    interaction: &Interaction,
-    data: &ApplicationCommandInteractionData,
+    interaction: &ApplicationCommandInteraction,
 ) -> SerenityResult<()> {
     // Extract the user ID from the payload.
-    let user_id = data
+    let user_id = interaction
+        .data
         .options
         .get(0)
         // Check that the option name matches the one set previously

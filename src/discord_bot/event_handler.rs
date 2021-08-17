@@ -1,12 +1,11 @@
 //! Event handling code for the telescope Discord Bot.
 
-use crate::discord_bot::commands::{get_handler, register_commands_for_guild};
+use crate::discord_bot::commands::{get_handler, register_commands_for_guild, InteractionHandler};
 use crate::env::global_config;
 use serenity::client::{Context, EventHandler};
 use serenity::model::gateway::Ready;
 use serenity::model::guild::Guild;
-use serenity::model::interactions::{InteractionResponseType, InteractionType, Interaction};
-use serenity::model::prelude::Interaction;
+use serenity::model::interactions::Interaction;
 
 /// Get the global config's discord client ID parsed to a u64.
 pub fn discord_client_id() -> u64 {
@@ -80,60 +79,33 @@ impl EventHandler for Handler {
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        match interaction.kind {
-            // Respond to pings with a pong.
-            InteractionType::Ping => {
-                // Respond with pong
-                let r: serenity::Result<()> = interaction
-                    .create_interaction_response(ctx.http.as_ref(), |r| {
-                        r.kind(InteractionResponseType::Pong)
-                    })
-                    .await;
-
-                // Handle errors
-                if let Err(err) = r {
-                    error!("Error responding to Ping interaction: {}", err);
-                }
-            }
-
+        match interaction {
             // Application commands. These map to one of the commands registered
             // in the global command ID map.
-            InteractionType::ApplicationCommand => {
-                // Match the application command data variant.
-                if let Some(Interaction::ApplicationCommand(data)) = interaction.data.as_ref() {
-                    // Extract the command name.
-                    let command_name = data.name.as_str();
-                    // Get the command's handler
-                    let handler = get_handler(command_name);
+            Interaction::ApplicationCommand(command) => {
+                // Clone the command name.
+                let command_name = command.data.name.clone();
 
-                    // Error if the handler doesn't exist.
-                    if handler.is_none() {
-                        error!(
-                            "Handler not found for '/{}'. Interaction: {:#?}",
-                            command_name, interaction
-                        );
-                        return;
-                    }
+                // Get the command's handler
+                let handler: Option<InteractionHandler> = get_handler(command_name.as_str());
 
-                    // Otherwise unwrap the handler and call it on the interaction.
-                    let handler = handler.unwrap();
-                    // Clone the command name first to avoid use-after-move.
-                    let command_name = command_name.to_string();
-                    // Call the handler on the interaction.
-                    let handler_result: serenity::Result<()> =
-                        handler(&ctx, &interaction, &data).await;
-                    // Log any errors from the handler.
-                    if let Err(err) = handler_result {
-                        error!("'/{}' handler returned an error: {}", command_name, err);
-                    }
-                } else {
-                    error!("Application command interaction did not have data with it.");
+                // Error if the handler doesn't exist.
+                if handler.is_none() {
+                    error!("Handler not found for '/{}'. Command: {:#?}", command_name, command);
                     return;
+                }
+
+                // Call the handler on the interaction.
+                let result: serenity::Result<()> = (handler.unwrap())(&ctx, &command).await;
+
+                // Log any errors from the handler.
+                if let Err(err) = result {
+                    error!("'/{}' handler returned an error: {}", command_name, err);
                 }
             }
 
             // Non-exhaustive match requires other branch.
-            other => warn!("Unhandled interaction type: {:?}", other),
+            other => warn!("Unhandled interaction: {:?}", other),
         }
     }
 }
