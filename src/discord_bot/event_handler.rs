@@ -5,7 +5,7 @@ use crate::env::global_config;
 use serenity::client::{Context, EventHandler};
 use serenity::model::gateway::Ready;
 use serenity::model::guild::Guild;
-use serenity::model::interactions::{InteractionData, InteractionResponseType, InteractionType};
+use serenity::model::interactions::{InteractionResponseType, InteractionType, Interaction};
 use serenity::model::prelude::Interaction;
 
 /// Get the global config's discord client ID parsed to a u64.
@@ -100,7 +100,7 @@ impl EventHandler for Handler {
             // in the global command ID map.
             InteractionType::ApplicationCommand => {
                 // Match the application command data variant.
-                if let Some(InteractionData::ApplicationCommand(data)) = interaction.data.as_ref() {
+                if let Some(Interaction::ApplicationCommand(data)) = interaction.data.as_ref() {
                     // Extract the command name.
                     let command_name = data.name.as_str();
                     // Get the command's handler
