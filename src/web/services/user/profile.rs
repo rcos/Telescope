@@ -1,18 +1,18 @@
 //! Profile services.
 
+use crate::api::rcos::users::edit_profile::EditProfileContext;
 use crate::api::rcos::users::profile::{
     profile::{ProfileTarget, ResponseData},
     Profile,
 };
-use crate::error::TelescopeError;
-use crate::templates::Template;
-use crate::web::services::auth::identity::{Identity, AuthenticationCookie};
-use actix_web::web::{Query, ServiceConfig, Form};
-use actix_web::{HttpRequest, HttpResponse};
-use crate::templates::forms::FormTemplate;
-use chrono::{Local, Datelike};
 use crate::api::rcos::users::UserRole;
-use crate::api::rcos::users::edit_profile::EditProfileContext;
+use crate::error::TelescopeError;
+use crate::templates::forms::FormTemplate;
+use crate::templates::Template;
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
+use actix_web::web::{Form, Query, ServiceConfig};
+use actix_web::{HttpRequest, HttpResponse};
+use chrono::{Datelike, Local};
 use std::collections::HashMap;
 
 /// The path from the template directory to the profile template.
@@ -87,7 +87,9 @@ fn make_settings_form() -> FormTemplate {
 }
 
 /// Get the viewer's username and make a profile edit from for them.
-async fn get_context_and_make_form(auth: &AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
+async fn get_context_and_make_form(
+    auth: &AuthenticationCookie,
+) -> Result<FormTemplate, TelescopeError> {
     // Get viewers username. You have to be authenticated to edit your own profile.
     let viewer: String = auth.get_rcos_username_or_error().await?;
     // Get the context for the edit form.
@@ -96,7 +98,10 @@ async fn get_context_and_make_form(auth: &AuthenticationCookie) -> Result<FormTe
     if context.is_none() {
         // Use an ISE since we should be able to get an edit context as long as there is an
         // authenticated username.
-        return Err(TelescopeError::ise(format!("Could not get edit context for username {}.", viewer)));
+        return Err(TelescopeError::ise(format!(
+            "Could not get edit context for username {}.",
+            viewer
+        )));
     }
 
     // Unwrap the context.
@@ -148,7 +153,12 @@ struct ProfileEdits {
 #[post("/edit_profile")]
 async fn save_changes(
     auth: AuthenticationCookie,
-    Form(ProfileEdits { first_name, last_name, role, cohort }): Form<ProfileEdits>
+    Form(ProfileEdits {
+        first_name,
+        last_name,
+        role,
+        cohort,
+    }): Form<ProfileEdits>,
 ) -> Result<HttpResponse, TelescopeError> {
     // Pass most of the handling here to the GET handler. This will get the context and make
     // and fill the form.
@@ -158,9 +168,7 @@ async fn save_changes(
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
 
     // Lambda function to reduce string to None if all whitespace or trim otherwise.
-    let reduce = |s: String| {
-        Some(s.trim().to_string()).filter(|s| !s.is_empty())
-    };
+    let reduce = |s: String| Some(s.trim().to_string()).filter(|s| !s.is_empty());
 
     // Trim the first and last names and then reduce to None if empty.
     let first_name = reduce(first_name);
@@ -171,8 +179,6 @@ async fn save_changes(
     form.template["context"]["last_name"] = json!(&last_name);
     form.template["context"]["cohort"] = json!(&cohort);
     form.template["context"]["role"] = json!(role);
-
-
 
     Err(TelescopeError::NotImplemented)
 }

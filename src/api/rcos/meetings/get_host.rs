@@ -1,7 +1,7 @@
 //! GraphQL query to get the username of the host of a meeting by the meeting's ID.
 
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -16,8 +16,11 @@ impl MeetingHost {
     pub async fn get(meeting_id: i64) -> Result<Option<String>, TelescopeError> {
         send_query::<Self>(meeting_host::Variables { meeting_id })
             .await
-            .map(|response| response.meetings_by_pk
-                .and_then(|meeting| meeting.host)
-                .map(|host| host.username))
+            .map(|response| {
+                response
+                    .meetings_by_pk
+                    .and_then(|meeting| meeting.host)
+                    .map(|host| host.username)
+            })
     }
 }

@@ -6,13 +6,12 @@ use crate::env::global_config;
 use crate::web::profile_for;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
 use serenity::client::Context;
+use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 use serenity::model::interactions::{
-    application_command::ApplicationCommandOptionType,
-    InteractionResponseType,
+    application_command::ApplicationCommandOptionType, InteractionResponseType,
 };
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
-use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -48,10 +47,7 @@ pub fn handle_whois<'a>(
 }
 
 /// Inner async fn to handle /whois commands without dealing with annoying types.
-async fn handle(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-) -> SerenityResult<()> {
+async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()> {
     // Extract the user ID from the payload.
     let user_id = interaction
         .data

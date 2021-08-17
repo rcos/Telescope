@@ -1,27 +1,27 @@
 //! Services to support meeting edits.
 
-use actix_web::{web::{ServiceConfig, Path, Query}, HttpResponse, HttpRequest};
-use crate::error::TelescopeError;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use crate::api::rcos::meetings::{
-    authorization_for::{UserMeetingAuthorization, AuthorizationFor},
-    creation::context::get_context,
-    get_by_id::{
-        Meeting,
-        meeting::MeetingMeeting
-    },
-    edit,
-};
-use crate::templates::forms::FormTemplate;
-use chrono::{DateTime, Utc, Local, NaiveTime, NaiveDateTime, TimeZone};
-use crate::api::rcos::meetings::ALL_MEETING_TYPES;
-use serde_json::Value;
-use crate::web::services::meetings::create::{FinishForm, get_semester_bounds};
-use actix_web::web::Form;
 use crate::api::rcos::meetings::creation::create::normalize_url;
-use actix_web::http::header::LOCATION;
-use crate::templates::Template;
 use crate::api::rcos::meetings::edit::EditHostSelection;
+use crate::api::rcos::meetings::ALL_MEETING_TYPES;
+use crate::api::rcos::meetings::{
+    authorization_for::{AuthorizationFor, UserMeetingAuthorization},
+    creation::context::get_context,
+    edit,
+    get_by_id::{meeting::MeetingMeeting, Meeting},
+};
+use crate::error::TelescopeError;
+use crate::templates::forms::FormTemplate;
+use crate::templates::Template;
+use crate::web::services::auth::identity::AuthenticationCookie;
+use crate::web::services::meetings::create::{get_semester_bounds, FinishForm};
+use actix_web::http::header::LOCATION;
+use actix_web::web::Form;
+use actix_web::{
+    web::{Path, Query, ServiceConfig},
+    HttpRequest, HttpResponse,
+};
+use chrono::{DateTime, Local, NaiveDateTime, NaiveTime, TimeZone, Utc};
+use serde_json::Value;
 
 /// The Handlebars file for the meeting edit form.
 const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
@@ -41,7 +41,7 @@ pub fn register(config: &mut ServiceConfig) {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct HostQuery {
     /// The new host for the meeting. Empty string for no host.
-    set_host: String
+    set_host: String,
 }
 
 /// Get meeting data or return a resource not found error.
@@ -49,11 +49,16 @@ async fn get_meeting_data(meeting_id: i64) -> Result<MeetingMeeting, TelescopeEr
     // Get the meeting data to check that it exists.
     Meeting::get_by_id(meeting_id)
         .await?
-        .ok_or(TelescopeError::resource_not_found("Meeting Not Found", "Could not find a meeting for this ID."))
+        .ok_or(TelescopeError::resource_not_found(
+            "Meeting Not Found",
+            "Could not find a meeting for this ID.",
+        ))
 }
 
 /// Get a user's meeting authorization object from their authentication cookie.
-async fn authorization_for_viewer(auth: &AuthenticationCookie) -> Result<UserMeetingAuthorization, TelescopeError> {
+async fn authorization_for_viewer(
+    auth: &AuthenticationCookie,
+) -> Result<UserMeetingAuthorization, TelescopeError> {
     // Get username from cookie.
     let viewer: String = auth.get_rcos_username_or_error().await?;
 
@@ -62,10 +67,16 @@ async fn authorization_for_viewer(auth: &AuthenticationCookie) -> Result<UserMee
 }
 
 /// Get meeting data and error if the authenticated user cannot edit the meeting.
-async fn meeting_data_checked(auth: &AuthenticationCookie, meeting_id: i64) -> Result<MeetingMeeting, TelescopeError> {
+async fn meeting_data_checked(
+    auth: &AuthenticationCookie,
+    meeting_id: i64,
+) -> Result<MeetingMeeting, TelescopeError> {
     // Get meeting data. Extract host's username.
     let meeting_data = get_meeting_data(meeting_id).await?;
-    let meeting_host: Option<&str> = meeting_data.host.as_ref().map(|host| host.username.as_str());
+    let meeting_host: Option<&str> = meeting_data
+        .host
+        .as_ref()
+        .map(|host| host.username.as_str());
 
     // Get user's authorization object.
     let authorization = authorization_for_viewer(auth).await?;
@@ -80,7 +91,10 @@ async fn meeting_data_checked(auth: &AuthenticationCookie, meeting_id: i64) -> R
 
 /// Resolve the desired host username from the set host query parameter or the existing meeting
 /// host.
-fn resolve_host_username(meeting_data: &MeetingMeeting, set_host: Option<Query<HostQuery>>) -> Option<String> {
+fn resolve_host_username(
+    meeting_data: &MeetingMeeting,
+    set_host: Option<Query<HostQuery>>,
+) -> Option<String> {
     let existing_host: Option<String> = meeting_data.host.as_ref().map(|h| h.username.clone());
     let new_host: Option<String> = set_host.map(|q| q.0.set_host);
     return new_host
@@ -96,7 +110,11 @@ fn resolve_meeting_title(meeting_data: &MeetingMeeting) -> String {
         Some(title) => title.clone(),
         None => {
             let meeting_start: &DateTime<Utc> = &meeting_data.start_date_time;
-            format!("{} - {}", meeting_data.type_, meeting_start.with_timezone(&Local).format("%B %_d, %Y"))
+            format!(
+                "{} - {}",
+                meeting_data.type_,
+                meeting_start.with_timezone(&Local).format("%B %_d, %Y")
+            )
         }
     }
 }
@@ -114,7 +132,7 @@ fn make_form(meeting_data: &MeetingMeeting) -> FormTemplate {
 async fn edit_page(
     Path(meeting_id): Path<i64>,
     auth: AuthenticationCookie,
-    set_host: Option<Query<HostQuery>>
+    set_host: Option<Query<HostQuery>>,
 ) -> Result<FormTemplate, TelescopeError> {
     // Get the meeting data. Error on meeting not found or permissions failure.
     let meeting_data = meeting_data_checked(&auth, meeting_id).await?;
@@ -188,13 +206,13 @@ async fn submit_meeting_edits(
         meeting_url,
         location,
         kind,
-        title
+        title,
     } = form_data;
 
     // Like the creation system, semester ID, meeting kind, and host username are not validated.
 
     // Add submitted data to return form.
-    form.template["data"]["semester"] = json!({"semester_id": &semester});
+    form.template["data"]["semester"] = json!({ "semester_id": &semester });
     form.template["data"]["type"] = json!(kind);
     form.template["data"]["description"] = json!(&description);
 
@@ -208,8 +226,8 @@ async fn submit_meeting_edits(
     form.template["data"]["title"] = json!(&title);
 
     // Same with location.
-    let location: Option<String> = location
-        .and_then(|string| (!string.trim().is_empty()).then(|| string.trim().to_string()));
+    let location: Option<String> =
+        location.and_then(|string| (!string.trim().is_empty()).then(|| string.trim().to_string()));
     form.template["data"]["location"] = json!(&location);
 
     // Trim description.
@@ -237,7 +255,7 @@ async fn submit_meeting_edits(
         .ok_or(TelescopeError::BadRequest {
             header: "Malformed Meeting Edit Form".into(),
             message: "Selected semester in available semester list.".into(),
-            show_status_code: false
+            show_status_code: false,
         })?;
 
     // Get the semester bounds.
@@ -245,17 +263,13 @@ async fn submit_meeting_edits(
 
     if end_date < start_date {
         form.template["issues"]["end_date"] = json!("End date is before start date.");
-    }
-    else if start_date > semester_end {
+    } else if start_date > semester_end {
         form.template["issues"]["start_date"] = json!("Start date is after end of semester.");
-    }
-    else if end_date > semester_end {
+    } else if end_date > semester_end {
         form.template["issues"]["end_date"] = json!("End date is after end of semester.");
-    }
-    else if start_date < semester_start {
+    } else if start_date < semester_start {
         form.template["issues"]["start_date"] = json!("Start date is before semester starts.");
-    }
-    else if end_date < semester_start {
+    } else if end_date < semester_start {
         form.template["issues"]["end_date"] = json!("End date is before semester starts.");
     }
 
@@ -270,13 +284,13 @@ async fn submit_meeting_edits(
     let start_time: NaiveTime = time_parse(start_time).map_err(|e| TelescopeError::BadRequest {
         header: "Malformed Start Time".into(),
         message: format!("Could not parse start time. Internal error: {}", e),
-        show_status_code: false
+        show_status_code: false,
     })?;
 
     let end_time: NaiveTime = time_parse(end_time).map_err(|e| TelescopeError::BadRequest {
         header: "Malformed End Time".into(),
         message: format!("Could not parse end time. Internal error: {}", e),
-        show_status_code: false
+        show_status_code: false,
     })?;
 
     // Add times to dates.
@@ -290,23 +304,19 @@ async fn submit_meeting_edits(
     }
 
     // Add timestamps.
-    let timezone_adder = |timestamp: &NaiveDateTime| Local
-        .from_local_datetime(timestamp)
-        .single();
+    let timezone_adder = |timestamp: &NaiveDateTime| Local.from_local_datetime(timestamp).single();
 
-    let start: DateTime<Local> = timezone_adder(&start)
-        .ok_or(TelescopeError::BadRequest {
-            header: "Malformed Start Time".into(),
-            message: "Could not ascribe local timezone to start timestamp.".into(),
-            show_status_code: false
-        })?;
+    let start: DateTime<Local> = timezone_adder(&start).ok_or(TelescopeError::BadRequest {
+        header: "Malformed Start Time".into(),
+        message: "Could not ascribe local timezone to start timestamp.".into(),
+        show_status_code: false,
+    })?;
 
-    let end: DateTime<Local> = timezone_adder(&end)
-        .ok_or(TelescopeError::BadRequest {
-            header: "Malformed End Time".into(),
-            message: "Could not ascribe local timezone to end timestamp.".into(),
-            show_status_code: false,
-        })?;
+    let end: DateTime<Local> = timezone_adder(&end).ok_or(TelescopeError::BadRequest {
+        header: "Malformed End Time".into(),
+        message: "Could not ascribe local timezone to end timestamp.".into(),
+        show_status_code: false,
+    })?;
 
     // Create variables for mutation.
     let edit_mutation_variables = edit::edit_meeting::Variables {
@@ -327,7 +337,7 @@ async fn submit_meeting_edits(
         host: form.template["context"]
             .get("host")
             .and_then(|host| host[0]["username"].as_str())
-            .map(|host| host.to_string())
+            .map(|host| host.to_string()),
     };
 
     // The returned meeting ID should match the existing one but we don't check.
@@ -350,7 +360,11 @@ async fn host_selection(
 ) -> Result<Template, TelescopeError> {
     // Check that the user can edit this meeting.
     let viewer = auth.get_rcos_username_or_error().await?;
-    if !AuthorizationFor::get(Some(viewer)).await?.can_edit_by_id(meeting_id).await? {
+    if !AuthorizationFor::get(Some(viewer))
+        .await?
+        .can_edit_by_id(meeting_id)
+        .await?
+    {
         return Err(TelescopeError::Forbidden);
     }
 

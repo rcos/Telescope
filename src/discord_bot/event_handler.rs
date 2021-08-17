@@ -91,7 +91,10 @@ impl EventHandler for Handler {
 
                 // Error if the handler doesn't exist.
                 if handler.is_none() {
-                    error!("Handler not found for '/{}'. Command: {:#?}", command_name, command);
+                    error!(
+                        "Handler not found for '/{}'. Command: {:#?}",
+                        command_name, command
+                    );
                     return;
                 }
 

@@ -1,15 +1,15 @@
 //! Meeting edit mutation and host selection query.
 
 use crate::api::rcos::prelude::*;
-use crate::error::TelescopeError;
 use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 
 /// Type representing GraphQL meeting edit mutation.
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
     query_path = "graphql/rcos/meetings/edit/edit.graphql",
-    response_derives = "Debug,Copy,Clone,Serialize",
+    response_derives = "Debug,Copy,Clone,Serialize"
 )]
 pub struct EditMeeting;
 
@@ -28,7 +28,7 @@ impl EditMeeting {
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
     query_path = "graphql/rcos/meetings/edit/host_selection.graphql",
-    response_derives = "Debug,Clone,Serialize",
+    response_derives = "Debug,Clone,Serialize"
 )]
 pub struct EditHostSelection;
 

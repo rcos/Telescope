@@ -15,7 +15,10 @@ const QUERY_STRING: &'static str =
 ///
 /// For meeting edits, semesters may be manually included by ID. otherwise, only ongoing and
 /// future semesters will be included.
-pub async fn get_context(host_username: Option<String>, include_semesters: Vec<String>) -> Result<Value, TelescopeError> {
+pub async fn get_context(
+    host_username: Option<String>,
+    include_semesters: Vec<String>,
+) -> Result<Value, TelescopeError> {
     // Make query variables.
     let mut variables: Value = json!({
         // Use an empty or single item list as a work around for non-nullable types.

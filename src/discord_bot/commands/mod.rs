@@ -15,10 +15,8 @@ type InteractionResult<'a> = BoxFuture<'a, serenity::Result<()>>;
 
 /// Interaction handler type. All interaction handlers are references to
 /// async functions that act on context and interaction data.
-pub type InteractionHandler = for<'a> fn(
-    &'a Context,
-    &'a ApplicationCommandInteraction
-) -> InteractionResult<'a>;
+pub type InteractionHandler =
+    for<'a> fn(&'a Context, &'a ApplicationCommandInteraction) -> InteractionResult<'a>;
 
 /// Command builder type. These builder function all act on serenity models
 /// and add the necessary info to them for each command.

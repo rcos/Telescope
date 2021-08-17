@@ -15,7 +15,7 @@ pub struct DeleteMeeting;
 
 impl DeleteMeeting {
     /// Delete a meeting and all associated attendances.
-    pub async fn execute(meeting_id: i64) -> Result<delete_meeting::ResponseData, TelescopeError>{
+    pub async fn execute(meeting_id: i64) -> Result<delete_meeting::ResponseData, TelescopeError> {
         send_query::<Self>(delete_meeting::Variables { meeting_id }).await
     }
 }

@@ -15,8 +15,8 @@ use chrono::Local;
 )]
 pub struct AuthorizationFor;
 
-use authorization_for::{ResponseData, Variables};
 use crate::api::rcos::meetings::get_host::MeetingHost;
+use authorization_for::{ResponseData, Variables};
 
 /// Info on the user that dictates their ability to access meeting data.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -106,7 +106,7 @@ impl UserMeetingAuthorization {
                 (Some(host), Some(viewer)) => Ok(host == *viewer),
 
                 // In any other case, the meeting is not to be edited by the viewer.
-                _ => Ok(false)
+                _ => Ok(false),
             }
         }
     }

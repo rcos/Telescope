@@ -4,11 +4,11 @@ pub mod accounts;
 pub mod create;
 pub mod developers_page;
 pub mod discord_whois;
+pub mod edit_profile;
 pub mod enrollments;
 pub mod navbar_auth;
 pub mod profile;
 pub mod role_lookup;
-pub mod edit_profile;
 
 /// The valid user roles for all users in the RCOS database.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Hash, Display)]
@@ -70,7 +70,7 @@ impl UserRole {
         UserRole::FacultyAdvisor,
         UserRole::External,
         UserRole::ExternalMentor,
-        UserRole::Sysadmin
+        UserRole::Sysadmin,
     ];
 
     /// Faculty advisors and sysadmins are considered admin users.
@@ -86,7 +86,9 @@ impl UserRole {
     /// Can a user of role `a` change their role to role `b`?
     pub fn can_switch_to(a: Self, b: UserRole) -> bool {
         // Can always switch to the same role.
-        if a == b { return true; }
+        if a == b {
+            return true;
+        }
 
         // Otherwise check the table.
         match (a, b) {
