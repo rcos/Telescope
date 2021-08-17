@@ -5,13 +5,7 @@ use futures::future::BoxFuture;
 use serenity::builder::CreateApplicationCommand;
 use serenity::client::Context;
 use serenity::model::guild::Guild;
-use serenity::model::interactions::{
-    application_command::{
-        ApplicationCommandInteractionData,
-        ApplicationCommand
-    },
-    Interaction
-};
+use serenity::model::interactions::application_command::ApplicationCommand;
 use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 
 mod whois;

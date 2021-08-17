@@ -11,7 +11,7 @@ use actix_web::web::{Query, ServiceConfig, Form};
 use actix_web::{HttpRequest, HttpResponse};
 use crate::templates::forms::FormTemplate;
 use chrono::{Local, Datelike};
-use crate::api::rcos::users::{UserRole, UserAccountType};
+use crate::api::rcos::users::UserRole;
 use crate::api::rcos::users::edit_profile::EditProfileContext;
 use std::collections::HashMap;
 

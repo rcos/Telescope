@@ -7,11 +7,7 @@ use crate::web::profile_for;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
 use serenity::client::Context;
 use serenity::model::interactions::{
-    Interaction,
-    application_command::{
-        ApplicationCommandInteractionData,
-        ApplicationCommandOptionType,
-    },
+    application_command::ApplicationCommandOptionType,
     InteractionResponseType,
 };
 use serenity::utils::Color;
