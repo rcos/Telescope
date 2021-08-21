@@ -1,0 +1,10 @@
+# Get members of a project by id
+query Members($id: Int!) {
+    small_group_members(
+        where: {
+            project_id: {_eq: $id}
+        }
+    ) {
+        username
+    }
+}

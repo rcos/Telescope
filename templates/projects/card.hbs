@@ -3,7 +3,7 @@
 <div class="card my-2" id="project-{{project_id}}" style="border-color: var(--project-small_group-bg); border-width: 4px;">
     <h3 class="card-header"
         style="background: var(--project-small_group-bg); color: var(--project-small_group-text); border-radius: 0;">
-        {{> projects/title this}}
+        {{title}}
         <span class="float-right">
 
             {{! project-type badge }}
@@ -16,22 +16,104 @@
             </span>
 
 
-            <a href="/project/{{project_id}}" class="btn btn-primary">
+            {{!-- <a href="/project/{{project_id}}" class="btn btn-primary">
                 View Details
+            </a> --}}
+            {{#if repository_urls}}
+            {{#each repository_urls}}
+            <a href="{{this}}" class="btn btn-primary">
+                Repository
             </a>
+            {{/each}}
+            </ul>
+        {{/if}}
+            
         </span>
     </h3>
-{{description}}
-    <div class="list-group list-group-flush text-dark">
+                            
+
+<div class="list-group list-group-flush text-dark">
+                  {{>data.semesters this}}
+                   {{#each data.semesters}}
+    ASD {{enrollments_aggregate.aggregate.count}} D
+      {{/each}}
+
+
+
+
+      {{#if data.semesters}}
+    <div class="table-responsive">
+        <table class="table table-striped table-light">
+            <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">End</th>
+                    <th scope="col">Enrollments</th>
+                    <th scope="col">Projects</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{#each data.semesters}}
+                    <tr>
+                        <th scope="row">{{title}}</th>
+                        <td>{{format_date start_date}}</td>
+                        <td>{{format_date end_date}}</td>
+
+                        {{! Stats }}
+
+                        {{#with enrollments_aggregate.aggregate}}
+                            <td>{{count}}</td>
+                        {{else}}
+                            <td>unavailable</td>
+                        {{/with}}
+
+                        {{#with projects.aggregate}}
+                            <td>{{count}}</td>
+                        {{else}}
+                            <td>unavailable</td>
+                        {{/with}}
+
+                        <td>
+                            <a href="/admin/semesters/edit/{{semester_id}}" class="btn btn-primary">
+                                Edit
+                            </a>
+                        </td>
+
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+{{else}}
+    No semester records found.
+{{/if}}
+
+
+
+
+
+
         {{#if description}}
             <div class="list-group-item">
                 <small class="text-muted mb-2">
-                    User supplied description:
                 </small>
                 {{render_markdown description}}
             </div>
         {{/if}}
-
+        {{stats}}
+            <div class="list-group-item">
+                    <span class="text-muted">
+                        {{#if most_recent_pm}}
+                            {{#each most_recent_pm}}
+                                PM: <a href="{{profile_for user.username}}">{{user.first_name}} {{user.last_name}}</a>
+                            {{/each}}
+                        {{else}}
+                            No PM
+                        {{/if}}
+                    </span>
+            </div>
         <div class="list-group-item">
             <div class="row row-cols-1 row-cols-md-3">
                 <div class="col align-content-center my-1">

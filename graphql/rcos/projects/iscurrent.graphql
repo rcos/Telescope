@@ -1,0 +1,5 @@
+query MyQuery {
+  enrollments(distinct_on: username, where: {semester_id: {_eq: "202101"}, project_id: {_eq: 1}}) {
+    project_id
+  }
+}
