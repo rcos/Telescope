@@ -12,18 +12,18 @@ use crate::api::rcos::send_query;
 )]
 pub struct Members;
 
-use self::members::{MembersMembers, Variables};
+use self::members::{MembersSmallGroupMembers, Variables};
 
 impl Members {
     /// Get the username of the host of a meeting if there is one.
     pub async fn get(
         id: i64,
-    ) -> Result<Vec<MembersMembers>, TelescopeError> {
+    ) -> Result<Vec<MembersSmallGroupMembers>, TelescopeError> {
         Ok(send_query::<Self>(Variables {
             id,
         })
         .await?
-        .members
+        .small_group_members
         )
     }
 }
