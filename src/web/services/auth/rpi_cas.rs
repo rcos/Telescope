@@ -19,7 +19,7 @@ use futures::future::{ready, Ready};
 use regex::Regex;
 
 /// The URL of the RPI CAS server.
-const RPI_CAS_ENDPOINT: &'static str = "https://cas-auth.rpi.edu/cas";
+const RPI_CAS_ENDPOINT: &'static str = "https://cas.auth.rpi.edu/cas";
 
 /// Query parameters of the request sent to Telescope after
 /// the user is authenticated with RPI CAS.
