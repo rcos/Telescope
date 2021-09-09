@@ -95,6 +95,7 @@ impl DiscordIdentity {
         let token_duration = token_response
             .expires_in()
             .expect("Discord did not return token duration.");
+
         // Convert the token duration to a chrono duration.
         let chrono_duration =
             Duration::from_std(token_duration).expect("Token duration out of range.");

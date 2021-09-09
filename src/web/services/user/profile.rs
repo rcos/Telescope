@@ -1,6 +1,6 @@
 //! Profile services.
 
-use crate::api::rcos::users::edit_profile::EditProfileContext;
+use crate::api::rcos::users::edit_profile::{EditProfileContext, SaveProfileEdits};
 use crate::api::rcos::users::profile::{
     profile::{ProfileTarget, ResponseData},
     Profile,
@@ -11,9 +11,10 @@ use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Form, Query, ServiceConfig};
-use actix_web::{HttpRequest, HttpResponse};
+use actix_web::{HttpRequest, HttpResponse, http::header::LOCATION};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
+use crate::web::profile_for;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -160,6 +161,9 @@ async fn save_changes(
         cohort,
     }): Form<ProfileEdits>,
 ) -> Result<HttpResponse, TelescopeError> {
+    // Get authenticated username. This API call gets duplicated in the context creation unfortunately.
+    let username: String = auth.get_rcos_username_or_error().await?;
+
     // Pass most of the handling here to the GET handler. This will get the context and make
     // and fill the form.
     let mut form: FormTemplate = get_context_and_make_form(&auth).await?;
@@ -167,18 +171,30 @@ async fn save_changes(
     // Convert the cohort to a number or default to no cohort input. This should be checked client side.
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
 
-    // Lambda function to reduce string to None if all whitespace or trim otherwise.
-    let reduce = |s: String| Some(s.trim().to_string()).filter(|s| !s.is_empty());
-
-    // Trim the first and last names and then reduce to None if empty.
-    let first_name = reduce(first_name);
-    let last_name = reduce(last_name);
-
     // Fill the form with the submitted info.
     form.template["context"]["first_name"] = json!(&first_name);
     form.template["context"]["last_name"] = json!(&last_name);
     form.template["context"]["cohort"] = json!(&cohort);
     form.template["context"]["role"] = json!(role);
 
-    Err(TelescopeError::NotImplemented)
+    // Error if first or last name is empty.
+    if first_name.trim().is_empty() {
+        form.template["issues"]["first_name"] = json!("Cannot be empty.");
+        return Err(TelescopeError::invalid_form(&form));
+    }
+
+    if last_name.trim().is_empty() {
+        form.template["issues"]["last_name"] = json!("Cannot be empty.");
+        return Err(TelescopeError::invalid_form(&form));
+    }
+
+    // Execute GraphQL mutation to save changes.
+    let username= SaveProfileEdits::execute(username, first_name, last_name, cohort, role)
+        .await?
+        .ok_or(TelescopeError::ise("Could not save changes -- user not found."))?;
+
+    // On success, redirect to user's profile.
+    return Ok(HttpResponse::Found()
+        .header(LOCATION, profile_for(username.as_str()))
+        .finish());
 }

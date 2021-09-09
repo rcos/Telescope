@@ -14,14 +14,30 @@
                         First name:
                     </label>
 
-                    <input class="form-control" name="first_name" type="text" id="first-name-input" value="{{context.first_name}}" required>
+                    <input name="first_name" type="text" id="first-name-input" value="{{context.first_name}}"
+                           {{#if issues.first_name}} class="form-control is-invalid" aria-labelledby="first-name-invalid" {{else}} class="form-control" {{/if}}
+                           required>
+
+                    {{#if issues.first_name}}
+                        <span id="first-name-invalid" class="invalid-feedback">
+                            {{issues.first_name}}
+                        </span>
+                    {{/if}}
                 </div>
 
                 {{! Last name }}
                 <div class="form-group">
                     <label for="last-name-input">Last name:</label>
 
-                    <input type="text" class="form-control" name="last_name" id="last-name-input" value="{{context.last_name}}" required>
+                    <input type="text" name="last_name" id="last-name-input" value="{{context.last_name}}"
+                           {{#if issues.last_name}} class="form-control is-invalid" aria-labelledby="last-name-invalid" {{else}} class="form-control" {{/if}}
+                           required>
+
+                    {{#if issues.last_name}}
+                        <span id="last-name-invalid" class="invalid-feedback">
+                            {{issues.last_name}}
+                        </span>
+                    {{/if}}
                 </div>
 
                 {{! Role }}
