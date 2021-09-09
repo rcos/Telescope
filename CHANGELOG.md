@@ -5,6 +5,8 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+- Make the `/whois` discord command ephemeral -- only the user who invokes the
+  interaction will see the response.
 
 ## 0.7.0 - September 9th, 2021
 - Name change functionality. ([#16])
