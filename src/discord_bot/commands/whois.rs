@@ -10,9 +10,9 @@ use serenity::model::interactions::application_command::ApplicationCommandIntera
 use serenity::model::interactions::{
     application_command::ApplicationCommandOptionType, InteractionResponseType,
 };
+use serenity::model::prelude::InteractionApplicationCommandCallbackDataFlags;
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
-use serenity::model::prelude::InteractionApplicationCommandCallbackDataFlags;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
