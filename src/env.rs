@@ -202,13 +202,14 @@ pub fn global_config() -> Arc<ConcreteConfig> {
 /// variables where necessary. Construct and return the configuration specified.
 /// Initializes logging and returns config.
 fn cli() -> ConcreteConfig {
-    // set env vars from a ".env" file if available.
+    // Set env vars from a ".env" file if available.
     dotenv::dotenv().ok();
 
+    // Get the command line args.
     let commandline: CommandLine = CommandLine::from_args();
 
+    // Read the config file into a string.
     let mut confing_file_string = String::new();
-
     File::open(&commandline.config_file)
         .map_err(|e| {
             eprintln!(
@@ -230,6 +231,7 @@ fn cli() -> ConcreteConfig {
         })
         .unwrap();
 
+    // Parse the config file into an object.
     let parsed = toml::from_str::<TelescopeConfig>(confing_file_string.as_str())
         .map_err(|e| {
             eprintln!("Error deserializing config file: {}", e);
@@ -237,10 +239,11 @@ fn cli() -> ConcreteConfig {
         })
         .unwrap();
 
-    let profile_path = commandline
+    // Extract the profile from the command line args or default to empty.
+    let profile_path: Vec<String> = commandline
         .profile
         .map(|s| s.split(".").map(|p| p.to_string()).collect())
         .unwrap_or(Vec::new());
 
-    parsed.make_concrete(profile_path)
+    return parsed.make_concrete(profile_path);
 }
