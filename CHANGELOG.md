@@ -5,7 +5,12 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
-- Name change functionality. 
+
+## 0.7.0 - September 9th, 2021
+- Name change functionality. [#16]
+- Cohort edit functionality. [#16]
+- Show draft meetings on profile pages.
+- Fixed homepage link to include past developers.
 
 ## 0.6.5 - August 31st, 2021
 - Created changelog. ([#151])
@@ -50,7 +55,7 @@ in the meeting edit form.
 - Created meeting details page.
 - Added support for meetings marked as draft.
 - Added link to handbook in navbar.
-- Added support for linking RPI CAS account. 
+- Added support for linking RPI CAS account. [#5]
 - Created Discord bot. ([#100])
     - Added `/whois` command.
 - Removed email client and templates. 
@@ -94,6 +99,8 @@ in the meeting edit form.
 - No release notes available.
 
 <!-- links -->
+[#5]: https://github.com/rcos/Telescope/issues/5
+[#16]: https://github.com/rcos/Telescope/issues/16
 [#96]: https://github.com/rcos/Telescope/issues/96
 [#100]: https://github.com/rcos/Telescope/issues/100
 [#112]: https://github.com/rcos/Telescope/issues/112
