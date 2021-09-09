@@ -5,7 +5,11 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+- Name change functionality. 
+
+## 0.6.5 - August 31st, 2021
 - Created changelog. ([#151])
+- Updated RPI CAS URL. ([#114])
 
 ## 0.6.4 - July 14th, 2021
 - Fixed bug that prevented external presentation urls from being appropriately shown 
@@ -94,6 +98,7 @@ in the meeting edit form.
 [#100]: https://github.com/rcos/Telescope/issues/100
 [#112]: https://github.com/rcos/Telescope/issues/112
 [#113]: https://github.com/rcos/Telescope/pull/113
+[#114]: https://github.com/rcos/Telescope/issues/114
 [#115]: https://github.com/rcos/Telescope/issues/115
 [#142]: https://github.com/rcos/Telescope/issues/142
 [#151]: https://github.com/rcos/Telescope/issues/151
