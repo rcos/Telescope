@@ -7,8 +7,8 @@ please submit a pull request fixing it.
 ## Unreleased
 
 ## 0.7.0 - September 9th, 2021
-- Name change functionality. [#16]
-- Cohort edit functionality. [#16]
+- Name change functionality. ([#16])
+- Cohort edit functionality. ([#16])
 - Show draft meetings on profile pages.
 - Fixed homepage link to include past developers.
 
