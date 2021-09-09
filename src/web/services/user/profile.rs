@@ -9,12 +9,12 @@ use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
+use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Form, Query, ServiceConfig};
-use actix_web::{HttpRequest, HttpResponse, http::header::LOCATION};
+use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
-use crate::web::profile_for;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -189,9 +189,11 @@ async fn save_changes(
     }
 
     // Execute GraphQL mutation to save changes.
-    let username= SaveProfileEdits::execute(username, first_name, last_name, cohort, role)
+    let username = SaveProfileEdits::execute(username, first_name, last_name, cohort, role)
         .await?
-        .ok_or(TelescopeError::ise("Could not save changes -- user not found."))?;
+        .ok_or(TelescopeError::ise(
+            "Could not save changes -- user not found.",
+        ))?;
 
     // On success, redirect to user's profile.
     return Ok(HttpResponse::Found()
