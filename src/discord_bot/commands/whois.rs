@@ -12,6 +12,7 @@ use serenity::model::interactions::{
 };
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
+use serenity::model::prelude::InteractionApplicationCommandCallbackDataFlags;
 
 /// The name of this slash command.
 pub const COMMAND_NAME: &'static str = "whois";
@@ -92,6 +93,8 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                         rdata
                             // Do not allow any mentions
                             .allowed_mentions(|am| am.empty_parse())
+                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
                             .create_embed(|embed| {
                                 // Add common attributes
                                 embed_common(embed)
@@ -122,6 +125,8 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                     rdata
                         // Allow no mentions
                         .allowed_mentions(|am| am.empty_parse())
+                        // Use the ephemeral flag to hide the response from everyone except the user who invoked it.
+                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
                         .create_embed(|create_embed| {
                             // Set common embed fields (author, footer, timestamp)
                             embed_common(create_embed);
