@@ -41,7 +41,7 @@ pub fn register(config: &mut ServiceConfig) {
 #[get("/user")]
 async fn profile(
     req: HttpRequest,
-    identity: Identity,
+    identity: AuthenticationCookie,
     // TODO: Switch to using Path here when we switch to user ids.
     Query(ProfileQuery { username }): Query<ProfileQuery>,
 ) -> Result<Template, TelescopeError> {
@@ -65,6 +65,10 @@ async fn profile(
     let page_title = format!("{} {}", target_user.first_name, target_user.last_name);
 
     // Get the target user's discord info.
+    let discord_id: Option<&str> = target_user
+        .discord
+        .first()
+        .map(|obj| obj.account_id.as_str());
 
     // Make a profile template
     return Template::new(TEMPLATE_NAME)

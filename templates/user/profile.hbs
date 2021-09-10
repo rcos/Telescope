@@ -12,7 +12,10 @@
             </div>
         {{/if}}
     </div>
+
+    {{! User Role }}
     <span class="badge badge-info">{{format_user_role target.role}}</span>
+
     {{! Cohort info }}
     {{#if target.cohort}}
         <span class="badge" style="background: var(--rpi-red);">
@@ -20,6 +23,7 @@
         </span>
     {{/if}}
 
+    {{! Created at }}
     <br>
     <span class="text-muted">
         Account created {{format_date target.created_at}} {{format_time target.created_at}}
@@ -30,13 +34,15 @@
         <h3 class="mt-2">User Info</h3>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mt-2">
+
+            {{! RPI CAS }}
             <div class="col">
                 <div class="card text-dark text-center">
                     <h5 class="card-header">RPI E-Mail</h5>
                     <div class="card-body p-1">
-                        {{! If the user has an email associated }}
+                        {{! If the user has linked RPI CAS }}
                         {{#if target.rcs_id.[0]}}
-                        {{! Link the email }}
+                            {{! Show the email }}
                             {{#with target.rcs_id.[0]}}
                                 <a href="mailto:{{account_id}}@rpi.edu">
                                     {{account_id}}@rpi.edu
@@ -50,13 +56,28 @@
                                 </a>
                             {{/if}}
                         {{else}}
-                        {{! Show a message indicating not linked and let the user link if it's their account. }}
+                            {{! Show a message indicating not linked and let the user link if it's their account. }}
                             RPI e-mail not linked.
                             {{#if (eq viewer.[0].username target.username)}}
                                 <a href="/link/rpi_cas" class="btn btn-primary w-100">
                                     Link with RPI CAS.
                                 </a>
                             {{/if}}
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            {{! Discord }}
+            <div class="col">
+                <div class="card text-dark text-center">
+                    <h5 class="card-header">
+                        Discord
+                    </h5>
+
+                    <div class="card-body p-1">
+                        {{#if }}
+
                         {{/if}}
                     </div>
                 </div>
