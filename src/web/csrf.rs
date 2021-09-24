@@ -11,28 +11,10 @@ use std::time::Duration as StdDuration;
 
 /// Extract the remote IP address string from an HTTP request's headers.
 fn extract_ip_addr(req: &HttpRequest) -> Result<String, TelescopeError> {
-    // Get the request headers.
-    req.headers()
-        // We use the X-Forwarded-For header that Caddy sets.
-        .get("X-Forwarded-For")
-        // Get the remote IP from the header.
-        .map(|header_value| {
-            // Convert the header value to a string.
-            header_value
-                .to_str()
-                // This should be ASCII, and should not error.
-                .expect("XFF header should be ASCII")
-                // Split on commas, as defined at
-                // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
-                .split(",")
-                // Get the first one -- this should be the remote client ID.
-                .next()
-                // There should always be at least one.
-                .expect("No first address in XFF header")
-                // Convert it to a string.
-                .to_string()
-        })
-        .ok_or(TelescopeError::IpExtractionError)
+    req.connection_info()
+              .realip_remote_addr()
+              .map(str::to_string)
+              .ok_or(TelescopeError::IpExtractionError)
 }
 
 lazy_static! {
