@@ -44,12 +44,14 @@ mod error;
 mod templates;
 mod web;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
     // set up logger and global web server configuration.
     env::init();
     // Log the server timezone
     info!("Server timezone: {}", chrono::Local::now().offset().fix());
+
+    // Create actix system to dispatch async operations.
+    let actix_system = actix::System::new();
 
     // Start global CSRF token janitor.
     CsrfJanitor.start();
@@ -96,10 +98,9 @@ async fn main() -> std::io::Result<()> {
     })
     // Bind to 80 (this gets reversed proxied by Caddy later)
     .bind("0.0.0.0:80")
-    .expect("Could not bind http://localhost:80")
+    .expect("Could not bind http://localhost:80");
     // Start the server running.
-    .run();
 
     // Wait on server to produce an error.
-    return web_server.await;
+    return actix_system.block_on(web_server.run());
 }

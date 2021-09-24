@@ -4,27 +4,26 @@ version = 3
 
 [[package]]
 name = "actix"
-version = "0.10.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1be241f88f3b1e7e9a3fbe3b5a8a0f6915b5a1d7ee0d9a248d3376d01068cc60"
+checksum = "3720d0064a0ce5c0de7bd93bdb0a6caebab2a9b5668746145d7b3b0c5da02914"
 dependencies = [
- "actix-rt",
+ "actix-rt 2.2.0",
  "actix_derive",
  "bitflags",
- "bytes 0.5.6",
+ "bytes 1.0.1",
  "crossbeam-channel",
- "derive_more",
- "futures-channel",
+ "futures-core",
+ "futures-sink",
+ "futures-task",
  "futures-util",
  "log",
  "once_cell",
  "parking_lot",
- "pin-project 0.4.27",
+ "pin-project-lite 0.2.4",
  "smallvec 1.6.1",
- "tokio 0.2.25",
- "tokio-util 0.3.1",
- "trust-dns-proto",
- "trust-dns-resolver",
+ "tokio 1.7.0",
+ "tokio-util 0.6.7",
 ]
 
 [[package]]
@@ -50,7 +49,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "177837a10863f15ba8d3ae3ec12fac1099099529ed20083a27fdfe247381d0dc"
 dependencies = [
  "actix-codec",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-service",
  "actix-utils",
  "derive_more",
@@ -93,7 +92,7 @@ checksum = "452299e87817ae5673910e53c243484ca38be3828db819b6011736fc6982e874"
 dependencies = [
  "actix-codec",
  "actix-connect",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-service",
  "actix-threadpool",
  "actix-tls",
@@ -186,13 +185,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-rt"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc7d7cd957c9ed92288a7c3c96af81fa5291f65247a76a34dac7b6af74e52ba0"
+dependencies = [
+ "futures-core",
+ "tokio 1.7.0",
+]
+
+[[package]]
 name = "actix-server"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "45407e6e672ca24784baa667c5d32ef109ccdd8d5e0b5ebb9ef8a67f4dfb708e"
 dependencies = [
  "actix-codec",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-service",
  "actix-utils",
  "futures-channel",
@@ -222,7 +231,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47239ca38799ab74ee6a8a94d1ce857014b2ac36f242f70f3f75a66f691e791c"
 dependencies = [
  "actix-macros",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-server",
  "actix-service",
  "log",
@@ -267,7 +276,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e9022dec56632d1d7979e59af14f0597a28a830a9c1c7fec8b2327eb9f16b5a"
 dependencies = [
  "actix-codec",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-service",
  "bitflags",
  "bytes 0.5.6",
@@ -290,7 +299,7 @@ dependencies = [
  "actix-http",
  "actix-macros",
  "actix-router",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-server",
  "actix-service",
  "actix-testing",
@@ -333,9 +342,9 @@ dependencies = [
 
 [[package]]
 name = "actix_derive"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b95aceadaf327f18f0df5962fedc1bde2f870566a0b9f65c89508a3b1f79334c"
+checksum = "6d44b8fee1ced9671ba043476deddef739dd0959bf77030b26b738cc591737a7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -487,7 +496,7 @@ checksum = "b381e490e7b0cfc37ebc54079b0413d8093ef43d14a4e4747083f7fa47a9e691"
 dependencies = [
  "actix-codec",
  "actix-http",
- "actix-rt",
+ "actix-rt 1.1.1",
  "actix-service",
  "base64 0.13.0",
  "bytes 0.5.6",
@@ -806,22 +815,21 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.4.4"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b153fe7cbef478c567df0f972e02e6d736db11affe43dfc9c56a9374d1adfb87"
+checksum = "06ed27e177f16d65f0f0c22a213e17c696ace5dd64b14258b52f9417ccb52db4"
 dependencies = [
+ "cfg-if 1.0.0",
  "crossbeam-utils",
- "maybe-uninit",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.7.2"
+version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3c7c73a2d1e9fc0886a08b93e98eb643461230d5f1925e4036204d5f2e261a8"
+checksum = "d82cfc11ce7f2c3faef78d8a684447b40d503d9681acebed6cb728d45940c4db"
 dependencies = [
- "autocfg",
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "lazy_static",
 ]
 
@@ -3111,7 +3119,10 @@ dependencies = [
  "memchr",
  "mio 0.7.13",
  "num_cpus",
+ "once_cell",
+ "parking_lot",
  "pin-project-lite 0.2.4",
+ "signal-hook-registry",
  "winapi 0.3.9",
 ]
 
@@ -3167,7 +3178,6 @@ checksum = "be8242891f2b6cbef26a2d7e8605133c2c554cd35b3e4948ea892d6d68436499"
 dependencies = [
  "bytes 0.5.6",
  "futures-core",
- "futures-io",
  "futures-sink",
  "log",
  "pin-project-lite 0.1.11",
