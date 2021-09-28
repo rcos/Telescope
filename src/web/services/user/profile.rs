@@ -10,7 +10,7 @@ use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
 use crate::web::profile_for;
-use crate::web::services::auth::identity::AuthenticationCookie;
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
@@ -42,7 +42,7 @@ pub fn register(config: &mut ServiceConfig) {
 #[get("/user")]
 async fn profile(
     req: HttpRequest,
-    identity: AuthenticationCookie,
+    identity: Identity,
     // TODO: Switch to using Path here when we switch to user ids.
     Query(ProfileQuery { username }): Query<ProfileQuery>,
 ) -> Result<Template, TelescopeError> {
@@ -81,7 +81,15 @@ async fn profile(
         template["discord"]["target"]["snowflake"] = json!(target_discord_id);
 
         // If we can, resolve the discord tag of the target using the viewer's auth.
-        if let Some(discord_auth) = identity.get_discord() {
+        let auth_cookie = identity
+            .identity()
+            .await;
+
+        let discord_auth = auth_cookie
+            .as_ref()
+            .and_then(|auth| auth.get_discord());
+
+        if let Some(discord_auth) = discord_auth {
             // Get target user info and current user info.
             let target_user: User = discord_auth.lookup_user(target_discord_id).await?;
             let viewer: CurrentUser = discord_auth.get_authenticated_user().await?;
