@@ -10,11 +10,12 @@ use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
 use crate::web::profile_for;
-use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
+use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
+use serenity::model::user::{User, CurrentUser};
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -59,23 +60,45 @@ async fn profile(
         ));
     }
 
+    // Create the profile template to send back to the viewer.
+    let mut template: Template = Template::new(TEMPLATE_NAME)
+        .field("data", &response);
+
     // Get the target user's info.
     let target_user: &ProfileTarget = response.target.as_ref().unwrap();
     // And use it to make the page title
-    let page_title = format!("{} {}", target_user.first_name, target_user.last_name);
+    let page_title: String = format!("{} {}", target_user.first_name, target_user.last_name);
 
     // Get the target user's discord info.
-    let discord_id: Option<&str> = target_user
+    let target_discord_id: Option<&str> = target_user
         .discord
         .first()
         .map(|obj| obj.account_id.as_str());
 
-    // Make a profile template
-    return Template::new(TEMPLATE_NAME)
-        .field("data", response)
-        // Render it inside a page (with the user's name as the title)
-        .render_into_page(&req, page_title)
-        .await;
+    // If the discord ID exists.
+    if let Some(target_discord_id) = target_discord_id {
+        // Add the discord field to the template.
+        template["discord"]["target"]["snowflake"] = json!(target_discord_id);
+
+        // If we can, resolve the discord tag of the target using the viewer's auth.
+        if let Some(discord_auth) = identity.get_discord() {
+            // Get target user info and current user info.
+            let target_user: User = discord_auth.lookup_user(target_discord_id).await?;
+            let viewer: CurrentUser = discord_auth.get_authenticated_user().await?;
+
+            // Add discord info to the template.
+            template["discord"]["target"] = json!({
+                "snowflake": target_user.id,
+                "face": target_user.face(),
+                "tag": target_user.tag()
+            });
+
+            template["discord"]["viewer"]["snowflake"] = json!(&viewer.id);
+        }
+    }
+
+    // Render the profile template and send to user.
+    return template.render_into_page(&req, page_title).await;
 }
 
 /// Create a form template for the user settings page.

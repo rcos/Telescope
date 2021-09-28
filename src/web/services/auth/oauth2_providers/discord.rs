@@ -14,7 +14,7 @@ use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
-use serenity::model::user::CurrentUser;
+use serenity::model::user::{CurrentUser, User};
 use std::sync::Arc;
 
 /// The Discord API endpoint to query for user data.
@@ -188,5 +188,23 @@ impl DiscordIdentity {
                     e
                 ))
             });
+    }
+
+    /// Lookup a discord user's info by their user ID snowflake.
+    pub async fn lookup_user(&self, user_id: &str) -> Result<User, TelescopeError> {
+        return reqwest::Client::new()
+            .get(format!("{}/users/{}", DISCORD_API_ENDPOINT, user_id).as_str())
+            .bearer_auth(self.access_token.secret())
+            .header(ACCEPT, "application/json")
+            .send()
+            .await
+            .map_err(|e| {
+                TelescopeError::ise(format!("Could not send user lookup request to discord. Internal error: {}", e))
+            })?
+            .json::<User>()
+            .await
+            .map_err(|e| {
+                TelescopeError::ise(format!("Could not deserialize discord user object. Internal error: {}", e))
+            })
     }
 }
