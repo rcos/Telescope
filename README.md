@@ -124,7 +124,11 @@ where `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` is replaced by your PAT.
     $ hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
     ``` 
 7. Track the Hasura tables:
-    In Hasura (http://localhost:8000), enter your `admin-secret` when prompted. Navigate to the "Data" tab, and click "Create Table". Track all tables, and hit "Add Table".
+    In Hasura (http://localhost:8000), enter your `admin-secret` when prompted. Navigate to the "Data" tab, and click "Create Table". Track all tables, and hit "Add Table". You also want to press "Track All" for the foreign key relationships as well.
+8. Reload metadata:
+   ```shell
+   $ hasura --project rcos-data/ metadata --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 reload
+   ```
 9. At this point Postgres, the Hasura GraphQL API, Caddy, and Telescope should 
    all be running on your system in individual docker containers. Docker 
    exposes the Hasura console at http://localhost:8000 and https://localhost:8001, 
