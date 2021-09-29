@@ -2,7 +2,7 @@
     email rcos.management@gmail.com
 }
 
-rcos.io, www.rcos.io {
+rcos.io {
     encode zstd gzip
     
     reverse_proxy telescope:80
@@ -29,6 +29,6 @@ gql.rcos.io {
     reverse_proxy hasura:8080
 }
 
-telescope.rcos.io {
+telescope.rcos.io, www.rcos.io {
     redir https://rcos.io permenant 
 }
