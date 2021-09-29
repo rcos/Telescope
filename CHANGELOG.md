@@ -5,9 +5,12 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+
+## 0.7.1 - September 29th, 2021
 - Make the `/whois` discord command ephemeral -- only the user who invokes the
   interaction will see the response.
 - Fixed "Schedule" link on the home page to render correctly on Safari. ([#176])
+- Updated everything to work at <https://rcos.io> instead of <https://telescope.rcos.io>. 
 
 ## 0.7.0 - September 9th, 2021
 - Name change functionality. ([#16])
