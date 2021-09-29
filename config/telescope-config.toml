@@ -16,5 +16,5 @@ client_secret = "****************************************"
 client_id = "xxxxxxxxxxxxxxxxxxxx"
 client_secret = "****************************************"
 bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-telescope_url = "https://telescope.rcos.io"
+telescope_url = "https://rcos.io"
 guild_ids = []
