@@ -2,13 +2,11 @@
     email rcos.management@gmail.com
 }
 
-# rcos.io, www.rcos.io {
-#     encode zstd gzip
-#     log { output discard }
-
-#     # TODO Observatory/Telescope
-#     respond "Hello, world!"
-# }
+rcos.io, www.rcos.io {
+    encode zstd gzip
+    
+    reverse_proxy telescope:80
+}
 
 api.rcos.io {
     encode zstd gzip
@@ -31,8 +29,6 @@ gql.rcos.io {
     reverse_proxy hasura:8080
 }
 
-telescope.rcos.io, rcos.io {
-    encode zstd gzip
-
-    reverse_proxy telescope:80
+telescope.rcos.io {
+    redir https://rcos.io permenant 
 }
