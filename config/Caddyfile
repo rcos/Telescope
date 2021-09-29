@@ -31,7 +31,7 @@ gql.rcos.io {
     reverse_proxy hasura:8080
 }
 
-telescope.rcos.io {
+telescope.rcos.io, rcos.io {
     encode zstd gzip
 
     reverse_proxy telescope:80
