@@ -1,12 +1,14 @@
-# Telescope
-Telescope intends to replace [Observatory](https://github.com/rcos/observatory-server) 
-as the RCOS website.
+# Telescope - <https://rcos.io>
+Telescope is the RCOS website. 
 
 [![Cargo](https://github.com/rcos/Telescope/actions/workflows/cargo.yml/badge.svg)](https://github.com/rcos/Telescope/actions/workflows/cargo.yml)
 [![Docker](https://github.com/rcos/Telescope/actions/workflows/docker.yml/badge.svg)](https://github.com/rcos/Telescope/actions/workflows/docker.yml)
 [![GitHub release version](https://img.shields.io/github/release/rcos/Telescope.svg)](https://github.com/rcos/Telescope/releases)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/rcos/Telescope.svg)](https://isitmaintained.com/project/rcos/Telescope)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/rcos/Telescope.svg)](https://isitmaintained.com/project/rcos/Telescope)
+
+## User Notes
+If you find issues with Telescope or have a feature ou want added, please make an issue under the issues tab. You should also feel free to contribute your own. Pull requests are welcome. See below for detailed information on building & contributing to telescope.
 
 ## Development Notes
 These are note for Telescope Developers on how to find and update Telescope 
