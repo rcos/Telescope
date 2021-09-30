@@ -30,5 +30,5 @@ gql.rcos.io {
 }
 
 telescope.rcos.io, www.rcos.io {
-    redir https://rcos.io permenant 
+    redir https://rcos.io{uri} permanent 
 }
