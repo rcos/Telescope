@@ -16,6 +16,7 @@ use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
 use serenity::model::user::{User, CurrentUser};
+use crate::api::discord;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -77,31 +78,41 @@ async fn profile(
 
     // If the discord ID exists.
     if let Some(target_discord_id) = target_discord_id {
-        // Add the discord field to the template.
-        template["discord"]["target"]["snowflake"] = json!(target_discord_id);
+        // Get target user info.
+        let target_user: Result<User, TelescopeError> = discord::lookup_user(target_discord_id)
+            .await;
+
+        // Check to make sure target user info was available.
+        if let Err(e) = target_user {
+            // Log an error and set a flag for the template.
+            warn!("Could not get target user account for Discord user ID {}. Account may have been deleted.", target_discord_id);
+            template["discord"]["target"] = json!({
+                // Also setting the ID lets the owner unlink discord if necessary.
+                "id": target_discord_id,
+                "errored": true
+            });
+        } else {
+            // Add the discord info to the template.
+            template["discord"]["target"] = json!(target_user.unwrap());
+        }
 
         // If we can, resolve the discord tag of the target using the viewer's auth.
+        // Get the authentication cookie if there is one.
         let auth_cookie = identity
             .identity()
             .await;
 
+        // Extract the Discord credentials if available.
         let discord_auth = auth_cookie
             .as_ref()
             .and_then(|auth| auth.get_discord());
 
+        // If there are Discord credentials, look up the associated user.
         if let Some(discord_auth) = discord_auth {
-            // Get target user info and current user info.
-            let target_user: User = discord_auth.lookup_user(target_discord_id).await?;
+            // Look up the viewer's discord info.
             let viewer: CurrentUser = discord_auth.get_authenticated_user().await?;
-
-            // Add discord info to the template.
-            template["discord"]["target"] = json!({
-                "snowflake": target_user.id,
-                "face": target_user.face(),
-                "tag": target_user.tag()
-            });
-
-            template["discord"]["viewer"]["snowflake"] = json!(&viewer.id);
+            // Add it to the template.
+            template["discord"]["viewer"] = json!(viewer);
         }
     }
 

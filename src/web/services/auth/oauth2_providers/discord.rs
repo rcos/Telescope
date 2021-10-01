@@ -1,24 +1,24 @@
 //! Discord OAuth2 flow.
 
+use std::sync::Arc;
+
+use actix_web::http::header::ACCEPT;
+use chrono::{DateTime, Duration, Utc};
+use futures::future::LocalBoxFuture;
+use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
+use oauth2::{AuthUrl, TokenUrl};
+use oauth2::basic::{BasicClient, BasicTokenResponse};
+use serenity::model::user::{CurrentUser, User};
+
+use crate::api::discord::DISCORD_API_ENDPOINT;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
-use crate::web::services::auth::oauth2_providers::{Oauth2Identity, Oauth2IdentityProvider};
 use crate::web::services::auth::IdentityProvider;
-use actix_web::http::header::ACCEPT;
-use chrono::{DateTime, Duration, Utc};
-use futures::future::LocalBoxFuture;
-use oauth2::basic::{BasicClient, BasicTokenResponse};
-use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
-use oauth2::{AuthUrl, TokenUrl};
-use serenity::model::user::{CurrentUser, User};
-use std::sync::Arc;
-
-/// The Discord API endpoint to query for user data.
-const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
+use crate::web::services::auth::oauth2_providers::{Oauth2Identity, Oauth2IdentityProvider};
 
 /// Zero-sized type used to represent Discord based identity verification.
 pub struct DiscordOAuth;
@@ -188,23 +188,5 @@ impl DiscordIdentity {
                     e
                 ))
             });
-    }
-
-    /// Lookup a discord user's info by their user ID snowflake.
-    pub async fn lookup_user(&self, user_id: &str) -> Result<User, TelescopeError> {
-        return reqwest::Client::new()
-            .get(format!("{}/users/{}", DISCORD_API_ENDPOINT, user_id).as_str())
-            .bearer_auth(self.access_token.secret())
-            .header(ACCEPT, "application/json")
-            .send()
-            .await
-            .map_err(|e| {
-                TelescopeError::ise(format!("Could not send user lookup request to discord. Internal error: {}", e))
-            })?
-            .json::<User>()
-            .await
-            .map_err(|e| {
-                TelescopeError::ise(format!("Could not deserialize discord user object. Internal error: {}", e))
-            })
     }
 }
