@@ -8,9 +8,7 @@ use futures::future::LocalBoxFuture;
 use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
 use oauth2::basic::{BasicClient, BasicTokenResponse};
-use serenity::model::user::{CurrentUser, User};
-
-use crate::api::discord::DISCORD_API_ENDPOINT;
+use serenity::model::user::CurrentUser;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
@@ -19,6 +17,9 @@ use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::IdentityProvider;
 use crate::web::services::auth::oauth2_providers::{Oauth2Identity, Oauth2IdentityProvider};
+
+/// The Discord API endpoint to query for user data.
+pub const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
 
 /// Zero-sized type used to represent Discord based identity verification.
 pub struct DiscordOAuth;

@@ -16,7 +16,7 @@ use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
 use serenity::model::user::{User, CurrentUser};
-use crate::api::discord;
+use crate::api::discord::global_discord_client;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -76,16 +76,17 @@ async fn profile(
         .first()
         .map(|obj| obj.account_id.as_str());
 
-    // If the discord ID exists.
-    if let Some(target_discord_id) = target_discord_id {
+    // If the discord ID exists, and is properly formatted.
+    if let Some(target_discord_id) = target_discord_id.and_then(|s| s.parse::<u64>().ok()) {
         // Get target user info.
-        let target_user: Result<User, TelescopeError> = discord::lookup_user(target_discord_id)
+        let target_user: Result<User, serenity::Error> = global_discord_client()
+            .get_user(target_discord_id)
             .await;
 
         // Check to make sure target user info was available.
         if let Err(e) = target_user {
             // Log an error and set a flag for the template.
-            warn!("Could not get target user account for Discord user ID {}. Account may have been deleted.", target_discord_id);
+            warn!("Could not get target user account for Discord user ID {}. Account may have been deleted. Internal error: {}", target_discord_id, e);
             template["discord"]["target"] = json!({
                 // Also setting the ID lets the owner unlink discord if necessary.
                 "id": target_discord_id,
