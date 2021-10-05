@@ -52,7 +52,7 @@ async-trait = "0.1.51"
 # Date and time utilities and formats
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
 chrono-tz = {version = "~0.6", features = ["serde"]}
-time = "0.2.27" # Latest version of time crate compatible with actix-identity 0.3.1
+time = "0.3.3" # Latest version of time crate compatible with actix-identity 0.3.1
 
 # URL formatting
 url = {version = "2", features = ["serde"]}
