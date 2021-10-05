@@ -84,17 +84,29 @@ async fn profile(
             .await;
 
         // Check to make sure target user info was available.
-        if let Err(e) = target_user {
-            // Log an error and set a flag for the template.
-            warn!("Could not get target user account for Discord user ID {}. Account may have been deleted. Internal error: {}", target_discord_id, e);
-            template["discord"]["target"] = json!({
-                // Also setting the ID lets the owner unlink discord if necessary.
-                "id": target_discord_id,
-                "errored": true
-            });
-        } else {
-            // Add the discord info to the template.
-            template["discord"]["target"] = json!(target_user.unwrap());
+        match target_user {
+            // Issue retrieving target user info
+            Err(e) => {
+                // Log an error and set a flag for the template.
+                warn!("Could not get target user account for Discord user ID {}. Account may have been deleted. Internal error: {}", target_discord_id, e);
+                template["discord"]["target"] = json!({
+                    // Also setting the ID lets the owner unlink discord if necessary.
+                    "id": target_discord_id,
+                    "errored": true
+                });
+            },
+
+            // User returned successfully.
+            Ok(u) => {
+                // Add the discord info to the template.
+                template["discord"]["target"] = json!({
+                    "response": &u,
+                    "resolved": {
+                        "face": u.face(),
+                        "tag": u.tag(),
+                    }
+                });
+            }
         }
 
         // If we can, resolve the discord tag of the target using the viewer's auth.
