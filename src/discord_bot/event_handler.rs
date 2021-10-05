@@ -33,7 +33,7 @@ impl EventHandler for Handler {
         if global_config()
             .discord_config
             .guild_ids
-            .contains(guild.id.as_u64())
+            .contains(&guild.id.to_string())
         {
             // If so, register telescope's commands
             info!(
