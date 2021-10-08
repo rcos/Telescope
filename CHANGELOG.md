@@ -5,6 +5,8 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+- Account linking with Discord ([#5], [#181])
+- Updated Discord colors and icons ([#116], [#181]) 
 
 ## 0.7.1 - September 29th, 2021
 - Make the `/whois` discord command ephemeral -- only the user who invokes the
@@ -113,6 +115,8 @@ in the meeting edit form.
 [#113]: https://github.com/rcos/Telescope/pull/113
 [#114]: https://github.com/rcos/Telescope/issues/114
 [#115]: https://github.com/rcos/Telescope/issues/115
+[#116]: https://github.com/rcos/Telescope/issues/116
 [#142]: https://github.com/rcos/Telescope/issues/142
 [#151]: https://github.com/rcos/Telescope/issues/151
 [#176]: https://github.com/rcos/Telescope/pull/176
+[#181]: https://github.com/rcos/Telescope/pull/181

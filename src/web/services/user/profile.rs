@@ -15,6 +15,8 @@ use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
+use serenity::model::user::{User, CurrentUser};
+use crate::api::discord::global_discord_client;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -59,19 +61,72 @@ async fn profile(
         ));
     }
 
+    // Create the profile template to send back to the viewer.
+    let mut template: Template = Template::new(TEMPLATE_NAME)
+        .field("data", &response);
+
     // Get the target user's info.
     let target_user: &ProfileTarget = response.target.as_ref().unwrap();
     // And use it to make the page title
-    let page_title = format!("{} {}", target_user.first_name, target_user.last_name);
+    let page_title: String = format!("{} {}", target_user.first_name, target_user.last_name);
 
     // Get the target user's discord info.
+    let target_discord_id: Option<&str> = target_user
+        .discord
+        .first()
+        .map(|obj| obj.account_id.as_str());
 
-    // Make a profile template
-    return Template::new(TEMPLATE_NAME)
-        .field("data", response)
-        // Render it inside a page (with the user's name as the title)
-        .render_into_page(&req, page_title)
-        .await;
+    // If the discord ID exists, and is properly formatted.
+    if let Some(target_discord_id) = target_discord_id.and_then(|s| s.parse::<u64>().ok()) {
+        // Get target user info.
+        let target_user: Result<User, serenity::Error> = global_discord_client()
+            .get_user(target_discord_id)
+            .await;
+
+        // Check to make sure target user info was available.
+        match target_user {
+            // Issue retrieving target user info
+            Err(e) => {
+                // Log an error and set a flag for the template.
+                warn!("Could not get target user account for Discord user ID {}. Account may have been deleted. Internal error: {}", target_discord_id, e);
+                template["discord"]["target"] = json!({"errored": true});
+            },
+
+            // User returned successfully.
+            Ok(u) => {
+                // Add the discord info to the template.
+                template["discord"]["target"] = json!({
+                    "response": &u,
+                    "resolved": {
+                        "face": u.face(),
+                        "tag": u.tag(),
+                    }
+                });
+            }
+        }
+
+        // If we can, resolve the discord tag of the target using the viewer's auth.
+        // Get the authentication cookie if there is one.
+        let auth_cookie = identity
+            .identity()
+            .await;
+
+        // Extract the Discord credentials if available.
+        let discord_auth = auth_cookie
+            .as_ref()
+            .and_then(|auth| auth.get_discord());
+
+        // If there are Discord credentials, look up the associated user.
+        if let Some(discord_auth) = discord_auth {
+            // Look up the viewer's discord info.
+            let viewer: CurrentUser = discord_auth.get_authenticated_user().await?;
+            // Add it to the template.
+            template["discord"]["viewer"] = json!(viewer);
+        }
+    }
+
+    // Render the profile template and send to user.
+    return template.render_into_page(&req, page_title).await;
 }
 
 /// Create a form template for the user settings page.
