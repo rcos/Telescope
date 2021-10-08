@@ -7,6 +7,7 @@ please submit a pull request fixing it.
 ## Unreleased
 - Account linking with Discord ([#5], [#181])
 - Updated Discord colors and icons ([#116], [#181]) 
+- Tweaked format of Discord Guild IDs in config file ([#179])
 
 ## 0.7.1 - September 29th, 2021
 - Make the `/whois` discord command ephemeral -- only the user who invokes the
@@ -116,4 +117,5 @@ in the meeting edit form.
 [#142]: https://github.com/rcos/Telescope/issues/142
 [#151]: https://github.com/rcos/Telescope/issues/151
 [#176]: https://github.com/rcos/Telescope/pull/176
+[#179]: https://github.com/rcos/Telescope/pull/179
 [#181]: https://github.com/rcos/Telescope/pull/181
