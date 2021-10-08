@@ -82,7 +82,10 @@
                                 Could not get discord info. Refresh the page perhaps?
                             {{else}}
                                 {{! Display info about target user's Discord }}
-                                {{! TODO }}
+                                <div class="align-content-center">
+                                    <img src="{{../discord.target.resolved.face}}" alt="Discord Profile Picture" class="img-thumbnail">
+                                    {{../discord.target.resolved.tag}}
+                                </div>
                             {{/if}}
 
                             {{! Check if user owns this account }}

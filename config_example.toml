@@ -68,7 +68,7 @@ telescope_url = "https://rcos.io"
 # [REQUIRED]
 # Guilds for the discord bot to add commands to. Telescope does not use global
 # commands, so each RCOS guild mut be whitelisted.
-guild_ids = []
+guild_ids = ["xxxxxxxxxxxxxxxxxx"]
 
 # Development Profile
 # These options will override the global ones when telescope is run using
