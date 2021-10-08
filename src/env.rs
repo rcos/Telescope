@@ -33,7 +33,7 @@ pub struct DiscordConfig {
     /// The discord Guild IDs for the bot to add the commands to as needed.
     /// This bot only adds commands to guilds to avoid being used outside of RCOS
     /// approved servers.
-    pub guild_ids: Vec<u64>,
+    pub guild_ids: Vec<String>,
 }
 
 /// The config of the server instance.
