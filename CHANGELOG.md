@@ -35,16 +35,14 @@ in the meeting edit form.
 - Fixed access bug that prevented users from viewing drafts of meetings that they host.
 
 ## 0.6.1 - July 10th, 2021
-- Fixed bug that prevented editing meetings from previous semesters. 
-  ([#142])
+- Fixed bug that prevented editing meetings from previous semesters. ([#142])
 
 ## 0.6.0 - July 9th, 2021
 - Added support for creating meetings. ([#96])
 - Added support for editing meetings. ([#96])
 - Changed appearance of footer. 
 - Added rust documentation for developers to site. 
-- Added system administrator user role. 
-  ([#115])
+- Added system administrator user role. ([#115])
 - Fixed several links to open in new tabs. 
 - Added semesters table in admin panel. 
 - Added semester creation form in admin panel.
@@ -56,14 +54,13 @@ in the meeting edit form.
 - Updated templates to work with handlebars 4.0.0.
 
 ## 0.5.1 - May 25th, 2021
-- Fixed bug that caused internal server error when visiting a user's profile.
-  ([#112])
+- Fixed bug that caused internal server error when visiting a user's profile. ([#112])
 
 ## 0.5.0 - May 25th, 2021
 - Created meeting details page.
 - Added support for meetings marked as draft.
 - Added link to handbook in navbar.
-- Added support for linking RPI CAS account. [#5]
+- Added support for linking RPI CAS account. ([#5])
 - Created Discord bot. ([#100])
     - Added `/whois` command.
 - Removed email client and templates. 
