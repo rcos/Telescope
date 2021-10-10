@@ -1,0 +1,25 @@
+query EnrollmentsForUser($username: String!, $offset: Int!, $limit: Int!) {
+  enrollments_aggregate {
+    aggregate {
+      count
+    }
+  }
+  enrollments(where: {_or: [{username: {_neq: $username}}, {semester: {start_date: {_gte: "now()"}}}]}, offset: $offset, limit: $limit, order_by: [{semester: {start_date: desc}}]) {
+    is_coordinator
+    is_for_pay
+    is_project_lead
+    final_grade
+    credits
+    project {
+      title
+    }
+    semester {
+      start_date
+      end_date
+      title
+      small_groups {
+        title
+      }
+    }
+  }
+}

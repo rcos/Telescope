@@ -1,0 +1,25 @@
+query Enrollments($offset: Int!, $limit: Int!) {
+  enrollments_aggregate {
+    aggregate {
+      count
+    }
+  }
+  enrollments(offset: $offset, limit: $limit, order_by: [{semester: {start_date: desc}}]) {
+    is_coordinator
+    is_for_pay
+    is_project_lead
+    final_grade
+    credits
+    project {
+      title
+    }
+    semester {
+      start_date
+      end_date
+      title
+      small_groups {
+        title
+      }
+    }
+  }
+}
