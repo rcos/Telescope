@@ -27,6 +27,11 @@
     --meeting-other-text: var(--light);
 }
 
+@font-face {
+    font-family: "Font Awesome";
+    src: url(https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/webfonts/fa-brands-400.woff2);
+}
+
 /* RCOS themed buttons. */
 .btn.btn-rcos {
     background: var(--rcos-red);
@@ -53,6 +58,10 @@
 
 .btn.btn-discord:hover {
     color: var(--discord-black);
+}
+
+.fab {
+    font-family: "Font Awesome";
 }
 
 /*
