@@ -1,10 +1,10 @@
-query EnrollmentsForUser($username: String!, $offset: Int!, $limit: Int!) {
+query Enrollments($username: String!, $offset: Int!, $limit: Int!) {
   enrollments_aggregate {
     aggregate {
       count
     }
   }
-  enrollments(where: {_or: [{username: {_neq: $username}}, {semester: {start_date: {_gte: "now()"}}}]}, offset: $offset, limit: $limit, order_by: [{semester: {start_date: desc}}]) {
+  enrollments = enrollments(where: {_or: [{username: {_neq: $username}}, {semester: {start_date: {_gte: "now()"}}}]}, offset: $offset, limit: $limit, order_by: [{semester: {start_date: desc}}]) {
     is_coordinator
     is_for_pay
     is_project_lead

@@ -1,0 +1,58 @@
+<h1>Enrollments Records</h1>
+
+{{! Pagination }}
+{{> pagination/pagination_bar pagination=pagination prefix="./"}}
+
+{{! Semester Creation link }}
+<a class="btn btn-primary w-100 mb-1" href="/admin/semesters/create">Create Semester</a>
+
+{{! Display actual data in a table}}
+{{#if enrollments}}
+    <div class="table-responsive">
+        <table class="table table-striped table-light">
+            <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">End</th>
+                    <th scope="col">Enrollments</th>
+                    <th scope="col">Projects</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{#each enrollments}}
+                    <tr>
+                        <th scope="row">{{title}}</th>
+                        <td>{{format_date semester.start_date}}</td>
+                        <td>{{format_date semester.end_date}}</td>
+
+                        {{! Stats }}
+
+                        {{#with enrollments_aggregate.aggregate}}
+                            <td>{{count}}</td>
+                        {{else}}
+                            <td>unavailable</td>
+                        {{/with}}
+
+                        {{#with projects.aggregate}}
+                            <td>{{count}}</td>
+                        {{else}}
+                            <td>unavailable</td>
+                        {{/with}}
+
+                        <td>
+                            <a href="/admin/semesters/edit/{{semester_id}}" class="btn btn-primary">
+                                Edit
+                            </a>
+                        </td>
+
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+{{else}}
+    No semester records found.
+{{/if}}
+<div class="ro

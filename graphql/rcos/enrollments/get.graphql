@@ -13,6 +13,7 @@ query Enrollments($offset: Int!, $limit: Int!) {
     project {
       title
     }
+    semesters_aggregate
     semester {
       start_date
       end_date

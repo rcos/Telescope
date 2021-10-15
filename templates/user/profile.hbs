@@ -119,9 +119,14 @@
     {{/if}}
 
     {{! Enrollments }}
-    <h3 class="mt-2">
-        Enrollments
-    </h3>
+    <div class="row justify-content-between">
+        <h3 class="mt-2 col-md-auto">
+            Enrollments
+        </h3>
+        <div class="col-md-3 d-flex align-items-center">
+            <a class="btn btn-primary w-100 my-1" href="/manage_enrollments">Manage enrollments</button>
+        </div>
+    </div>
     {{#each target.enrollments}}
         <div class="card mt-1 text-dark">
             <div class="card-header">
