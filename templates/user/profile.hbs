@@ -11,6 +11,14 @@
                 </a>
             </div>
         {{/if}}
+
+        {{! Join Discord Link (if available) }}
+        {{#if (eq target.username viewer.[0].username)}}
+            {{! Viewer is target user }}
+            {{#if ../discord.target}}
+                {{! todo: join discord link }}
+            {{/if}}
+        {{/if}}
     </div>
 
     {{! User Role }}
