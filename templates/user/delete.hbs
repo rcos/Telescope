@@ -1,0 +1,22 @@
+{{! User settings form. Users can change their name and role here }}
+
+<div class="row justify-content-center no-gutters">
+    <div class="text-dark card col-sm-10 col-md-7 col-lg-6 col-xl-4">
+        <div class="card-header">
+            <h1>Delete</h1>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                Are you sure you want to delete the profile for <strong>{{target.first_name}} {{target.last_name}}</strong>?
+
+                This is a permanent action.
+
+                <a href="/user?username={{target.username}}" class="mb-2 btn w-100 btn-secondary">Cancel</a>
+                <button type="submit" class="btn w-100 btn-success">
+                    Delete account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

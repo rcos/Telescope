@@ -66,11 +66,15 @@
                     <input aria-describedby="cohort-description" name="cohort" id="cohort-input" class="form-control"
                            type="number" min="1824" max="{{max_entry_year}}" value="{{context.cohort}}"
                            {{! Diabled on no RCS ID }}
-                           {{#if (not context.rcs_id.[0].account_id)}}disabled{{/if}}>
+                           {{#if (not context.rcs_id.[0]._id)}}disabled{{/if}}>
 
                     <small id="cohort-description" class="form-text text-muted">
                         Entry year is only available to users with RPI CAS linked.
                     </small>
+                </div>
+
+                <div class="d-flex mb-2">
+                    <a href="/user?username={{context.username}}" class="mr-2 btn w-50 btn-secondary">Cancel</a><a href="/profile_delete" class="btn w-50 btn-danger">Delete profile</a>
                 </div>
 
                 <button type="submit" class="btn w-100 btn-success">
