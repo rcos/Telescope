@@ -17,7 +17,7 @@ use chrono::{Datelike, Local};
 use std::collections::HashMap;
 use serenity::model::guild::Member;
 use serenity::model::user::{User, CurrentUser};
-use crate::api::discord::global_discord_client;
+use crate::api::discord::{self, global_discord_client};
 use crate::env::global_config;
 
 /// The path from the template directory to the profile template.
@@ -85,6 +85,33 @@ async fn profile(
             .get_user(target_discord_id)
             .await;
 
+        // Check to make sure target user info was available.
+        match target_user {
+            // Issue retrieving target user info
+            Err(e) => {
+                // Log an error and set a flag for the template.
+                warn!("Could not get target user account for Discord user ID {}. Account may have been deleted. Internal error: {}", target_discord_id, e);
+                template["discord"]["target"] = json!({"errored": true});
+
+                // Return early if there was an error.
+                // Otherwise we can go forward and check for the user's membership in the RCOS
+                // Discord server.
+                return template.render_into_page(&req, page_title).await;
+            },
+
+            // User returned successfully.
+            Ok(u) => {
+                // Add the discord info to the template.
+                template["discord"]["target"] = json!({
+                    "response": &u,
+                    "resolved": {
+                        "face": u.face(),
+                        "tag": u.tag(),
+                    }
+                });
+            }
+        }
+
         // Check if the target user is in the RCOS Discord.
         // First parse the RCOS Discord Guild ID.
         let rcos_discord: u64 = global_config()
@@ -101,27 +128,26 @@ async fn profile(
             .await
             .ok();
 
-        // Check to make sure target user info was available.
-        match target_user {
-            // Issue retrieving target user info
-            Err(e) => {
-                // Log an error and set a flag for the template.
-                warn!("Could not get target user account for Discord user ID {}. Account may have been deleted. Internal error: {}", target_discord_id, e);
-                template["discord"]["target"] = json!({"errored": true});
-            },
+        // Get "Verified" role ID if available.
+        let verified_role_id = discord::rcos_discord_verified_role_id()
+            .await
+            .ok()
+            .flatten();
 
-            // User returned successfully.
-            Ok(u) => {
-                // Add the discord info to the template.
-                template["discord"]["target"] = json!({
-                    "response": &u,
-                    "resolved": {
-                        "face": u.face(),
-                        "tag": u.tag(),
-                    }
-                });
-            }
-        }
+        // Check if the user has the verified role.
+        let is_verified: bool = membership
+            // Take as reference
+            .as_ref()
+            // Make tuple with other option if it's some.
+            .map(|membership| verified_role_id.map(|role_id| (membership, role_id)))
+            // Flatten to Option<(...)>
+            .flatten()
+            // Filter to membership containing verified role.
+            .filter(|(membership, role_id)| membership.roles.contains(role_id))
+            .is_some();
+
+        // Add verified status to template.
+        template["discord"]["target"]["is_verified"] = json!(is_verified);
     }
 
     // Render the profile template and send to user.

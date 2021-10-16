@@ -36,9 +36,15 @@
             <div class="col-12 col-md-6 col-lg-4 my-1">
                 {{#if target.rcs_id.[0] }}
                     {{! RPI CAS is linked }}
-                    {{#if ../discord.target}}
-                        {{! RCOS Discord is available }}
-
+                    {{#if ../discord.target.resolved}}
+                        {{! RCOS Discord is available to user. Check if they are already there and if they have the verified role}}
+                        {{#if ../discord.target.is_verified}}
+                        {{else}}
+                            {{! Show link to join discord }}
+                            <a href="/join_discord" class="btn btn-discord w-100">
+                                Join RCOS Discord <span class="fab">&#xf392;</span>
+                            </a>
+                        {{/if}}
                     {{else}}
                         {{! RPI CAS must be linked to join RCOS Discord }}
                         <button disabled class="disabled btn-danger btn w-100">
