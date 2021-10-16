@@ -122,25 +122,6 @@ async fn profile(
                 });
             }
         }
-
-        // If we can, resolve the discord tag of the target using the viewer's auth.
-        // Get the authentication cookie if there is one.
-        let auth_cookie = identity
-            .identity()
-            .await;
-
-        // Extract the Discord credentials if available.
-        let discord_auth = auth_cookie
-            .as_ref()
-            .and_then(|auth| auth.get_discord());
-
-        // If there are Discord credentials, look up the associated user.
-        if let Some(discord_auth) = discord_auth {
-            // Look up the viewer's discord info.
-            let viewer: CurrentUser = discord_auth.get_authenticated_user().await?;
-            // Add it to the template.
-            template["discord"]["viewer"] = json!(viewer);
-        }
     }
 
     // Render the profile template and send to user.
