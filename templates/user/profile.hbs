@@ -1,25 +1,6 @@
 {{! Everything is sourced from the API response data currently }}
 {{#with data}}
-    <div class="row justify-content-between">
-        <h1 class="col-12 col-md-auto">{{target.first_name}} {{target.last_name}}</h1>
-
-        {{! Edit profile link }}
-        {{#if (and viewer.[0].username (eq target.username viewer.[0].username))}}
-            <div class="col-12 col-md-3 d-flex align-items-center">
-                <a class="btn btn-primary w-100 my-1" href="/edit_profile">
-                    Edit Profile
-                </a>
-            </div>
-        {{/if}}
-
-        {{! Join Discord Link (if available) }}
-        {{#if (eq target.username viewer.[0].username)}}
-            {{! Viewer is target user }}
-            {{#if ../discord.target}}
-                {{! todo: join discord link }}
-            {{/if}}
-        {{/if}}
-    </div>
+    <h1 class="m-1">{{target.first_name}} {{target.last_name}}</h1>
 
     {{! User Role }}
     <span class="badge badge-info">{{format_user_role target.role}}</span>
@@ -36,6 +17,52 @@
     <span class="text-muted">
         Account created {{format_date target.created_at}} {{format_time target.created_at}}
     </span>
+
+    {{! User actions }}
+    {{#if (and viewer.[0].username (eq target.username viewer.[0].username))}}
+        {{! Actions header }}
+        <h3 class="my-2">Actions</h3>
+
+        <div class="row">
+
+            {{! Edit profile link }}
+            <div class="col-12 col-md-3 col-lg-2 my-1">
+                <a class="btn btn-primary w-100" href="/edit_profile">
+                    Edit Profile
+                </a>
+            </div>
+
+            {{! Join Discord Link (if available) }}
+            <div class="col-12 col-md-6 col-lg-4 my-1">
+                {{#if target.rcs_id.[0] }}
+                    {{! RPI CAS is linked }}
+                    {{#if ../discord.target}}
+                        {{! RCOS Discord is available }}
+
+                    {{else}}
+                        {{! RPI CAS must be linked to join RCOS Discord }}
+                        <button disabled class="disabled btn-danger btn w-100">
+                            RCOS Discord unavailable
+                        </button>
+                        <br>
+                        <small class="text-muted">
+                            Please link your Discord account.
+                        </small>
+                    {{/if}}
+                {{else}}
+                    {{! RPI CAS must be linked to join RCOS Discord }}
+                    <button disabled class="disabled btn-danger btn w-100">
+                        RCOS Discord unavailable
+                    </button>
+                    <br>
+                    <small class="text-muted">
+                        If you are not a student, please reach out to RCOS management
+                        at <a href="mailto:rcos.management@gmail.com">rcos.management@gmail.com</a>.
+                    </small>
+                {{/if}}
+            </div>
+        </div>
+    {{/if}}
 
     {{! Account info -- RPI email, etc (Only visible to authenticated users)}}
     {{#if viewer.[0].username}}

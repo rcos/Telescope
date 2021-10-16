@@ -5,6 +5,9 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+- Changes to the config file: 
+  - Now only a single RCOS Discord server ID is accepted instead of a list of IDs. 
+- 
 
 ## 0.7.2 - October 12th, 2021
 - Account linking with Discord ([#5], [#181])
@@ -29,7 +32,7 @@ please submit a pull request fixing it.
 
 ## 0.6.4 - July 14th, 2021
 - Fixed bug that prevented external presentation urls from being appropriately shown 
-in the meeting edit form. 
+  in the meeting edit form. 
 
 ## 0.6.3 - July 14th, 2021
 - Added support for deleting meetings. ([#96])

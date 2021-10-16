@@ -30,11 +30,7 @@ impl EventHandler for Handler {
         );
 
         // Check if the guild is whitelisted.
-        if global_config()
-            .discord_config
-            .guild_ids
-            .contains(&guild.id.to_string())
-        {
+        if global_config().discord_config.rcos_guild_id == guild.id.to_string() {
             // If so, register telescope's commands
             info!(
                 "Registering telescope's Discord commands for guild \"{}\" (ID: {})",
@@ -49,6 +45,8 @@ impl EventHandler for Handler {
                         guild.id, err
                     );
                 });
+        } else {
+            warn!("Non-RCOS guild connected: \"{}\" (ID: {})", guild.name, guild.id);
         }
     }
 

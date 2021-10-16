@@ -2,6 +2,8 @@
 
 use crate::env::global_config;
 use serenity::http::Http;
+use serenity::model::id::RoleId;
+use crate::error::TelescopeError;
 
 lazy_static! {
     static ref DISCORD_API_CLIENT: Http =
@@ -11,4 +13,26 @@ lazy_static! {
 /// Get a reference to the global lazily evaluated static discord api client object.
 pub fn global_discord_client() -> &'static Http {
     DISCORD_API_CLIENT.as_ref()
+}
+
+/// Get the ID of the verified role on the RCOS discord if possible.
+pub async fn rcos_discord_verified_role_id() -> Result<RoleId, TelescopeError> {
+    // Get the RCOS Guild ID.
+    let rcos_discord: u64 = global_config()
+        .discord_config
+        .rcos_guild_id()
+        .ok_or_else(|| {
+            error!("Malformed RCOS Guild ID.");
+            TelescopeError::ise("Malformed RCOS Guild ID.")
+        })?;
+
+    global_discord_client()
+        .get_guild_roles(rcos_discord)
+        .await
+        .map_err(|err| {
+            error!("Could not get RCOS Discord Roles. Internal error: {}", err);
+            TelescopeError::serenity_error(err)
+        })?;
+
+    unimplemented!()
 }

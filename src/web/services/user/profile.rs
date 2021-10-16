@@ -15,8 +15,10 @@ use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
+use serenity::model::guild::Member;
 use serenity::model::user::{User, CurrentUser};
 use crate::api::discord::global_discord_client;
+use crate::env::global_config;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -82,6 +84,22 @@ async fn profile(
         let target_user: Result<User, serenity::Error> = global_discord_client()
             .get_user(target_discord_id)
             .await;
+
+        // Check if the target user is in the RCOS Discord.
+        // First parse the RCOS Discord Guild ID.
+        let rcos_discord: u64 = global_config()
+            .discord_config
+            .rcos_guild_id()
+            .ok_or_else(|| {
+                error!("Could not parse RCOS Discord Guild ID.");
+                TelescopeError::ise("Bad RCOS Discord Guild ID.")
+            })?;
+
+        // Target user as member of RCOS discord.
+        let membership: Option<Member> = global_discord_client()
+            .get_member(rcos_discord, target_discord_id)
+            .await
+            .ok();
 
         // Check to make sure target user info was available.
         match target_user {

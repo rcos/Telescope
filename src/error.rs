@@ -94,6 +94,12 @@ pub enum TelescopeError {
     GitHubApiError(String),
 
     #[error(ignore)]
+    #[display(fmt = "Error interacting with Discord API: {}", _0)]
+    /// Error interacting with the Discord API via Serenity. This should report
+    /// as an ISE or a gateway error.
+    SerenityError(String),
+
+    #[error(ignore)]
     #[display(fmt = "{} returned error(s) :{:?}", platform, errors)]
     /// A GraphQL API responded with errors. This should
     /// report as an internal server error.
@@ -153,6 +159,12 @@ impl TelescopeError {
     pub fn github_api_error(err: ReqwestError) -> Self {
         error!("Error querying GitHub API: {}", err);
         Self::GitHubApiError(err.to_string())
+    }
+
+    /// Convert a Serenity error into a Telescope error.
+    pub fn serenity_error(err: serenity::Error) -> Self {
+        error!("Serenity Error: {}", err);
+        Self::SerenityError(err.to_string())
     }
 
     /// Convert reqwest error from RPI CAS service into a Telescope error.
@@ -258,6 +270,13 @@ impl TelescopeError {
                 format!("Could not query the GitHub API. Please contact a coordinator and \
                     file a GitHub issue on the Telescope repository. Internal error description: {}",
                     err),
+            ),
+
+            TelescopeError::SerenityError(err) => jumbotron::new(
+                format!("{} - Discord Error", status_code),
+                format!("Error interacting with the Discord API. Please contact a \
+                    coordinator and file a GitHUb issue if this error persists. Internal error \
+                    description: {}", err)
             ),
 
             TelescopeError::RpiCasError(err) => jumbotron::new(

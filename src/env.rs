@@ -30,10 +30,18 @@ pub struct DiscordConfig {
     /// The URL that Telescope is running at (to build links in discord embeds.)
     pub telescope_url: String,
 
-    /// The discord Guild IDs for the bot to add the commands to as needed.
-    /// This bot only adds commands to guilds to avoid being used outside of RCOS
-    /// approved servers.
-    pub guild_ids: Vec<String>,
+    /// The RCOS Discord Guild ID.
+    pub rcos_guild_id: String,
+}
+
+impl DiscordConfig {
+    /// Get the RCOS Discord Guild ID as a `u64`.
+    pub fn rcos_guild_id(&self) -> Option<u64> {
+        self.rcos_guild_id
+            .as_str()
+            .parse::<u64>()
+            .ok()
+    }
 }
 
 /// The config of the server instance.
