@@ -25,5 +25,6 @@ pub fn register(config: &mut ServiceConfig) {
         .service(register::register_page)
         .service(register::finish_registration)
         .service(register::submit_registration)
+        .service(delete::confirm_delete)
         .service(delete::profile_delete);
 }

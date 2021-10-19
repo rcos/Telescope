@@ -1,9 +1,8 @@
-use actix_web::{HttpRequest, web::Form};
-use oauth2::HttpResponse;
+use actix_web::{HttpRequest, HttpResponse, web::Form, http::header::LOCATION};
 use crate::api::rcos::users::profile::Profile;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
-use crate::web::services::auth::identity::AuthenticationCookie;
+use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 
 // Confirmation form to delete the profile
 #[get("/profile_delete")]
@@ -18,8 +17,10 @@ pub async fn confirm_delete(auth: AuthenticationCookie) -> Result<FormTemplate, 
     Ok(form)
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-struct DeleteConfirmation ();
-
 #[post("/profile_delete")]
-pub async fn profile_delete(auth: AuthenticationCookie, _form: Form<DeleteConfirmation>) -> Result<HttpResponse, TelescopeError> {}
+pub async fn profile_delete(identity: Identity) -> Result<HttpResponse, TelescopeError> {
+    identity.forget();
+    return Ok(HttpResponse::Found()
+              .header(LOCATION, "/")
+              .finish());
+}
