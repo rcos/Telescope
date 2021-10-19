@@ -5,6 +5,7 @@ query DiscordWhoIs($discord_id: String!) {
             first_name
             last_name
             role
+            cohort
 
             # RCS ID info for the user
             rcs_id: user_accounts(where: {type: {_eq: "rpi"}} limit: 1) {

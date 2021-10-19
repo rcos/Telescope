@@ -8,6 +8,7 @@ use futures::future::LocalBoxFuture;
 use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
 use oauth2::basic::{BasicClient, BasicTokenResponse};
+use serenity::model::id::RoleId;
 use serenity::model::user::CurrentUser;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
@@ -65,7 +66,9 @@ impl Oauth2IdentityProvider for DiscordOAuth {
     fn scopes() -> Vec<Scope> {
         vec![
             // Scope required for us to get the users identity.
-            Scope::new("identify".to_owned()),
+            Scope::new("identify".to_string()),
+            // Scope required for us to add users to the RCOS Discord server.
+            Scope::new("guilds.join".to_string())
         ]
     }
 }
@@ -189,5 +192,35 @@ impl DiscordIdentity {
                     e
                 ))
             });
+    }
+
+    /// Add this user to the RCOS Discord. Set their username and
+    pub async fn add_to_rcos_guild(&self, nickname: Option<String>, roles: Vec<RoleId>) -> Result<(), TelescopeError> {
+        // Get user ID.
+        let user_id: String = self.get_user_id().await?;
+        // Get the RCOS Discord server ID.
+        let rcos_discord = &global_config().discord_config.rcos_guild_id;
+        // Make the request URL.
+        let url: String = format!("{}/guilds/{}/members/{}", DISCORD_API_ENDPOINT, rcos_discord, user_id);
+        // Make the request object (JSON sent to Discord).
+        let body = json!({
+            "access_code": self.access_token.secret(),
+            "nick": nickname,
+            "roles": roles
+        });
+
+        // Send Discord request.
+        let response = reqwest::Client::new()
+            .put(url.as_str())
+            .json(&body)
+            .bearer_auth(global_config().discord_config.bot_token.as_str())
+            .send()
+            .await
+            .map_err(|err| {
+                error!("Could not add user to RCOS Discord. Reqwest error: {}", err);
+                TelescopeError::ise(format!("Could not join RCOS Discord. Internal Error: {}", err))
+            })?;
+
+        return Ok(());
     }
 }

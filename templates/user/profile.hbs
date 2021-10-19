@@ -39,6 +39,10 @@
                     {{#if ../discord.target.resolved}}
                         {{! RCOS Discord is available to user. Check if they are already there and if they have the verified role}}
                         {{#if ../discord.target.is_verified}}
+                            {{! Already there and verified }}
+                            <button class="btn disabled btn-success" disabled>
+                                Already in RCOS Discord
+                            </button>
                         {{else}}
                             {{! Show link to join discord }}
                             <a href="/join_discord" class="btn btn-discord w-100">

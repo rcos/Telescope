@@ -149,6 +149,20 @@ impl AuthenticationCookie {
         }
     }
 
+    /// Get the RCS ID of the authenticated user. Error if there is not an account
+    /// associated with this authentication cookie or if there is an issue communicating
+    /// with the RCOS API. Return `Ok(None)` if there is an account but RPI CAS is not linked.
+    pub async fn get_rcs_id(&self) -> Result<Option<String>, TelescopeError> {
+        // Check the base authentication first.
+        if let RootIdentity::RpiCas(RpiCasIdentity{ rcs_id }) = &self.root {
+            return Ok(Some(rcs_id.clone()));
+        } else {
+            // Otherwise, get the RCS ID from the API.
+            let rcos_username: String = self.get_rcos_username_or_error().await?;
+            AccountLookup::send(rcos_username, UserAccountType::Rpi).await
+        }
+    }
+
     /// Try to replace the root identity with the secondary GitHub identity.
     /// Return true on success.
     fn replace_root_with_github(&mut self) -> bool {
