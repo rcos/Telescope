@@ -6,6 +6,7 @@ please submit a pull request fixing it.
 
 ## Unreleased
 - Fixed error caused by unlinking Discord account while authenticated with Discord. ([#185])
+- Update Rust to 1.56 and Rust 2021 Edition. 
 
 ## 0.7.2 - October 12th, 2021
 - Account linking with Discord ([#5], [#181])
