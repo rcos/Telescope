@@ -18,6 +18,7 @@ use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
 use serenity::model::id::RoleId;
 use serenity::model::user::CurrentUser;
+use crate::api::discord::global_discord_client;
 
 /// The Discord API endpoint to query for user data.
 pub const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -232,5 +233,32 @@ impl DiscordIdentity {
             })?;
 
         return Ok(());
+    }
+
+    /// Remove a user from the RCOS Discord server. This should be invoked
+    /// whenever a user unlinks their discord account or deletes their telescope account.
+    pub async fn remove_from_rcos_guild(&self) -> Result<(), TelescopeError> {
+        // Get user ID.
+        let user_id: u64 = self
+            .get_user_id()
+            .await?
+            .as_str()
+            .parse::<u64>()
+            .map_err(|err| {
+                error!("Malformed Discord User ID. Internal error {}", err);
+                TelescopeError::ise("Error removing user the RCOS Discord.")
+            })?;
+
+        // Get the RCOS Discord server ID.
+        let rcos_discord = global_config()
+            .discord_config
+            .rcos_guild_id()
+            .expect("RCOS Guild ID Malformed");
+
+        // Send request.
+        global_discord_client()
+            .kick_member(rcos_discord, user_id)
+            .await
+            .map_err(|err| TelescopeError::serenity_error(err))
     }
 }
