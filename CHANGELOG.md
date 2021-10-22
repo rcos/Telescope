@@ -6,8 +6,7 @@ please submit a pull request fixing it.
 
 ## Unreleased
 - Changes to the config file: 
-  - Now only a single RCOS Discord server ID is accepted instead of a list of IDs. 
-- 
+  - Now only a single RCOS Discord server ID is accepted instead of a list of IDs.
 - Fixed error caused by unlinking Discord account while authenticated with Discord. ([#185])
 
 ## 0.7.2 - October 12th, 2021

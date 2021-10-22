@@ -2,10 +2,9 @@
 
 use actix_web::HttpResponse;
 use reqwest::header::LOCATION;
-use crate::api::discord::{global_discord_client, rcos_discord_verified_role_id};
+use crate::api::discord::rcos_discord_verified_role_id;
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::error::TelescopeError;
-use crate::templates::Template;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::AuthenticationCookie;
 

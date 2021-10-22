@@ -2,7 +2,6 @@
 
 use crate::env::global_config;
 use serenity::http::Http;
-use serenity::model::guild::Role;
 use serenity::model::id::RoleId;
 use crate::error::TelescopeError;
 

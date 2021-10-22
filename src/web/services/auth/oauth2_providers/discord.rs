@@ -210,7 +210,7 @@ impl DiscordIdentity {
         });
 
         // Send Discord request.
-        let response = reqwest::Client::new()
+        let _ = reqwest::Client::new()
             .put(url.as_str())
             .json(&body)
             .bearer_auth(global_config().discord_config.bot_token.as_str())

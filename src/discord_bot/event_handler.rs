@@ -7,15 +7,6 @@ use serenity::model::gateway::Ready;
 use serenity::model::guild::Guild;
 use serenity::model::interactions::Interaction;
 
-/// Get the global config's discord client ID parsed to a u64.
-pub fn discord_client_id() -> u64 {
-    global_config()
-        .discord_config
-        .client_id
-        .parse::<u64>()
-        .expect("Malformed Discord Client ID")
-}
-
 /// ZST representing the event handler for telescope's discord bot.
 pub struct Handler;
 

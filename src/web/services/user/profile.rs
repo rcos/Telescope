@@ -16,7 +16,7 @@ use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use std::collections::HashMap;
 use serenity::model::guild::Member;
-use serenity::model::user::{User, CurrentUser};
+use serenity::model::user::User;
 use crate::api::discord::{self, global_discord_client};
 use crate::env::global_config;
 
