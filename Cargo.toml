@@ -3,7 +3,8 @@ name = "telescope"
 version = "0.7.3"
 authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
-edition = "2018"
+edition = "2021"
+rust-version = "1.56"
 
 [dependencies]
 # command line argument parser
