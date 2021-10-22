@@ -226,6 +226,24 @@ pub trait IdentityProvider: 'static {
                 });
             }
 
+            // Important: The root must be replaced with another platform (if possible)
+            // before the unlink mutation is executed. Doing this in the other order will
+            // lead to an account not found error while trying to replace the root of the
+            // auth cookie because the account lookup will fail/error out.
+            // See https://github.com/rcos/Telescope/issues/185.
+
+            // Try to replace the unlinking account in the authentication cookie's root
+            // (if it's authenticated as root).
+            let removed_auth: bool = cookie.remove_platform(Self::USER_ACCOUNT_TY).await?;
+            // If this is a success, then save the modified authentication cookie and redirect
+            // the user to their profile at the end.
+            // If not, the user has been logged out. Redirect them to the homepage at the end.
+            if removed_auth {
+                id.save(&cookie);
+            } else {
+                id.forget();
+            }
+
             // There is a secondary authenticator linked, delete this user account record.
             // Log a message about the unlinked platform.
             let platform_id =
@@ -238,18 +256,6 @@ pub trait IdentityProvider: 'static {
                     Self::USER_ACCOUNT_TY,
                     platform_id
                 );
-            }
-
-            // Try to replace the unlinked account in the authentication cookie's root
-            // (if it's authenticated as root).
-            let removed_auth: bool = cookie.remove_platform(Self::USER_ACCOUNT_TY).await?;
-            // If this is a success, then save the modified authentication cookie and redirect
-            // the user to their profile.
-            // If not, the user has been logged out. Redirect them to the homepage.
-            if removed_auth {
-                id.save(&cookie);
-            } else {
-                id.forget();
             }
 
             // Get the path to redirect the user to.
