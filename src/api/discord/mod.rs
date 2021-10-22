@@ -1,9 +1,9 @@
 //! Discord API interactions authenticated with the Telescope bot token.
 
 use crate::env::global_config;
+use crate::error::TelescopeError;
 use serenity::http::Http;
 use serenity::model::id::RoleId;
-use crate::error::TelescopeError;
 
 lazy_static! {
     static ref DISCORD_API_CLIENT: Http =

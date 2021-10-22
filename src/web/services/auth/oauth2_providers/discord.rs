@@ -2,22 +2,22 @@
 
 use std::sync::Arc;
 
-use actix_web::http::header::ACCEPT;
-use chrono::{DateTime, Duration, Utc};
-use futures::future::LocalBoxFuture;
-use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
-use oauth2::{AuthUrl, TokenUrl};
-use oauth2::basic::{BasicClient, BasicTokenResponse};
-use serenity::model::id::RoleId;
-use serenity::model::user::CurrentUser;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
-use crate::web::services::auth::IdentityProvider;
 use crate::web::services::auth::oauth2_providers::{Oauth2Identity, Oauth2IdentityProvider};
+use crate::web::services::auth::IdentityProvider;
+use actix_web::http::header::ACCEPT;
+use chrono::{DateTime, Duration, Utc};
+use futures::future::LocalBoxFuture;
+use oauth2::basic::{BasicClient, BasicTokenResponse};
+use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
+use oauth2::{AuthUrl, TokenUrl};
+use serenity::model::id::RoleId;
+use serenity::model::user::CurrentUser;
 
 /// The Discord API endpoint to query for user data.
 pub const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -68,7 +68,7 @@ impl Oauth2IdentityProvider for DiscordOAuth {
             // Scope required for us to get the users identity.
             Scope::new("identify".to_string()),
             // Scope required for us to add users to the RCOS Discord server.
-            Scope::new("guilds.join".to_string())
+            Scope::new("guilds.join".to_string()),
         ]
     }
 }
@@ -195,13 +195,20 @@ impl DiscordIdentity {
     }
 
     /// Add this user to the RCOS Discord. Set their username and
-    pub async fn add_to_rcos_guild(&self, nickname: Option<String>, roles: Vec<RoleId>) -> Result<(), TelescopeError> {
+    pub async fn add_to_rcos_guild(
+        &self,
+        nickname: Option<String>,
+        roles: Vec<RoleId>,
+    ) -> Result<(), TelescopeError> {
         // Get user ID.
         let user_id: String = self.get_user_id().await?;
         // Get the RCOS Discord server ID.
         let rcos_discord = &global_config().discord_config.rcos_guild_id;
         // Make the request URL.
-        let url: String = format!("{}/guilds/{}/members/{}", DISCORD_API_ENDPOINT, rcos_discord, user_id);
+        let url: String = format!(
+            "{}/guilds/{}/members/{}",
+            DISCORD_API_ENDPOINT, rcos_discord, user_id
+        );
         // Make the request object (JSON sent to Discord).
         let body = json!({
             "access_code": self.access_token.secret(),
@@ -218,7 +225,10 @@ impl DiscordIdentity {
             .await
             .map_err(|err| {
                 error!("Could not add user to RCOS Discord. Reqwest error: {}", err);
-                TelescopeError::ise(format!("Could not join RCOS Discord. Internal Error: {}", err))
+                TelescopeError::ise(format!(
+                    "Could not join RCOS Discord. Internal Error: {}",
+                    err
+                ))
             })?;
 
         return Ok(());

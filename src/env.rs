@@ -37,10 +37,7 @@ pub struct DiscordConfig {
 impl DiscordConfig {
     /// Get the RCOS Discord Guild ID as a `u64`.
     pub fn rcos_guild_id(&self) -> Option<u64> {
-        self.rcos_guild_id
-            .as_str()
-            .parse::<u64>()
-            .ok()
+        self.rcos_guild_id.as_str().parse::<u64>().ok()
     }
 }
 

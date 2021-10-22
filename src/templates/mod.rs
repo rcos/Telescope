@@ -87,7 +87,6 @@ impl<T: Into<String>> Index<T> for Template {
 }
 
 impl<T: Into<String>> IndexMut<T> for Template {
-
     /// Returns the existing value or creates a new empty object at the location
     /// and returns a reference to that.
     fn index_mut(&mut self, index: T) -> &mut Self::Output {

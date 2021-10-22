@@ -3,10 +3,10 @@
 use actix_web::web::ServiceConfig;
 
 pub mod developers;
+mod join_discord;
 mod login;
 pub mod profile;
 mod register;
-mod join_discord;
 
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {

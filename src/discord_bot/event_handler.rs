@@ -37,7 +37,10 @@ impl EventHandler for Handler {
                     );
                 });
         } else {
-            warn!("Non-RCOS guild connected: \"{}\" (ID: {})", guild.name, guild.id);
+            warn!(
+                "Non-RCOS guild connected: \"{}\" (ID: {})",
+                guild.name, guild.id
+            );
         }
     }
 

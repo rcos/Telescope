@@ -1,12 +1,12 @@
 //! Page and service to let users into RCOS Discord and give them the verified role.
 
-use actix_web::HttpResponse;
-use reqwest::header::LOCATION;
 use crate::api::discord::rcos_discord_verified_role_id;
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::error::TelescopeError;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::AuthenticationCookie;
+use actix_web::HttpResponse;
+use reqwest::header::LOCATION;
 
 /// Let users into the RCOS discord.
 #[get("/join_discord")]
@@ -22,7 +22,7 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         return Err(TelescopeError::BadRequest {
             header: "Could not join RCOS Discord".to_string(),
             message: "Please log out and then login with Discord to continue".to_string(),
-            show_status_code: false
+            show_status_code: false,
         });
     }
 
@@ -42,7 +42,7 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         return Err(TelescopeError::BadRequest {
             header: "Could not join RCOS Discord".to_string(),
             message: "RPI CAS must be linked to join RCOS Discord.".to_string(),
-            show_status_code: false
+            show_status_code: false,
         });
     }
 
@@ -66,7 +66,13 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         .unwrap_or("".to_string());
 
     // Format nickname
-    let nickname: String = format!("{} {} {}({})", &fname[..20], lname.chars().next().unwrap(), cohort_format, rcs_id);
+    let nickname: String = format!(
+        "{} {} {}({})",
+        &fname[..20],
+        lname.chars().next().unwrap(),
+        cohort_format,
+        rcs_id
+    );
 
     // Get RCOS Discord Verified role ID if possible. If not, user empty role list.
     let roles = rcos_discord_verified_role_id()
@@ -82,4 +88,3 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         .header(LOCATION, profile_for(username.as_str()))
         .finish())
 }
-

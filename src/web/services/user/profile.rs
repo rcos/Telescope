@@ -1,11 +1,13 @@
 //! Profile services.
 
+use crate::api::discord::{self, global_discord_client};
 use crate::api::rcos::users::edit_profile::{EditProfileContext, SaveProfileEdits};
 use crate::api::rcos::users::profile::{
     profile::{ProfileTarget, ResponseData},
     Profile,
 };
 use crate::api::rcos::users::UserRole;
+use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
@@ -14,11 +16,9 @@ use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Form, Query, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
-use std::collections::HashMap;
 use serenity::model::guild::Member;
 use serenity::model::user::User;
-use crate::api::discord::{self, global_discord_client};
-use crate::env::global_config;
+use std::collections::HashMap;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -64,8 +64,7 @@ async fn profile(
     }
 
     // Create the profile template to send back to the viewer.
-    let mut template: Template = Template::new(TEMPLATE_NAME)
-        .field("data", &response);
+    let mut template: Template = Template::new(TEMPLATE_NAME).field("data", &response);
 
     // Get the target user's info.
     let target_user: &ProfileTarget = response.target.as_ref().unwrap();
@@ -81,9 +80,8 @@ async fn profile(
     // If the discord ID exists, and is properly formatted.
     if let Some(target_discord_id) = target_discord_id.and_then(|s| s.parse::<u64>().ok()) {
         // Get target user info.
-        let target_user: Result<User, serenity::Error> = global_discord_client()
-            .get_user(target_discord_id)
-            .await;
+        let target_user: Result<User, serenity::Error> =
+            global_discord_client().get_user(target_discord_id).await;
 
         // Check to make sure target user info was available.
         match target_user {
@@ -97,7 +95,7 @@ async fn profile(
                 // Otherwise we can go forward and check for the user's membership in the RCOS
                 // Discord server.
                 return template.render_into_page(&req, page_title).await;
-            },
+            }
 
             // User returned successfully.
             Ok(u) => {
@@ -114,13 +112,14 @@ async fn profile(
 
         // Check if the target user is in the RCOS Discord.
         // First parse the RCOS Discord Guild ID.
-        let rcos_discord: u64 = global_config()
-            .discord_config
-            .rcos_guild_id()
-            .ok_or_else(|| {
-                error!("Could not parse RCOS Discord Guild ID.");
-                TelescopeError::ise("Bad RCOS Discord Guild ID.")
-            })?;
+        let rcos_discord: u64 =
+            global_config()
+                .discord_config
+                .rcos_guild_id()
+                .ok_or_else(|| {
+                    error!("Could not parse RCOS Discord Guild ID.");
+                    TelescopeError::ise("Bad RCOS Discord Guild ID.")
+                })?;
 
         // Target user as member of RCOS discord.
         let membership: Option<Member> = global_discord_client()

@@ -3,9 +3,9 @@
 use crate::error::TelescopeError;
 use graphql_client::Response;
 
+pub mod discord;
 pub mod github;
 pub mod rcos;
-pub mod discord;
 
 /// Handle a response from a GraphQL API. Convert any errors as necessary and
 /// extract the returned data if possible.
