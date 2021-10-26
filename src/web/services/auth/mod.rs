@@ -226,6 +226,19 @@ pub trait IdentityProvider: 'static {
                 });
             }
 
+            // If the user is unlinking their Discord, we remove them from the RCOS Discord Server.
+            if Self::USER_ACCOUNT_TY == UserAccountType::Discord {
+                cookie
+                    .get_discord()
+                    .ok_or(TelescopeError::BadRequest {
+                        header: "Discord Not Linked".to_string(),
+                        message: "Cannot unlink Discord account if not currently linked.".to_string(),
+                        show_status_code: false
+                    })?
+                    .remove_from_rcos_guild()
+                    .await?
+            }
+
             // Important: The root must be replaced with another platform (if possible)
             // before the unlink mutation is executed. Doing this in the other order will
             // lead to an account not found error while trying to replace the root of the
