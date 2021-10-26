@@ -85,6 +85,7 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         rcs_id
     );
 
+    // FIXME: Ensure this gets the Verified role everytime. 
     // Get RCOS Discord Verified role ID if possible. If not, user empty role list.
     let roles = rcos_discord_verified_role_id()
         .await?

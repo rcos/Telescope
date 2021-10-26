@@ -16,6 +16,7 @@ use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, RefreshToken, Scope, TokenResponse};
 use oauth2::{AuthUrl, TokenUrl};
+use reqwest::header::AUTHORIZATION;
 use serenity::model::id::RoleId;
 use serenity::model::user::CurrentUser;
 use crate::api::discord::global_discord_client;
@@ -212,16 +213,16 @@ impl DiscordIdentity {
         );
         // Make the request object (JSON sent to Discord).
         let body = json!({
-            "access_code": self.access_token.secret(),
+            "access_token": self.access_token.secret(),
             "nick": nickname,
             "roles": roles
         });
 
         // Send Discord request.
-        let _ = reqwest::Client::new()
+        let response = reqwest::Client::new()
             .put(url.as_str())
             .json(&body)
-            .bearer_auth(global_config().discord_config.bot_token.as_str())
+            .header(AUTHORIZATION, format!("Bot {}", global_config().discord_config.bot_token.as_str()))
             .send()
             .await
             .map_err(|err| {
@@ -231,6 +232,11 @@ impl DiscordIdentity {
                     err
                 ))
             })?;
+
+        // FIXME: Return error if response is not in 200 range.
+
+        info!("Added user {} (ID {}) to RCOS Discord.", nickname.unwrap_or("(no nickname)".to_string()), user_id);
+        debug!("Response from Discord:\n{:#?}", response);
 
         return Ok(());
     }
