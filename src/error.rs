@@ -255,7 +255,7 @@ impl TelescopeError {
                 format!("{} - Bad CSRF Token", status_code),
                 "The CSRF token supplied to the server by this request does not match the \
                 one the server generated for this identity provider for this IP. If you believe \
-                this is in error, please contact a coordinator and file a GitHUb issue.",
+                this is in error, please contact a coordinator and file a GitHub issue.",
             ),
 
             TelescopeError::RcosApiError(err) => jumbotron::new(
@@ -275,7 +275,7 @@ impl TelescopeError {
             TelescopeError::SerenityError(err) => jumbotron::new(
                 format!("{} - Discord Error", status_code),
                 format!("Error interacting with the Discord API. Please contact a \
-                    coordinator and file a GitHUb issue if this error persists. Internal error \
+                    coordinator and file a GitHub issue if this error persists. Internal error \
                     description: {}", err)
             ),
 
