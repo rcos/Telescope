@@ -68,7 +68,18 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
     // Format nickname
     let nickname: String = format!(
         "{} {} {}({})",
-        &fname[..20],
+        // Limit the first name to 20 character to avoid passing Discord nickname limits.
+        fname
+            // Character iterator.
+            .chars()
+            // Add indices.
+            .zip(0..)
+            // Filter to the first 20 chars.
+            .filter(|(_, ind)| *ind < 20)
+            // Strip away the index.
+            .map(|(c, _)| c)
+            // Collect to string.
+            .collect::<String>(),
         lname.chars().next().unwrap(),
         cohort_format,
         rcs_id
