@@ -15,6 +15,8 @@ use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::collections::HashMap;
 use std::future::Future;
+use crate::api::discord::global_discord_client;
+use crate::env::global_config;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -226,17 +228,31 @@ pub trait IdentityProvider: 'static {
                 });
             }
 
-            // If the user is unlinking their Discord, we remove them from the RCOS Discord Server.
-            if Self::USER_ACCOUNT_TY == UserAccountType::Discord {
-                cookie
-                    .get_discord()
-                    .ok_or(TelescopeError::BadRequest {
-                        header: "Discord Not Linked".to_string(),
-                        message: "Cannot unlink Discord account if not currently linked.".to_string(),
-                        show_status_code: false
-                    })?
-                    .remove_from_rcos_guild()
-                    .await?
+            // If the user is unlinking their Discord or RPI CAS, we remove them from the
+            // RCOS Discord Server.
+            match Self::USER_ACCOUNT_TY {
+                UserAccountType::Rpi | UserAccountType::Discord => {
+                    // Lookup and parse the user's Discord ID.
+                    let user_discord =  all_accounts
+                        .get(&UserAccountType::Discord)
+                        .and_then(|string| string.as_str().parse::<u64>().ok());
+
+                    if let Some(discord_id) = user_discord {
+                        // Get RCOS Discord ID.
+                        let rcos_discord = global_config()
+                            .discord_config
+                            .rcos_guild_id()
+                            .expect("Malformed RCOS Discord Guild ID");
+
+                        // Kick user from RCOS Discord.
+                        global_discord_client()
+                            .kick_member(rcos_discord, discord_id)
+                            .await
+                            .map_err(TelescopeError::serenity_error)?
+                    }
+                },
+
+                _ => {},
             }
 
             // Important: The root must be replaced with another platform (if possible)
