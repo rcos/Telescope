@@ -80,8 +80,9 @@ async fn profile(
     // If the discord ID exists, and is properly formatted.
     if let Some(target_discord_id) = target_discord_id.and_then(|s| s.parse::<u64>().ok()) {
         // Get target user info.
-        let target_user: Result<User, serenity::Error> =
-            global_discord_client().get_user(target_discord_id).await;
+        let target_user: Result<User, serenity::Error> = global_discord_client()
+            .get_user(target_discord_id)
+            .await;
 
         // Check to make sure target user info was available.
         match target_user {
@@ -147,6 +148,13 @@ async fn profile(
 
         // Add verified status to template.
         template["discord"]["target"]["is_verified"] = json!(is_verified);
+
+        // Add Discord authentication status to template.
+        template["discord"]["viewer"]["is_authenticated"] = identity
+            .identity()
+            .await
+            .map(|cookie| json!(cookie.get_discord().is_some()))
+            .unwrap_or(json!(false));
     }
 
     // Render the profile template and send to user.

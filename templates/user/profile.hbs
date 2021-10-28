@@ -44,14 +44,24 @@
                                 Already in RCOS Discord
                             </button>
                         {{else}}
-                            {{! FIXME: Make sure user authenticates with Discord on the way here. }}
-                            {{! Show link to join discord }}
-                            <a href="/join_discord" class="btn btn-discord w-100">
-                                Join RCOS Discord <span class="fab">&#xf392;</span>
-                            </a>
+                            {{#if ../discord.viewer.is_authenticated}}
+                                {{! Discord must be authenticated with to join RCOS Discord }}
+                                <a href="/link/discord" class="btn btn-info">
+                                    Authenticate With Discord <span class="fab">&#xf392;</span>
+                                </a>
+                                <br>
+                                <small class="text-muted">
+                                    You must authenticate with Discord to join the RCOS Discord.
+                                </small>
+                            {{else}}
+                                {{! Show link to join discord }}
+                                <a href="/join_discord" class="btn btn-discord w-100">
+                                    Join RCOS Discord <span class="fab">&#xf392;</span>
+                                </a>
+                            {{/if}}
                         {{/if}}
                     {{else}}
-                        {{! RPI CAS must be linked to join RCOS Discord }}
+                        {{! Discord must be linked to join RCOS Discord }}
                         <button disabled class="disabled btn-danger btn w-100">
                             RCOS Discord unavailable
                         </button>
@@ -68,7 +78,7 @@
                     <br>
                     <small class="text-muted">
                         If you are not a student, please reach out to RCOS management
-                        at <a href="mailto:rcos.management@gmail.com">rcos.management@gmail.com</a>.
+                        at <a href="mailto:rcos-leadership@googlegroups.com">rcos-leadership@googlegroups.com</a>.
                     </small>
                 {{/if}}
             </div>

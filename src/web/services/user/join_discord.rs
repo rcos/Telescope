@@ -1,12 +1,13 @@
 //! Page and service to let users into RCOS Discord and give them the verified role.
 
+use actix_web::HttpResponse;
 use crate::api::discord::rcos_discord_verified_role_id;
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::error::TelescopeError;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::AuthenticationCookie;
-use actix_web::HttpResponse;
 use reqwest::header::LOCATION;
+
 
 /// Let users into the RCOS discord.
 #[get("/join_discord")]
