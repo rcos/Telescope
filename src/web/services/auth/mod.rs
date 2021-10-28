@@ -1,6 +1,8 @@
+use crate::api::discord::global_discord_client;
 use crate::api::rcos::users::accounts::for_user::UserAccounts;
 use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
+use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
@@ -15,8 +17,6 @@ use oauth2::RedirectUrl;
 use oauth2_providers::github::GitHubOauth;
 use std::collections::HashMap;
 use std::future::Future;
-use crate::api::discord::global_discord_client;
-use crate::env::global_config;
 
 pub mod identity;
 pub mod oauth2_providers;
@@ -233,7 +233,7 @@ pub trait IdentityProvider: 'static {
             match Self::USER_ACCOUNT_TY {
                 UserAccountType::Rpi | UserAccountType::Discord => {
                     // Lookup and parse the user's Discord ID.
-                    let user_discord =  all_accounts
+                    let user_discord = all_accounts
                         .get(&UserAccountType::Discord)
                         .and_then(|string| string.as_str().parse::<u64>().ok());
 
@@ -250,9 +250,9 @@ pub trait IdentityProvider: 'static {
                             .await
                             .map_err(TelescopeError::serenity_error)?
                     }
-                },
+                }
 
-                _ => {},
+                _ => {}
             }
 
             // Important: The root must be replaced with another platform (if possible)

@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use crate::api::discord::global_discord_client;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
@@ -19,7 +20,6 @@ use oauth2::{AuthUrl, TokenUrl};
 use reqwest::header::AUTHORIZATION;
 use serenity::model::id::RoleId;
 use serenity::model::user::CurrentUser;
-use crate::api::discord::global_discord_client;
 
 /// The Discord API endpoint to query for user data.
 pub const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -222,7 +222,10 @@ impl DiscordIdentity {
         let response = reqwest::Client::new()
             .put(url.as_str())
             .json(&body)
-            .header(AUTHORIZATION, format!("Bot {}", global_config().discord_config.bot_token.as_str()))
+            .header(
+                AUTHORIZATION,
+                format!("Bot {}", global_config().discord_config.bot_token.as_str()),
+            )
             .send()
             .await
             .map_err(|err| {
@@ -235,7 +238,11 @@ impl DiscordIdentity {
 
         // FIXME: Return error if response is not in 200 range.
 
-        info!("Added user {} (ID {}) to RCOS Discord.", nickname.unwrap_or("(no nickname)".to_string()), user_id);
+        info!(
+            "Added user {} (ID {}) to RCOS Discord.",
+            nickname.unwrap_or("(no nickname)".to_string()),
+            user_id
+        );
         debug!("Response from Discord:\n{:#?}", response);
 
         return Ok(());

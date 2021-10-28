@@ -80,9 +80,8 @@ async fn profile(
     // If the discord ID exists, and is properly formatted.
     if let Some(target_discord_id) = target_discord_id.and_then(|s| s.parse::<u64>().ok()) {
         // Get target user info.
-        let target_user: Result<User, serenity::Error> = global_discord_client()
-            .get_user(target_discord_id)
-            .await;
+        let target_user: Result<User, serenity::Error> =
+            global_discord_client().get_user(target_discord_id).await;
 
         // Check to make sure target user info was available.
         match target_user {
