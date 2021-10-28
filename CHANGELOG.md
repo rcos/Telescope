@@ -9,7 +9,7 @@ please submit a pull request fixing it.
   - Now only a single RCOS Discord server ID is accepted instead of a list of IDs.
 - Fixed error caused by unlinking Discord account while authenticated with Discord. ([#185])
 - Update Rust to 1.56 and Rust 2021 Edition. ([#186])
-- Change RCOS contact email from rcos.management@gmail.com to rcos-leadership@googlegroups.com.
+- Change RCOS contact email from rcos.management@gmail.com to rcos-leadership@googlegroups.com. ([#188])
 
 ## 0.7.2 - October 12th, 2021
 - Account linking with Discord ([#5], [#181])
@@ -129,3 +129,4 @@ please submit a pull request fixing it.
 [#182]: https://github.com/rcos/Telescope/pull/182
 [#185]: https://github.com/rcos/Telescope/issues/185
 [#186]: https://github.com/rcos/Telescope/pull/186
+[#188]: https://github.com/rcos/Telescope/issues/188
