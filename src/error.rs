@@ -36,6 +36,16 @@ pub enum TelescopeError {
         message: String,
     },
 
+    #[display(fmt = "{}: {}", header, message)]
+    /// Upstream server returned error. This is usually when adding users to the
+    /// RCOS Discord.
+    GatewayError {
+        /// The header on the jumbotron to be displayed.
+        header: String,
+        /// The message on the jumbotron to be displayed.
+        message: String,
+    },
+
     #[from]
     #[display(fmt = "Error rendering handlebars template: {}", _0)]
     /// An error in rendering a handlebars template. This will report as
@@ -212,6 +222,11 @@ impl TelescopeError {
                 jumbotron::new(format!("{} - {}", status_code, header), message)
             }
 
+            TelescopeError::GatewayError { header, message } => jumbotron::new(
+                format!("{} - {}", status_code, header),
+                format!("{} Please contact a coordinator or faculty advisor.", message)
+            ),
+
             TelescopeError::FutureCanceled => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
                 "An internal future was canceled unexpectedly. Please try again. If you \
@@ -379,6 +394,7 @@ impl ResponseError for TelescopeError {
             TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,
             TelescopeError::Forbidden => StatusCode::FORBIDDEN,
             TelescopeError::RpiCasError(_) => StatusCode::BAD_GATEWAY,
+            TelescopeError::GatewayError { .. } => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

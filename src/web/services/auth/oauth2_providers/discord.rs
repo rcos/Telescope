@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 
-use crate::api::discord::global_discord_client;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
@@ -236,14 +235,26 @@ impl DiscordIdentity {
                 ))
             })?;
 
-        // FIXME: Return error if response is not in 200 range.
-
         info!(
             "Added user {} (ID {}) to RCOS Discord.",
             nickname.unwrap_or("(no nickname)".to_string()),
             user_id
         );
-        debug!("Response from Discord:\n{:#?}", response);
+
+        // Return an error if Discord API call fails.
+        if !response.status().is_success() {
+            error!("Discord returned non-success status code when adding user to RCOS Guild. Response: {:#?}", response);
+            return Err(TelescopeError::GatewayError {
+                header: "Discord API Error".to_string(),
+                message: format!("Discord API returned status {}{}.",
+                                 response.status()
+                                     .as_u16(),
+                                 response.status()
+                                     .canonical_reason()
+                                     .map(|s| format!(" ({})", s))
+                                     .unwrap_or("".to_string()))
+            });
+        }
 
         return Ok(());
     }
