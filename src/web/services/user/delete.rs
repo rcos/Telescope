@@ -1,8 +1,8 @@
-use actix_web::{HttpRequest, HttpResponse, web::Form, http::header::LOCATION};
-use crate::api::rcos::users::profile::Profile;
+use crate::api::rcos::users::{delete::DeleteUser, profile::Profile};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
+use actix_web::{http::header::LOCATION, web::Form, HttpRequest, HttpResponse};
 
 // Confirmation form to delete the profile
 #[get("/profile_delete")]
@@ -19,8 +19,13 @@ pub async fn confirm_delete(auth: AuthenticationCookie) -> Result<FormTemplate, 
 
 #[post("/profile_delete")]
 pub async fn profile_delete(identity: Identity) -> Result<HttpResponse, TelescopeError> {
+    DeleteUser::execute(identity.get_rcos_username().await.map(
+        |x| -> Result<String, TelescopeError> {
+            x.ok_or(TelescopeError::InternalServerError(
+                "Missing username".to_string(),
+            ))
+        },
+    )??).await?;
     identity.forget();
-    return Ok(HttpResponse::Found()
-              .header(LOCATION, "/")
-              .finish());
+    return Ok(HttpResponse::Found().header(LOCATION, "/?notice=Your%20account%20was%20deleted%20successfully.").finish());
 }

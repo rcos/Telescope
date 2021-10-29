@@ -23,7 +23,6 @@ const TEMPLATE_NAME: &'static str = "user/profile";
 
 /// The path from the templates directory to the user settings form template.
 const SETTINGS_FORM: &'static str = "user/settings";
-
 /// Wrapper struct for deserializing username.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProfileQuery {
@@ -167,6 +166,8 @@ async fn get_context_and_make_form(
     let mut form: FormTemplate = make_settings_form();
     // Add the context to the form.
     form.template["context"] = json!(&context);
+    // Add username to the form for the cancel button
+    form.template["username"] = json!(&viewer);
 
     // Add the list of roles (and whether the current role can switch to them).
     let role_list = UserRole::ALL_ROLES
