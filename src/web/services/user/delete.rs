@@ -1,6 +1,6 @@
 use crate::api::rcos::users::{delete::DeleteUser, profile::Profile};
 use crate::error::TelescopeError;
-use crate::templates::forms::FormTemplate;
+use crate::templates::{forms::FormTemplate, jumbotron, Template};
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::{http::header::LOCATION, web::Form, HttpRequest, HttpResponse};
 
@@ -18,14 +18,22 @@ pub async fn confirm_delete(auth: AuthenticationCookie) -> Result<FormTemplate, 
 }
 
 #[post("/profile_delete")]
-pub async fn profile_delete(identity: Identity) -> Result<HttpResponse, TelescopeError> {
+pub async fn profile_delete(
+    req: HttpRequest,
+    identity: Identity,
+) -> Result<Template, TelescopeError> {
     DeleteUser::execute(identity.get_rcos_username().await.map(
         |x| -> Result<String, TelescopeError> {
             x.ok_or(TelescopeError::InternalServerError(
                 "Missing username".to_string(),
             ))
         },
-    )??).await?;
+    )??)
+    .await?;
     identity.forget();
-    return Ok(HttpResponse::Found().header(LOCATION, "/?notice=Your%20account%20was%20deleted%20successfully.").finish());
+    return Ok(
+        jumbotron::new("Account deletion", "Your account was deleted successfully.")
+            .render_into_page(&req, "Account deletion")
+            .await?,
+    );
 }
