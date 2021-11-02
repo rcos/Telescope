@@ -4,6 +4,6 @@ mutation LinkUserAccount($username: String!, $platform: user_account!, $platform
             username: $username,
             type: $platform,
             account_id: $platform_id
-        }
+        },
     ) { username }
 }

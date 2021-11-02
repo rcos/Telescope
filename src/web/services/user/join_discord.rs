@@ -90,7 +90,7 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
     let roles = rcos_discord_verified_role_id()
         .await?
         .map(|role| vec![role])
-        .unwrap_or(vec![]);
+        .ok_or(TelescopeError::ise("Could not get Verified role ID."))?;
 
     // Add user to Discord.
     discord.add_to_rcos_guild(Some(nickname), roles).await?;

@@ -45,6 +45,11 @@
                             </button>
                         {{else}}
                             {{#if ../discord.viewer.is_authenticated}}
+                                {{! Show link to join discord }}
+                                <a href="/join_discord" class="btn btn-discord w-100">
+                                    Join RCOS Discord <span class="fab">&#xf392;</span>
+                                </a>
+                            {{else}}
                                 {{! Discord must be authenticated with to join RCOS Discord }}
                                 <a href="/link/discord" class="btn btn-info">
                                     Authenticate With Discord <span class="fab">&#xf392;</span>
@@ -53,11 +58,6 @@
                                 <small class="text-muted">
                                     You must authenticate with Discord to join the RCOS Discord.
                                 </small>
-                            {{else}}
-                                {{! Show link to join discord }}
-                                <a href="/join_discord" class="btn btn-discord w-100">
-                                    Join RCOS Discord <span class="fab">&#xf392;</span>
-                                </a>
                             {{/if}}
                         {{/if}}
                     {{else}}

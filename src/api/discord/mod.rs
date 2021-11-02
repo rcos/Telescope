@@ -34,7 +34,7 @@ pub async fn rcos_discord_verified_role_id() -> Result<Option<RoleId>, Telescope
         .iter()
         // We use a simple string comparison for now. We can change this to use
         // something else later on if needed.
-        .find(|role| role.name == "Verified")
+        .find(|role| role.name.eq_ignore_ascii_case("Verified"))
         // Extract the ID from the Discord Role.
         .map(|role| role.id))
 }

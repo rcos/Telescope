@@ -13,7 +13,11 @@ use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Scope};
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::sync::Arc;
+use crate::api::rcos::users::accounts::for_user::UserAccounts;
+use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
+use crate::web::services::auth::AUTHENTICATOR_ACCOUNT_TYPES;
 
 pub mod discord;
 pub mod github;
@@ -293,12 +297,58 @@ where
             // Add/update user account record in the RCOS database.
             // First get the authenticated user's username.
             let rcos_username: String = cookie.get_rcos_username_or_error().await?;
+
+            info!("Linking {} account ID {} to Telescope User {}",
+                Self::USER_ACCOUNT_TY, platform_id, rcos_username);
+
+            // Check if there is already an account of this type linked.
+            // Lookup all linked accounts.
+            let linked_accounts = UserAccounts::send(rcos_username.clone())
+                .await?
+                .into_iter()
+                .collect::<HashMap<UserAccountType, String>>();
+
+            // If there is already an account for this service linked:
+            if linked_accounts.contains_key(&Self::USER_ACCOUNT_TY) {
+                // If the same account ID is linked, add to cookie and return.
+                if linked_accounts[&Self::USER_ACCOUNT_TY] == platform_id {
+                    info!("Already linked. Updating Cookie.");
+                    // Add identity to auth cookie.
+                    platform_identity.add_to_cookie(&mut cookie);
+                    ident.save(&cookie);
+
+                    // Return user to their profile.
+                    return Ok(HttpResponse::Found()
+                            .header(LOCATION, profile_for(&rcos_username))
+                            .finish());
+                }
+
+                // Otherwise try to replace the linked account.
+                // Make sure another authenticator account is linked first.
+                let other_authenticator_accounts: usize = linked_accounts
+                    .iter()
+                    .filter(|(ty, _)| **ty != Self::USER_ACCOUNT_TY)
+                    .filter(|(ty, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(ty))
+                    .count();
+
+                // If there are other authenticated accounts, we can remove this one before
+                // sending the link mutation.
+                if other_authenticator_accounts >= 1 {
+                    info!("Replacing currently linked account.");
+
+                    // Send unlink mutation.
+                    UnlinkUserAccount::send(rcos_username.clone(), Self::USER_ACCOUNT_TY)
+                        .await?;
+                }
+            }
+
             // Send the link mutation.
             let rcos_username: String =
                 LinkUserAccount::send(rcos_username, Self::USER_ACCOUNT_TY, platform_id).await?;
 
             // Add identity to auth cookie.
             platform_identity.add_to_cookie(&mut cookie);
+            ident.save(&cookie);
 
             // Redirect the user to their profile page
             Ok(HttpResponse::Found()
