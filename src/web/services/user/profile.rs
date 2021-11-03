@@ -111,10 +111,7 @@ async fn profile(
 
         // Check if the target user is in the RCOS Discord.
         // First parse the RCOS Discord Guild ID.
-        let rcos_discord: u64 =
-            global_config()
-                .discord_config
-                .rcos_guild_id();
+        let rcos_discord: u64 = global_config().discord_config.rcos_guild_id();
 
         // Target user as member of RCOS discord.
         let membership: Option<Member> = global_discord_client()

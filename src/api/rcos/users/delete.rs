@@ -1,6 +1,5 @@
 //! RCOS API mutation to delete a user
 
-use crate::api::rcos::prelude::*;
 use crate::api::rcos::send_query;
 use crate::error::TelescopeError;
 

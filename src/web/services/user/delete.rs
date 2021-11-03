@@ -2,7 +2,7 @@ use crate::api::rcos::users::{delete::DeleteUser, profile::Profile, UserAccountT
 use crate::error::TelescopeError;
 use crate::templates::{forms::FormTemplate, jumbotron, Template};
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
-use actix_web::{http::header::LOCATION, web::Form, HttpRequest, HttpResponse};
+use actix_web::HttpRequest;
 use crate::api::discord::global_discord_client;
 use crate::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::env::global_config;
