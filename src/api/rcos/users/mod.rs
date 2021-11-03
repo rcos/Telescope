@@ -2,6 +2,7 @@
 
 pub mod accounts;
 pub mod create;
+pub mod delete;
 pub mod developers_page;
 pub mod discord_whois;
 pub mod edit_profile;

@@ -7,6 +7,7 @@ mod join_discord;
 mod login;
 pub mod profile;
 mod register;
+mod delete;
 
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {
@@ -24,7 +25,9 @@ pub fn register(config: &mut ServiceConfig) {
         // Registration related services
         .service(register::register_page)
         .service(register::finish_registration)
-        .service(register::submit_registration)
         // Discord Gateway
         .service(join_discord::handle);
+        .service(register::submit_registration)
+        .service(delete::confirm_delete)
+        .service(delete::profile_delete);
 }
