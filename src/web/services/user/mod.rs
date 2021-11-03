@@ -25,9 +25,10 @@ pub fn register(config: &mut ServiceConfig) {
         // Registration related services
         .service(register::register_page)
         .service(register::finish_registration)
-        // Discord Gateway
-        .service(join_discord::handle);
         .service(register::submit_registration)
+        // Discord Gateway
+        .service(join_discord::handle)
+        // User Deletion
         .service(delete::confirm_delete)
         .service(delete::profile_delete);
 }
