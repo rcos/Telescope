@@ -23,16 +23,6 @@ services:
             HASURA_GRAPHQL_LOG_LEVEL: "warn"
             HASURA_GRAPHQL_ADMIN_SECRET: "${RCOS_ADMIN_SECRET}"
 
-    postgrest:
-        image: postgrest/postgrest:v7.0.1
-        restart: unless-stopped
-        environment:
-            PGRST_DB_SCHEMA: "public"
-            PGRST_DB_ANON_ROLE: "web_anon"
-            PGRST_OPENAPI_SERVER_PROXY_URI: "https://api.rcos.io"
-            PGRST_DB_URI: "${RCOS_DB_URI}"
-            PGRST_JWT_SECRET: "${RCOS_JWT_SECRET}"
-
     wikijs:
         image: requarks/wiki:2
         restart: unless-stopped
@@ -53,3 +43,4 @@ services:
 
 volumes:
     caddy_data:
+

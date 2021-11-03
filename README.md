@@ -14,12 +14,10 @@ are open-sourced here.
 
 ## API
 
-This database is served by a PostgREST\* and Hasura GraphQL APIs that
+This database is served by a Hasura GraphQL APIs that
 allows access to some resources when unauthenticated for public access, and
 allows full access to all resources when authenticated. RCOS infrastructure
 cannot connect to the database directly and must interact through this API.
-
-\* The REST API may be removed in favor of GraphQL in the future.
 
 ## Migrations
 
@@ -27,7 +25,7 @@ Migrations and metadata are managed using the [Hasura CLI](https://hasura.io/doc
 
 ## Deployment
 
-1. Replace the `<PASSWORD>` and `<ADMINPASS>` placeholders in
-   `docker-compose.yml` and the [roles migration
-   file](./db/migrations/20210117194733_create_roles.sql) with secure passwords.
+1. Write a `.env` file with appropriate values for each key matching the ones used in the `docker-compose.yml` file.
 2. Run `docker-compose up -d` to start everything.
+3. While running, use `docker logs` to inspect the log output of any of the containers. 
+
