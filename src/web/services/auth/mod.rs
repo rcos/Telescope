@@ -241,8 +241,7 @@ pub trait IdentityProvider: 'static {
                         // Get RCOS Discord ID.
                         let rcos_discord = global_config()
                             .discord_config
-                            .rcos_guild_id()
-                            .expect("Malformed RCOS Discord Guild ID");
+                            .rcos_guild_id();
 
                         // Kick user from RCOS Discord.
                         global_discord_client()

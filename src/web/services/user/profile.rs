@@ -114,11 +114,7 @@ async fn profile(
         let rcos_discord: u64 =
             global_config()
                 .discord_config
-                .rcos_guild_id()
-                .ok_or_else(|| {
-                    error!("Could not parse RCOS Discord Guild ID.");
-                    TelescopeError::ise("Bad RCOS Discord Guild ID.")
-                })?;
+                .rcos_guild_id();
 
         // Target user as member of RCOS discord.
         let membership: Option<Member> = global_discord_client()
