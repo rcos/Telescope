@@ -14,8 +14,6 @@ use delete_user::{ResponseData, Variables};
 
 impl DeleteUser {
     pub async fn execute(username: String) -> Result<ResponseData, TelescopeError> {
-        send_query::<Self>(Variables {
-            username
-        }).await
+        send_query::<Self>(Variables { username }).await
     }
 }

@@ -1,9 +1,12 @@
 use super::{make_redirect_url, IdentityProvider};
+use crate::api::rcos::users::accounts::for_user::UserAccounts;
 use crate::api::rcos::users::accounts::link::LinkUserAccount;
+use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
 use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
+use crate::web::services::auth::AUTHENTICATOR_ACCOUNT_TYPES;
 use crate::web::{csrf, profile_for};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
@@ -15,9 +18,6 @@ use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Sc
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
-use crate::api::rcos::users::accounts::for_user::UserAccounts;
-use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
-use crate::web::services::auth::AUTHENTICATOR_ACCOUNT_TYPES;
 
 pub mod discord;
 pub mod github;
@@ -298,8 +298,12 @@ where
             // First get the authenticated user's username.
             let rcos_username: String = cookie.get_rcos_username_or_error().await?;
 
-            info!("Linking {} account ID {} to Telescope User {}",
-                Self::USER_ACCOUNT_TY, platform_id, rcos_username);
+            info!(
+                "Linking {} account ID {} to Telescope User {}",
+                Self::USER_ACCOUNT_TY,
+                platform_id,
+                rcos_username
+            );
 
             // Check if there is already an account of this type linked.
             // Lookup all linked accounts.
@@ -319,8 +323,8 @@ where
 
                     // Return user to their profile.
                     return Ok(HttpResponse::Found()
-                            .header(LOCATION, profile_for(&rcos_username))
-                            .finish());
+                        .header(LOCATION, profile_for(&rcos_username))
+                        .finish());
                 }
 
                 // Otherwise try to replace the linked account.
@@ -337,8 +341,7 @@ where
                     info!("Replacing currently linked account.");
 
                     // Send unlink mutation.
-                    UnlinkUserAccount::send(rcos_username.clone(), Self::USER_ACCOUNT_TY)
-                        .await?;
+                    UnlinkUserAccount::send(rcos_username.clone(), Self::USER_ACCOUNT_TY).await?;
                 }
             }
 

@@ -18,9 +18,7 @@ pub fn global_discord_client() -> &'static Http {
 /// Get the ID of the verified role on the RCOS discord if it exists.
 pub async fn rcos_discord_verified_role_id() -> Result<Option<RoleId>, TelescopeError> {
     // Get the RCOS Guild ID.
-    let rcos_discord: u64 = global_config()
-        .discord_config
-        .rcos_guild_id();
+    let rcos_discord: u64 = global_config().discord_config.rcos_guild_id();
 
     // Get role
     Ok(global_discord_client()

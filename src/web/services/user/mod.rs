@@ -2,12 +2,12 @@
 
 use actix_web::web::ServiceConfig;
 
+mod delete;
 pub mod developers;
 mod join_discord;
 mod login;
 pub mod profile;
 mod register;
-mod delete;
 
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {

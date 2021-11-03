@@ -239,9 +239,7 @@ pub trait IdentityProvider: 'static {
 
                     if let Some(discord_id) = user_discord {
                         // Get RCOS Discord ID.
-                        let rcos_discord = global_config()
-                            .discord_config
-                            .rcos_guild_id();
+                        let rcos_discord = global_config().discord_config.rcos_guild_id();
 
                         // Kick user from RCOS Discord.
                         global_discord_client()

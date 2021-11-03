@@ -1,11 +1,11 @@
+use crate::api::discord::global_discord_client;
+use crate::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::api::rcos::users::{delete::DeleteUser, profile::Profile, UserAccountType};
+use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::templates::{forms::FormTemplate, jumbotron, Template};
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::HttpRequest;
-use crate::api::discord::global_discord_client;
-use crate::api::rcos::users::accounts::lookup::AccountLookup;
-use crate::env::global_config;
 
 /// Confirmation form to delete the profile
 #[get("/profile_delete")]
@@ -20,7 +20,10 @@ pub async fn confirm_delete(auth: AuthenticationCookie) -> Result<FormTemplate, 
 }
 
 #[post("/profile_delete")]
-pub async fn profile_delete(req: HttpRequest, identity: Identity) -> Result<Template, TelescopeError> {
+pub async fn profile_delete(
+    req: HttpRequest,
+    identity: Identity,
+) -> Result<Template, TelescopeError> {
     // Get the viewer's RCOS username.
     let rcos_username: String = identity
         .get_rcos_username()
@@ -28,9 +31,10 @@ pub async fn profile_delete(req: HttpRequest, identity: Identity) -> Result<Temp
         .ok_or(TelescopeError::NotAuthenticated)?;
 
     // Check if the viewer has a discord account linked.
-    let discord_id: Option<u64> = AccountLookup::send(rcos_username.clone(), UserAccountType::Discord)
-        .await?
-        .and_then(|string| string.as_str().parse::<u64>().ok());
+    let discord_id: Option<u64> =
+        AccountLookup::send(rcos_username.clone(), UserAccountType::Discord)
+            .await?
+            .and_then(|string| string.as_str().parse::<u64>().ok());
 
     // If there is one, kick it from the RCOS Discord.
     if let Some(discord_id) = discord_id {
@@ -52,6 +56,6 @@ pub async fn profile_delete(req: HttpRequest, identity: Identity) -> Result<Temp
 
     // Show the user a jumbotron indicating account deletion.
     jumbotron::new("Account deletion", "Your account was deleted successfully.")
-            .render_into_page(&req, "Account deletion")
-            .await
+        .render_into_page(&req, "Account deletion")
+        .await
 }

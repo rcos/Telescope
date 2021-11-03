@@ -1,6 +1,5 @@
 //! Discord OAuth2 flow.
 
-use std::sync::Arc;
 use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
@@ -18,6 +17,7 @@ use oauth2::{AuthUrl, TokenUrl};
 use reqwest::header::AUTHORIZATION;
 use serenity::model::id::RoleId;
 use serenity::model::user::CurrentUser;
+use std::sync::Arc;
 
 /// The Discord API endpoint to query for user data.
 pub const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -245,13 +245,15 @@ impl DiscordIdentity {
             error!("Discord returned non-success status code when adding user to RCOS Guild. Response: {:#?}", response);
             return Err(TelescopeError::GatewayError {
                 header: "Discord API Error".to_string(),
-                message: format!("Discord API returned status {}{}.",
-                                 response.status()
-                                     .as_u16(),
-                                 response.status()
-                                     .canonical_reason()
-                                     .map(|s| format!(" ({})", s))
-                                     .unwrap_or("".to_string()))
+                message: format!(
+                    "Discord API returned status {}{}.",
+                    response.status().as_u16(),
+                    response
+                        .status()
+                        .canonical_reason()
+                        .map(|s| format!(" ({})", s))
+                        .unwrap_or("".to_string())
+                ),
             });
         }
 
