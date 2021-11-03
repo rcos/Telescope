@@ -4,12 +4,14 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased
+## 0.7.3 - November 3rd, 2021
 - Changes to the config file: 
   - Now only a single RCOS Discord server ID is accepted instead of a list of IDs.
 - Fixed error caused by unlinking Discord account while authenticated with Discord. ([#185])
 - Update Rust to 1.56 and Rust 2021 Edition. ([#186])
 - Change RCOS contact email from rcos.management@gmail.com to rcos-leadership@googlegroups.com. ([#188])
+- Add Discord gateway. ([#178])
+- User deletion functionality. ([#15], [#189])
 
 ## 0.7.2 - October 12th, 2021
 - Account linking with Discord ([#5], [#181])
@@ -113,6 +115,7 @@ please submit a pull request fixing it.
 
 <!-- links -->
 [#5]: https://github.com/rcos/Telescope/issues/5
+[#15]: https://github.com/rcos/Telescope/issues/15
 [#16]: https://github.com/rcos/Telescope/issues/16
 [#96]: https://github.com/rcos/Telescope/issues/96
 [#100]: https://github.com/rcos/Telescope/issues/100
@@ -124,9 +127,11 @@ please submit a pull request fixing it.
 [#142]: https://github.com/rcos/Telescope/issues/142
 [#151]: https://github.com/rcos/Telescope/issues/151
 [#176]: https://github.com/rcos/Telescope/pull/176
+[#178]: https://github.com/rcos/Telescope/issues/178
 [#179]: https://github.com/rcos/Telescope/pull/179
 [#181]: https://github.com/rcos/Telescope/pull/181
 [#182]: https://github.com/rcos/Telescope/pull/182
 [#185]: https://github.com/rcos/Telescope/issues/185
 [#186]: https://github.com/rcos/Telescope/pull/186
 [#188]: https://github.com/rcos/Telescope/issues/188
+[#189]: https://github.com/rcos/Telescope/pull/189
