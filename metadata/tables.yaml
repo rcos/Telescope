@@ -37,9 +37,6 @@
       foreign_key_constraint_on: username
 - table:
     schema: public
-    name: chat_associations
-- table:
-    schema: public
     name: coordinators
   select_permissions:
   - role: web_anon
@@ -283,6 +280,13 @@
           semester_id: semester_id
 - table:
     schema: public
+    name: project_channels
+  object_relationships:
+  - name: project
+    using:
+      foreign_key_constraint_on: project_id
+- table:
+    schema: public
     name: project_pitches
   object_relationships:
   - name: enrollment
@@ -349,11 +353,26 @@
       foreign_key_constraint_on: semester_id
 - table:
     schema: public
+    name: project_roles
+  object_relationships:
+  - name: project
+    using:
+      foreign_key_constraint_on: project_id
+- table:
+    schema: public
     name: projects
   object_relationships:
   - name: external_organization
     using:
       foreign_key_constraint_on: external_organization_id
+  - name: project_role
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: project_roles
+        column_mapping:
+          project_id: project_id
   array_relationships:
   - name: enrollments
     using:
@@ -362,6 +381,13 @@
         table:
           schema: public
           name: enrollments
+  - name: project_channels
+    using:
+      foreign_key_constraint_on:
+        column: project_id
+        table:
+          schema: public
+          name: project_channels
   - name: project_pitches
     using:
       foreign_key_constraint_on:
@@ -403,31 +429,6 @@
       - external_organization_id
       - homepage_url
       - cover_image_url
-      filter: {}
-- table:
-    schema: public
-    name: public_meetings
-  select_permissions:
-  - role: web_anon
-    permission:
-      columns:
-      - meeting_id
-      - semester_id
-      - type
-      - host_username
-      - is_public
-      - start_date_time
-      - end_date_time
-      - title
-      - agenda
-      - presentation_markdown
-      - external_presentation_url
-      - attendance_code
-      - recording_url
-      - is_remote
-      - location
-      - meeting_url
-      - created_at
       filter: {}
 - table:
     schema: public
@@ -512,6 +513,20 @@
           name: workshop_proposals
 - table:
     schema: public
+    name: small_group_categories
+  object_relationships:
+  - name: small_group
+    using:
+      foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
+    name: small_group_channels
+  object_relationships:
+  - name: small_group
+    using:
+      foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
     name: small_group_members
 - table:
     schema: public
@@ -535,12 +550,41 @@
       foreign_key_constraint_on: small_group_id
 - table:
     schema: public
+    name: small_group_roles
+  object_relationships:
+  - name: small_group
+    using:
+      foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
     name: small_groups
   object_relationships:
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
+  - name: small_group_role
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: small_group_roles
+        column_mapping:
+          small_group_id: small_group_id
   array_relationships:
+  - name: small_group_categories
+    using:
+      foreign_key_constraint_on:
+        column: small_group_id
+        table:
+          schema: public
+          name: small_group_categories
+  - name: small_group_channels
+    using:
+      foreign_key_constraint_on:
+        column: small_group_id
+        table:
+          schema: public
+          name: small_group_channels
   - name: small_group_mentors
     using:
       foreign_key_constraint_on:
