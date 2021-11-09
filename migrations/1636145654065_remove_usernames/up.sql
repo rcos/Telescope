@@ -22,6 +22,8 @@ ALTER TABLE user_accounts DROP COLUMN username;
 ALTER TABLE meetings DROP COLUMN host_username;
 -- Add foreign key constraint to enrollments table.
 ALTER TABLE meetings ADD FOREIGN KEY (host_user_id, semester_id) REFERENCES enrollments(user_id, semester_id);
+-- Add comment on host user ID.
+COMMENT ON COLUMN meetings.host_user_id IS 'User ID of the optional host of a meeting, for example, the user ID of a mentor hosting a bonus session';
 
 -- Mentor proposals.
 ALTER TABLE mentor_proposals DROP CONSTRAINT mentor_proposals_pkey;
@@ -38,6 +40,8 @@ FROM users
 WHERE reviewer_username IS NOT NULL AND reviewer_username = users.username;
 -- Drop old reviewer username column.
 ALTER TABLE mentor_proposals DROP COLUMN reviewer_username;
+-- Add comment on user ID.
+COMMENT ON COLUMN mentor_proposals.user_id IS 'User ID of mentor to-be.';
 
 -- Pay requests table.
 ALTER TABLE pay_requests DROP CONSTRAINT pay_requests_pkey;

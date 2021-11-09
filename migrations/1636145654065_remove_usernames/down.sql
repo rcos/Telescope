@@ -68,6 +68,7 @@ ALTER TABLE meeting_attendances ADD PRIMARY KEY (meeting_id, username);
 
 -- Meeting (hosts).
 ALTER TABLE meetings ADD COLUMN host_username VARCHAR REFERENCES users(username);
+COMMENT ON COLUMN meetings.host_username IS 'Optional host of meeting, e.g. mentor username for bonus workshop';
 -- Set host usernames.
 UPDATE meetings
 SET host_username = username
