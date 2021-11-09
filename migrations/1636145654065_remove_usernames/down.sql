@@ -133,3 +133,18 @@ WHERE reviewer_id IS NOT NULL AND reviewer_id = users.id;
 ALTER TABLE project_pitches ALTER COLUMN username SET NOT NULL;
 ALTER TABLE project_pitches DROP CONSTRAINT project_pitches_pkey;
 ALTER TABLE project_pitches ADD PRIMARY KEY (semester_id, username);
+
+-- Project presentation grades table.
+ALTER TABLE project_presentation_grades ADD COLUMN grader_username VARCHAR REFERENCES users(username);
+ALTER TABLE project_presentation_grades ADD FOREIGN KEY (semester_id, grader_username) REFERENCES enrollments(semester_id, username);
+-- Set usernames.
+UPDATE project_presentation_grades
+SET grader_username = users.username
+FROM users
+WHERE grader_id = users.id;
+-- Upgrade to PK.
+ALTER TABLE project_presentation_grades ALTER COLUMN grader_username SET NOT NULL;
+ALTER TABLE project_presentation_grades DROP CONSTRAINT project_presentation_grades_pkey;
+ALTER TABLE project_presentation_grades ADD PRIMARY KEY (semester_id, project_id, grader_username);
+
+

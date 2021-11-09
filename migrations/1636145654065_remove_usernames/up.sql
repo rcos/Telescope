@@ -54,6 +54,14 @@ ALTER TABLE project_pitches ADD PRIMARY KEY (semester_id, user_id);
 ALTER TABLE project_pitches DROP COLUMN username;
 ALTER TABLE project_pitches DROP COLUMN reviewer_username;
 
+-- Project presentation grades table.
+ALTER TABLE project_presentation_grades DROP CONSTRAINT project_presentation_grades_pkey;
+ALTER TABLE project_presentation_grades ADD PRIMARY KEY (semester_id, project_id, grader_id);
+ALTER TABLE project_presentation_grades DROP COLUMN grader_username;
+-- Add foreign key to enrollments table.
+ALTER TABLE project_presentation_grades ADD FOREIGN KEY (semester_id, grader_id) REFERENCES enrollments(semester_id, user_id);
+
+
 -- Enrollments and users table go last because everything else depends on them. 
 
 -- Remove username from enrollments table.
