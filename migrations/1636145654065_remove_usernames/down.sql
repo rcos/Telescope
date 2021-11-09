@@ -66,3 +66,6 @@ ALTER TABLE meeting_attendances ALTER COLUMN username SET NOT NULL;
 ALTER TABLE meeting_attendances DROP CONSTRAINT meeting_attendances_pkey;
 ALTER TABLE meeting_attendances ADD PRIMARY KEY (meeting_id, username);
 
+-- Meeting (hosts).
+ALTER TABLE meetings ADD COLUMN host_username VARCHAR REFERENCES users(username);
+-- Set host usernames. 

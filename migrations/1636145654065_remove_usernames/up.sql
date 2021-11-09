@@ -18,6 +18,9 @@ ALTER TABLE user_accounts DROP CONSTRAINT user_accounts_pkey;
 ALTER TABLE user_accounts ADD PRIMARY KEY (user_id, type);
 ALTER TABLE user_accounts DROP COLUMN username;
 
+-- Meetings (hosts).
+ALTER TABLE meetings DROP COLUMN host_username;
+
 -- Enrollments and users table go last because everything else depends on them. 
 
 -- Remove username from enrollments table.
