@@ -39,6 +39,12 @@ WHERE reviewer_username IS NOT NULL AND reviewer_username = users.username;
 -- Drop old reviewer username column.
 ALTER TABLE mentor_proposals DROP COLUMN reviewer_username;
 
+-- Pay requests table.
+ALTER TABLE pay_requests DROP CONSTRAINT pay_requests_pkey;
+ALTER TABLE pay_requests ADD PRIMARY KEY (semester_id, user_id);
+ALTER TABLE pay_requests DROP COLUMN username;
+
+
 -- Enrollments and users table go last because everything else depends on them. 
 
 -- Remove username from enrollments table.

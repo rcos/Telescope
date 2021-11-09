@@ -97,3 +97,18 @@ WHERE mentor_proposals.reviewer_id IS NOT NULL AND mentor_proposals.reviewer_id 
 ALTER TABLE mentor_proposals ALTER COLUMN username SET NOT NULL;
 ALTER TABLE mentor_proposals DROP CONSTRAINT mentor_proposals_pkey;
 ALTER TABLE mentor_proposals ADD PRIMARY KEY (semester_id, username);
+-- Drop reviewer id column.
+ALTER TABLE mentor_proposals DROP COLUMN reviewer_id;
+
+-- Pay requests table.
+ALTER TABLE pay_requests ADD COLUMN username VARCHAR REFERENCES users(username);
+ALTER TABLE pay_requests ADD FOREIGN KEY (username, semester_id) REFERENCES enrollments(username, semester_id);
+-- Set usernames.
+UPDATE pay_requests
+SET username = users.username
+FROM users
+WHERE user_id = users.id;
+-- Set not null, then upgrade to primary
+ALTER TABLE pay_requests ALTER COLUMN username SET NOT NULL;
+ALTER TABLE pay_requests DROP CONSTRAINT pay_requests_pkey;
+ALTER TABLE pay_requests ADD PRIMARY KEY (username, semester_id);
