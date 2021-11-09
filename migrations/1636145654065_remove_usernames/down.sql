@@ -113,3 +113,23 @@ WHERE user_id = users.id;
 ALTER TABLE pay_requests ALTER COLUMN username SET NOT NULL;
 ALTER TABLE pay_requests DROP CONSTRAINT pay_requests_pkey;
 ALTER TABLE pay_requests ADD PRIMARY KEY (username, semester_id);
+
+-- Project pitches table.
+ALTER TABLE project_pitches ADD COLUMN username VARCHAR REFERENCES users(username);
+ALTER TABLE project_pitches ADD COLUMN reviewer_username VARCHAR REFERENCES users(username);
+ALTER TABLE project_pitches ADD FOREIGN KEY (username, semester_id) REFERENCES enrollments(username, semester_id);
+ALTER TABLE project_pitches ADD FOREIGN KEY (reviewer_username, semester_id) REFERENCES enrollments(username, semester_id);
+-- Set usernames.
+UPDATE project_pitches
+SET username = users.username
+FROM users
+WHERE user_id = users.id;
+-- Set reviewer usernames.
+UPDATE project_pitches
+SET reviewer_username = users.username
+FROM users
+WHERE reviewer_id IS NOT NULL AND reviewer_id = users.id;
+-- Set not null, upgrade to PK.
+ALTER TABLE project_pitches ALTER COLUMN username SET NOT NULL;
+ALTER TABLE project_pitches DROP CONSTRAINT project_pitches_pkey;
+ALTER TABLE project_pitches ADD PRIMARY KEY (semester_id, username);

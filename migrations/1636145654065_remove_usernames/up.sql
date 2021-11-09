@@ -48,6 +48,11 @@ ALTER TABLE pay_requests DROP CONSTRAINT pay_requests_pkey;
 ALTER TABLE pay_requests ADD PRIMARY KEY (semester_id, user_id);
 ALTER TABLE pay_requests DROP COLUMN username;
 
+-- Project pitches table.
+ALTER TABLE project_pitches DROP CONSTRAINT project_pitches_pkey;
+ALTER TABLE project_pitches ADD PRIMARY KEY (semester_id, user_id);
+ALTER TABLE project_pitches DROP COLUMN username;
+ALTER TABLE project_pitches DROP COLUMN reviewer_username;
 
 -- Enrollments and users table go last because everything else depends on them. 
 
