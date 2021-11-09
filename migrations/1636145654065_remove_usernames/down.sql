@@ -68,4 +68,32 @@ ALTER TABLE meeting_attendances ADD PRIMARY KEY (meeting_id, username);
 
 -- Meeting (hosts).
 ALTER TABLE meetings ADD COLUMN host_username VARCHAR REFERENCES users(username);
--- Set host usernames. 
+-- Set host usernames.
+UPDATE meetings
+SET host_username = username
+FROM users
+WHERE meetings.host_user_id IS NOT NULL AND users.id = meetings.host_user_id;
+-- Add foreign key constraint.
+ALTER TABLE meetings ADD FOREIGN KEY (host_username, semester_id) REFERENCES enrollments(username, semester_id);
+
+-- Mentor proposals.
+ALTER TABLE mentor_proposals ADD COLUMN username VARCHAR REFERENCES users(username);
+COMMENT ON COLUMN mentor_proposals.username IS 'Username of mentor to-be.';
+ALTER TABLE mentor_proposals ADD COLUMN reviewer_username VARCHAR REFERENCES users(username);
+COMMENT ON COLUMN mentor_proposals.reviewer_username IS 'Username of coordinator/faculty who reviewed proposal.';
+ALTER TABLE mentor_proposals ADD FOREIGN KEY (username, semester_id) REFERENCES enrollments(username, semester_id);
+ALTER TABLE mentor_proposals ADD FOREIGN KEY (reviewer_username, semester_id) REFERENCES enrollments(username, semester_id);
+-- Set username.
+UPDATE mentor_proposals
+SET username = users.username
+FROM users
+WHERE user_id = users.id;
+-- Set reviewer username.
+UPDATE mentor_proposals
+SET reviewer_username = users.username
+FROM users
+WHERE mentor_proposals.reviewer_id IS NOT NULL AND mentor_proposals.reviewer_id = users.id;
+-- Add not null constraint and then upgrade to primary key.
+ALTER TABLE mentor_proposals ALTER COLUMN username SET NOT NULL;
+ALTER TABLE mentor_proposals DROP CONSTRAINT mentor_proposals_pkey;
+ALTER TABLE mentor_proposals ADD PRIMARY KEY (semester_id, username);

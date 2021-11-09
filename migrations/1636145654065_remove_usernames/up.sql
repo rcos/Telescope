@@ -20,6 +20,24 @@ ALTER TABLE user_accounts DROP COLUMN username;
 
 -- Meetings (hosts).
 ALTER TABLE meetings DROP COLUMN host_username;
+-- Add foreign key constraint to enrollments table.
+ALTER TABLE meetings ADD FOREIGN KEY (host_user_id, semester_id) REFERENCES enrollments(user_id, semester_id);
+
+-- Mentor proposals.
+ALTER TABLE mentor_proposals DROP CONSTRAINT mentor_proposals_pkey;
+ALTER TABLE mentor_proposals ADD PRIMARY KEY (semester_id, user_id);
+ALTER TABLE mentor_proposals DROP COLUMN username;
+-- Add missing column and foreign key for reviewer user ID.
+ALTER TABLE mentor_proposals ADD COLUMN reviewer_id UUID REFERENCES users(id);
+ALTER TABLE mentor_proposals ADD FOREIGN KEY (semester_id, reviewer_id) REFERENCES enrollments(semester_id, user_id);
+COMMENT ON COLUMN mentor_proposals.reviewer_id IS 'User ID of coordinator/faculty who reviewed proposal';
+-- Set column values.
+UPDATE mentor_proposals
+SET reviewer_id = id
+FROM users
+WHERE reviewer_username IS NOT NULL AND reviewer_username = users.username;
+-- Drop old reviewer username column.
+ALTER TABLE mentor_proposals DROP COLUMN reviewer_username;
 
 -- Enrollments and users table go last because everything else depends on them. 
 
