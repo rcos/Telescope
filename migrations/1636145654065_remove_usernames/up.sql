@@ -61,6 +61,7 @@ ALTER TABLE project_presentation_grades DROP COLUMN grader_username;
 -- Add foreign key to enrollments table.
 ALTER TABLE project_presentation_grades ADD FOREIGN KEY (semester_id, grader_id) REFERENCES enrollments(semester_id, user_id);
 
+-- Small group mentors : TODO
 
 -- Enrollments and users table go last because everything else depends on them. 
 
