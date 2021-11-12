@@ -29,6 +29,6 @@ impl Semesters {
 impl semesters::ResponseData {
     /// Get the semester count if available.
     pub fn semester_count(&self) -> Option<i64> {
-        Some(self.semesters_aggregate.aggregate.as_ref()?.count?)
+        Some(self.semesters_aggregate.aggregate.as_ref()?.count)
     }
 }
