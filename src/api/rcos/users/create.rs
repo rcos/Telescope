@@ -16,7 +16,6 @@ use create_one_user::{ResponseData, Variables};
 impl CreateOneUser {
     /// Make the input variables object for a user creation mutation.
     pub fn make_variables(
-        username: String,
         first_name: String,
         last_name: String,
         role: user_role,
@@ -24,7 +23,6 @@ impl CreateOneUser {
         platform_id: String,
     ) -> Variables {
         Variables {
-            username,
             first_name,
             last_name,
             role,
@@ -36,7 +34,7 @@ impl CreateOneUser {
 
 impl ResponseData {
     /// Get the username that was added to the database.
-    pub fn username(&self) -> Option<String> {
-        Some(self.insert_users_one.as_ref()?.username.clone())
+    pub fn user_id(&self) -> uuid::Uuid {
+        self.insert_users_one.id
     }
 }

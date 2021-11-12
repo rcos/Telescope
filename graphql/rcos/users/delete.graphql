@@ -1,29 +1,29 @@
 # Deletes a user account and all data associated with it.
 
-mutation DeleteUser($username: String!) {
+mutation DeleteUser($user_id: uuid!) {
     # Delete user hosting history -- This just removes the user as the host of
     # any meetings they hosted.
-    update_meetings(where: {host_username: {_eq: $username}}, _set: {host_username: null}) {
+    update_meetings(where: {host_user_id: {_eq: $user_id}}, _set: {host_user_id: null}) {
         affected_rows
     }
 
     # Delete user mentoring records
-    delete_small_group_mentors(where: {username: {_eq: $username}}) {
+    delete_small_group_mentors(where: {user_id: {_eq: $user_id}}) {
         affected_rows
     }
 
     # Delete links to GitHub/Discord/RPI CAS
-    delete_user_accounts(where: {username: {_eq: $username}}) {
+    delete_user_accounts(where: {user_id: {_eq: $user_id}}) {
         affected_rows
     }
 
     # Delete user enrollment history
-    delete_enrollments(where: {username: {_eq: $username}}) {
+    delete_enrollments(where: {user_id: {_eq: $user_id}}) {
         affected_rows
     }
 
     # Delete user account itself
-    delete_users_by_pk(username: $username) {
-        username
+    delete_users_by_pk(id: $user_id) {
+        id
     }
 }

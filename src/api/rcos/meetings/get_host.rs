@@ -13,14 +13,14 @@ pub struct MeetingHost;
 
 impl MeetingHost {
     /// Get the username of the host of a meeting if there is one.
-    pub async fn get(meeting_id: i64) -> Result<Option<String>, TelescopeError> {
+    pub async fn get(meeting_id: i64) -> Result<Option<uuid::Uuid>, TelescopeError> {
         send_query::<Self>(meeting_host::Variables { meeting_id })
             .await
             .map(|response| {
                 response
                     .meetings_by_pk
                     .and_then(|meeting| meeting.host)
-                    .map(|host| host.username)
+                    .map(|host| host.id)
             })
     }
 }

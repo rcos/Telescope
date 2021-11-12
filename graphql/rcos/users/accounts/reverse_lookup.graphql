@@ -1,5 +1,5 @@
 query ReverseLookup($platform: user_account!, $id: String!) {
     user_accounts(limit: 1, where: {type: {_eq: $platform}, account_id: {_eq: $id}}) {
-        username
+        user_id
     }
 }

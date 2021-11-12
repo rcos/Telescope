@@ -1,10 +1,10 @@
 fragment HostInfo on users {
-    username
+    id
     first_name
     last_name
 
     # User's RPI email
-    rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+    rcs_id: userAccountsByUserId(where: {type: {_eq: "rpi"}}) {
         account_id
     }
 }
@@ -21,9 +21,9 @@ query EditHostSelection($meeting_id: Int!) {
             # Coordinators sorted alphabetically
             coordinators: enrollments(
                 where: {is_coordinator: {_eq: true}},
-                order_by: [{user: {first_name: asc}}, {user: {last_name: asc}}]
+                order_by: [{userByUserId: {first_name: asc}}, {userByUserId: {last_name: asc}}]
             ) {
-                user { ...HostInfo }
+                userByUserId { ...HostInfo }
             }
 
             # Mentors by small group and then alphabetically
@@ -40,14 +40,14 @@ query EditHostSelection($meeting_id: Int!) {
                 # See
                 # - https://github.com/rcos/Telescope/issues/141
                 # - https://github.com/hasura/graphql-engine/issues/3796
-                small_group_mentors(order_by: [{user: {first_name: asc}}]) {
-                    user { ... HostInfo }
+                small_group_mentors(order_by: [{userByUserId: {first_name: asc}}]) {
+                    userByUserId { ... HostInfo }
                 }
             }
 
             # Everyone else alphabetically
-            enrollments(order_by: [{user: {first_name: asc}}, {user: {last_name: asc}}]) {
-                user { ... HostInfo }
+            enrollments(order_by: [{userByUserId: {first_name: asc}}, {userByUserId: {last_name: asc}}]) {
+                userByUserId { ... HostInfo }
             }
         }
     }

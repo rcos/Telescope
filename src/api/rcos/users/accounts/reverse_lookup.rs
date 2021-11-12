@@ -1,5 +1,6 @@
 //! RCOS API query to get the username (if available) of a user by platform and account id.
 
+use uuid::Uuid;
 // Import and rename for GraphQL macro
 use crate::api::rcos::users::UserAccountType as user_account;
 
@@ -26,9 +27,9 @@ impl ReverseLookup {
 }
 
 impl ResponseData {
-    /// Get the username of a user (if they exist) via their
+    /// Get the user ID of a user (if they exist) via their
     /// account id for a given platform.
-    pub fn username(mut self) -> Option<String> {
-        Some(self.user_accounts.pop()?.username)
+    pub fn user_id(mut self) -> Option<Uuid> {
+        Some(self.user_accounts.pop()?.user_id)
     }
 }

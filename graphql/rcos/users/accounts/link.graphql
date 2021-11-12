@@ -1,9 +1,9 @@
-mutation LinkUserAccount($username: String!, $platform: user_account!, $platform_id: String!) {
+mutation LinkUserAccount($user_id: uuid!, $platform: user_account!, $platform_id: String!) {
     insert_user_accounts_one(
         object: {
-            username: $username,
+            user_id: $user_id,
             type: $platform,
             account_id: $platform_id
         },
-    ) { username }
+    ) { user_id }
 }

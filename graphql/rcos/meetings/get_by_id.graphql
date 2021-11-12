@@ -24,10 +24,10 @@ query Meeting($id: Int!) {
         }
 
         # Info on the host
-        host: user {
+        host: userByHostUserId {
             first_name
             last_name
-            username
+            id
         }
 
         # Attendance count

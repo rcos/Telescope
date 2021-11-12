@@ -1,9 +1,9 @@
 fragment HostInfo on users {
-    username
+    id
     first_name
     last_name
 
-    rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+    rcs_id: userAccountsByUserId(where: {type: {_eq: "rpi"}}) {
         account_id
     }
 }
@@ -18,13 +18,13 @@ query HostSelection($search: String!, $now: date!) {
         where: {
             _or: [
                 # Faculty advisors
-                {role: {_eq: "faculty_advisor"}, enrollments: {semester: {end_date: {_gte: $now}}}},
+                {role: {_eq: "faculty_advisor"}, enrollmentsByUserId: {semester: {end_date: {_gte: $now}}}},
                 # Current coordinators
-                {enrollments: {is_coordinator: {_eq: true}, semester: {end_date: {_gte: $now}}}}
+                {enrollmentsByUserId: {is_coordinator: {_eq: true}, semester: {end_date: {_gte: $now}}}}
                 # Current mentors
-                {small_group_mentors: {small_group: {semester: {end_date: {_gte: $now}}}}}
+                {smallGroupMentorsByUserId: {small_group: {semester: {end_date: {_gte: $now}}}}}
             ],
-            enrollments: {semester: {end_date: {_gte: $now}}}
+            enrollmentsByUserId: {semester: {end_date: {_gte: $now}}}
         },
         order_by: [
             {first_name: asc},
@@ -43,10 +43,10 @@ query HostSelection($search: String!, $now: date!) {
             _or: [
                 {first_name: {_ilike: $search}},
                 {last_name: {_ilike: $search}},
-                {username: {_ilike: $search}}
+                {userAccountsByUserId: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}}
             ],
             # Only enrolled users can host meetings in a given semester.
-            enrollments: {semester: {end_date: {_gte: $now}}}
+            enrollmentsByUserId: {semester: {end_date: {_gte: $now}}}
         }
     ) { ... HostInfo }
 }
