@@ -2800,7 +2800,7 @@ dependencies = [
  "serde_urlencoded",
  "serenity",
  "structopt",
- "time 0.2.27",
+ "time 0.3.5",
  "toml",
  "url",
  "uuid",
@@ -2876,6 +2876,15 @@ dependencies = [
  "time-macros",
  "version_check 0.9.3",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "time"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41effe7cfa8af36f439fac33861b66b049edc6f9a32331e2312660529c1c24ad"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
