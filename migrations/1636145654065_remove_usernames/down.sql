@@ -1,5 +1,14 @@
 -- Replace usernames in the RCOS Database.
 
+-- Make usernames and set them to the string versions of the user IDs.
+ALTER TABLE users ADD COLUMN username VARCHAR UNIQUE;
+-- Set usernames.
+UPDATE users SET username = id::text;
+-- Upgrade to pk.
+ALTER TABLE users ALTER COLUMN username SET NOT NULL;
+ALTER TABLE users DROP CONSTRAINT users_pkey;
+ALTER TABLE users ADD PRIMARY KEY (username);
+
 -- Bonus Attendance table.
 -- Add back username column.
 ALTER TABLE bonus_attendances ADD COLUMN username VARCHAR REFERENCES users(username);
@@ -147,4 +156,52 @@ ALTER TABLE project_presentation_grades ALTER COLUMN grader_username SET NOT NUL
 ALTER TABLE project_presentation_grades DROP CONSTRAINT project_presentation_grades_pkey;
 ALTER TABLE project_presentation_grades ADD PRIMARY KEY (semester_id, project_id, grader_username);
 
+-- Small group mentors.
+ALTER TABLE small_group_mentors ADD COLUMN username VARCHAR REFERENCES users(username);
+-- Set usernames.
+UPDATE small_group_mentors
+SET username = users.username
+FROM users
+WHERE users.id = small_group_mentors.user_id;
+-- Upgrade to pk.
+ALTER TABLE small_group_mentors ALTER COLUMN username SET NOT NULL;
+ALTER TABLE small_group_mentors DROP CONSTRAINT small_group_mentors_pkey;
+ALTER TABLE small_group_mentors ADD PRIMARY KEY (small_group_id, username);
 
+-- Status update submissions.
+ALTER TABLE status_update_submissions ADD COLUMN username VARCHAR REFERENCES users(username);
+ALTER TABLE status_update_submissions ADD COLUMN grader_username VARCHAR REFERENCES users(username);
+COMMENT ON COLUMN status_update_submissions.grader_username IS 'The mentor/coordinator/faculty member that graded this status_update';
+-- Set username.
+UPDATE status_update_submissions
+SET username = users.username
+FROM users
+WHERE user_id = users.id;
+-- Set grader username.
+UPDATE status_update_submissions
+SET grader_username = username
+FROM users
+WHERE grader_id IS NOT NULL AND grader_id = users.id;
+-- Upgrade username to pk.
+ALTER TABLE status_update_submissions ALTER COLUMN username SET NOT NULL;
+ALTER TABLE status_update_submissions DROP CONSTRAINT status_update_submissions_pkey;
+ALTER TABLE status_update_submissions ADD PRIMARY KEY (status_update_id, username);
+
+-- Workshop proposal table
+ALTER TABLE workshop_proposals ADD COLUMN username VARCHAR REFERENCES users(username);
+ALTER TABLE workshop_proposals ADD COLUMN reviewer_username VARCHAR REFERENCES users(username);
+ALTER TABLE workshop_proposals ADD FOREIGN KEY (semester_id, username) REFERENCES enrollments(semester_id, username);
+ALTER TABLE workshop_proposals ADD FOREIGN KEY (semester_id, reviewer_username) REFERENCES enrollments(semester_id, username);
+COMMENT ON COLUMN workshop_proposals.reviewer_username IS 'Username of coordinator/faculty who reviewed proposal';
+-- Set usernames.
+UPDATE workshop_proposals
+SET username = users.username
+FROM users
+WHERE user_id = users.id;
+-- Set reviewer names.
+UPDATE workshop_proposals
+SET reviewer_username = users.username
+FROM users
+WHERE reviewer_id IS NOT NULL AND user_id = users.id;
+-- Set username not null.
+ALTER TABLE workshop_proposals ALTER COLUMN username SET NOT NULL;

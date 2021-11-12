@@ -61,7 +61,28 @@ ALTER TABLE project_presentation_grades DROP COLUMN grader_username;
 -- Add foreign key to enrollments table.
 ALTER TABLE project_presentation_grades ADD FOREIGN KEY (semester_id, grader_id) REFERENCES enrollments(semester_id, user_id);
 
--- Small group mentors : TODO
+-- Small group mentors
+ALTER TABLE small_group_mentors DROP CONSTRAINT small_group_mentors_pkey;
+ALTER TABLE small_group_mentors ADD PRIMARY KEY (small_group_id, user_id);
+ALTER TABLE small_group_mentors DROP COLUMN username;
+
+-- Status update submissions
+-- Add missing comment.
+COMMENT ON COLUMN status_update_submissions.grader_id IS 'The mentor/coordinator/faculty member that graded this status_update';
+-- Make primary key changes and drop username column.
+ALTER TABLE status_update_submissions DROP CONSTRAINT status_update_submissions_pkey;
+ALTER TABLE status_update_submissions ADD PRIMARY KEY (status_update_id, user_id);
+ALTER TABLE status_update_submissions DROP COLUMN username;
+-- Same with grader.
+ALTER TABLE status_update_submissions DROP COLUMN grader_username;
+
+-- Workshop proposal table
+-- Add missing comment first.
+COMMENT ON COLUMN workshop_proposals.reviewer_id IS 'User ID of coordinator/faculty who reviewed proposal';
+-- Drop username and reviewer columns.
+ALTER TABLE workshop_proposals DROP COLUMN username;
+ALTER TABLE workshop_proposals DROP COLUMN reviewer_username;
+-- No need to change pk, it's already just an ID.
 
 -- Enrollments and users table go last because everything else depends on them. 
 
@@ -71,3 +92,8 @@ ALTER TABLE enrollments DROP CONSTRAINT enrollments_pkey;
 ALTER TABLE enrollments ADD PRIMARY KEY (semester_id, user_id);
 -- Then drop the username column.
 ALTER TABLE enrollments DROP COLUMN username;
+
+-- Finally the users table.
+ALTER TABLE users DROP CONSTRAINT users_pkey;
+ALTER TABLE users ADD PRIMARY KEY (id);
+ALTER TABLE users DROP COLUMN username;
