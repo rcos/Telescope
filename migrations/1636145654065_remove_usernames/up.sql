@@ -84,6 +84,13 @@ ALTER TABLE workshop_proposals DROP COLUMN username;
 ALTER TABLE workshop_proposals DROP COLUMN reviewer_username;
 -- No need to change pk, it's already just an ID.
 
+-- We also drop all views.
+-- These are not replaced with user ID versions, since we do not use them much.
+DROP VIEW small_group_members;
+DROP VIEW faculty_advisors;
+DROP VIEW duplicate_users;
+DROP VIEW coordinators;
+
 -- Enrollments and users table go last because everything else depends on them. 
 
 -- Remove username from enrollments table.

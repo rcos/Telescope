@@ -205,3 +205,53 @@ FROM users
 WHERE reviewer_id IS NOT NULL AND user_id = users.id;
 -- Set username not null.
 ALTER TABLE workshop_proposals ALTER COLUMN username SET NOT NULL;
+
+-- Recreate views dropped.
+
+-- Start with coordinator view.
+CREATE VIEW coordinators(semester_id, username, preferred_name, first_name, last_name)
+AS SELECT DISTINCT e.semester_id, u.username, u.preferred_name, u.first_name, u.last_name
+FROM users u JOIN enrollments e ON e.username::text = u.username::text
+WHERE e.is_coordinator = TRUE ORDER BY e.semester_id, u.username;
+-- Recreate comment.
+COMMENT ON VIEW coordinators IS 'View for access to Coordinators each semester';
+
+-- Duplicate users view.
+CREATE VIEW duplicate_users(username_a, username_b, first_name, last_name)
+AS SELECT DISTINCT LEAST(a.username, b.username) AS username_a,
+                GREATEST(a.username, b.username) AS username_b,
+                a.first_name,
+                a.last_name
+FROM users a JOIN users b ON
+    a.first_name::text ILIKE b.first_name::text AND
+    a.last_name::text ILIKE b.last_name::text AND
+    a.username::text <> b.username::text;
+
+-- Faculty advisors
+CREATE VIEW faculty_advisors(username, preferred_name, first_name, last_name)
+AS SELECT username, preferred_name, first_name, last_name
+FROM users
+WHERE role = 'faculty_advisor'::user_role;
+COMMENT ON VIEW faculty_advisors IS 'View for access to Faculty Advisors';
+
+-- Small group members.
+CREATE VIEW small_group_members(
+    small_group_id, semester_id, username, project_id, is_project_lead,
+    is_coordinator, credits, is_for_pay, mid_year_grade, final_grade, created_at)
+AS SELECT sg.small_group_id,
+       e.semester_id,
+       e.username,
+       e.project_id,
+       e.is_project_lead,
+       e.is_coordinator,
+       e.credits,
+       e.is_for_pay,
+       e.mid_year_grade,
+       e.final_grade,
+       e.created_at
+FROM enrollments e
+    JOIN projects p ON p.project_id = e.project_id
+    JOIN small_group_projects sgp ON sgp.project_id = p.project_id
+    JOIN small_groups sg ON sg.small_group_id = sgp.small_group_id;
+
+COMMENT ON VIEW small_group_members IS 'View for easy access to small group members';
