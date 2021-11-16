@@ -16,7 +16,7 @@ pub struct MeetingHost;
 
 impl MeetingHost {
     /// Get the username of the host of a meeting if there is one.
-    pub async fn get(meeting_id: i64) -> Result<Option<uuid::Uuid>, TelescopeError> {
+    pub async fn get(meeting_id: i64) -> Result<Option<uuid>, TelescopeError> {
         send_query::<Self>(meeting_host::Variables { meeting_id })
             .await
             .map(|response| {
