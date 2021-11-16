@@ -2,6 +2,7 @@
 
 // Import and rename for GraphQL macro
 use crate::api::rcos::users::{UserAccountType as user_account, UserRole as user_role};
+use crate::api::rcos::prelude::*;
 
 /// Type representing GraphQL mutation to create a user and a user account.
 #[derive(GraphQLQuery)]
@@ -34,7 +35,7 @@ impl CreateOneUser {
 
 impl ResponseData {
     /// Get the username that was added to the database.
-    pub fn user_id(&self) -> uuid::Uuid {
+    pub fn user_id(&self) -> uuid {
         self.insert_users_one.id
     }
 }

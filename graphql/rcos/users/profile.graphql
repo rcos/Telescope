@@ -1,20 +1,20 @@
 # Profile query -- gets info about the target user and the viewer.
-query Profile($target: String!, $viewer: [String!]!, $now: date!) {
+query Profile($target: uuid!, $viewer: [uuid!]!, $now: date!) {
     # The owner of the profile.
-    target: users_by_pk(username: $target) {
-        username
+    target: users_by_pk(id: $target) {
+        id
         first_name
         last_name
         role
         created_at
         cohort
 
-        enrollments(order_by: [{semester: {start_date: desc}}]) {
+        enrollments: enrollmentsByUserId(order_by: [{semester: {start_date: desc}}]) {
             semester {
                 title
 
                 # Small groups for this semester that the target user mentors
-                small_groups(where: {small_group_mentors: {username: {_eq: $target}}}) {
+                small_groups(where: {small_group_mentors: {user_id: {_eq: $target}}}) {
                     title
                 }
             }
@@ -30,22 +30,22 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
         }
 
         # The user's discord, if it exists
-        discord: user_accounts(where: {type: {_eq: "discord"}}, limit: 1) {
+        discord: userAccountsByUserId(where: {type: {_eq: "discord"}}, limit: 1) {
             account_id
         }
 
         # The user's github, if it exists.
-        github: user_accounts(where: {type: {_eq: "github"}}, limit: 1) {
+        github: userAccountsByUserId(where: {type: {_eq: "github"}}, limit: 1) {
             account_id
         }
 
         # The user's RCS ID if they have linkled RPI CAS.
-        rcs_id: user_accounts(where: {type: {_eq: "rpi"}}, limit: 1) {
+        rcs_id: userAccountsByUserId(where: {type: {_eq: "rpi"}}, limit: 1) {
             account_id
         }
 
         # What semesters was this user a small group mentor?
-        mentoring: small_group_mentors(
+        mentoring: smallGroupMentorsByUserId(
             order_by: {small_group: {semester_id: desc}}
         ) {
             small_group {
@@ -58,14 +58,14 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
         }
 
         # The number of public meetings hosted
-        public_meetings_hosted: meetings_aggregate(where: {is_draft: {_eq: false}}) {
+        public_meetings_hosted: meetingsByHostUserId_aggregate(where: {is_draft: {_eq: false}}) {
             aggregate {
                 count
             }
         }
 
         # Meetings this user has hosted
-        hosting: meetings(
+        hosting: meetingsByHostUserId(
             order_by: {is_draft: desc, start_date_time: desc},
         ) {
             semester {
@@ -90,13 +90,13 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
     # Viewer info
     viewer: users(
         limit: 1,
-        where: {username: {_in: $viewer}}
+        where: {id: {_in: $viewer}}
     ) {
-        username
+        id
         role
 
         # Is the viewer a coordinator?
-        is_current_coordinator: enrollments(
+        is_current_coordinator: enrollmentsByUserId(
             limit: 1,
             where: {
                 is_coordinator: {_eq: true},
@@ -107,11 +107,11 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
         }
 
         # Are they a mentor for a current small group the target is in?
-        mentors_target: small_group_mentors (
+        mentors_target: smallGroupMentorsByUserId (
             where: {
                 small_group: {
                     semester: {start_date: {_lte: $now}, end_date: {_gte: $now}},
-                    small_group_projects: {project: {enrollments: {username: {_eq: $target}}}}
+                    small_group_projects: {project: {enrollments: {user_id: {_eq: $target}}}}
                 }
             }
         ) {

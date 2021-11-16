@@ -1,6 +1,6 @@
 # Fragment used by the two variants of the Developers query to get user info.
 fragment UserInfo on users {
-    username
+    id
     first_name
     last_name
 
@@ -8,12 +8,12 @@ fragment UserInfo on users {
     #role
 
     # RCS ID if available
-    rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+    rcs_id: userAccountsByUserId(where: {type: {_eq: "rpi"}}) {
         account_id
     }
 
     # Semesters coordinating
-    coordinating: enrollments(
+    coordinating: enrollmentsByUserId(
         where: {
             is_coordinator: {_eq: true}
         },
@@ -27,7 +27,7 @@ fragment UserInfo on users {
     }
 
     # Semesters mentoring
-    mentoring: small_group_mentors(order_by: [
+    mentoring: smallGroupMentorsByUserId(order_by: [
         {small_group: {semester: {start_date: desc}}}
     ]) {
         small_group {
@@ -50,7 +50,7 @@ query AllDevelopers(
         _or: [
             {first_name: {_ilike: $search}},
             {last_name: {_ilike: $search}},
-            {username: {_ilike: $search}},
+            {userAccountsByUserId: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
         ]
     }) {
         aggregate {
@@ -64,7 +64,7 @@ query AllDevelopers(
         where: {_or: [
             {first_name: {_ilike: $search}},
             {last_name: {_ilike: $search}},
-            {username: {_ilike: $search}},
+            {userAccountsByUserId: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
         ]},
         order_by: [{first_name: asc}, {last_name: asc}]
     ) {...UserInfo}
@@ -79,14 +79,14 @@ query CurrentDevelopers(
 ) {
     # Current user count -- used to determine the number of pages.
     user_count: users_aggregate(where: {
-        enrollments: {semester: {
+        enrollmentsByUserId: {semester: {
             start_date: {_lte: $now}
             end_date: {_gte: $now}
         }},
         _or: [
             {first_name: {_ilike: $search}},
             {last_name: {_ilike: $search}},
-            {username: {_ilike: $search}},
+            {userAccountsByUserId: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
         ]
     }) { aggregate { count } }
 
@@ -94,14 +94,14 @@ query CurrentDevelopers(
         limit: $limit,
         offset: $offset,
         where: {
-            enrollments: {semester: {
+            enrollmentsByUserId: {semester: {
                 start_date: {_lte: $now}
                 end_date: {_gte: $now}
             }},
             _or: [
                 {first_name: {_ilike: $search}},
                 {last_name: {_ilike: $search}},
-                {username: {_ilike: $search}},
+                {userAccountsByUserId: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
             ]
         }
         order_by: [{first_name: asc}, {last_name: asc}]

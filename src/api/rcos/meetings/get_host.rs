@@ -1,6 +1,9 @@
 //! GraphQL query to get the username of the host of a meeting by the meeting's ID.
 
-use crate::api::rcos::send_query;
+use crate::api::rcos::{
+    send_query,
+    prelude::*
+};
 use crate::error::TelescopeError;
 
 #[derive(GraphQLQuery)]

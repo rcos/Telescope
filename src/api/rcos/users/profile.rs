@@ -18,8 +18,8 @@ use profile::{ResponseData, Variables};
 impl Profile {
     /// Get the profile data for a given username.
     pub async fn for_user(
-        target: String,
-        viewer: Option<String>,
+        target: uuid,
+        viewer: Option<uuid>,
     ) -> Result<ResponseData, TelescopeError> {
         // Convert viewer to a vec with one or zero usernames in it.
         let viewer = viewer.map(|v| vec![v]).unwrap_or(Vec::new());

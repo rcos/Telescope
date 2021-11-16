@@ -2,8 +2,9 @@
 
 // Namespace items for generated code
 use crate::api::rcos::users::{UserAccountType as user_account, UserAccountType};
-use uuid::Uuid;
-use crate::api::rcos::send_query;
+use crate::api::rcos::{
+    send_query, prelude::*
+};
 use crate::error::TelescopeError;
 
 #[derive(GraphQLQuery)]
@@ -18,7 +19,7 @@ use link_user_account::{ResponseData, Variables};
 impl LinkUserAccount {
     /// Make the variables for a user account upsert mutation.
     fn make_variables(
-        user_id: uuid::Uuid,
+        user_id: uuid,
         platform: UserAccountType,
         platform_id: String,
     ) -> Variables {
@@ -40,10 +41,10 @@ impl LinkUserAccount {
     /// This will also fail if the account already exists. Please check to make sure the user
     /// has not already linked an account on this platform.
     pub async fn send(
-        user_id: uuid::Uuid,
+        user_id: uuid,
         platform: UserAccountType,
         platform_id: String,
-    ) -> Result<Uuid, TelescopeError> {
+    ) -> Result<uuid, TelescopeError> {
         send_query::<Self>(Self::make_variables(user_id, platform, platform_id))
             .await
             .map(ResponseData::user_id)
@@ -52,7 +53,7 @@ impl LinkUserAccount {
 
 impl ResponseData {
     /// Extract the user ID from this response (if there was one).
-    fn user_id(self) -> Uuid {
+    fn user_id(self) -> uuid {
         self.insert_user_accounts_one
             .expect("This should not be null -- this mutation should always return data.")
             .user_id
