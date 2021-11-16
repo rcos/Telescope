@@ -59,8 +59,8 @@ async fn get_meeting_data(meeting_id: i64) -> Result<MeetingMeeting, TelescopeEr
 async fn authorization_for_viewer(
     auth: &AuthenticationCookie,
 ) -> Result<UserMeetingAuthorization, TelescopeError> {
-    // Get username from cookie.
-    let viewer: String = auth.get_rcos_username_or_error().await?;
+    // Get user ID from cookie.
+    let viewer = auth.get_user_id_or_error().await?;
 
     // Query API for auth object.
     return AuthorizationFor::get(Some(viewer)).await;
@@ -73,10 +73,10 @@ async fn meeting_data_checked(
 ) -> Result<MeetingMeeting, TelescopeError> {
     // Get meeting data. Extract host's username.
     let meeting_data = get_meeting_data(meeting_id).await?;
-    let meeting_host: Option<&str> = meeting_data
+    let meeting_host: Option<_> = meeting_data
         .host
         .as_ref()
-        .map(|host| host.username.as_str());
+        .map(|host| host.id);
 
     // Get user's authorization object.
     let authorization = authorization_for_viewer(auth).await?;
@@ -359,7 +359,7 @@ async fn host_selection(
     req: HttpRequest,
 ) -> Result<Template, TelescopeError> {
     // Check that the user can edit this meeting.
-    let viewer = auth.get_rcos_username_or_error().await?;
+    let viewer = auth.get_user_id_or_error().await?;
     if !AuthorizationFor::get(Some(viewer))
         .await?
         .can_edit_by_id(meeting_id)

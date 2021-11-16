@@ -18,6 +18,7 @@ use reqwest::header::AUTHORIZATION;
 use serenity::model::id::RoleId;
 use serenity::model::user::CurrentUser;
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// The Discord API endpoint to query for user data.
 pub const DISCORD_API_ENDPOINT: &'static str = "https://discord.com/api/v8";
@@ -154,9 +155,9 @@ impl DiscordIdentity {
             .map(|u| u.id.to_string())
     }
 
-    /// Get the RCOS username of the account associated with the authenticated
+    /// Get the RCOS user ID of the account associated with the authenticated
     /// discord user if one exists.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+    pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // Get the authenticated user id.
         let platform_id: String = self.get_user_id().await?;
         // Build the query variables for a reverse lookup query to the central RCOS API
@@ -164,7 +165,7 @@ impl DiscordIdentity {
         // Send the query and await the response
         return send_query::<ReverseLookup>(variables)
             .await
-            .map(|response| response.username());
+            .map(|response| response.user_id());
     }
 
     /// Get the currently authenticated discord user associated with this access token.

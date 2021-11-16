@@ -18,10 +18,10 @@ pub async fn meeting(
     Path(meeting_id): Path<i64>,
     identity: Identity,
 ) -> Result<Template, TelescopeError> {
-    // Get the viewer's username.
-    let viewer_username: Option<String> = identity.get_rcos_username().await?;
+    // Get the viewer's user ID.
+    let viewer: Option<_> = identity.get_user_id().await?;
     // Get the viewer's authorization info.
-    let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer_username).await?;
+    let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer).await?;
     // Get the meeting data from the RCOS API.
     let meeting: Option<MeetingMeeting> = Meeting::get_by_id(meeting_id).await?;
     // Check to make sure the meeting exists.
@@ -36,7 +36,7 @@ pub async fn meeting(
     let meeting: MeetingMeeting = meeting.unwrap();
     // Make sure that the meeting is visible to the user.
     // First check for draft status.
-    let meeting_host: Option<&str> = meeting.host.as_ref().map(|host| host.username.as_str());
+    let meeting_host: Option<_> = meeting.host.as_ref().map(|host| host.id);
     let can_edit: bool = authorization.can_edit(meeting_host);
     if !can_edit && meeting.is_draft && !authorization.can_view_drafts() {
         return Err(TelescopeError::BadRequest {
@@ -59,8 +59,6 @@ pub async fn meeting(
             show_status_code: false,
         });
     }
-
-    info!("{:#?}", &authorization);
 
     // If the meeting is visible to the viewer, make and return the template.
     return Template::new(TEMPLATE_PATH)

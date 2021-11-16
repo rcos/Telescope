@@ -13,6 +13,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
+use uuid::Uuid;
 
 /// The type returned by authorization functions.
 pub type AuthorizationResult = Result<(), TelescopeError>;
@@ -98,7 +99,7 @@ where
         // Box and pin the async value.
         return Box::pin(async move {
             // Extract the RCOS username.
-            let rcos_username = extract_rcos_username(&req).await;
+            let rcos_username = extract_user_id(&req).await;
 
             // Properly propagate any errors.
             if let Err(error) = rcos_username {
@@ -123,8 +124,8 @@ where
     }
 }
 
-/// Extract the RCOS username authenticated with a request or error.
-async fn extract_rcos_username(req: &ServiceRequest) -> Result<String, TelescopeError> {
+/// Extract the RCOS user ID authenticated with a request or error.
+async fn extract_user_id(req: &ServiceRequest) -> Result<Uuid, TelescopeError> {
     req
         // Get the identity of the service request -- this should be a json encoded authentication
         // cookie if it exists.
@@ -137,7 +138,7 @@ async fn extract_rcos_username(req: &ServiceRequest) -> Result<String, Telescope
         .refresh()
         .await?
         // Get the RCOS username associated with the authenticated user.
-        .get_rcos_username()
+        .get_user_id()
         .await?
         // Respond with an error if the user is not found.
         .ok_or(TelescopeError::NotAuthenticated)

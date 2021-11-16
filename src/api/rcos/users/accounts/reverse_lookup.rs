@@ -15,21 +15,30 @@ pub struct ReverseLookup;
 
 use reverse_lookup::ResponseData;
 use reverse_lookup::Variables;
+use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 
 impl ReverseLookup {
     /// Make the variables for a reverse account lookup.
-    pub fn make_vars(platform: user_account, platform_id: String) -> Variables {
+    fn make_vars(platform: user_account, platform_id: String) -> Variables {
         Variables {
             platform,
             id: platform_id,
         }
+    }
+
+    /// Get the user ID associated with an ID on a different platform if available.
+    pub async fn execute(platform: user_account, platform_id: String) -> Result<Option<uuid>, TelescopeError> {
+        send_query::<Self>(Self::make_vars(platform, platform_id))
+            .await
+            .map(|response| response.user_id())
     }
 }
 
 impl ResponseData {
     /// Get the user ID of a user (if they exist) via their
     /// account id for a given platform.
-    pub fn user_id(mut self) -> Option<uuid> {
+    fn user_id(mut self) -> Option<uuid> {
         Some(self.user_accounts.pop()?.user_id)
     }
 }

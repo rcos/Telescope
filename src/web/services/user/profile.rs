@@ -11,14 +11,15 @@ use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
-use actix_web::web::{Form, Query, ServiceConfig};
+use actix_web::web::{Form, Path, Query, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use serenity::model::guild::Member;
 use serenity::model::user::User;
 use std::collections::HashMap;
+use uuid::Uuid;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -41,18 +42,17 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 /// User profile service. The username in the path is url-encoded.
-#[get("/user")]
+#[get("/user/{id}")]
 async fn profile(
     req: HttpRequest,
     identity: Identity,
-    // TODO: Switch to using Path here when we switch to user ids.
-    Query(ProfileQuery { username }): Query<ProfileQuery>,
+    Path(id): Path<Uuid>
 ) -> Result<Template, TelescopeError> {
-    // Get the viewer's username.
-    let viewer_username: Option<String> = identity.get_rcos_username().await?;
+    // Get the viewer's user ID.
+    let viewer: Option<Uuid> = identity.get_user_id().await?;
 
     // Get the user's profile information (and viewer info) from the RCOS API.
-    let response: ResponseData = Profile::for_user(username, viewer_username).await?;
+    let response: ResponseData = Profile::for_user(id, viewer).await?;
 
     // Throw an error if there is no user.
     if response.target.is_none() {
@@ -170,9 +170,9 @@ async fn get_context_and_make_form(
     auth: &AuthenticationCookie,
 ) -> Result<FormTemplate, TelescopeError> {
     // Get viewers username. You have to be authenticated to edit your own profile.
-    let viewer: String = auth.get_rcos_username_or_error().await?;
+    let viewer: Uuid = auth.get_user_id_or_error().await?;
     // Get the context for the edit form.
-    let context = EditProfileContext::get(viewer.clone()).await?;
+    let context = EditProfileContext::get(viewer).await?;
     // Ensure that the context exists.
     if context.is_none() {
         // Use an ISE since we should be able to get an edit context as long as there is an
@@ -191,7 +191,7 @@ async fn get_context_and_make_form(
     // Add the context to the form.
     form.template["context"] = json!(&context);
     // Add username to the form for the cancel button
-    form.template["username"] = json!(&viewer);
+    form.template["user_id"] = json!(&viewer);
 
     // Add the list of roles (and whether the current role can switch to them).
     let role_list = UserRole::ALL_ROLES
@@ -241,8 +241,8 @@ async fn save_changes(
         cohort,
     }): Form<ProfileEdits>,
 ) -> Result<HttpResponse, TelescopeError> {
-    // Get authenticated username. This API call gets duplicated in the context creation unfortunately.
-    let username: String = auth.get_rcos_username_or_error().await?;
+    // Get authenticated user ID. This API call gets duplicated in the context creation unfortunately.
+    let user_id = auth.get_user_id_or_error().await?;
 
     // Pass most of the handling here to the GET handler. This will get the context and make
     // and fill the form.
@@ -269,7 +269,7 @@ async fn save_changes(
     }
 
     // Execute GraphQL mutation to save changes.
-    let username = SaveProfileEdits::execute(username, first_name, last_name, cohort, role)
+    let user_id = SaveProfileEdits::execute(user_id, first_name, last_name, cohort, role)
         .await?
         .ok_or(TelescopeError::ise(
             "Could not save changes -- user not found.",
@@ -277,6 +277,6 @@ async fn save_changes(
 
     // On success, redirect to user's profile.
     return Ok(HttpResponse::Found()
-        .header(LOCATION, profile_for(username.as_str()))
+        .header(LOCATION, format!("/user/{}", user_id))
         .finish());
 }

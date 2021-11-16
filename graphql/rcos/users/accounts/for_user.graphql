@@ -1,5 +1,5 @@
-query UserAccounts($username: String!) {
-    user_accounts(where: {username: {_eq: $username}}) {
+query UserAccounts($user_id: uuid!) {
+    user_accounts(where: {user_id: {_eq: $user_id}}) {
         type
         account_id
     }

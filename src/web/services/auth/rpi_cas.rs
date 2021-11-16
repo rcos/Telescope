@@ -8,7 +8,7 @@ use crate::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::{identity::Identity, make_redirect_url, IdentityProvider};
 use actix_web::http::header::LOCATION;
@@ -17,6 +17,7 @@ use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use futures::future::{ready, Ready};
 use regex::Regex;
+use uuid::Uuid;
 
 /// The URL of the RPI CAS server.
 const RPI_CAS_ENDPOINT: &'static str = "https://cas.auth.rpi.edu/cas";
@@ -72,14 +73,14 @@ pub struct RpiCasIdentity {
 }
 
 impl RpiCasIdentity {
-    /// Get the RCOS username (if one exists) associated with this RCS ID.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+    /// Get the RCOS user ID (if one exists) associated with this RCS ID.
+    pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // Make the query variables for a reverse lookup query.
         let query_variables = ReverseLookup::make_vars(UserAccountType::Rpi, self.rcs_id.clone());
         // Send the reverse lookup and propagate the response.
         return send_query::<ReverseLookup>(query_variables)
             .await
-            .map(|response| response.username());
+            .map(|response| response.user_id());
     }
 }
 
@@ -231,8 +232,8 @@ impl IdentityProvider for RpiCas {
             let rcs_id: String = cas_authenticated(&req, Self::login_redirect_path()).await?;
             // Get the RCOS username of the account linked to this RCS id.
             let token = RpiCasIdentity { rcs_id };
-            let rcos_username: String = token
-                .get_rcos_username()
+            let user_id = token
+                .get_rcos_user_id()
                 .await?
                 // Throw error on missing user account
                 .ok_or(TelescopeError::resource_not_found(
@@ -249,7 +250,7 @@ impl IdentityProvider for RpiCas {
             identity.save(&RootIdentity::RpiCas(token).make_authenticated_cookie());
             // Redirect the user to their profile.
             Ok(HttpResponse::Found()
-                .header(LOCATION, profile_for(rcos_username.as_str()))
+                .header(LOCATION, format!("/user/{}", user_id))
                 .finish())
         });
     }
@@ -283,7 +284,7 @@ impl IdentityProvider for RpiCas {
                 .ok_or(TelescopeError::NotAuthenticated)?;
 
             // Get the RCOS username of the authenticated user.
-            let rcos_username: String = authenticated.get_rcos_username_or_error().await?;
+            let rcos_username = authenticated.get_user_id_or_error().await?;
 
             // Get the RCS ID of the authenticated user (if one exists).
             let existing_rcs_id: Option<String> =

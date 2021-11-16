@@ -15,9 +15,9 @@ use self::account_lookup::{ResponseData, Variables};
 
 impl AccountLookup {
     /// Make the variables for an account lookup query.
-    pub fn make_variables(username: String, platform: user_account) -> Variables {
+    pub fn make_variables(user_id: uuid, platform: user_account) -> Variables {
         Variables {
-            rcos_username: username,
+            user_id,
             platform,
         }
     }
@@ -25,11 +25,11 @@ impl AccountLookup {
     /// Send the account lookup query. This return the user's ID on the given platform if there
     /// is one linked.
     pub async fn send(
-        username: String,
+        user_id: uuid,
         platform: user_account,
     ) -> Result<Option<String>, TelescopeError> {
         // Send the query and convert the response.
-        send_query::<Self>(Self::make_variables(username, platform))
+        send_query::<Self>(Self::make_variables(user_id, platform))
             .await
             .map(|response| response.platform_id())
     }

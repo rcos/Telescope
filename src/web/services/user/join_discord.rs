@@ -3,7 +3,7 @@
 use crate::api::discord::rcos_discord_verified_role_id;
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_web::HttpResponse;
 use reqwest::header::LOCATION;
@@ -12,7 +12,7 @@ use reqwest::header::LOCATION;
 #[get("/join_discord")]
 pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
     // Get the authenticated username.
-    let username = auth.get_rcos_username_or_error().await?;
+    let username = auth.get_user_id_or_error().await?;
 
     // Get Discord access token.
     let discord = auth.get_discord();

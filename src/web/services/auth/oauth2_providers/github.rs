@@ -18,6 +18,7 @@ use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -110,9 +111,9 @@ impl GitHubIdentity {
             .map(|response| response.viewer)
     }
 
-    /// Get the RCOS username of the authenticated user via their GitHub account on the central
+    /// Get the RCOS user ID of the authenticated user via their GitHub account on the central
     /// RCOS API.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+    pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // Get the on platform id of this user.
         let platform_id: String = self.get_user_id().await?;
         // Build the variables for a reverse lookup query to the central RCOS API.
@@ -120,6 +121,6 @@ impl GitHubIdentity {
         // Send the query to the central RCOS API and await response.
         return rcos::send_query::<ReverseLookup>(query_variables)
             .await
-            .map(|response| response.username());
+            .map(|response| response.user_id());
     }
 }

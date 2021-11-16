@@ -10,7 +10,7 @@ use actix_web::HttpRequest;
 /// Confirmation form to delete the profile
 #[get("/profile_delete")]
 pub async fn confirm_delete(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
-    let username = auth.get_rcos_username_or_error().await?;
+    let username = auth.get_user_id_or_error().await?;
     let profiledata = Profile::for_user(username.clone(), Some(username)).await?;
 
     let mut form = FormTemplate::new("user/delete", "Delete confirmation");
@@ -24,15 +24,15 @@ pub async fn profile_delete(
     req: HttpRequest,
     identity: Identity,
 ) -> Result<Template, TelescopeError> {
-    // Get the viewer's RCOS username.
-    let rcos_username: String = identity
-        .get_rcos_username()
+    // Get the viewer's RCOS user ID.
+    let user_id = identity
+        .get_user_id()
         .await?
         .ok_or(TelescopeError::NotAuthenticated)?;
 
     // Check if the viewer has a discord account linked.
     let discord_id: Option<u64> =
-        AccountLookup::send(rcos_username.clone(), UserAccountType::Discord)
+        AccountLookup::send(user_id, UserAccountType::Discord)
             .await?
             .and_then(|string| string.as_str().parse::<u64>().ok());
 
@@ -49,7 +49,7 @@ pub async fn profile_delete(
     }
 
     // Execute the user deletion.
-    DeleteUser::execute(rcos_username).await?;
+    DeleteUser::execute(user_id).await?;
 
     // Clear the user's cookies.
     identity.forget();

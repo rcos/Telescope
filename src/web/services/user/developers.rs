@@ -99,8 +99,8 @@ pub async fn developers_page(
         api_data = serde_json::to_value(query_response).unwrap();
     }
 
-    // Get the viewers username
-    let viewer_username: Option<String> = identity.get_rcos_username().await?;
+    // Get the viewers user ID
+    let viewer: Option<_> = identity.get_user_id().await?;
 
     // Render the developers page template and return it inside a page.
     Template::new(TEMPLATE_PATH)
@@ -108,7 +108,7 @@ pub async fn developers_page(
         .field(PAGINATION, get_page_numbers(&api_data, page_num as u64 + 1))
         .field(DATA, api_data)
         .field(QUERY, query)
-        .field(IDENTITY, viewer_username)
+        .field(IDENTITY, viewer)
         .field(PRESERVED_QUERY, req.query_string())
         .render_into_page(&req, "Developers")
         .await

@@ -4,7 +4,7 @@ use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
@@ -203,7 +203,7 @@ pub trait IdentityProvider: 'static {
     ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
             // Lookup the username of the user trying to unlink an account.
-            let username: String = cookie.get_rcos_username_or_error().await?;
+            let username: String = cookie.get_user_id_or_error().await?;
             // Get all of the accounts linked to this user. Make sure at least one
             // can function for authentication.
             let all_accounts: HashMap<UserAccountType, String> =

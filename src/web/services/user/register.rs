@@ -7,7 +7,7 @@ use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
 use crate::templates::{auth, page, Template};
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 use actix_web::http::header::LOCATION;
@@ -143,7 +143,7 @@ pub async fn finish_registration(
     identity_cookie: AuthenticationCookie,
 ) -> Result<HttpResponse, actix_web::Error> {
     // If this authenticated identity is already linked to an account
-    if let Some(rcs_id) = identity_cookie.get_rcos_username().await? {
+    if let Some(rcs_id) = identity_cookie.get_user_id().await? {
         return Ok(HttpResponse::Found()
             .header(LOCATION, profile_for(rcs_id.as_str()))
             .finish());

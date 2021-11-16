@@ -1,5 +1,5 @@
-mutation UnlinkUserAccount($username: String!, $platform: user_account!) {
-    delete_user_accounts_by_pk(username: $username, type: $platform) {
+mutation UnlinkUserAccount($user_id: uuid!, $platform: user_account!) {
+    delete_user_accounts_by_pk(user_id: $user_id, type: $platform) {
         account_id
     }
 }
