@@ -75,12 +75,7 @@ pub struct RpiCasIdentity {
 impl RpiCasIdentity {
     /// Get the RCOS user ID (if one exists) associated with this RCS ID.
     pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
-        // Make the query variables for a reverse lookup query.
-        let query_variables = ReverseLookup::make_vars(UserAccountType::Rpi, self.rcs_id.clone());
-        // Send the reverse lookup and propagate the response.
-        return send_query::<ReverseLookup>(query_variables)
-            .await
-            .map(|response| response.user_id());
+        ReverseLookup::execute(UserAccountType::Rpi, self.rcs_id.clone()).await
     }
 }
 

@@ -82,7 +82,7 @@ impl Oauth2Identity for DiscordIdentity {
     }
 
     fn platform_user_id(&self) -> LocalBoxFuture<Result<String, TelescopeError>> {
-        Box::pin(async move { self.get_user_id().await })
+        Box::pin(async move { self.get_discord_id().await })
     }
 
     fn into_root(self) -> RootIdentity {
@@ -149,7 +149,7 @@ impl DiscordIdentity {
     }
 
     /// Get the authenticated Discord account's ID.
-    pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
+    pub async fn get_discord_id(&self) -> Result<String, TelescopeError> {
         self.get_authenticated_user()
             .await
             .map(|u| u.id.to_string())
@@ -159,13 +159,9 @@ impl DiscordIdentity {
     /// discord user if one exists.
     pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // Get the authenticated user id.
-        let platform_id: String = self.get_user_id().await?;
-        // Build the query variables for a reverse lookup query to the central RCOS API
-        let variables = ReverseLookup::make_vars(UserAccountType::Discord, platform_id);
-        // Send the query and await the response
-        return send_query::<ReverseLookup>(variables)
-            .await
-            .map(|response| response.user_id());
+        let platform_id: String = self.get_discord_id().await?;
+        // Send the query and await the response.
+        ReverseLookup::execute(UserAccountType::Discord, platform_id).await
     }
 
     /// Get the currently authenticated discord user associated with this access token.
@@ -202,7 +198,7 @@ impl DiscordIdentity {
         roles: Vec<RoleId>,
     ) -> Result<(), TelescopeError> {
         // Get user ID.
-        let user_id: String = self.get_user_id().await?;
+        let user_id: String = self.get_discord_id().await?;
         // Get the RCOS Discord server ID.
         let rcos_discord = &global_config().discord_config.rcos_guild_id;
         // Make the request URL.

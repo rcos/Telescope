@@ -10,11 +10,12 @@ use actix_web::HttpRequest;
 /// Confirmation form to delete the profile
 #[get("/profile_delete")]
 pub async fn confirm_delete(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
-    let username = auth.get_user_id_or_error().await?;
-    let profiledata = Profile::for_user(username.clone(), Some(username)).await?;
+    let user_id = auth.get_user_id_or_error().await?;
+    // The viewer and target are both the same user ID.
+    let profile_data = Profile::for_user(user_id, Some(user_id)).await?;
 
     let mut form = FormTemplate::new("user/delete", "Delete confirmation");
-    form.template = json!(profiledata);
+    form.template = json!(profile_data);
 
     Ok(form)
 }

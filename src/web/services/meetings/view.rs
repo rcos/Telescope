@@ -23,7 +23,7 @@ pub async fn meeting(
     // Get the viewer's authorization info.
     let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer).await?;
     // Get the meeting data from the RCOS API.
-    let meeting: Option<MeetingMeeting> = Meeting::get_by_id(meeting_id).await?;
+    let meeting: Option<MeetingMeeting> = Meeting::get(meeting_id).await?;
     // Check to make sure the meeting exists.
     if meeting.is_none() {
         return Err(TelescopeError::resource_not_found(

@@ -26,12 +26,6 @@ const TEMPLATE_NAME: &'static str = "user/profile";
 
 /// The path from the templates directory to the user settings form template.
 const SETTINGS_FORM: &'static str = "user/settings";
-/// Wrapper struct for deserializing username.
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ProfileQuery {
-    /// The username of the owner of the profile.
-    pub username: String,
-}
 
 /// Register services into actix app.
 pub fn register(config: &mut ServiceConfig) {
@@ -58,7 +52,7 @@ async fn profile(
     if response.target.is_none() {
         return Err(TelescopeError::resource_not_found(
             "User Not Found",
-            "Could not find a user by this username.",
+            "Could not find a user by this user ID.",
         ));
     }
 
@@ -178,7 +172,7 @@ async fn get_context_and_make_form(
         // Use an ISE since we should be able to get an edit context as long as there is an
         // authenticated username.
         return Err(TelescopeError::ise(format!(
-            "Could not get edit context for username {}.",
+            "Could not get edit context for user ID {}.",
             viewer
         )));
     }

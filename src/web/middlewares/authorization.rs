@@ -19,9 +19,9 @@ use uuid::Uuid;
 pub type AuthorizationResult = Result<(), TelescopeError>;
 
 /// The type representing an authorization function reference.
-/// Authorization functions accept an RCOS username and respond with
+/// Authorization functions accept an RCOS user ID and respond with
 /// `Ok(())` on success or a telescope error preventing access.
-type AuthorizationCheck = Rc<dyn Fn(String) -> LocalBoxFuture<'static, AuthorizationResult>>;
+type AuthorizationCheck = Rc<dyn Fn(Uuid) -> LocalBoxFuture<'static, AuthorizationResult>>;
 
 /// Authorization middleware check's a user's credentials using a stored function
 /// before calling the sub-service. This function may return any telescope error,
@@ -47,7 +47,7 @@ pub struct AuthorizedAccess<S: 'static> {
 
 impl Authorization {
     /// Construct a new authorization transform.
-    pub fn new<F: 'static + Fn(String) -> LocalBoxFuture<'static, AuthorizationResult>>(
+    pub fn new<F: 'static + Fn(Uuid) -> LocalBoxFuture<'static, AuthorizationResult>>(
         func: F,
     ) -> Self {
         Self {
@@ -99,17 +99,17 @@ where
         // Box and pin the async value.
         return Box::pin(async move {
             // Extract the RCOS username.
-            let rcos_username = extract_user_id(&req).await;
+            let user_id_result = extract_user_id(&req).await;
 
             // Properly propagate any errors.
-            if let Err(error) = rcos_username {
+            if let Err(error) = user_id_result {
                 Ok(req.error_response(error))
             } else {
-                let rcos_username = rcos_username.unwrap();
+                let user_id = user_id_result.unwrap();
 
                 // Call the authorization check.
                 let authorization_result: AuthorizationResult =
-                    (check.as_ref())(rcos_username).await;
+                    (check.as_ref())(user_id).await;
 
                 // Check for an error. We have to explicitly convert to a response here otherwise
                 // actix error handling will skip upstream middlewares.

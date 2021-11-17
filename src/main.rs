@@ -73,13 +73,13 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             // Middleware to render telescope errors into pages
-            // .wrap(middlewares::error_rendering::TelescopeErrorHandler)
+            .wrap(middlewares::error_rendering::TelescopeErrorHandler)
             // Cookie Identity middleware.
             .wrap(IdentityService::new(cookie_policy))
             // Logger middleware
             .wrap(middleware::Logger::default())
             // Register Services
-            // .configure(web::services::register)
+            .configure(web::services::register)
             // static files service
             .service(
                 afs::Files::new("/static", "static")
@@ -89,7 +89,7 @@ async fn main() -> std::io::Result<()> {
                     .show_files_listing(),
             )
             .route("/sponsors", get().to(SponsorsPage::page))
-            // .default_service(aweb::to(web::services::not_found::not_found))
+            .default_service(aweb::to(web::services::not_found::not_found))
     })
     // Bind to 80 (this gets reversed proxied by Caddy later)
     .bind("0.0.0.0:80")

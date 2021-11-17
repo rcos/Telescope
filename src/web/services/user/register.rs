@@ -193,6 +193,7 @@ pub async fn submit_registration(
         first_name,
         last_name,
         (platform == UserAccountType::Rpi).then(|| UserRole::Student).unwrap_or(UserRole::External),
+        platform,
         platform_id
     )
         .await

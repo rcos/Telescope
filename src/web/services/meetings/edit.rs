@@ -48,7 +48,7 @@ struct HostQuery {
 /// Get meeting data or return a resource not found error.
 async fn get_meeting_data(meeting_id: i64) -> Result<MeetingMeeting, TelescopeError> {
     // Get the meeting data to check that it exists.
-    Meeting::get_by_id(meeting_id)
+    Meeting::get(meeting_id)
         .await?
         .ok_or(TelescopeError::resource_not_found(
             "Meeting Not Found",
@@ -103,7 +103,7 @@ fn resolve_host_user_id(
     let new_host: Option<Uuid> = set_host.and_then(|q| {
         let set_host = q.set_host;
         // Check for nil UUID here.
-        (!set_host.is_nil()).then(set_host)
+        (!set_host.is_nil()).then(|| set_host)
     });
 
     return new_host.or(existing_host);
@@ -132,8 +132,8 @@ async fn edit_page(
 ) -> Result<FormTemplate, TelescopeError> {
     // Get the meeting data. Error on meeting not found or permissions failure.
     let meeting_data = meeting_data_checked(&auth, meeting_id).await?;
-    // Resolve the desired host username.
-    let host: Option<String> = resolve_host_user_id(&meeting_data, set_host);
+    // Resolve the desired host user ID.
+    let host: Option<Uuid> = resolve_host_user_id(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
     let context = CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()])

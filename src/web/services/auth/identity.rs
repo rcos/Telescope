@@ -50,8 +50,8 @@ impl RootIdentity {
     /// Get the string representing the unique user identifier on this platform.
     pub async fn get_platform_id(&self) -> Result<String, TelescopeError> {
         match self {
-            RootIdentity::GitHub(gh) => gh.get_user_id().await,
-            RootIdentity::Discord(d) => d.get_user_id().await,
+            RootIdentity::GitHub(gh) => gh.get_github_id().await,
+            RootIdentity::Discord(d) => d.get_discord_id().await,
             RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => Ok(rcs_id.clone()),
         }
     }
