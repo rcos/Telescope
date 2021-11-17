@@ -9,7 +9,7 @@ mutation CreateOneUser(
         first_name: $first_name
         last_name: $last_name,
         role: $role,
-        userAccountsByUserId: {
+        user_accounts: {
             data: [
                 {type: $platform, account_id: $platform_id}
             ]

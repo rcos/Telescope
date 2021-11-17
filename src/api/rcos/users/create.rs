@@ -1,8 +1,8 @@
 //! RCOS API mutation to create a user record and user_account record with it.
 
-// Import and rename for GraphQL macro
-use crate::api::rcos::users::{UserAccountType as user_account, UserRole as user_role};
 use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 
 /// Type representing GraphQL mutation to create a user and a user account.
 #[derive(GraphQLQuery)]
@@ -12,30 +12,23 @@ use crate::api::rcos::prelude::*;
 )]
 pub struct CreateOneUser;
 
-use create_one_user::{ResponseData, Variables};
-
 impl CreateOneUser {
-    /// Make the input variables object for a user creation mutation.
-    pub fn make_variables(
+    /// Create a user and return the created user ID if this call did not fail.
+    pub async fn execute(
         first_name: String,
         last_name: String,
         role: user_role,
         platform: user_account,
         platform_id: String,
-    ) -> Variables {
-        Variables {
+    ) -> Result<Option<uuid>, TelescopeError> {
+        send_query::<Self>(create_one_user::Variables {
             first_name,
             last_name,
             role,
             platform,
             platform_id,
-        }
-    }
-}
-
-impl ResponseData {
-    /// Get the username that was added to the database.
-    pub fn user_id(&self) -> uuid {
-        self.insert_users_one.id
+        })
+            .await
+            .map(|response| response.insert_users_one.map(|obj| obj.id))
     }
 }
