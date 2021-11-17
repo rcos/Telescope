@@ -4,6 +4,12 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
+## Unreleased
+
+## 0.8.0 - November 17th, 2021
+- Replaced all usernames with user IDs. ([#130])
+- Updated Hasura to v2.0.10 
+
 ## 0.7.3 - November 3rd, 2021
 - Changes to the config file: 
   - Now only a single RCOS Discord server ID is accepted instead of a list of IDs.
@@ -124,6 +130,7 @@ please submit a pull request fixing it.
 [#114]: https://github.com/rcos/Telescope/issues/114
 [#115]: https://github.com/rcos/Telescope/issues/115
 [#116]: https://github.com/rcos/Telescope/issues/116
+[#130]: https://github.com/rcos/Telescope/issues/130
 [#142]: https://github.com/rcos/Telescope/issues/142
 [#151]: https://github.com/rcos/Telescope/issues/151
 [#176]: https://github.com/rcos/Telescope/pull/176
