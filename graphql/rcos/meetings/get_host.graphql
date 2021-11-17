@@ -1,6 +1,6 @@
 # Get the username of a host of a meeting
 query MeetingHost($meeting_id: Int!) {
     meetings_by_pk(meeting_id: $meeting_id) {
-        host: userByHostUserId { id }
+        host: user { id }
     }
 }

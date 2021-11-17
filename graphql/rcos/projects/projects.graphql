@@ -18,7 +18,7 @@ fragment ProjectInfo on projects {
         order_by: {semester: {end_date: desc}},
         where: {is_project_lead: {_eq: true}}
     ) {
-        userByUserId {
+        user {
             id
             first_name
             last_name
