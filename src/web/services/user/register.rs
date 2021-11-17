@@ -14,6 +14,7 @@ use actix_web::http::header::LOCATION;
 use actix_web::web::Form;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use serenity::model::user::CurrentUser;
+use uuid::Uuid;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "user/register";
@@ -143,9 +144,9 @@ pub async fn finish_registration(
     identity_cookie: AuthenticationCookie,
 ) -> Result<HttpResponse, actix_web::Error> {
     // If this authenticated identity is already linked to an account
-    if let Some(rcs_id) = identity_cookie.get_user_id().await? {
+    if let Some(user_id) = identity_cookie.get_user_id().await? {
         return Ok(HttpResponse::Found()
-            .header(LOCATION, profile_for(rcs_id.as_str()))
+            .header(LOCATION, format!("/user/{}", user_id))
             .finish());
     } else {
         // Otherwise create a form for the authenticated the user's cookie.
@@ -177,58 +178,23 @@ pub async fn submit_registration(
         last_name,
     } = form_input.0;
 
-    // Make query variables to create user
-    let query_vars: CreateOneUserVariables = match &identity_cookie.root {
-        // On GitHub authenticated identity
-        RootIdentity::GitHub(gh) => {
-            // Get the authenticated user.
-            let authenticated_user: AuthenticatedUserViewer = gh.get_authenticated_user().await?;
-            // Destructure important fields
-            let AuthenticatedUserViewer { login, id, .. } = authenticated_user;
-            // Build query variables.
-            CreateOneUser::make_variables(
-                login,
-                first_name,
-                last_name,
-                UserRole::External,
-                UserAccountType::GitHub,
-                id,
-            )
-        }
+    // Retrieve the user account platform variant.
+    let platform = identity_cookie.root.get_user_account_type();
 
-        // On Discord authenticated identity.
-        RootIdentity::Discord(d) => {
-            // Get authenticated user
-            let authenticated_user: CurrentUser = d.get_authenticated_user().await?;
-            // Build query variables.
-            CreateOneUser::make_variables(
-                authenticated_user.tag(),
-                first_name,
-                last_name,
-                UserRole::External,
-                UserAccountType::Discord,
-                authenticated_user.id.to_string(),
-            )
-        }
-
-        // On RPI CAS based identity
-        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => CreateOneUser::make_variables(
-            rcs_id.clone(),
-            first_name,
-            last_name,
-            // We assume anyone signing up via RPI CAS is a student.
-            UserRole::Student,
-            UserAccountType::Rpi,
-            rcs_id.clone(),
-        ),
+    // Get the platform ID to send with the account creation mutation.
+    let platform_id: String = match &identity_cookie.root {
+        RootIdentity::GitHub(gh) => gh.get_github_id().await?,
+        RootIdentity::Discord(d) => d.get_discord_id().await?,
+        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => rcs_id.clone()
     };
 
-    // Extract the platform for use in error reporting if necessary.
-    let platform: UserAccountType = query_vars.platform;
-
-    // Create the account!
-    // We have no subject field since the account isn't created until this request resolves
-    let profile: String = send_query::<CreateOneUser>(query_vars)
+    // Create the account
+    let created_user_id: Uuid = CreateOneUser::execute(
+        first_name,
+        last_name,
+        (platform == UserAccountType::Rpi).then(|| UserRole::Student).unwrap_or(UserRole::External),
+        platform_id
+    )
         .await
         // If we cannot create an account, someone has probably already
         // linked the identity provider to another account. Tell the user to
@@ -245,15 +211,11 @@ pub async fn submit_registration(
             ),
             show_status_code: false,
         })?
-        // Extract the username
-        .username()
-        // Get the profile address
-        .map(|username: String| profile_for(username.as_str()))
         // If there is no username, throw an error
         .ok_or(TelescopeError::ise(
-            "Create User mutation did not return username",
+            "Create User mutation did not return user ID",
         ))?;
 
     // Redirect the user to the account we created for them
-    Ok(HttpResponse::Found().header(LOCATION, profile).finish())
+    Ok(HttpResponse::Found().header(LOCATION, format!("/user/{}", created_user_id)).finish())
 }

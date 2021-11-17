@@ -30,7 +30,7 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
     let discord = discord.unwrap();
     // Get Discord user ID.
     let discord_user_id: u64 = discord
-        .get_user_id()
+        .get_discord_id()
         .await?
         .as_str()
         .parse::<u64>()
