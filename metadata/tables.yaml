@@ -20,60 +20,53 @@
     schema: public
     name: bonus_attendances
   object_relationships:
-  - name: enrollment
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: enrollments
-        column_mapping:
-          username: username
-          semester_id: semester_id
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: username
-- table:
-    schema: public
-    name: coordinators
-  select_permissions:
-  - role: web_anon
-    permission:
-      columns:
-      - semester_id
-      - username
-      - preferred_name
-      - first_name
-      - last_name
-      filter: {}
-- table:
-    schema: public
-    name: duplicate_users
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: enrollments
   object_relationships:
+  - name: mentor_proposal
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: mentor_proposals
+        column_mapping:
+          semester_id: semester_id
+          user_id: user_id
+  - name: pay_request
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: pay_requests
+        column_mapping:
+          semester_id: semester_id
+          user_id: user_id
   - name: project
     using:
       foreign_key_constraint_on: project_id
+  - name: project_pitch
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: project_pitches
+        column_mapping:
+          semester_id: semester_id
+          user_id: user_id
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
   array_relationships:
-  - name: bonus_attendances
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: bonus_attendances
-        column_mapping:
-          username: username
-          semester_id: semester_id
   - name: final_grade_appeals
     using:
       manual_configuration:
@@ -81,8 +74,8 @@
           schema: public
           name: final_grade_appeal
         column_mapping:
-          username: username
           semester_id: semester_id
+          user_id: user_id
   - name: meetings
     using:
       manual_configuration:
@@ -90,8 +83,8 @@
           schema: public
           name: meetings
         column_mapping:
-          username: host_username
           semester_id: semester_id
+          user_id: host_user_id
   - name: mentor_proposals
     using:
       manual_configuration:
@@ -99,26 +92,8 @@
           schema: public
           name: mentor_proposals
         column_mapping:
-          username: username
           semester_id: semester_id
-  - name: mentorProposalsBySemesterIdReviewerUsername
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: mentor_proposals
-        column_mapping:
-          username: reviewer_username
-          semester_id: semester_id
-  - name: pay_requests
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: pay_requests
-        column_mapping:
-          username: username
-          semester_id: semester_id
+          user_id: reviewer_id
   - name: project_pitches
     using:
       manual_configuration:
@@ -126,17 +101,8 @@
           schema: public
           name: project_pitches
         column_mapping:
-          username: username
           semester_id: semester_id
-  - name: projectPitchesByReviewerUsernameSemesterId
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: project_pitches
-        column_mapping:
-          username: reviewer_username
-          semester_id: semester_id
+          user_id: reviewer_id
   - name: project_presentation_grades
     using:
       manual_configuration:
@@ -144,8 +110,8 @@
           schema: public
           name: project_presentation_grades
         column_mapping:
-          username: grader_username
           semester_id: semester_id
+          user_id: grader_id
   - name: workshop_proposals
     using:
       manual_configuration:
@@ -153,17 +119,17 @@
           schema: public
           name: workshop_proposals
         column_mapping:
-          username: username
           semester_id: semester_id
-  - name: workshopProposalsBySemesterIdReviewerUsername
+          user_id: user_id
+  - name: workshopProposalsByReviewerIdSemesterId
     using:
       manual_configuration:
         remote_table:
           schema: public
           name: workshop_proposals
         column_mapping:
-          username: reviewer_username
           semester_id: semester_id
+          user_id: reviewer_id
 - table:
     schema: public
     name: external_organizations
@@ -177,18 +143,6 @@
           name: projects
 - table:
     schema: public
-    name: faculty_advisors
-  select_permissions:
-  - role: web_anon
-    permission:
-      columns:
-      - username
-      - preferred_name
-      - first_name
-      - last_name
-      filter: {}
-- table:
-    schema: public
     name: final_grade_appeal
   object_relationships:
   - name: enrollment
@@ -198,14 +152,14 @@
           schema: public
           name: enrollments
         column_mapping:
-          username: username
           semester_id: semester_id
+          user_id: user_id
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: meeting_attendances
@@ -215,7 +169,7 @@
       foreign_key_constraint_on: meeting_id
   - name: user
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: meetings
@@ -227,14 +181,14 @@
           schema: public
           name: enrollments
         column_mapping:
+          host_user_id: user_id
           semester_id: semester_id
-          host_username: username
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: host_username
+      foreign_key_constraint_on: host_user_id
   array_relationships:
   - name: meeting_attendances
     using:
@@ -254,17 +208,23 @@
           schema: public
           name: enrollments
         column_mapping:
-          reviewer_username: username
           semester_id: semester_id
-  - name: enrollmentBySemesterIdUsername
+          reviewer_id: user_id
+  - name: enrollmentBySemesterIdUserId
     using:
       manual_configuration:
         remote_table:
           schema: public
           name: enrollments
         column_mapping:
-          username: username
           semester_id: semester_id
+          user_id: user_id
+  - name: user
+    using:
+      foreign_key_constraint_on: reviewer_id
+  - name: userByUserId
+    using:
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: pay_requests
@@ -276,8 +236,11 @@
           schema: public
           name: enrollments
         column_mapping:
-          username: username
           semester_id: semester_id
+          user_id: user_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: project_channels
@@ -296,17 +259,17 @@
           schema: public
           name: enrollments
         column_mapping:
-          reviewer_username: username
           semester_id: semester_id
-  - name: enrollmentByUsernameSemesterId
+          reviewer_id: user_id
+  - name: enrollmentBySemesterIdUserId
     using:
       manual_configuration:
         remote_table:
           schema: public
           name: enrollments
         column_mapping:
-          username: username
           semester_id: semester_id
+          user_id: user_id
   - name: project
     using:
       foreign_key_constraint_on: existing_project_id
@@ -315,10 +278,10 @@
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: reviewer_username
-  - name: userByUsername
+      foreign_key_constraint_on: reviewer_id
+  - name: userByUserId
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: project_presentation_grades
@@ -330,8 +293,8 @@
           schema: public
           name: enrollments
         column_mapping:
+          grader_id: user_id
           semester_id: semester_id
-          grader_username: username
   - name: project
     using:
       foreign_key_constraint_on: project_id
@@ -340,7 +303,7 @@
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: grader_username
+      foreign_key_constraint_on: grader_id
 - table:
     schema: public
     name: project_presentations
@@ -527,9 +490,6 @@
       foreign_key_constraint_on: small_group_id
 - table:
     schema: public
-    name: small_group_members
-- table:
-    schema: public
     name: small_group_mentors
   object_relationships:
   - name: small_group
@@ -537,7 +497,7 @@
       foreign_key_constraint_on: small_group_id
   - name: user
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: small_group_projects
@@ -608,10 +568,10 @@
       foreign_key_constraint_on: status_update_id
   - name: user
     using:
-      foreign_key_constraint_on: grader_username
-  - name: userByUsername
+      foreign_key_constraint_on: grader_id
+  - name: userByUserId
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: status_updates
@@ -633,7 +593,7 @@
   object_relationships:
   - name: user
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: users
@@ -641,98 +601,119 @@
   - name: bonus_attendances
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: bonus_attendances
   - name: enrollments
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: enrollments
   - name: final_grade_appeals
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: final_grade_appeal
   - name: meeting_attendances
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: meeting_attendances
   - name: meetings
     using:
       foreign_key_constraint_on:
-        column: host_username
+        column: host_user_id
         table:
           schema: public
           name: meetings
+  - name: mentor_proposals
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: mentor_proposals
+  - name: mentorProposalsByReviewerId
+    using:
+      foreign_key_constraint_on:
+        column: reviewer_id
+        table:
+          schema: public
+          name: mentor_proposals
+  - name: pay_requests
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: pay_requests
   - name: project_pitches
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: project_pitches
-  - name: projectPitchesByReviewerUsername
+  - name: projectPitchesByReviewerId
     using:
       foreign_key_constraint_on:
-        column: reviewer_username
+        column: reviewer_id
         table:
           schema: public
           name: project_pitches
   - name: project_presentation_grades
     using:
       foreign_key_constraint_on:
-        column: grader_username
+        column: grader_id
         table:
           schema: public
           name: project_presentation_grades
   - name: small_group_mentors
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: small_group_mentors
   - name: status_update_submissions
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: status_update_submissions
-  - name: statusUpdateSubmissionsByGraderUsername
+  - name: statusUpdateSubmissionsByGraderId
     using:
       foreign_key_constraint_on:
-        column: grader_username
+        column: grader_id
         table:
           schema: public
           name: status_update_submissions
   - name: user_accounts
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: user_accounts
   - name: workshop_proposals
     using:
       foreign_key_constraint_on:
-        column: username
+        column: user_id
         table:
           schema: public
           name: workshop_proposals
-  - name: workshopProposalsByReviewerUsername
+  - name: workshopProposalsByReviewerId
     using:
       foreign_key_constraint_on:
-        column: reviewer_username
+        column: reviewer_id
         table:
           schema: public
           name: workshop_proposals
@@ -747,23 +728,23 @@
           schema: public
           name: enrollments
         column_mapping:
-          reviewer_username: username
           semester_id: semester_id
-  - name: enrollmentByUsernameSemesterId
+          reviewer_id: user_id
+  - name: enrollmentByUserIdSemesterId
     using:
       manual_configuration:
         remote_table:
           schema: public
           name: enrollments
         column_mapping:
-          username: username
           semester_id: semester_id
+          user_id: user_id
   - name: semester
     using:
       foreign_key_constraint_on: semester_id
   - name: user
     using:
-      foreign_key_constraint_on: reviewer_username
-  - name: userByUsername
+      foreign_key_constraint_on: reviewer_id
+  - name: userByUserId
     using:
-      foreign_key_constraint_on: username
+      foreign_key_constraint_on: user_id
