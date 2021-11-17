@@ -1,42 +1,33 @@
 //! GraphQL query to get context for meeting creation.
 
-use crate::api::rcos::send_json_query;
-use crate::error::TelescopeError;
 use chrono::Utc;
-use serde_json::Value;
+use crate::api::rcos::prelude::*;
+use crate::api::rcos::send_query;
+use crate::error::TelescopeError;
 
-/// The GraphQL query.
-const QUERY_STRING: &'static str =
-    include_str!("../../../../../graphql/rcos/meetings/creation/context.graphql");
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/meetings/creation/context.graphql",
+    response_derives = "Debug,Clone,Serialize",
+    variables_derives = "Deserialize"
+)]
+pub struct CreationContext;
 
-/// Get the meeting creation context. This is done in JSON format because the typed version of
-/// the query variables is bulky and difficult to work with. If there are issues doing this in JSON
-/// it may be converted to a strongly typed implementation in the future.
-///
-/// For meeting edits, semesters may be manually included by ID. otherwise, only ongoing and
-/// future semesters will be included.
-pub async fn get_context(
-    host_username: Option<String>,
-    include_semesters: Vec<String>,
-) -> Result<Value, TelescopeError> {
-    // Make query variables.
-    let mut variables: Value = json!({
-        // Use an empty or single item list as a work around for non-nullable types.
-        "host_username": host_username.clone().map(|username| vec![username]).unwrap_or(Vec::new()),
-        "semester_filter": {
-            "_or": [
-                { "end_date": { "_gte": Utc::today().naive_utc() }},
-                { "semester_id": {"_in": include_semesters }}
-            ]
-        }
-    });
-
-    // Add the extra clause to the filter variable if there is a host.
-    // This will filter to semesters the host is enrolled in.
-    if let Some(username) = host_username {
-        variables["semester_filter"]["enrollments"]["username"]["_eq"] = json!(username);
+impl CreationContext {
+    /// Get the meeting creation context.
+    ///
+    /// For meeting edits, semesters may be manually included by ID. otherwise, only ongoing and
+    /// future semesters will be included.
+    pub async fn execute(host: Option<uuid>, include_semesters: Vec<String>) -> Result<creation_context::ResponseData, TelescopeError> {
+        send_query::<Self>(creation_context::Variables {
+            host: host.map(|h| vec![h]).unwrap_or(vec![]),
+            semester_filter: serde_json::from_value(json!({
+                "_or": [
+                    { "end_date": { "_gte": Utc::today().naive_utc() }},
+                    { "semester_id": {"_in": include_semesters }}
+                ]
+            })).map_err(|_| TelescopeError::ise("Malformed semester filter in GraphQL query."))?
+        }).await
     }
-
-    // Send the query and await the result.
-    send_json_query("CreationContext", QUERY_STRING, variables).await
 }
