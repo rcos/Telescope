@@ -4,7 +4,6 @@ use crate::api::rcos::users::accounts::link::LinkUserAccount;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
-use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::error::TelescopeError;
 use crate::web::csrf;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};

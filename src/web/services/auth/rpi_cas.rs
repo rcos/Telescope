@@ -2,7 +2,6 @@
 //! [here](https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol.html)
 //! and work from RPI students who came before me.
 
-use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::link::LinkUserAccount;
 use crate::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;

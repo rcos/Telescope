@@ -1,6 +1,5 @@
 //! Discord OAuth2 flow.
 
-use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;

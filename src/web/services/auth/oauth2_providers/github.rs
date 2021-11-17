@@ -1,15 +1,12 @@
+use crate::api::github::{
+    self,
+    users::authenticated_user::{
+        authenticated_user::{AuthenticatedUserViewer, Variables},
+        AuthenticatedUser,
+    },
+};
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
-use crate::api::{
-    github::{
-        self,
-        users::authenticated_user::{
-            authenticated_user::{AuthenticatedUserViewer, Variables},
-            AuthenticatedUser,
-        },
-    },
-    rcos,
-};
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};

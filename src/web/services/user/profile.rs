@@ -13,7 +13,7 @@ use crate::templates::forms::FormTemplate;
 use crate::templates::Template;
 
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
-use actix_web::web::{Form, Path, Query, ServiceConfig};
+use actix_web::web::{Form, Path, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
 use chrono::{Datelike, Local};
 use serenity::model::guild::Member;

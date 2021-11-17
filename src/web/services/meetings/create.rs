@@ -6,7 +6,6 @@
 //! to finish meeting creation.
 
 use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
-use crate::api::rcos::meetings::creation;
 use crate::api::rcos::meetings::creation::context::CreationContext;
 use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;

@@ -1,8 +1,4 @@
-use crate::api::github::users::authenticated_user::authenticated_user::AuthenticatedUserViewer;
-use crate::api::rcos::send_query;
-use crate::api::rcos::users::create::{
-    create_one_user::Variables as CreateOneUserVariables, CreateOneUser,
-};
+use crate::api::rcos::users::create::CreateOneUser;
 use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
 use crate::templates::forms::FormTemplate;
@@ -13,7 +9,6 @@ use crate::web::services::auth::rpi_cas::RpiCasIdentity;
 use actix_web::http::header::LOCATION;
 use actix_web::web::Form;
 use actix_web::{HttpRequest, HttpResponse, Responder};
-use serenity::model::user::CurrentUser;
 use uuid::Uuid;
 
 /// The path from the templates directory to the registration template.
