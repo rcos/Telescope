@@ -283,12 +283,12 @@ impl IdentityProvider for RpiCas {
                 .await
                 .ok_or(TelescopeError::NotAuthenticated)?;
 
-            // Get the RCOS username of the authenticated user.
-            let rcos_username = authenticated.get_user_id_or_error().await?;
+            // Get the RCOS user ID of the authenticated user.
+            let user_id = authenticated.get_user_id_or_error().await?;
 
             // Get the RCS ID of the authenticated user (if one exists).
             let existing_rcs_id: Option<String> =
-                AccountLookup::send(rcos_username.clone(), Self::USER_ACCOUNT_TY).await?;
+                AccountLookup::send(user_id, Self::USER_ACCOUNT_TY).await?;
 
             // Get the RCS ID from the authenticated RPI CAS response.
             let new_rcs_id: String = cas_authenticated(&req, Self::link_redirect_path()).await?;
@@ -305,7 +305,7 @@ impl IdentityProvider for RpiCas {
             if add_new_to_db {
                 // Link the account.
                 LinkUserAccount::send(
-                    rcos_username.clone(),
+                    user_id,
                     Self::USER_ACCOUNT_TY,
                     new_rcs_id.clone(),
                 )
@@ -329,7 +329,7 @@ impl IdentityProvider for RpiCas {
 
             // We are all set at this point, redirect to the user's account.
             return Ok(HttpResponse::Found()
-                .header(LOCATION, profile_for(rcos_username.as_str()))
+                .header(LOCATION, format!("/user/{}", user_id))
                 .finish());
         });
     }
