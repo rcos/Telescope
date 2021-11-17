@@ -5,7 +5,7 @@ query CurrentCoordinators($now: date!) {
         end_date: {_gte: $now}
     }) {
         coordinators: enrollments(where: {is_coordinator: {_eq: true}}) {
-            username
+            user_id
         }
     }
 }
