@@ -11,7 +11,7 @@ services:
         - "443:443"
 
     hasura:
-        image: hasura/graphql-engine
+        image: hasura/graphql-engine:v2.0.10
         restart: unless-stopped
         environment:
             # https://hasura.io/docs/1.0/graphql/core/deployment/graphql-engine-flags/reference.html
