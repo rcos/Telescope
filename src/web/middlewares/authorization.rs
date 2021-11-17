@@ -108,8 +108,7 @@ where
                 let user_id = user_id_result.unwrap();
 
                 // Call the authorization check.
-                let authorization_result: AuthorizationResult =
-                    (check.as_ref())(user_id).await;
+                let authorization_result: AuthorizationResult = (check.as_ref())(user_id).await;
 
                 // Check for an error. We have to explicitly convert to a response here otherwise
                 // actix error handling will skip upstream middlewares.

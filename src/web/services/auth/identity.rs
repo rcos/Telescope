@@ -198,8 +198,7 @@ impl AuthenticationCookie {
         // Lookup the user's ID
         let user_id = self.get_user_id_or_error().await?;
         // Lookup the user's RCS id
-        let rcs_id: Option<String> =
-            AccountLookup::send(user_id, UserAccountType::Rpi).await?;
+        let rcs_id: Option<String> = AccountLookup::send(user_id, UserAccountType::Rpi).await?;
         // If there is an RCS id, replace the root.
         if let Some(rcs_id) = rcs_id {
             self.root = RootIdentity::RpiCas(RpiCasIdentity { rcs_id });

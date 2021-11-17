@@ -1,8 +1,8 @@
 //! RCOS API query to get the user ID (if available) of a user by platform and account id.
 
 // Import and rename for GraphQL macro
-use crate::api::rcos::users::UserAccountType as user_account;
 use crate::api::rcos::prelude::*;
+use crate::api::rcos::users::UserAccountType as user_account;
 
 /// Type representing query for user ID given a platform and user id on that
 /// platform.
@@ -13,10 +13,10 @@ use crate::api::rcos::prelude::*;
 )]
 pub struct ReverseLookup;
 
-use reverse_lookup::ResponseData;
-use reverse_lookup::Variables;
 use crate::api::rcos::send_query;
 use crate::error::TelescopeError;
+use reverse_lookup::ResponseData;
+use reverse_lookup::Variables;
 
 impl ReverseLookup {
     /// Make the variables for a reverse account lookup.
@@ -28,7 +28,10 @@ impl ReverseLookup {
     }
 
     /// Get the user ID associated with an ID on a different platform if available.
-    pub async fn execute(platform: user_account, platform_id: String) -> Result<Option<uuid>, TelescopeError> {
+    pub async fn execute(
+        platform: user_account,
+        platform_id: String,
+    ) -> Result<Option<uuid>, TelescopeError> {
         send_query::<Self>(Self::make_vars(platform, platform_id))
             .await
             .map(|response| response.user_id())

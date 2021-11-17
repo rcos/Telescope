@@ -7,6 +7,7 @@
 
 use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
 use crate::api::rcos::meetings::creation;
+use crate::api::rcos::meetings::creation::context::CreationContext;
 use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
@@ -22,7 +23,6 @@ use actix_web::HttpResponse;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
 use uuid::Uuid;
-use crate::api::rcos::meetings::creation::context::CreationContext;
 
 /// The handlebars template for the user to select a host.
 const HOST_SELECTION_TEMPLATE: &'static str = "meetings/creation/host_selection";

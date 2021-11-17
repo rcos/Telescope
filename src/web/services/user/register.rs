@@ -185,38 +185,42 @@ pub async fn submit_registration(
     let platform_id: String = match &identity_cookie.root {
         RootIdentity::GitHub(gh) => gh.get_github_id().await?,
         RootIdentity::Discord(d) => d.get_discord_id().await?,
-        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => rcs_id.clone()
+        RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => rcs_id.clone(),
     };
 
     // Create the account
     let created_user_id: Uuid = CreateOneUser::execute(
         first_name,
         last_name,
-        (platform == UserAccountType::Rpi).then(|| UserRole::Student).unwrap_or(UserRole::External),
+        (platform == UserAccountType::Rpi)
+            .then(|| UserRole::Student)
+            .unwrap_or(UserRole::External),
         platform,
-        platform_id
+        platform_id,
     )
-        .await
-        // If we cannot create an account, someone has probably already
-        // linked the identity provider to another account. Tell the user to
-        // cancel and try to login.
-        .map_err(|_| TelescopeError::BadRequest {
-            header: "Could Not Create Account".into(),
-            message: format!(
-                "We could not create an account. This likely (although not always) \
+    .await
+    // If we cannot create an account, someone has probably already
+    // linked the identity provider to another account. Tell the user to
+    // cancel and try to login.
+    .map_err(|_| TelescopeError::BadRequest {
+        header: "Could Not Create Account".into(),
+        message: format!(
+            "We could not create an account. This likely (although not always) \
             means that your {0} account is already linked to an existing user's account. Please \
             try to login to that account. If you continue having issues or are sure that your {0} \
             account is not already linked to an existing user, please contact a coordinator and \
             file an issue on the Telescope GitHub.",
-                platform
-            ),
-            show_status_code: false,
-        })?
-        // If there is no user ID, throw an error
-        .ok_or(TelescopeError::ise(
-            "Create User mutation did not return user ID",
-        ))?;
+            platform
+        ),
+        show_status_code: false,
+    })?
+    // If there is no user ID, throw an error
+    .ok_or(TelescopeError::ise(
+        "Create User mutation did not return user ID",
+    ))?;
 
     // Redirect the user to the account we created for them
-    Ok(HttpResponse::Found().header(LOCATION, format!("/user/{}", created_user_id)).finish())
+    Ok(HttpResponse::Found()
+        .header(LOCATION, format!("/user/{}", created_user_id))
+        .finish())
 }

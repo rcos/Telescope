@@ -1,8 +1,8 @@
 //! Lookup all the user accounts for a given user.
 
 // Namespacing
-use crate::api::rcos::users::UserAccountType as user_account;
 use crate::api::rcos::prelude::*;
+use crate::api::rcos::users::UserAccountType as user_account;
 
 #[derive(GraphQLQuery)]
 #[graphql(

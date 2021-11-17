@@ -74,10 +74,7 @@ async fn meeting_data_checked(
 ) -> Result<MeetingMeeting, TelescopeError> {
     // Get meeting data. Extract host's user ID.
     let meeting_data = get_meeting_data(meeting_id).await?;
-    let meeting_host: Option<_> = meeting_data
-        .host
-        .as_ref()
-        .map(|host| host.id);
+    let meeting_host: Option<_> = meeting_data.host.as_ref().map(|host| host.id);
 
     // Get user's authorization object.
     let authorization = authorization_for_viewer(auth).await?;
@@ -136,8 +133,8 @@ async fn edit_page(
     let host: Option<Uuid> = resolve_host_user_id(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
-    let context = CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()])
-        .await?;
+    let context =
+        CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
     let mut form: FormTemplate = make_form(&meeting_data);
@@ -177,8 +174,8 @@ async fn submit_meeting_edits(
     let host: Option<Uuid> = resolve_host_user_id(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
-    let context = CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()])
-        .await?;
+    let context =
+        CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
     let mut form: FormTemplate = make_form(&meeting_data);
@@ -334,7 +331,7 @@ async fn submit_meeting_edits(
         // Extract the host from context object.
         host: form.template["context"]["host"][0]["id"]
             .as_str()
-            .and_then(|host_id| host_id.parse::<Uuid>().ok())
+            .and_then(|host_id| host_id.parse::<Uuid>().ok()),
     };
 
     // The returned meeting ID should match the existing one but we don't check.

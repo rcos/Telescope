@@ -2,9 +2,7 @@
 
 // Namespace items for generated code
 use crate::api::rcos::users::{UserAccountType as user_account, UserAccountType};
-use crate::api::rcos::{
-    send_query, prelude::*
-};
+use crate::api::rcos::{prelude::*, send_query};
 use crate::error::TelescopeError;
 
 #[derive(GraphQLQuery)]
@@ -18,11 +16,7 @@ use link_user_account::{ResponseData, Variables};
 
 impl LinkUserAccount {
     /// Make the variables for a user account upsert mutation.
-    fn make_variables(
-        user_id: uuid,
-        platform: UserAccountType,
-        platform_id: String,
-    ) -> Variables {
+    fn make_variables(user_id: uuid, platform: UserAccountType, platform_id: String) -> Variables {
         Variables {
             user_id,
             platform,

@@ -28,7 +28,7 @@ impl CreateOneUser {
             platform,
             platform_id,
         })
-            .await
-            .map(|response| response.insert_users_one.map(|obj| obj.id))
+        .await
+        .map(|response| response.insert_users_one.map(|obj| obj.id))
     }
 }

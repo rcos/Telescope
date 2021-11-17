@@ -1,9 +1,9 @@
 //! GraphQL query to get context for meeting creation.
 
-use chrono::Utc;
 use crate::api::rcos::prelude::*;
 use crate::api::rcos::send_query;
 use crate::error::TelescopeError;
+use chrono::Utc;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -19,7 +19,10 @@ impl CreationContext {
     ///
     /// For meeting edits, semesters may be manually included by ID. otherwise, only ongoing and
     /// future semesters will be included.
-    pub async fn execute(host: Option<uuid>, include_semesters: Vec<String>) -> Result<creation_context::ResponseData, TelescopeError> {
+    pub async fn execute(
+        host: Option<uuid>,
+        include_semesters: Vec<String>,
+    ) -> Result<creation_context::ResponseData, TelescopeError> {
         send_query::<Self>(creation_context::Variables {
             host: host.map(|h| vec![h]).unwrap_or(vec![]),
             semester_filter: serde_json::from_value(json!({
@@ -27,7 +30,9 @@ impl CreationContext {
                     { "end_date": { "_gte": Utc::today().naive_utc() }},
                     { "semester_id": {"_in": include_semesters }}
                 ]
-            })).map_err(|_| TelescopeError::ise("Malformed semester filter in GraphQL query."))?
-        }).await
+            }))
+            .map_err(|_| TelescopeError::ise("Malformed semester filter in GraphQL query."))?,
+        })
+        .await
     }
 }

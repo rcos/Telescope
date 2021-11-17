@@ -1,13 +1,14 @@
 use super::{make_redirect_url, IdentityProvider};
 use crate::api::rcos::users::accounts::for_user::UserAccounts;
 use crate::api::rcos::users::accounts::link::LinkUserAccount;
+use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
 use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::error::TelescopeError;
+use crate::web::csrf;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
 use crate::web::services::auth::AUTHENTICATOR_ACCOUNT_TYPES;
-use crate::web::csrf;
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
 use actix_web::FromRequest;
@@ -18,7 +19,6 @@ use oauth2::{AuthorizationCode, AuthorizationRequest, CsrfToken, RedirectUrl, Sc
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
-use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 
 pub mod discord;
 pub mod github;
@@ -226,9 +226,12 @@ where
                 .await?
                 .ok_or(TelescopeError::resource_not_found(
                     "Could not find associated user account.",
-                    format!("Could not find user account associated with this {} account. \
+                    format!(
+                        "Could not find user account associated with this {} account. \
                     Please create an account or sign in using another method.",
-                    Self::SERVICE_NAME)))?;
+                        Self::SERVICE_NAME
+                    ),
+                ))?;
 
             // Otherwise, store the identity in the user's cookies and redirect to their profile.
             let identity: Identity = Identity::extract(&req).await?;

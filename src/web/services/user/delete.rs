@@ -32,10 +32,9 @@ pub async fn profile_delete(
         .ok_or(TelescopeError::NotAuthenticated)?;
 
     // Check if the viewer has a discord account linked.
-    let discord_id: Option<u64> =
-        AccountLookup::send(user_id, UserAccountType::Discord)
-            .await?
-            .and_then(|string| string.as_str().parse::<u64>().ok());
+    let discord_id: Option<u64> = AccountLookup::send(user_id, UserAccountType::Discord)
+        .await?
+        .and_then(|string| string.as_str().parse::<u64>().ok());
 
     // If there is one, kick it from the RCOS Discord.
     if let Some(discord_id) = discord_id {

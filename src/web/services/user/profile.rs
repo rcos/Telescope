@@ -40,7 +40,7 @@ pub fn register(config: &mut ServiceConfig) {
 async fn profile(
     req: HttpRequest,
     identity: Identity,
-    Path(id): Path<Uuid>
+    Path(id): Path<Uuid>,
 ) -> Result<Template, TelescopeError> {
     // Get the viewer's user ID.
     let viewer: Option<Uuid> = identity.get_user_id().await?;

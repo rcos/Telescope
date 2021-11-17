@@ -1,8 +1,8 @@
 //! Mutation to unlink a user account.
 
 // Namespace items for generated module
-use crate::api::rcos::users::UserAccountType as user_account;
 use crate::api::rcos::prelude::*;
+use crate::api::rcos::users::UserAccountType as user_account;
 
 #[derive(GraphQLQuery)]
 #[graphql(

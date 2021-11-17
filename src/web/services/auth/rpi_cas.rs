@@ -299,12 +299,7 @@ impl IdentityProvider for RpiCas {
             // Add to database if needed.
             if add_new_to_db {
                 // Link the account.
-                LinkUserAccount::send(
-                    user_id,
-                    Self::USER_ACCOUNT_TY,
-                    new_rcs_id.clone(),
-                )
-                .await?;
+                LinkUserAccount::send(user_id, Self::USER_ACCOUNT_TY, new_rcs_id.clone()).await?;
             }
 
             // Throw an error if the new RCS ID doesn't match the linked one.
