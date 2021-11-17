@@ -3,6 +3,7 @@
 use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
 use actix_web::HttpRequest;
 use serde_json::Value;
+use uuid::Uuid;
 
 use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};
 use crate::error::TelescopeError;
@@ -19,7 +20,7 @@ const QUERY: &'static str = "query";
 /// Handlebars key for the RCOS API data.
 const DATA: &'static str = "data";
 
-/// Handlebars key for the viewer's username.
+/// Handlebars key for the viewer's user ID.
 const IDENTITY: &'static str = "identity";
 
 /// Handlebars key for the preserved query string from the request.
@@ -34,7 +35,7 @@ const PAGINATION: &'static str = "pagination";
 /// data and any filters.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct DevelopersPageQuery {
-    /// Filter for users if their first name, last name, or username contains
+    /// Filter for users if their first name, last name, or RCS ID contains
     /// this string case independently (via ILIKE).
     pub search: Option<String>,
 
@@ -100,7 +101,7 @@ pub async fn developers_page(
     }
 
     // Get the viewers user ID
-    let viewer: Option<_> = identity.get_user_id().await?;
+    let viewer: Option<Uuid> = identity.get_user_id().await?;
 
     // Render the developers page template and return it inside a page.
     Template::new(TEMPLATE_PATH)

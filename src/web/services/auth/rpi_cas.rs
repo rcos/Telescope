@@ -225,8 +225,8 @@ impl IdentityProvider for RpiCas {
         return Box::pin(async move {
             // Get the RCS ID of the user logging in.
             let rcs_id: String = cas_authenticated(&req, Self::login_redirect_path()).await?;
-            // Get the RCOS username of the account linked to this RCS id.
             let token = RpiCasIdentity { rcs_id };
+            // Get the RCOS user ID of the account linked to this RCS id.
             let user_id = token
                 .get_rcos_user_id()
                 .await?

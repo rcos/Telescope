@@ -98,7 +98,7 @@ where
 
         // Box and pin the async value.
         return Box::pin(async move {
-            // Extract the RCOS username.
+            // Extract the RCOS user ID.
             let user_id_result = extract_user_id(&req).await;
 
             // Properly propagate any errors.
@@ -137,7 +137,7 @@ async fn extract_user_id(req: &ServiceRequest) -> Result<Uuid, TelescopeError> {
         // Refresh the cookie if necessary.
         .refresh()
         .await?
-        // Get the RCOS username associated with the authenticated user.
+        // Get the RCOS user ID associated with the authenticated user.
         .get_user_id()
         .await?
         // Respond with an error if the user is not found.

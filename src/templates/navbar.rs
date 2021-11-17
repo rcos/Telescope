@@ -114,7 +114,7 @@ async fn for_user(req_path: &str, user_id: Uuid) -> Result<Template, TelescopeEr
 }
 
 /// Construct a navbar for a user who is partway through account creation and doesn't
-/// have a username yet.
+/// have a user ID yet.
 fn for_auth(req_path: &str) -> Template {
     with_defaults(req_path).field(
         RIGHT_ITEMS,
@@ -132,14 +132,14 @@ pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> 
     if let Some(authenticated) = identity {
         // Check if there is an authenticated RCOS account
         if let Some(user_id) = authenticated.get_user_id().await? {
-            // If there is make a navbar with the username.
+            // If there is make a navbar with the user ID.
             return Ok(for_user(req.path(), user_id).await?);
         } else {
             // Otherwise the user is in the middle of creating an account.
             return Ok(for_auth(req.path()));
         }
     } else {
-        // If the user is not authenticated or there is no username, return a user-less navbar.
+        // If the user is not authenticated or there is no user ID, return a user-less navbar.
         return Ok(userless(req.path()));
     }
 }

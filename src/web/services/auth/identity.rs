@@ -367,7 +367,7 @@ impl Identity {
     pub async fn get_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // If there is an identity cookie
         if let Some(id) = self.identity().await {
-            // Use it to get the authenticated RCOS username.
+            // Use it to get the authenticated RCOS user ID.
             return id.get_user_id().await;
         } else {
             return Ok(None);

@@ -35,7 +35,7 @@ pub fn register(config: &mut ServiceConfig) {
         .service(save_changes);
 }
 
-/// User profile service. The username in the path is url-encoded.
+/// User profile service. The target's user ID is in the path.
 #[get("/user/{id}")]
 async fn profile(
     req: HttpRequest,
@@ -159,18 +159,18 @@ fn make_settings_form() -> FormTemplate {
     return form;
 }
 
-/// Get the viewer's username and make a profile edit from for them.
+/// Get the viewer's user ID and make a profile edit form for them.
 async fn get_context_and_make_form(
     auth: &AuthenticationCookie,
 ) -> Result<FormTemplate, TelescopeError> {
-    // Get viewers username. You have to be authenticated to edit your own profile.
+    // Get viewer's user ID. You have to be authenticated to edit your own profile.
     let viewer: Uuid = auth.get_user_id_or_error().await?;
     // Get the context for the edit form.
     let context = EditProfileContext::get(viewer).await?;
     // Ensure that the context exists.
     if context.is_none() {
         // Use an ISE since we should be able to get an edit context as long as there is an
-        // authenticated username.
+        // authenticated user.
         return Err(TelescopeError::ise(format!(
             "Could not get edit context for user ID {}.",
             viewer
@@ -184,7 +184,7 @@ async fn get_context_and_make_form(
     let mut form: FormTemplate = make_settings_form();
     // Add the context to the form.
     form.template["context"] = json!(&context);
-    // Add username to the form for the cancel button
+    // Add user id to the form for the cancel button
     form.template["user_id"] = json!(&viewer);
 
     // Add the list of roles (and whether the current role can switch to them).

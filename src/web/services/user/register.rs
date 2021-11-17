@@ -212,7 +212,7 @@ pub async fn submit_registration(
             ),
             show_status_code: false,
         })?
-        // If there is no username, throw an error
+        // If there is no user ID, throw an error
         .ok_or(TelescopeError::ise(
             "Create User mutation did not return user ID",
         ))?;

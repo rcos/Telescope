@@ -72,7 +72,7 @@ async fn meeting_data_checked(
     auth: &AuthenticationCookie,
     meeting_id: i64,
 ) -> Result<MeetingMeeting, TelescopeError> {
-    // Get meeting data. Extract host's username.
+    // Get meeting data. Extract host's user ID.
     let meeting_data = get_meeting_data(meeting_id).await?;
     let meeting_host: Option<_> = meeting_data
         .host
@@ -90,7 +90,7 @@ async fn meeting_data_checked(
     }
 }
 
-/// Resolve the desired host username from the set host query parameter or the existing meeting
+/// Resolve the desired host user ID from the set host query parameter or the existing meeting
 /// host.
 fn resolve_host_user_id(
     meeting_data: &MeetingMeeting,
@@ -173,7 +173,7 @@ async fn submit_meeting_edits(
 ) -> Result<HttpResponse, TelescopeError> {
     // Get meeting data. Error if there is no such meeting or the user cannot access it
     let meeting_data = meeting_data_checked(&auth, meeting_id).await?;
-    // Resolve the desired host username.
+    // Resolve the desired host user ID.
     let host: Option<Uuid> = resolve_host_user_id(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
@@ -207,7 +207,7 @@ async fn submit_meeting_edits(
         title,
     } = form_data;
 
-    // Like the creation system, semester ID, meeting kind, and host username are not validated.
+    // Like the creation system, semester ID, meeting kind, and host ID are not validated.
 
     // Add submitted data to return form.
     form.template["data"]["semester"] = json!({ "semester_id": &semester });
