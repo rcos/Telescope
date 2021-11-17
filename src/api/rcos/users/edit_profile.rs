@@ -37,7 +37,7 @@ impl EditProfileContext {
 }
 
 impl SaveProfileEdits {
-    /// Save edits to a user's profile, returning their username if the user was found.
+    /// Save edits to a user's profile, returning their user ID if the user was found.
     pub async fn execute(
         user_id: uuid,
         first_name: String,
@@ -53,7 +53,6 @@ impl SaveProfileEdits {
             role,
         })
         .await
-        // Extract returned username option.
         .map(|response| response.update_users_by_pk.map(|obj| obj.id))
     }
 }

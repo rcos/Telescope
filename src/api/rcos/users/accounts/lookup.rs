@@ -1,9 +1,9 @@
-//! Lookup an account by the type and username.
+//! Lookup an account by the type and user ID.
 
 use crate::api::rcos::{prelude::*, send_query};
 use crate::error::TelescopeError;
 
-/// GraphQL query to lookup a user account by type and username.
+/// GraphQL query to lookup a user account by type and user ID.
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",

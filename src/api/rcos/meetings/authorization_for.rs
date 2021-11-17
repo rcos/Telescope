@@ -140,7 +140,7 @@ impl UserMeetingAuthorization {
 impl AuthorizationFor {
     /// Get the meeting access authorization rules for a given user.
     pub async fn get(user_id: Option<uuid>) -> Result<UserMeetingAuthorization, TelescopeError> {
-        // If there is no username, then the viewer has default (lowest) authorization.
+        // If there is no user ID, then the viewer has default (lowest) authorization.
         if user_id.is_none() {
             return Ok(UserMeetingAuthorization::default());
         }

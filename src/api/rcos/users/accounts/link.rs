@@ -31,9 +31,9 @@ impl LinkUserAccount {
     }
 
     /// Create a user account record on behalf of a user. This method will send a
-    /// [`LinkUserAccount`] mutation with the subject set to the username. This method returns
-    /// the username associated with the created user account (which should match the supplied
-    /// username).
+    /// [`LinkUserAccount`] mutation with the subject set to the user ID. This method returns
+    /// the user ID associated with the created user account (which should match the supplied
+    /// user ID).
     ///
     /// This will fail if this user account is already linked to another user. In practice, this
     /// should be rare, so we let this case get handled by Telescope error propagation instead
