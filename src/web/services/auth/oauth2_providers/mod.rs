@@ -1,13 +1,13 @@
 use super::{make_redirect_url, IdentityProvider};
 use crate::api::rcos::users::accounts::for_user::UserAccounts;
 use crate::api::rcos::users::accounts::link::LinkUserAccount;
+use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
-use crate::api::rcos::{send_query, users::accounts::reverse_lookup};
 use crate::error::TelescopeError;
+use crate::web::csrf;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity, RootIdentity};
 use crate::web::services::auth::AUTHENTICATOR_ACCOUNT_TYPES;
-use crate::web::{csrf, profile_for};
 use actix_web::http::header::LOCATION;
 use actix_web::web::Query;
 use actix_web::FromRequest;
@@ -220,31 +220,23 @@ where
             // Get the on-platform ID of the user's identity.
             let platform_id: String = root.get_platform_id().await?;
 
-            // Make variables.
-            let variables = reverse_lookup::reverse_lookup::Variables {
-                id: platform_id,
-                platform: root.get_user_account_type(),
-            };
             // Send API query.
-            let username: Option<String> = send_query::<reverse_lookup::ReverseLookup>(variables)
+            let user_id = ReverseLookup::execute(root.get_user_account_type(), platform_id)
                 .await?
-                .username();
-
-            // If there is no user, return a not-found error.
-            let username: String = username.ok_or(TelescopeError::resource_not_found(
-                "Could not find associated user account.",
-                format!(
-                    "Could not find user account associated with this {} account. \
-                Please create an account or sign in using another method.",
-                    Self::SERVICE_NAME
-                ),
-            ))?;
+                .ok_or(TelescopeError::resource_not_found(
+                    "Could not find associated user account.",
+                    format!(
+                        "Could not find user account associated with this {} account. \
+                    Please create an account or sign in using another method.",
+                        Self::SERVICE_NAME
+                    ),
+                ))?;
 
             // Otherwise, store the identity in the user's cookies and redirect to their profile.
             let identity: Identity = Identity::extract(&req).await?;
             identity.save(&root.make_authenticated_cookie());
             Ok(HttpResponse::Found()
-                .header(LOCATION, profile_for(username.as_str()))
+                .header(LOCATION, format!("/user/{}", user_id))
                 .finish())
         });
     }
@@ -295,19 +287,19 @@ where
             let platform_id: String = platform_identity.platform_user_id().await?;
 
             // Add/update user account record in the RCOS database.
-            // First get the authenticated user's username.
-            let rcos_username: String = cookie.get_rcos_username_or_error().await?;
+            // First get the authenticated user's ID.
+            let user_id = cookie.get_user_id_or_error().await?;
 
             info!(
                 "Linking {} account ID {} to Telescope User {}",
                 Self::USER_ACCOUNT_TY,
                 platform_id,
-                rcos_username
+                user_id
             );
 
             // Check if there is already an account of this type linked.
             // Lookup all linked accounts.
-            let linked_accounts = UserAccounts::send(rcos_username.clone())
+            let linked_accounts = UserAccounts::send(user_id)
                 .await?
                 .into_iter()
                 .collect::<HashMap<UserAccountType, String>>();
@@ -323,7 +315,7 @@ where
 
                     // Return user to their profile.
                     return Ok(HttpResponse::Found()
-                        .header(LOCATION, profile_for(&rcos_username))
+                        .header(LOCATION, format!("/user/{}", user_id))
                         .finish());
                 }
 
@@ -341,13 +333,12 @@ where
                     info!("Replacing currently linked account.");
 
                     // Send unlink mutation.
-                    UnlinkUserAccount::send(rcos_username.clone(), Self::USER_ACCOUNT_TY).await?;
+                    UnlinkUserAccount::send(user_id, Self::USER_ACCOUNT_TY).await?;
                 }
             }
 
             // Send the link mutation.
-            let rcos_username: String =
-                LinkUserAccount::send(rcos_username, Self::USER_ACCOUNT_TY, platform_id).await?;
+            LinkUserAccount::send(user_id, Self::USER_ACCOUNT_TY, platform_id).await?;
 
             // Add identity to auth cookie.
             platform_identity.add_to_cookie(&mut cookie);
@@ -355,7 +346,7 @@ where
 
             // Redirect the user to their profile page
             Ok(HttpResponse::Found()
-                .header(LOCATION, profile_for(&rcos_username))
+                .header(LOCATION, format!("/user/{}", user_id))
                 .finish())
         });
     }

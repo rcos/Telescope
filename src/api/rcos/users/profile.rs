@@ -16,12 +16,12 @@ pub struct Profile;
 use profile::{ResponseData, Variables};
 
 impl Profile {
-    /// Get the profile data for a given username.
+    /// Get the profile data for a given user ID..
     pub async fn for_user(
-        target: String,
-        viewer: Option<String>,
+        target: uuid,
+        viewer: Option<uuid>,
     ) -> Result<ResponseData, TelescopeError> {
-        // Convert viewer to a vec with one or zero usernames in it.
+        // Convert viewer to a vec with one or zero user IDs in it.
         let viewer = viewer.map(|v| vec![v]).unwrap_or(Vec::new());
 
         // Send the query and await the response.

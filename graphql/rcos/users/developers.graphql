@@ -1,6 +1,6 @@
 # Fragment used by the two variants of the Developers query to get user info.
 fragment UserInfo on users {
-    username
+    id
     first_name
     last_name
 
@@ -50,7 +50,7 @@ query AllDevelopers(
         _or: [
             {first_name: {_ilike: $search}},
             {last_name: {_ilike: $search}},
-            {username: {_ilike: $search}},
+            {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
         ]
     }) {
         aggregate {
@@ -64,7 +64,7 @@ query AllDevelopers(
         where: {_or: [
             {first_name: {_ilike: $search}},
             {last_name: {_ilike: $search}},
-            {username: {_ilike: $search}},
+            {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
         ]},
         order_by: [{first_name: asc}, {last_name: asc}]
     ) {...UserInfo}
@@ -86,7 +86,7 @@ query CurrentDevelopers(
         _or: [
             {first_name: {_ilike: $search}},
             {last_name: {_ilike: $search}},
-            {username: {_ilike: $search}},
+            {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
         ]
     }) { aggregate { count } }
 
@@ -101,7 +101,7 @@ query CurrentDevelopers(
             _or: [
                 {first_name: {_ilike: $search}},
                 {last_name: {_ilike: $search}},
-                {username: {_ilike: $search}},
+                {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}},
             ]
         }
         order_by: [{first_name: asc}, {last_name: asc}]

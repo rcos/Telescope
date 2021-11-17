@@ -1,11 +1,11 @@
-# Get a list of usernames of coordiators in any sesmester currently occuring.
+# Get a list of user IDs of coordinators in any semester currently occurring.
 query CurrentCoordinators($now: date!) {
     current_semesters: semesters(where: {
         start_date: {_lte: $now},
         end_date: {_gte: $now}
     }) {
         coordinators: enrollments(where: {is_coordinator: {_eq: true}}) {
-            username
+            user_id
         }
     }
 }

@@ -31,7 +31,7 @@ query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolea
         description
 
         # Get info about the host
-        host: userByHostUserId {
+        host: user {
             id
             first_name
             last_name

@@ -1,4 +1,4 @@
-query CreationContext($host_username: [String!]!, $semester_filter: semesters_bool_exp!) {
+query CreationContext($host: [uuid!]!, $semester_filter: semesters_bool_exp!) {
     # Semesters in which a meeting can be created. This will be
     # all current and duture semesters in ascending order.
     available_semesters: semesters(
@@ -13,8 +13,8 @@ query CreationContext($host_username: [String!]!, $semester_filter: semesters_bo
 
     # We get around the possibity of no host by letting the rust side make the filter.
     # Setting _is_null to true when there's no host, or specifying otherwise.
-    host: users(where: {username: {_in: $host_username}}, limit: 1) {
-        username
+    host: users(where: {id: {_in: $host}}, limit: 1) {
+        id
         first_name
         last_name
     }

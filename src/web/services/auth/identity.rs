@@ -12,6 +12,7 @@ use actix_web::dev::{Payload, PayloadStream};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{ready, LocalBoxFuture, Ready};
 use serde::Serialize;
+use uuid::Uuid;
 
 /// The root identity that this user is authenticated with.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -49,25 +50,25 @@ impl RootIdentity {
     /// Get the string representing the unique user identifier on this platform.
     pub async fn get_platform_id(&self) -> Result<String, TelescopeError> {
         match self {
-            RootIdentity::GitHub(gh) => gh.get_user_id().await,
-            RootIdentity::Discord(d) => d.get_user_id().await,
+            RootIdentity::GitHub(gh) => gh.get_github_id().await,
+            RootIdentity::Discord(d) => d.get_discord_id().await,
             RootIdentity::RpiCas(RpiCasIdentity { rcs_id }) => Ok(rcs_id.clone()),
         }
     }
 
-    /// Get the username of the RCOS account associated with the account
+    /// Get the user ID of the RCOS account associated with the account
     /// authenticated with this access token (if one exists).
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+    pub async fn get_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         match self {
-            RootIdentity::GitHub(gh) => gh.get_rcos_username().await,
-            RootIdentity::Discord(d) => d.get_rcos_username().await,
-            RootIdentity::RpiCas(rpi) => rpi.get_rcos_username().await,
+            RootIdentity::GitHub(gh) => gh.get_rcos_user_id().await,
+            RootIdentity::Discord(d) => d.get_rcos_user_id().await,
+            RootIdentity::RpiCas(rpi) => rpi.get_rcos_user_id().await,
         }
     }
 
-    /// Get the user's RCOS username. If the user is not found, throw an error.
-    pub async fn get_rcos_username_or_error(&self) -> Result<String, TelescopeError> {
-        self.get_rcos_username()
+    /// Get the user's RCOS user ID. If the user is not found, throw an error.
+    pub async fn get_user_id_or_error(&self) -> Result<Uuid, TelescopeError> {
+        self.get_user_id()
             .await
             .map(|opt| opt.ok_or(TelescopeError::ise("The authenticated user doesn't exist.")))?
     }
@@ -117,16 +118,16 @@ impl AuthenticationCookie {
         return Ok(self);
     }
 
-    /// Get the RCOS username of an authenticated user. This is the same as just getting the
-    /// RCOS username of the root identity.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
-        self.root.get_rcos_username().await
+    /// Get the RCOS user ID of an authenticated user. This is the same as just getting the
+    /// RCOS user ID of the root identity.
+    pub async fn get_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
+        self.root.get_user_id().await
     }
 
-    /// Get the authenticated user's RCOS username via the root identity or throw an internal
+    /// Get the authenticated user's RCOS user ID via the root identity or throw an internal
     /// server error.
-    pub async fn get_rcos_username_or_error(&self) -> Result<String, TelescopeError> {
-        self.root.get_rcos_username_or_error().await
+    pub async fn get_user_id_or_error(&self) -> Result<Uuid, TelescopeError> {
+        self.root.get_user_id_or_error().await
     }
 
     /// Get discord credentials if authenticated.
@@ -158,8 +159,8 @@ impl AuthenticationCookie {
             return Ok(Some(rcs_id.clone()));
         } else {
             // Otherwise, get the RCS ID from the API.
-            let rcos_username: String = self.get_rcos_username_or_error().await?;
-            AccountLookup::send(rcos_username, UserAccountType::Rpi).await
+            let user_id = self.get_user_id_or_error().await?;
+            AccountLookup::send(user_id, UserAccountType::Rpi).await
         }
     }
 
@@ -194,11 +195,10 @@ impl AuthenticationCookie {
     /// identity with it.
     /// Return true on success.
     async fn replace_root_with_rpi_cas(&mut self) -> Result<bool, TelescopeError> {
-        // Lookup the user's username
-        let rcos_username: String = self.get_rcos_username_or_error().await?;
+        // Lookup the user's ID
+        let user_id = self.get_user_id_or_error().await?;
         // Lookup the user's RCS id
-        let rcs_id: Option<String> =
-            AccountLookup::send(rcos_username, UserAccountType::Rpi).await?;
+        let rcs_id: Option<String> = AccountLookup::send(user_id, UserAccountType::Rpi).await?;
         // If there is an RCS id, replace the root.
         if let Some(rcs_id) = rcs_id {
             self.root = RootIdentity::RpiCas(RpiCasIdentity { rcs_id });
@@ -362,12 +362,12 @@ impl Identity {
         }
     }
 
-    /// Get the username of the authenticated RCOS account (if there is one.)
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+    /// Get the user ID of the authenticated RCOS account (if there is one.)
+    pub async fn get_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // If there is an identity cookie
         if let Some(id) = self.identity().await {
-            // Use it to get the authenticated RCOS username.
-            return id.get_rcos_username().await;
+            // Use it to get the authenticated RCOS user ID.
+            return id.get_user_id().await;
         } else {
             return Ok(None);
         }

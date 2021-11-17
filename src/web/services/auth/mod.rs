@@ -4,7 +4,7 @@ use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
@@ -202,19 +202,18 @@ pub trait IdentityProvider: 'static {
         mut cookie: AuthenticationCookie,
     ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
-            // Lookup the username of the user trying to unlink an account.
-            let username: String = cookie.get_rcos_username_or_error().await?;
+            // Lookup the ID of the user trying to unlink an account.
+            let user_id = cookie.get_user_id_or_error().await?;
             // Get all of the accounts linked to this user. Make sure at least one
             // can function for authentication.
-            let all_accounts: HashMap<UserAccountType, String> =
-                UserAccounts::send(username.clone())
-                    .await?
-                    // Iterate
-                    .into_iter()
-                    // filter down to the authentication providers
-                    .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
-                    // Collect into map.
-                    .collect();
+            let all_accounts: HashMap<UserAccountType, String> = UserAccounts::send(user_id)
+                .await?
+                // Iterate
+                .into_iter()
+                // filter down to the authentication providers
+                .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
+                // Collect into map.
+                .collect();
 
             // If there is not a secondary account for the user to authenticate with,
             // return an error.
@@ -272,13 +271,12 @@ pub trait IdentityProvider: 'static {
 
             // There is a secondary authenticator linked, delete this user account record.
             // Log a message about the unlinked platform.
-            let platform_id =
-                UnlinkUserAccount::send(username.clone(), Self::USER_ACCOUNT_TY).await?;
+            let platform_id = UnlinkUserAccount::send(user_id, Self::USER_ACCOUNT_TY).await?;
 
             if let Some(platform_id) = platform_id {
                 info!(
                     "User {} unlinked {} account with id {}.",
-                    username,
+                    user_id,
                     Self::USER_ACCOUNT_TY,
                     platform_id
                 );
@@ -287,7 +285,7 @@ pub trait IdentityProvider: 'static {
             // Get the path to redirect the user to.
             let redirect: String = removed_auth
                 // If the auth was replaced successfully, the user's profile.
-                .then(|| profile_for(username.as_str()))
+                .then(|| format!("/user/{}", user_id))
                 // Otherwise the homepage.
                 .unwrap_or("/".into());
 

@@ -13,7 +13,7 @@ mutation EditMeeting(
     $location: String,
     $recording_url: String,
     $external_slides_url: String,
-    $host: String,
+    $host: uuid,
 ) {
     # We have to be explicit as to which columns we set, otherwise we risk
     # overwriting an existing value with a null unintentionally.
@@ -30,7 +30,7 @@ mutation EditMeeting(
         location: $location,
         recording_url: $recording_url,
         external_presentation_url: $external_slides_url,
-        host_username: $host,
+        host_user_id: $host,
     }) {
         meeting_id
     }

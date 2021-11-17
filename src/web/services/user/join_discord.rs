@@ -3,7 +3,7 @@
 use crate::api::discord::rcos_discord_verified_role_id;
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_web::HttpResponse;
 use reqwest::header::LOCATION;
@@ -11,8 +11,8 @@ use reqwest::header::LOCATION;
 /// Let users into the RCOS discord.
 #[get("/join_discord")]
 pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, TelescopeError> {
-    // Get the authenticated username.
-    let username = auth.get_rcos_username_or_error().await?;
+    // Get the authenticated user id.
+    let user_id = auth.get_user_id_or_error().await?;
 
     // Get Discord access token.
     let discord = auth.get_discord();
@@ -30,7 +30,7 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
     let discord = discord.unwrap();
     // Get Discord user ID.
     let discord_user_id: u64 = discord
-        .get_user_id()
+        .get_discord_id()
         .await?
         .as_str()
         .parse::<u64>()
@@ -85,7 +85,6 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         rcs_id
     );
 
-    // FIXME: Ensure this gets the Verified role everytime.
     // Get RCOS Discord Verified role ID if possible. If not, user empty role list.
     let roles = rcos_discord_verified_role_id()
         .await?
@@ -97,6 +96,6 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
 
     // On success, redirect user back to their profile.
     Ok(HttpResponse::Found()
-        .header(LOCATION, profile_for(username.as_str()))
+        .header(LOCATION, format!("/user/{}", user_id))
         .finish())
 }

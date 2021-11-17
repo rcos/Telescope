@@ -3,7 +3,6 @@
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
-use crate::web::profile_for;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
 use serenity::client::Context;
 use serenity::model::interactions::application_command::ApplicationCommandInteraction;
@@ -138,9 +137,9 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                                     .title(format!("{} {}", u.first_name, u.last_name))
                                     // Link to their profile
                                     .url(format!(
-                                        "{}{}",
+                                        "{}/user/{}",
                                         global_config().discord_config.telescope_url,
-                                        profile_for(u.username.as_str())
+                                        u.id
                                     ))
                                     // List their role inline
                                     .field("User Role", u.role, true);

@@ -20,9 +20,9 @@ async fn delete_meeting(
     Path(meeting_id): Path<i64>,
 ) -> Result<HttpResponse, TelescopeError> {
     // Require that there is a user authenticated.
-    let username: String = auth.get_rcos_username_or_error().await?;
+    let user_id = auth.get_user_id_or_error().await?;
     // Require that they can delete meetings.
-    let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(username)).await?;
+    let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(user_id)).await?;
     if !auth.can_delete_meetings() {
         return Err(TelescopeError::Forbidden);
     }

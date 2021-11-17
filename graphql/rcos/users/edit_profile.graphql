@@ -1,7 +1,7 @@
 # Queries and mutations for editing profile information.
 
-query EditProfileContext($username: String!) {
-    users_by_pk(username: $username) {
+query EditProfileContext($user_id: uuid!) {
+    users_by_pk(id: $user_id) {
         first_name
         last_name
         cohort
@@ -13,8 +13,8 @@ query EditProfileContext($username: String!) {
     }
 }
 
-mutation SaveProfileEdits($username: String!, $fname: String!, $lname: String!, $cohort: Int, $role: user_role!) {
-    update_users_by_pk(pk_columns: {username: $username}, _set: {first_name: $fname, last_name: $lname, role: $role, cohort: $cohort}) {
-        username
+mutation SaveProfileEdits($user_id: uuid!, $fname: String!, $lname: String!, $cohort: Int, $role: user_role!) {
+    update_users_by_pk(pk_columns: {id: $user_id}, _set: {first_name: $fname, last_name: $lname, role: $role, cohort: $cohort}) {
+        id
     }
 }

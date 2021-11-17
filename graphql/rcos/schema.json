@@ -3469,7 +3469,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -4038,7 +4038,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -4157,7 +4157,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -4610,7 +4610,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -5412,18 +5412,6 @@
               }
             },
             {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "final_grade_appeal",
-              "type": {
-                "kind": "OBJECT",
-                "name": "final_grade_appeal",
-                "ofType": null
-              }
-            },
-            {
               "args": [
                 {
                   "defaultValue": null,
@@ -5820,180 +5808,6 @@
               }
             },
             {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "mentor_proposals_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "mentor_proposals_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "mentor_proposals_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "mentorProposalsBySemesterIdUserId",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "mentor_proposals",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "mentor_proposals_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "mentor_proposals_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "mentor_proposals_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "mentorProposalsBySemesterIdUserId_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "mentor_proposals_aggregate",
-                  "ofType": null
-                }
-              }
-            },
-            {
               "args": [],
               "deprecationReason": null,
               "description": "An object relationship",
@@ -6204,180 +6018,6 @@
               }
             },
             {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "pay_requests_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "pay_requests_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "pay_requests_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "pay_requests",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "pay_requests",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "pay_requests_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "pay_requests_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "pay_requests_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "pay_requests_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "pay_requests_aggregate",
-                  "ofType": null
-                }
-              }
-            },
-            {
               "args": [],
               "deprecationReason": null,
               "description": "An object relationship",
@@ -6387,354 +6027,6 @@
                 "kind": "OBJECT",
                 "name": "projects",
                 "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_pitches_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_pitches_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_pitches_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "projectPitchesByReviewerIdSemesterId",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_pitches",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_pitches_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_pitches_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_pitches_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "projectPitchesByReviewerIdSemesterId_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "project_pitches_aggregate",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_pitches_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_pitches_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_pitches_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "projectPitchesBySemesterIdUserId",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_pitches",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_pitches_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_pitches_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_pitches_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "projectPitchesBySemesterIdUserId_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "project_pitches_aggregate",
-                  "ofType": null
-                }
               }
             },
             {
@@ -6759,6 +6051,180 @@
                 "kind": "OBJECT",
                 "name": "project_pitches",
                 "ofType": null
+              }
+            },
+            {
+              "args": [
+                {
+                  "defaultValue": null,
+                  "description": "distinct select on columns",
+                  "name": "distinct_on",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "project_pitches_select_column",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "limit the number of rows returned",
+                  "name": "limit",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "skip the first n rows. Use only with order_by",
+                  "name": "offset",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "sort the rows by one or more columns",
+                  "name": "order_by",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "project_pitches_order_by",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "filter the rows returned",
+                  "name": "where",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "project_pitches_bool_exp",
+                    "ofType": null
+                  }
+                }
+              ],
+              "deprecationReason": null,
+              "description": "An array relationship",
+              "isDeprecated": false,
+              "name": "project_pitches",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "project_pitches",
+                      "ofType": null
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "args": [
+                {
+                  "defaultValue": null,
+                  "description": "distinct select on columns",
+                  "name": "distinct_on",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "project_pitches_select_column",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "limit the number of rows returned",
+                  "name": "limit",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "skip the first n rows. Use only with order_by",
+                  "name": "offset",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "sort the rows by one or more columns",
+                  "name": "order_by",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "project_pitches_order_by",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "filter the rows returned",
+                  "name": "where",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "project_pitches_bool_exp",
+                    "ofType": null
+                  }
+                }
+              ],
+              "deprecationReason": null,
+              "description": "An aggregate relationship",
+              "isDeprecated": false,
+              "name": "project_pitches_aggregate",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "project_pitches_aggregate",
+                  "ofType": null
+                }
               }
             },
             {
@@ -6972,7 +6438,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7245,7 +6711,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsBySemesterIdUserId",
+              "name": "workshop_proposals",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7336,7 +6802,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsBySemesterIdUserId_aggregate",
+              "name": "workshop_proposals_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7935,16 +7401,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "final_grade_appeal",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "final_grade_appeals",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -7995,16 +7451,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "mentorProposalsBySemesterIdUserId",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "mentor_proposals_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "mentor_proposal",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -8045,40 +7491,10 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "pay_requests",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "pay_requests_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "project",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "projects_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "projectPitchesByReviewerIdSemesterId",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_pitches_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "projectPitchesBySemesterIdUserId",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_pitches_bool_exp",
                 "ofType": null
               }
             },
@@ -8096,6 +7512,16 @@
               "defaultValue": null,
               "description": null,
               "name": "project_pitch",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "project_pitches_bool_exp",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "project_pitches",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_bool_exp",
@@ -8135,7 +7561,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -8165,7 +7591,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsBySemesterIdUserId",
+              "name": "workshop_proposals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_bool_exp",
@@ -8290,16 +7716,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "final_grade_appeal",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_obj_rel_insert_input",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "final_grade_appeals",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -8350,16 +7766,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "mentorProposalsBySemesterIdUserId",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "mentor_proposals_arr_rel_insert_input",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "mentor_proposal",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -8400,40 +7806,10 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "pay_requests",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "pay_requests_arr_rel_insert_input",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "project",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "projects_obj_rel_insert_input",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "projectPitchesByReviewerIdSemesterId",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_pitches_arr_rel_insert_input",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "projectPitchesBySemesterIdUserId",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_pitches_arr_rel_insert_input",
                 "ofType": null
               }
             },
@@ -8454,6 +7830,16 @@
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_obj_rel_insert_input",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "project_pitches",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "project_pitches_arr_rel_insert_input",
                 "ofType": null
               }
             },
@@ -8490,7 +7876,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -8520,7 +7906,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsBySemesterIdUserId",
+              "name": "workshop_proposals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_arr_rel_insert_input",
@@ -9066,16 +8452,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "final_grade_appeal",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "final_grade_appeals_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -9126,16 +8502,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "mentorProposalsBySemesterIdUserId_aggregate",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "mentor_proposals_aggregate_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "mentor_proposal",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -9176,40 +8542,10 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "pay_requests_aggregate",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "pay_requests_aggregate_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "project",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "projects_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "projectPitchesByReviewerIdSemesterId_aggregate",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_pitches_aggregate_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "projectPitchesBySemesterIdUserId_aggregate",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_pitches_aggregate_order_by",
                 "ofType": null
               }
             },
@@ -9230,6 +8566,16 @@
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_order_by",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "project_pitches_aggregate",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "project_pitches_aggregate_order_by",
                 "ofType": null
               }
             },
@@ -9266,7 +8612,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -9296,7 +8642,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsBySemesterIdUserId_aggregate",
+              "name": "workshop_proposals_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_aggregate_order_by",
@@ -11702,7 +11048,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -11794,7 +11140,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -12103,7 +11449,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -12163,7 +11509,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -12221,7 +11567,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -12281,7 +11627,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -12620,41 +11966,6 @@
           "possibleTypes": null
         },
         {
-          "description": "input type for inserting object relation for remote table \"final_grade_appeal\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "data",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "final_grade_appeal_insert_input",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": "on conflict condition",
-              "name": "on_conflict",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_on_conflict",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "final_grade_appeal_obj_rel_insert_input",
-          "possibleTypes": null
-        },
-        {
           "description": "on conflict condition type for table \"final_grade_appeal\"",
           "enumValues": null,
           "fields": null,
@@ -12729,7 +12040,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -12789,7 +12100,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -13085,7 +12396,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -13644,7 +12955,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -13759,7 +13070,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -14114,7 +13425,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -15183,7 +14494,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByHostUserId",
+              "name": "user",
               "type": {
                 "kind": "OBJECT",
                 "name": "users",
@@ -15882,7 +15193,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByHostUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -16141,7 +15452,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByHostUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -17165,7 +16476,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByHostUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -17955,7 +17266,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -18382,7 +17693,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -18536,7 +17847,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -19162,7 +18473,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -25944,7 +25255,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -26309,7 +25620,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -26413,7 +25724,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -26857,7 +26168,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -28674,7 +27985,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -28686,7 +27997,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -28870,19 +28181,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByReviewerId",
-              "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -28891,6 +28190,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByReviewerId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -29411,7 +28722,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -29421,7 +28732,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -29561,7 +28872,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByReviewerId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -29571,7 +28882,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -29656,7 +28967,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -29666,7 +28977,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -29806,7 +29117,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByReviewerId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -29816,7 +29127,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -30528,7 +29839,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -30538,7 +29849,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -30678,7 +29989,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByReviewerId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -30688,7 +29999,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -31510,7 +30821,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -32115,7 +31426,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -32270,7 +31581,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -32743,7 +32054,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -44861,7 +44172,7 @@
                 }
               ],
               "deprecationReason": null,
-              "description": "fetch data from the table: \"user_accounts\"",
+              "description": "An array relationship",
               "isDeprecated": false,
               "name": "user_accounts",
               "type": {
@@ -44952,7 +44263,7 @@
                 }
               ],
               "deprecationReason": null,
-              "description": "fetch aggregated fields from the table: \"user_accounts\"",
+              "description": "An aggregate relationship",
               "isDeprecated": false,
               "name": "user_accounts_aggregate",
               "type": {
@@ -51531,7 +50842,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -52070,7 +51381,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -52165,7 +51476,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -52456,7 +51767,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -58209,19 +57520,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByGraderId",
-              "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -58230,6 +57529,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByGraderId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -58852,7 +58163,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -58862,7 +58173,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -59037,7 +58348,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -59047,7 +58358,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -59716,7 +59027,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByGraderId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -59726,7 +59037,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -67629,7 +66940,7 @@
                 }
               ],
               "deprecationReason": null,
-              "description": "fetch data from the table: \"user_accounts\"",
+              "description": "An array relationship",
               "isDeprecated": false,
               "name": "user_accounts",
               "type": {
@@ -67720,7 +67031,7 @@
                 }
               ],
               "deprecationReason": null,
-              "description": "fetch aggregated fields from the table: \"user_accounts\"",
+              "description": "An aggregate relationship",
               "isDeprecated": false,
               "name": "user_accounts_aggregate",
               "type": {
@@ -68494,7 +67805,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -68823,7 +68134,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -68913,7 +68224,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -69258,7 +68569,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -69644,7 +68955,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "bonusAttendancesByUserId",
+              "name": "bonus_attendances",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -69735,7 +69046,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "bonusAttendancesByUserId_aggregate",
+              "name": "bonus_attendances_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -69846,7 +69157,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "enrollmentsByUserId",
+              "name": "enrollments",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -69937,7 +69248,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "enrollmentsByUserId_aggregate",
+              "name": "enrollments_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -70020,7 +69331,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "finalGradeAppealsByUserId",
+              "name": "final_grade_appeals",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -70111,7 +69422,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "finalGradeAppealsByUserId_aggregate",
+              "name": "final_grade_appeals_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -70242,7 +69553,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "meetingAttendancesByUserId",
+              "name": "meeting_attendances",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -70333,7 +69644,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "meetingAttendancesByUserId_aggregate",
+              "name": "meeting_attendances_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -70416,7 +69727,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "meetingsByHostUserId",
+              "name": "meetings",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -70507,7 +69818,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "meetingsByHostUserId_aggregate",
+              "name": "meetings_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71298,7 +70609,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "projectPitchesByUserId",
+              "name": "project_pitches",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71389,7 +70700,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "projectPitchesByUserId_aggregate",
+              "name": "project_pitches_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71472,7 +70783,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "projectPresentationGradesByGraderId",
+              "name": "project_presentation_grades",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71563,7 +70874,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "projectPresentationGradesByGraderId_aggregate",
+              "name": "project_presentation_grades_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71662,7 +70973,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "smallGroupMentorsByUserId",
+              "name": "small_group_mentors",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71753,7 +71064,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "smallGroupMentorsByUserId_aggregate",
+              "name": "small_group_mentors_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72010,7 +71321,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "statusUpdateSubmissionsByUserId",
+              "name": "status_update_submissions",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72101,7 +71412,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "statusUpdateSubmissionsByUserId_aggregate",
+              "name": "status_update_submissions_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72200,7 +71511,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "userAccountsByUserId",
+              "name": "user_accounts",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72291,7 +71602,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "userAccountsByUserId_aggregate",
+              "name": "user_accounts_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72548,7 +71859,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsByUserId",
+              "name": "workshop_proposals",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72639,7 +71950,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsByUserId_aggregate",
+              "name": "workshop_proposals_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72957,7 +72268,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "bonusAttendancesByUserId",
+              "name": "bonus_attendances",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "bonus_attendances_bool_exp",
@@ -72987,7 +72298,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentsByUserId",
+              "name": "enrollments",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -72997,7 +72308,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "finalGradeAppealsByUserId",
+              "name": "final_grade_appeals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "final_grade_appeal_bool_exp",
@@ -73037,7 +72348,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "meetingAttendancesByUserId",
+              "name": "meeting_attendances",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "meeting_attendances_bool_exp",
@@ -73047,7 +72358,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "meetingsByHostUserId",
+              "name": "meetings",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "meetings_bool_exp",
@@ -73107,7 +72418,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPitchesByUserId",
+              "name": "project_pitches",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_bool_exp",
@@ -73117,7 +72428,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPresentationGradesByGraderId",
+              "name": "project_presentation_grades",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_presentation_grades_bool_exp",
@@ -73137,7 +72448,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "smallGroupMentorsByUserId",
+              "name": "small_group_mentors",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "small_group_mentors_bool_exp",
@@ -73157,7 +72468,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "statusUpdateSubmissionsByUserId",
+              "name": "status_update_submissions",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "status_update_submissions_bool_exp",
@@ -73177,7 +72488,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userAccountsByUserId",
+              "name": "user_accounts",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "user_accounts_bool_exp",
@@ -73197,7 +72508,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserId",
+              "name": "workshop_proposals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_bool_exp",
@@ -73262,7 +72573,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "bonusAttendancesByUserId",
+              "name": "bonus_attendances",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "bonus_attendances_arr_rel_insert_input",
@@ -73292,7 +72603,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentsByUserId",
+              "name": "enrollments",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_arr_rel_insert_input",
@@ -73302,7 +72613,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "finalGradeAppealsByUserId",
+              "name": "final_grade_appeals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "final_grade_appeal_arr_rel_insert_input",
@@ -73342,7 +72653,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "meetingAttendancesByUserId",
+              "name": "meeting_attendances",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "meeting_attendances_arr_rel_insert_input",
@@ -73352,7 +72663,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "meetingsByHostUserId",
+              "name": "meetings",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "meetings_arr_rel_insert_input",
@@ -73412,7 +72723,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPitchesByUserId",
+              "name": "project_pitches",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_arr_rel_insert_input",
@@ -73422,7 +72733,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPresentationGradesByGraderId",
+              "name": "project_presentation_grades",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_presentation_grades_arr_rel_insert_input",
@@ -73442,7 +72753,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "smallGroupMentorsByUserId",
+              "name": "small_group_mentors",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "small_group_mentors_arr_rel_insert_input",
@@ -73462,7 +72773,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "statusUpdateSubmissionsByUserId",
+              "name": "status_update_submissions",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "status_update_submissions_arr_rel_insert_input",
@@ -73482,7 +72793,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userAccountsByUserId",
+              "name": "user_accounts",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "user_accounts_arr_rel_insert_input",
@@ -73502,7 +72813,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserId",
+              "name": "workshop_proposals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_arr_rel_insert_input",
@@ -73856,7 +73167,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "bonusAttendancesByUserId_aggregate",
+              "name": "bonus_attendances_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "bonus_attendances_aggregate_order_by",
@@ -73886,7 +73197,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentsByUserId_aggregate",
+              "name": "enrollments_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_aggregate_order_by",
@@ -73896,7 +73207,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "finalGradeAppealsByUserId_aggregate",
+              "name": "final_grade_appeals_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "final_grade_appeal_aggregate_order_by",
@@ -73936,7 +73247,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "meetingAttendancesByUserId_aggregate",
+              "name": "meeting_attendances_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "meeting_attendances_aggregate_order_by",
@@ -73946,7 +73257,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "meetingsByHostUserId_aggregate",
+              "name": "meetings_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "meetings_aggregate_order_by",
@@ -74006,7 +73317,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPitchesByUserId_aggregate",
+              "name": "project_pitches_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_aggregate_order_by",
@@ -74016,7 +73327,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPresentationGradesByGraderId_aggregate",
+              "name": "project_presentation_grades_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_presentation_grades_aggregate_order_by",
@@ -74036,7 +73347,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "smallGroupMentorsByUserId_aggregate",
+              "name": "small_group_mentors_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "small_group_mentors_aggregate_order_by",
@@ -74056,7 +73367,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "statusUpdateSubmissionsByUserId_aggregate",
+              "name": "status_update_submissions_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "status_update_submissions_aggregate_order_by",
@@ -74076,7 +73387,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userAccountsByUserId_aggregate",
+              "name": "user_accounts_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "user_accounts_aggregate_order_by",
@@ -74096,7 +73407,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserId_aggregate",
+              "name": "workshop_proposals_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_aggregate_order_by",
@@ -74656,7 +73967,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -74668,7 +73979,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -74844,19 +74155,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "userByReviewerId",
-              "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
+              "name": "user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -74865,6 +74164,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByReviewerId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -75401,7 +74712,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -75411,7 +74722,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -75531,7 +74842,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByReviewerId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -75541,7 +74852,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -75630,7 +74941,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -75640,7 +74951,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -75760,7 +75071,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByReviewerId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -75770,7 +75081,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -76501,7 +75812,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByReviewerIdSemesterId",
+              "name": "enrollment",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -76511,7 +75822,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentBySemesterIdUserId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -76631,7 +75942,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByReviewerId",
+              "name": "user",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -76641,7 +75952,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",

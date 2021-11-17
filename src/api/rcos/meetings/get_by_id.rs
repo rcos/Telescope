@@ -17,7 +17,7 @@ use self::meeting::{MeetingMeeting, Variables};
 
 impl Meeting {
     /// Get a meeting by its ID.
-    pub async fn get_by_id(meeting_id: i64) -> Result<Option<MeetingMeeting>, TelescopeError> {
+    pub async fn get(meeting_id: i64) -> Result<Option<MeetingMeeting>, TelescopeError> {
         Ok(send_query::<Self>(Variables { id: meeting_id })
             // Wait for API response
             .await?

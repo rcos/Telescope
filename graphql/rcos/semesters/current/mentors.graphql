@@ -6,7 +6,7 @@ query CurrentMentors($now: date!) {
     }) {
         small_groups {
             small_group_mentors {
-                username
+                user_id
             }
         }
     }

@@ -35,3 +35,6 @@ pub type _url = Vec<Url>;
 
 /// Discord channel association variants.
 pub type channel_type = ChannelType;
+
+/// UUID type alias for hasura.
+pub type uuid = ::uuid::Uuid;

@@ -19,7 +19,7 @@
     </span>
 
     {{! User actions }}
-    {{#if (and viewer.[0].username (eq target.username viewer.[0].username))}}
+    {{#if (and viewer.[0].id (eq target.id viewer.[0].id))}}
         {{! Actions header }}
         <h3 class="my-2">Actions</h3>
 
@@ -86,7 +86,7 @@
     {{/if}}
 
     {{! Account info -- RPI email, etc (Only visible to authenticated users)}}
-    {{#if viewer.[0].username}}
+    {{#if viewer.[0].id}}
         <h3 class="mt-2">User Info</h3>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mt-2">
@@ -106,7 +106,7 @@
                             {{/with}}
 
                             {{! If the target is the viewer link to the unlink handler }}
-                            {{#if (eq viewer.[0].username target.username)}}
+                            {{#if (eq viewer.[0].id target.id)}}
                                 <a href="/unlink/rpi_cas" class="btn btn-danger w-100 mt-1">
                                     Unlink this RPI CAS
                                 </a>
@@ -114,7 +114,7 @@
                         {{else}}
                             {{! Show a message indicating not linked and let the user link if it's their account. }}
                             RPI e-mail not linked.
-                            {{#if (eq viewer.[0].username target.username)}}
+                            {{#if (eq viewer.[0].id target.id)}}
                                 <a href="/link/rpi_cas" class="btn btn-primary w-100">
                                     Link with RPI CAS.
                                 </a>
@@ -147,7 +147,7 @@
                             {{/if}}
 
                             {{! Check if user owns this account }}
-                            {{#if (eq viewer.[0].username target.username)}}
+                            {{#if (eq viewer.[0].id target.id)}}
                                 {{! Allow owner to unlink dead Discord }}
                                 <a href="/unlink/discord" class="btn btn-danger w-100">
                                     Unlink Discord
@@ -160,7 +160,7 @@
                             No Discord account linked.
 
                             {{! Allow viewer to link their own discord if it's their account }}
-                            {{#if (eq viewer.[0].username target.username)}}
+                            {{#if (eq viewer.[0].id target.id)}}
                                 <a href="/link/discord" class="btn btn-discord w-100">
                                     Link Discord
 
@@ -214,7 +214,7 @@
     {{! Meetings the user has hosted }}
     {{! Include drafts if the viewer can see them }}
     {{#if (or
-              (eq viewer.[0].username target.username)
+              (eq viewer.[0].id target.id)
               (or viewer.[0].is_current_coordinator.[0].is_coordinator
                   (or
                       (eq viewer.[0].role "sysadmin")

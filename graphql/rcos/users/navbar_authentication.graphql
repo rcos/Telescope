@@ -1,7 +1,6 @@
 # Authentication to determine what tabs on the navbar the user should have access to.
-query Authentication($username: String!, $now: date!) {
-    users_by_pk(username: $username) {
-
+query Authentication($user_id: uuid!, $now: date!) {
+    users_by_pk(id: $user_id) {
         # If a semester ID is returned here they're a current coordinator.
         is_current_coordinator: enrollments(
             where: {

@@ -1,15 +1,12 @@
+use crate::api::github::{
+    self,
+    users::authenticated_user::{
+        authenticated_user::{AuthenticatedUserViewer, Variables},
+        AuthenticatedUser,
+    },
+};
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
-use crate::api::{
-    github::{
-        self,
-        users::authenticated_user::{
-            authenticated_user::{AuthenticatedUserViewer, Variables},
-            AuthenticatedUser,
-        },
-    },
-    rcos,
-};
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
@@ -18,6 +15,7 @@ use futures::future::LocalBoxFuture;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::{AccessToken, AuthUrl, Scope, TokenResponse, TokenUrl};
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// Zero sized type representing the GitHub OAuth2 identity provider.
 pub struct GitHubOauth;
@@ -77,7 +75,7 @@ impl Oauth2Identity for GitHubIdentity {
     }
 
     fn platform_user_id(&self) -> LocalBoxFuture<Result<String, TelescopeError>> {
-        Box::pin(async move { self.get_user_id().await })
+        Box::pin(async move { self.get_github_id().await })
     }
 
     fn into_root(self) -> RootIdentity {
@@ -93,7 +91,7 @@ impl GitHubIdentity {
     /// Get the github account id of the user associated with this access token.
     /// Note that this is the GitHub GraphQL node ID, and is only compatible with the
     /// GitHub V4 API.
-    pub async fn get_user_id(&self) -> Result<String, TelescopeError> {
+    pub async fn get_github_id(&self) -> Result<String, TelescopeError> {
         // Get the authenticated user and convert their id to a string.
         self.get_authenticated_user()
             .await
@@ -110,16 +108,12 @@ impl GitHubIdentity {
             .map(|response| response.viewer)
     }
 
-    /// Get the RCOS username of the authenticated user via their GitHub account on the central
+    /// Get the RCOS user ID of the authenticated user via their GitHub account on the central
     /// RCOS API.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
+    pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
         // Get the on platform id of this user.
-        let platform_id: String = self.get_user_id().await?;
-        // Build the variables for a reverse lookup query to the central RCOS API.
-        let query_variables = ReverseLookup::make_vars(UserAccountType::GitHub, platform_id);
+        let platform_id: String = self.get_github_id().await?;
         // Send the query to the central RCOS API and await response.
-        return rcos::send_query::<ReverseLookup>(query_variables)
-            .await
-            .map(|response| response.username());
+        ReverseLookup::execute(UserAccountType::GitHub, platform_id).await
     }
 }

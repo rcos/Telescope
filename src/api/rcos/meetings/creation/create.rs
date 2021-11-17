@@ -22,7 +22,7 @@ pub fn normalize_url(url: Option<String>) -> Option<String> {
 impl CreateMeeting {
     /// Execute a meeting creation mutation. Return the created meeting's ID.
     pub async fn execute(
-        host_username: Option<String>,
+        host: Option<uuid>,
         title: Option<String>,
         start: DateTime<Utc>,
         end: DateTime<Utc>,
@@ -37,7 +37,7 @@ impl CreateMeeting {
         kind: MeetingType,
     ) -> Result<Option<i64>, TelescopeError> {
         send_query::<Self>(create_meeting::Variables {
-            host_username,
+            host,
             title,
             start,
             end,
