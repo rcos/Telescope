@@ -2,8 +2,6 @@
 
 use reqwest::header::HeaderValue;
 
-use crate::web::services::user::profile::ProfileQuery;
-
 pub mod csrf;
 pub mod middlewares;
 pub mod services;

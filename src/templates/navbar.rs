@@ -123,7 +123,7 @@ fn for_auth(req_path: &str) -> Template {
     )
 }
 
-/// Create a navbar template for
+/// Create a navbar template for a given request.
 pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
     // Extract the authenticated identities from the request.
     let identity: Option<AuthenticationCookie> = Identity::extract(req).await?.identity().await;

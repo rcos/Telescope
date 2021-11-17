@@ -5,7 +5,7 @@ use crate::api::rcos::meetings::edit::EditHostSelection;
 use crate::api::rcos::meetings::ALL_MEETING_TYPES;
 use crate::api::rcos::meetings::{
     authorization_for::{AuthorizationFor, UserMeetingAuthorization},
-    creation::context::get_context,
+    creation::context::CreationContext,
     edit,
     get_by_id::{meeting::MeetingMeeting, Meeting},
 };
