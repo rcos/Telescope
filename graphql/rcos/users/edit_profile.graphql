@@ -7,7 +7,7 @@ query EditProfileContext($user_id: uuid!) {
         cohort
         role
 
-        rcs_id: userAccountsByUserId(where: {type: {_eq: "rpi"}}) {
+        rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
             account_id
         }
     }

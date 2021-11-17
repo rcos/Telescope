@@ -2,7 +2,7 @@
 query Authentication($user_id: uuid!, $now: date!) {
     users_by_pk(id: $user_id) {
         # If a semester ID is returned here they're a current coordinator.
-        is_current_coordinator: enrollmentsByUserId(
+        is_current_coordinator: enrollments(
             where: {
                 is_coordinator: {_eq: true},
                 semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
@@ -11,7 +11,7 @@ query Authentication($user_id: uuid!, $now: date!) {
         ) { semester_id }
 
         # If a small group ID is returned here then they're a current mentor.
-        is_current_mentor: smallGroupMentorsByUserId(
+        is_current_mentor: small_group_mentors(
             where: {small_group: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}},
             limit: 1
         ) {
