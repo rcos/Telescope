@@ -9,7 +9,7 @@ query Profile($target: uuid!, $viewer: [uuid!]!, $now: date!) {
         created_at
         cohort
 
-        enrollments: enrollments(order_by: [{semester: {start_date: desc}}]) {
+        enrollments(order_by: [{semester: {start_date: desc}}]) {
             semester {
                 title
 
