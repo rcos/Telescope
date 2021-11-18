@@ -14,9 +14,9 @@ use crate::error::TelescopeError;
 pub struct RoleLookup;
 
 impl RoleLookup {
-    /// Get a user's role. Return `Ok(None)` if there is no user record for this username.
-    pub async fn get(username: String) -> Result<Option<UserRole>, TelescopeError> {
-        send_query::<Self>(role_lookup::Variables { username })
+    /// Get a user's role. Return `Ok(None)` if there is no user record for this user ID.
+    pub async fn get(user_id: uuid) -> Result<Option<UserRole>, TelescopeError> {
+        send_query::<Self>(role_lookup::Variables { user_id })
             .await
             // Extract the role from the results
             .map(|result| result.users_by_pk.map(|u| u.role))

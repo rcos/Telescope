@@ -1,5 +1,5 @@
-query AccountLookup($platform: user_account!, $rcos_username: String!) {
-    user_accounts_by_pk(type: $platform, username: $rcos_username) {
+query AccountLookup($platform: user_account!, $user_id: uuid!) {
+    user_accounts_by_pk(type: $platform, user_id: $user_id) {
         account_id
     }
 }

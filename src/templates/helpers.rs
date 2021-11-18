@@ -2,7 +2,6 @@
 
 use crate::api::rcos::meetings::MeetingType;
 use crate::api::rcos::users::UserRole;
-use crate::web::profile_for;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
@@ -14,7 +13,6 @@ use url::Url;
 
 /// Register the custom handlebars helpers to the handlebars registry.
 pub fn register_helpers(registry: &mut Handlebars) {
-    registry.register_helper("profile_for", wrap_helper(profile_for_helper));
     registry.register_helper("format_date", wrap_helper(format_date_helper));
     registry.register_helper("format_time", wrap_helper(format_time_helper));
     registry.register_helper(
@@ -45,26 +43,6 @@ where
 
     // Box and return
     return Box::new(closure);
-}
-
-/// Helper function matching handlebars helper definition form to get the profile
-/// url for a username.
-fn profile_for_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperResult {
-    // Get the first parameter
-    let username: &str = h
-        .param(0)
-        // As a string
-        .and_then(|v| v.value().as_str())
-        // Handle errors
-        .ok_or(RenderError::new(
-            "profile_for helper requires one string parameter",
-        ))?;
-
-    // Get the profile for this user
-    let converted: String = profile_for(username);
-    // Write it to the output.
-    out.write(converted.as_str())?;
-    Ok(())
 }
 
 /// Handlebars helper to properly format a meeting type.

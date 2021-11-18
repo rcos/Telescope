@@ -12,12 +12,13 @@ use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
+use uuid::Uuid;
 
 /// Check that a user is an admin.
-fn admin_authorization(username: String) -> LocalBoxFuture<'static, AuthorizationResult> {
+fn admin_authorization(user_id: Uuid) -> LocalBoxFuture<'static, AuthorizationResult> {
     Box::pin(async move {
         // Then check that their role is admin.
-        let role: UserRole = RoleLookup::get(username)
+        let role: UserRole = RoleLookup::get(user_id)
             .await?
             // The role should not be none, since the account needs to exist at this point.
             .expect("Viewer's account does not exist.");

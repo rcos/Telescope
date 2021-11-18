@@ -3,6 +3,7 @@
 use crate::error::TelescopeError;
 use graphql_client::Response;
 
+pub mod discord;
 pub mod github;
 pub mod rcos;
 

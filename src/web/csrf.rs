@@ -12,9 +12,9 @@ use std::time::Duration as StdDuration;
 /// Extract the remote IP address string from an HTTP request's headers.
 fn extract_ip_addr(req: &HttpRequest) -> Result<String, TelescopeError> {
     req.connection_info()
-              .realip_remote_addr()
-              .map(str::to_string)
-              .ok_or(TelescopeError::IpExtractionError)
+        .realip_remote_addr()
+        .map(str::to_string)
+        .ok_or(TelescopeError::IpExtractionError)
 }
 
 lazy_static! {

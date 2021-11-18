@@ -19,7 +19,7 @@
 <span>
     {{! Hosting info }}
     {{#with meeting.host}}
-        Hosted by <a href="{{profile_for username}}">{{first_name}} {{last_name}}</a>.
+        Hosted by <a href="/user/{{id}}">{{first_name}} {{last_name}}</a>.
     {{/with}}
 
     {{! Date and time }}

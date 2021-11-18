@@ -7,15 +7,6 @@ use serenity::model::gateway::Ready;
 use serenity::model::guild::Guild;
 use serenity::model::interactions::Interaction;
 
-/// Get the global config's discord client ID parsed to a u64.
-pub fn discord_client_id() -> u64 {
-    global_config()
-        .discord_config
-        .client_id
-        .parse::<u64>()
-        .expect("Malformed Discord Client ID")
-}
-
 /// ZST representing the event handler for telescope's discord bot.
 pub struct Handler;
 
@@ -30,11 +21,7 @@ impl EventHandler for Handler {
         );
 
         // Check if the guild is whitelisted.
-        if global_config()
-            .discord_config
-            .guild_ids
-            .contains(&guild.id.to_string())
-        {
+        if global_config().discord_config.rcos_guild_id == guild.id.to_string() {
             // If so, register telescope's commands
             info!(
                 "Registering telescope's Discord commands for guild \"{}\" (ID: {})",
@@ -49,6 +36,11 @@ impl EventHandler for Handler {
                         guild.id, err
                     );
                 });
+        } else {
+            warn!(
+                "Non-RCOS guild connected: \"{}\" (ID: {})",
+                guild.name, guild.id
+            );
         }
     }
 

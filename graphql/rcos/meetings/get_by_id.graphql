@@ -1,5 +1,4 @@
-# Get some info about a meeting and the viewer based on the meeting ID and
-# the viewer's username.
+# Get some info about a meeting.
 query Meeting($id: Int!) {
     meeting: meetings_by_pk(meeting_id: $id) {
         meeting_id
@@ -27,7 +26,7 @@ query Meeting($id: Int!) {
         host: user {
             first_name
             last_name
-            username
+            id
         }
 
         # Attendance count

@@ -1,18 +1,10 @@
 {{! Everything is sourced from the API response data currently }}
 {{#with data}}
-    <div class="row justify-content-between">
-        <h1 class="col-12 col-md-auto">{{target.first_name}} {{target.last_name}}</h1>
+    <h1 class="m-1">{{target.first_name}} {{target.last_name}}</h1>
 
-        {{! Edit profile link }}
-        {{#if (and viewer.[0].username (eq target.username viewer.[0].username))}}
-            <div class="col-12 col-md-3 d-flex align-items-center">
-                <a class="btn btn-primary w-100 my-1" href="/edit_profile">
-                    Edit Profile
-                </a>
-            </div>
-        {{/if}}
-    </div>
+    {{! User Role }}
     <span class="badge badge-info">{{format_user_role target.role}}</span>
+
     {{! Cohort info }}
     {{#if target.cohort}}
         <span class="badge" style="background: var(--rpi-red);">
@@ -20,23 +12,93 @@
         </span>
     {{/if}}
 
+    {{! Created at }}
     <br>
     <span class="text-muted">
         Account created {{format_date target.created_at}} {{format_time target.created_at}}
     </span>
 
+    {{! User actions }}
+    {{#if (and viewer.[0].id (eq target.id viewer.[0].id))}}
+        {{! Actions header }}
+        <h3 class="my-2">Actions</h3>
+
+        <div class="row">
+
+            {{! Edit profile link }}
+            <div class="col-12 col-md-3 col-lg-2 my-1">
+                <a class="btn btn-primary w-100" href="/edit_profile">
+                    Edit Profile
+                </a>
+            </div>
+
+            {{! Join Discord Link (if available) }}
+            <div class="col-12 col-md-6 col-lg-4 my-1">
+                {{#if target.rcs_id.[0] }}
+                    {{! RPI CAS is linked }}
+                    {{#if ../discord.target.resolved}}
+                        {{! RCOS Discord is available to user. Check if they are already there and if they have the verified role}}
+                        {{#if ../discord.target.is_verified}}
+                            {{! Already there and verified }}
+                            <button class="btn disabled btn-success" disabled>
+                                Already in RCOS Discord
+                            </button>
+                        {{else}}
+                            {{#if ../discord.viewer.is_authenticated}}
+                                {{! Show link to join discord }}
+                                <a href="/join_discord" class="btn btn-discord w-100">
+                                    Join RCOS Discord <span class="fab">&#xf392;</span>
+                                </a>
+                            {{else}}
+                                {{! Discord must be authenticated with to join RCOS Discord }}
+                                <a href="/link/discord" class="btn btn-info">
+                                    Authenticate With Discord <span class="fab">&#xf392;</span>
+                                </a>
+                                <br>
+                                <small class="text-muted">
+                                    You must authenticate with Discord to join the RCOS Discord.
+                                </small>
+                            {{/if}}
+                        {{/if}}
+                    {{else}}
+                        {{! Discord must be linked to join RCOS Discord }}
+                        <button disabled class="disabled btn-danger btn w-100">
+                            RCOS Discord unavailable
+                        </button>
+                        <br>
+                        <small class="text-muted">
+                            Please link your Discord account.
+                        </small>
+                    {{/if}}
+                {{else}}
+                    {{! RPI CAS must be linked to join RCOS Discord }}
+                    <button disabled class="disabled btn-danger btn w-100">
+                        RCOS Discord unavailable
+                    </button>
+                    <br>
+                    <small class="text-muted">
+                        If you are not a student, please reach out to RCOS management
+                        at <a href="mailto:rcos-leadership@googlegroups.com">rcos-leadership@googlegroups.com</a>.
+                    </small>
+                {{/if}}
+            </div>
+        </div>
+    {{/if}}
+
     {{! Account info -- RPI email, etc (Only visible to authenticated users)}}
-    {{#if viewer.[0].username}}
+    {{#if viewer.[0].id}}
         <h3 class="mt-2">User Info</h3>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mt-2">
+
+            {{! RPI CAS }}
             <div class="col">
                 <div class="card text-dark text-center">
                     <h5 class="card-header">RPI E-Mail</h5>
                     <div class="card-body p-1">
-                        {{! If the user has an email associated }}
+                        {{! If the user has linked RPI CAS }}
                         {{#if target.rcs_id.[0]}}
-                        {{! Link the email }}
+                            {{! Show the email }}
                             {{#with target.rcs_id.[0]}}
                                 <a href="mailto:{{account_id}}@rpi.edu">
                                     {{account_id}}@rpi.edu
@@ -44,17 +106,65 @@
                             {{/with}}
 
                             {{! If the target is the viewer link to the unlink handler }}
-                            {{#if (eq viewer.[0].username target.username)}}
+                            {{#if (eq viewer.[0].id target.id)}}
                                 <a href="/unlink/rpi_cas" class="btn btn-danger w-100 mt-1">
                                     Unlink this RPI CAS
                                 </a>
                             {{/if}}
                         {{else}}
-                        {{! Show a message indicating not linked and let the user link if it's their account. }}
+                            {{! Show a message indicating not linked and let the user link if it's their account. }}
                             RPI e-mail not linked.
-                            {{#if (eq viewer.[0].username target.username)}}
+                            {{#if (eq viewer.[0].id target.id)}}
                                 <a href="/link/rpi_cas" class="btn btn-primary w-100">
                                     Link with RPI CAS.
+                                </a>
+                            {{/if}}
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            {{! Discord }}
+            <div class="col">
+                <div class="card text-dark text-center">
+                    <div class="card-header">
+                        <span class="fab">&#xf392;</span>
+                    </div>
+
+                    <div class="card-body p-1">
+                        {{#if ../discord.target}}
+                            {{! Discord is linked -- check if the discord info was successfully retieved. }}
+                            {{#if ../discord.target.errored}}
+                                Could not get discord info. Refresh the page perhaps?
+                            {{else}}
+                                {{! Display info about target user's Discord }}
+                                <div class="w-50 mx-auto">
+                                    <img src="{{../discord.target.resolved.face}}" alt="Discord Profile Picture" class="img-thumbnail">
+                                    <p class="font-weight-bold">
+                                        {{../discord.target.resolved.tag}}
+                                    </p>
+                                </div>
+                            {{/if}}
+
+                            {{! Check if user owns this account }}
+                            {{#if (eq viewer.[0].id target.id)}}
+                                {{! Allow owner to unlink dead Discord }}
+                                <a href="/unlink/discord" class="btn btn-danger w-100">
+                                    Unlink Discord
+
+                                    <span class="fab">&#xf392;</span>
+                                </a>
+                            {{/if}}
+                        {{else}}
+                            {{! Show message indicating not linked }}
+                            No Discord account linked.
+
+                            {{! Allow viewer to link their own discord if it's their account }}
+                            {{#if (eq viewer.[0].id target.id)}}
+                                <a href="/link/discord" class="btn btn-discord w-100">
+                                    Link Discord
+
+                                    <span class="fab">&#xf392;</span>
                                 </a>
                             {{/if}}
                         {{/if}}
@@ -104,7 +214,7 @@
     {{! Meetings the user has hosted }}
     {{! Include drafts if the viewer can see them }}
     {{#if (or
-              (eq viewer.[0].username target.username)
+              (eq viewer.[0].id target.id)
               (or viewer.[0].is_current_coordinator.[0].is_coordinator
                   (or
                       (eq viewer.[0].role "sysadmin")

@@ -32,7 +32,7 @@ query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolea
 
         # Get info about the host
         host: user {
-            username
+            id
             first_name
             last_name
         }

@@ -69,9 +69,9 @@ async fn meetings_list(
         .with_timezone(&Utc);
 
     // Is there an RCOS user authenticated?
-    let viewer_username: Option<String> = identity.get_rcos_username().await?;
+    let viewer: Option<_> = identity.get_user_id().await?;
     // Check if that user can view drafts / certain meeting types.
-    let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer_username).await?;
+    let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer).await?;
     let include_drafts: bool = authorization.can_view_drafts();
     let visible_meeting_types: Vec<MeetingType> = authorization.viewable_types();
 

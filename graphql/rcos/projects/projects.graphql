@@ -19,7 +19,7 @@ fragment ProjectInfo on projects {
         where: {is_project_lead: {_eq: true}}
     ) {
         user {
-            username
+            id
             first_name
             last_name
         }

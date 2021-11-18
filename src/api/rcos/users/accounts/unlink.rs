@@ -1,6 +1,7 @@
 //! Mutation to unlink a user account.
 
 // Namespace items for generated module
+use crate::api::rcos::prelude::*;
 use crate::api::rcos::users::UserAccountType as user_account;
 
 #[derive(GraphQLQuery)]
@@ -16,8 +17,8 @@ use unlink_user_account::{ResponseData, Variables};
 
 impl UnlinkUserAccount {
     /// Make variables for an unlink user-account mutation.
-    fn make_variables(username: String, platform: user_account) -> Variables {
-        Variables { username, platform }
+    fn make_variables(user_id: uuid, platform: user_account) -> Variables {
+        Variables { user_id, platform }
     }
 
     /// Unlink and delete a user account from the database. Return the platform id
@@ -26,11 +27,11 @@ impl UnlinkUserAccount {
     /// This should be used with significant care, as a user record in the database with no linked
     /// accounts is orphaned and the user will not be able to login and use Telescope.
     pub async fn send(
-        username: String,
+        user_id: uuid,
         platform: user_account,
     ) -> Result<Option<String>, TelescopeError> {
         // Send the query, wait for and convert the response
-        send_query::<Self>(Self::make_variables(username, platform))
+        send_query::<Self>(Self::make_variables(user_id, platform))
             .await
             .map(ResponseData::platform_id)
     }

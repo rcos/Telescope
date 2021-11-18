@@ -1,5 +1,5 @@
 fragment HostInfo on users {
-    username
+    id
     first_name
     last_name
 
@@ -46,7 +46,7 @@ query EditHostSelection($meeting_id: Int!) {
             }
 
             # Everyone else alphabetically
-            enrollments(order_by: [{user: {first_name: asc}}, {user: {last_name: asc}}]) {
+            enrollments(order_by: [{user: {first_name: asc}}, {userByUserId: {last_name: asc}}]) {
                 user { ... HostInfo }
             }
         }

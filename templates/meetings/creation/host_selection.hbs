@@ -9,7 +9,7 @@ meeting creation form once they have selected a user or no host.
     <tr>
         <th scope="row">
             {{! Link to profile open in new tab }}
-            <a href="{{profile_for username}}" target="_blank" rel="noopener noreferrer">
+            <a href="/user/{{id}}" target="_blank" rel="noopener noreferrer">
                 {{first_name}} {{last_name}}
             </a>
         </th>
@@ -23,7 +23,7 @@ meeting creation form once they have selected a user or no host.
         </td>
 
         <td>
-            <a href="/meeting/create/finish?{{url_encode host=username}}" class="btn btn-primary">
+            <a href="/meeting/create/finish?{{url_encode host=id}}" class="btn btn-primary">
                 Select...
             </a>
         </td>

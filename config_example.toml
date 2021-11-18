@@ -66,9 +66,11 @@ bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Discord embeds.
 telescope_url = "https://rcos.io"
 # [REQUIRED]
-# Guilds for the discord bot to add commands to. Telescope does not use global
-# commands, so each RCOS guild mut be whitelisted.
-guild_ids = []
+# RCOS Discord Server ID. Telescope's bot is a single server bot.
+# No commands are available in any other servers. This must be the ID of the one
+# server Telescope will be added to. This server should have a role named
+# "Verified" for users added by Telescope with a verified identity.
+rcos_guild_id = "xxxxxxxxxxxxxxxxxx"
 
 # Development Profile
 # These options will override the global ones when telescope is run using

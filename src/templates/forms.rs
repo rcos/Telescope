@@ -64,7 +64,7 @@ impl Responder for FormTemplate {
 
             // Put it in a page.
             page::with_content(&req, self.page_title, rendered.as_str())
-                // Wait for the page to resolve the username etc
+                // Wait for the page to resolve the user ID etc
                 .await?
                 // Render the page to HTML
                 .render()

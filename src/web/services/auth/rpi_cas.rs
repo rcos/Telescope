@@ -2,13 +2,12 @@
 //! [here](https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol.html)
 //! and work from RPI students who came before me.
 
-use crate::api::rcos::send_query;
 use crate::api::rcos::users::accounts::link::LinkUserAccount;
 use crate::api::rcos::users::accounts::lookup::AccountLookup;
 use crate::api::rcos::users::accounts::reverse_lookup::ReverseLookup;
 use crate::api::rcos::users::UserAccountType;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::{identity::Identity, make_redirect_url, IdentityProvider};
 use actix_web::http::header::LOCATION;
@@ -17,6 +16,7 @@ use actix_web::{HttpRequest, HttpResponse};
 use futures::future::LocalBoxFuture;
 use futures::future::{ready, Ready};
 use regex::Regex;
+use uuid::Uuid;
 
 /// The URL of the RPI CAS server.
 const RPI_CAS_ENDPOINT: &'static str = "https://cas.auth.rpi.edu/cas";
@@ -72,14 +72,9 @@ pub struct RpiCasIdentity {
 }
 
 impl RpiCasIdentity {
-    /// Get the RCOS username (if one exists) associated with this RCS ID.
-    pub async fn get_rcos_username(&self) -> Result<Option<String>, TelescopeError> {
-        // Make the query variables for a reverse lookup query.
-        let query_variables = ReverseLookup::make_vars(UserAccountType::Rpi, self.rcs_id.clone());
-        // Send the reverse lookup and propagate the response.
-        return send_query::<ReverseLookup>(query_variables)
-            .await
-            .map(|response| response.username());
+    /// Get the RCOS user ID (if one exists) associated with this RCS ID.
+    pub async fn get_rcos_user_id(&self) -> Result<Option<Uuid>, TelescopeError> {
+        ReverseLookup::execute(UserAccountType::Rpi, self.rcs_id.clone()).await
     }
 }
 
@@ -229,10 +224,10 @@ impl IdentityProvider for RpiCas {
         return Box::pin(async move {
             // Get the RCS ID of the user logging in.
             let rcs_id: String = cas_authenticated(&req, Self::login_redirect_path()).await?;
-            // Get the RCOS username of the account linked to this RCS id.
             let token = RpiCasIdentity { rcs_id };
-            let rcos_username: String = token
-                .get_rcos_username()
+            // Get the RCOS user ID of the account linked to this RCS id.
+            let user_id = token
+                .get_rcos_user_id()
                 .await?
                 // Throw error on missing user account
                 .ok_or(TelescopeError::resource_not_found(
@@ -249,7 +244,7 @@ impl IdentityProvider for RpiCas {
             identity.save(&RootIdentity::RpiCas(token).make_authenticated_cookie());
             // Redirect the user to their profile.
             Ok(HttpResponse::Found()
-                .header(LOCATION, profile_for(rcos_username.as_str()))
+                .header(LOCATION, format!("/user/{}", user_id))
                 .finish())
         });
     }
@@ -282,12 +277,12 @@ impl IdentityProvider for RpiCas {
                 .await
                 .ok_or(TelescopeError::NotAuthenticated)?;
 
-            // Get the RCOS username of the authenticated user.
-            let rcos_username: String = authenticated.get_rcos_username_or_error().await?;
+            // Get the RCOS user ID of the authenticated user.
+            let user_id = authenticated.get_user_id_or_error().await?;
 
             // Get the RCS ID of the authenticated user (if one exists).
             let existing_rcs_id: Option<String> =
-                AccountLookup::send(rcos_username.clone(), Self::USER_ACCOUNT_TY).await?;
+                AccountLookup::send(user_id, Self::USER_ACCOUNT_TY).await?;
 
             // Get the RCS ID from the authenticated RPI CAS response.
             let new_rcs_id: String = cas_authenticated(&req, Self::link_redirect_path()).await?;
@@ -303,12 +298,7 @@ impl IdentityProvider for RpiCas {
             // Add to database if needed.
             if add_new_to_db {
                 // Link the account.
-                LinkUserAccount::send(
-                    rcos_username.clone(),
-                    Self::USER_ACCOUNT_TY,
-                    new_rcs_id.clone(),
-                )
-                .await?;
+                LinkUserAccount::send(user_id, Self::USER_ACCOUNT_TY, new_rcs_id.clone()).await?;
             }
 
             // Throw an error if the new RCS ID doesn't match the linked one.
@@ -328,7 +318,7 @@ impl IdentityProvider for RpiCas {
 
             // We are all set at this point, redirect to the user's account.
             return Ok(HttpResponse::Found()
-                .header(LOCATION, profile_for(rcos_username.as_str()))
+                .header(LOCATION, format!("/user/{}", user_id))
                 .finish());
         });
     }

@@ -1,5 +1,5 @@
 fragment HostInfo on users {
-    username
+    id
     first_name
     last_name
 
@@ -43,7 +43,7 @@ query HostSelection($search: String!, $now: date!) {
             _or: [
                 {first_name: {_ilike: $search}},
                 {last_name: {_ilike: $search}},
-                {username: {_ilike: $search}}
+                {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}}
             ],
             # Only enrolled users can host meetings in a given semester.
             enrollments: {semester: {end_date: {_gte: $now}}}

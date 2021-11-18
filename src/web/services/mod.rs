@@ -10,7 +10,7 @@ pub mod not_found;
 mod projects;
 pub mod user;
 
-/// Register all of the routs to the actix app.
+/// Register all of the routes to the actix app.
 pub fn register(config: &mut ServiceConfig) {
     // Register authentication related services
     auth::register(config);

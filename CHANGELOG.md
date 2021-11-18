@@ -6,6 +6,24 @@ please submit a pull request fixing it.
 
 ## Unreleased
 
+## 0.8.0 - November 17th, 2021
+- Replaced all usernames with user IDs. ([#130])
+- Updated Hasura to v2.0.10 
+
+## 0.7.3 - November 3rd, 2021
+- Changes to the config file: 
+  - Now only a single RCOS Discord server ID is accepted instead of a list of IDs.
+- Fixed error caused by unlinking Discord account while authenticated with Discord. ([#185])
+- Update Rust to 1.56 and Rust 2021 Edition. ([#186])
+- Change RCOS contact email from rcos.management@gmail.com to rcos-leadership@googlegroups.com. ([#188])
+- Add Discord gateway. ([#178])
+- User deletion functionality. ([#15], [#189])
+
+## 0.7.2 - October 12th, 2021
+- Account linking with Discord ([#5], [#181])
+- Updated Discord colors and icons ([#116], [#181], [#182]) 
+- Tweaked format of Discord Guild IDs in config file ([#179])
+
 ## 0.7.1 - September 29th, 2021
 - Make the `/whois` discord command ephemeral -- only the user who invokes the
   interaction will see the response.
@@ -24,7 +42,7 @@ please submit a pull request fixing it.
 
 ## 0.6.4 - July 14th, 2021
 - Fixed bug that prevented external presentation urls from being appropriately shown 
-in the meeting edit form. 
+  in the meeting edit form. 
 
 ## 0.6.3 - July 14th, 2021
 - Added support for deleting meetings. ([#96])
@@ -33,16 +51,14 @@ in the meeting edit form.
 - Fixed access bug that prevented users from viewing drafts of meetings that they host.
 
 ## 0.6.1 - July 10th, 2021
-- Fixed bug that prevented editing meetings from previous semesters. 
-  ([#142])
+- Fixed bug that prevented editing meetings from previous semesters. ([#142])
 
 ## 0.6.0 - July 9th, 2021
 - Added support for creating meetings. ([#96])
 - Added support for editing meetings. ([#96])
 - Changed appearance of footer. 
 - Added rust documentation for developers to site. 
-- Added system administrator user role. 
-  ([#115])
+- Added system administrator user role. ([#115])
 - Fixed several links to open in new tabs. 
 - Added semesters table in admin panel. 
 - Added semester creation form in admin panel.
@@ -54,14 +70,13 @@ in the meeting edit form.
 - Updated templates to work with handlebars 4.0.0.
 
 ## 0.5.1 - May 25th, 2021
-- Fixed bug that caused internal server error when visiting a user's profile.
-  ([#112])
+- Fixed bug that caused internal server error when visiting a user's profile. ([#112])
 
 ## 0.5.0 - May 25th, 2021
 - Created meeting details page.
 - Added support for meetings marked as draft.
 - Added link to handbook in navbar.
-- Added support for linking RPI CAS account. [#5]
+- Added support for linking RPI CAS account. ([#5])
 - Created Discord bot. ([#100])
     - Added `/whois` command.
 - Removed email client and templates. 
@@ -106,6 +121,7 @@ in the meeting edit form.
 
 <!-- links -->
 [#5]: https://github.com/rcos/Telescope/issues/5
+[#15]: https://github.com/rcos/Telescope/issues/15
 [#16]: https://github.com/rcos/Telescope/issues/16
 [#96]: https://github.com/rcos/Telescope/issues/96
 [#100]: https://github.com/rcos/Telescope/issues/100
@@ -113,6 +129,16 @@ in the meeting edit form.
 [#113]: https://github.com/rcos/Telescope/pull/113
 [#114]: https://github.com/rcos/Telescope/issues/114
 [#115]: https://github.com/rcos/Telescope/issues/115
+[#116]: https://github.com/rcos/Telescope/issues/116
+[#130]: https://github.com/rcos/Telescope/issues/130
 [#142]: https://github.com/rcos/Telescope/issues/142
 [#151]: https://github.com/rcos/Telescope/issues/151
 [#176]: https://github.com/rcos/Telescope/pull/176
+[#178]: https://github.com/rcos/Telescope/issues/178
+[#179]: https://github.com/rcos/Telescope/pull/179
+[#181]: https://github.com/rcos/Telescope/pull/181
+[#182]: https://github.com/rcos/Telescope/pull/182
+[#185]: https://github.com/rcos/Telescope/issues/185
+[#186]: https://github.com/rcos/Telescope/pull/186
+[#188]: https://github.com/rcos/Telescope/issues/188
+[#189]: https://github.com/rcos/Telescope/pull/189

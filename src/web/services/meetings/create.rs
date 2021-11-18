@@ -6,7 +6,7 @@
 //! to finish meeting creation.
 
 use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
-use crate::api::rcos::meetings::creation;
+use crate::api::rcos::meetings::creation::context::CreationContext;
 use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
@@ -21,6 +21,7 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
+use uuid::Uuid;
 
 /// The handlebars template for the user to select a host.
 const HOST_SELECTION_TEMPLATE: &'static str = "meetings/creation/host_selection";
@@ -72,13 +73,13 @@ async fn host_selection_page(
 /// Query on finish meeting page.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct FinishQuery {
-    host: String,
+    host: Uuid,
 }
 
 /// Create an empty instance of the form to finish meeting creation.
-async fn finish_form(host_username: Option<String>) -> Result<FormTemplate, TelescopeError> {
+async fn finish_form(host: Option<Uuid>) -> Result<FormTemplate, TelescopeError> {
     // Query RCOS API for meeting creation context.
-    let context: Value = creation::context::get_context(host_username, Vec::new()).await?;
+    let context = CreationContext::execute(host, Vec::new()).await?;
 
     // Create form.
     let mut form = FormTemplate::new(FINISH_CREATION_TEMPLATE, "Create Meeting");
@@ -97,7 +98,7 @@ async fn finish_form(host_username: Option<String>) -> Result<FormTemplate, Tele
 #[get("/finish")]
 async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, TelescopeError> {
     // Extract query parameter.
-    let host: Option<String> = query.map(|q| q.host.clone());
+    let host = query.map(|q| q.host);
     // Return form.
     return finish_form(host).await;
 }
@@ -154,8 +155,8 @@ async fn submit_meeting(
     query: Option<Query<FinishQuery>>,
     Form(form): Form<FinishForm>,
 ) -> Result<HttpResponse, TelescopeError> {
-    // Resolve host username.
-    let host: Option<String> = query.map(|q| q.host.clone());
+    // Resolve host user ID.
+    let host = query.map(|q| q.host.clone());
 
     // Create a form instance to send back to the user if the one they submitted was invalid.
     let mut return_form: FormTemplate = finish_form(host.clone()).await?;
@@ -190,7 +191,7 @@ async fn submit_meeting(
     // TL;DR: Semester ID validation is handled client side and enforced enough API side that we
     // don't touch it here.
     //
-    // Same thing with meeting type variant and host username.
+    // Same thing with meeting type variant and host user ID.
 
     // The title should be null (Option::None) if it is all whitespace or empty.
     // If it is, we don't bother user for this -- they can change the title later and

@@ -1,9 +1,10 @@
 [package]
 name = "telescope"
-version = "0.7.2"
+version = "0.8.1-dev"
 authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
-edition = "2018"
+edition = "2021"
+rust-version = "1.56"
 
 [dependencies]
 # command line argument parser
@@ -74,6 +75,9 @@ dashmap = "~4.0"
 
 # CommonMark markdown rendering.
 pulldown-cmark = "0.8.0"
+
+# UUID used in user IDs.
+uuid = {version = "0.8.2", features = ["serde", "v4"]}
 
 # API stuff
 

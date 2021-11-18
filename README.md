@@ -20,8 +20,8 @@ certain files are. This section provides a map to this repository.
     continuous integration workflows, and the Dependabot configuration.
 - `proposals`: This folder contains the project proposal files that Telescope has
     been submitted under for the Rensselaer Center for Open Source (RCOS).
-- `rcos-data`: This git submodule points to the current telescope version of the
-    repository that contains the migrations for the central RCOS database.  
+- `rcos-data`: This git submodule points to the repository that contains the 
+    migrations for the central RCOS database.  
 - `graphql`: This folder contains the introspected `schema.json` file for the 
     central RCOS GraphQL API exposed via Hasura over the central RCOS database.
     This folder also contains GraphQL files for all of the different queries

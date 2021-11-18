@@ -1,8 +1,10 @@
+use crate::api::discord::global_discord_client;
 use crate::api::rcos::users::accounts::for_user::UserAccounts;
 use crate::api::rcos::users::accounts::unlink::UnlinkUserAccount;
 use crate::api::rcos::users::UserAccountType;
+use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::web::profile_for;
+
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use crate::web::services::auth::oauth2_providers::discord::DiscordOAuth;
 use crate::web::services::auth::rpi_cas::RpiCas;
@@ -200,19 +202,18 @@ pub trait IdentityProvider: 'static {
         mut cookie: AuthenticationCookie,
     ) -> LocalBoxFuture<'static, Result<HttpResponse, TelescopeError>> {
         return Box::pin(async move {
-            // Lookup the username of the user trying to unlink an account.
-            let username: String = cookie.get_rcos_username_or_error().await?;
+            // Lookup the ID of the user trying to unlink an account.
+            let user_id = cookie.get_user_id_or_error().await?;
             // Get all of the accounts linked to this user. Make sure at least one
             // can function for authentication.
-            let all_accounts: HashMap<UserAccountType, String> =
-                UserAccounts::send(username.clone())
-                    .await?
-                    // Iterate
-                    .into_iter()
-                    // filter down to the authentication providers
-                    .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
-                    // Collect into map.
-                    .collect();
+            let all_accounts: HashMap<UserAccountType, String> = UserAccounts::send(user_id)
+                .await?
+                // Iterate
+                .into_iter()
+                // filter down to the authentication providers
+                .filter(|(u, _)| AUTHENTICATOR_ACCOUNT_TYPES.contains(u))
+                // Collect into map.
+                .collect();
 
             // If there is not a secondary account for the user to authenticate with,
             // return an error.
@@ -226,36 +227,65 @@ pub trait IdentityProvider: 'static {
                 });
             }
 
-            // There is a secondary authenticator linked, delete this user account record.
-            // Log a message about the unlinked platform.
-            let platform_id =
-                UnlinkUserAccount::send(username.clone(), Self::USER_ACCOUNT_TY).await?;
+            // If the user is unlinking their Discord or RPI CAS, we remove them from the
+            // RCOS Discord Server.
+            match Self::USER_ACCOUNT_TY {
+                UserAccountType::Rpi | UserAccountType::Discord => {
+                    // Lookup and parse the user's Discord ID.
+                    let user_discord = all_accounts
+                        .get(&UserAccountType::Discord)
+                        .and_then(|string| string.as_str().parse::<u64>().ok());
 
-            if let Some(platform_id) = platform_id {
-                info!(
-                    "User {} unlinked {} account with id {}.",
-                    username,
-                    Self::USER_ACCOUNT_TY,
-                    platform_id
-                );
+                    if let Some(discord_id) = user_discord {
+                        // Get RCOS Discord ID.
+                        let rcos_discord = global_config().discord_config.rcos_guild_id();
+
+                        // Kick user from RCOS Discord.
+                        global_discord_client()
+                            .kick_member(rcos_discord, discord_id)
+                            .await
+                            .map_err(TelescopeError::serenity_error)?
+                    }
+                }
+
+                _ => {}
             }
 
-            // Try to replace the unlinked account in the authentication cookie's root
+            // Important: The root must be replaced with another platform (if possible)
+            // before the unlink mutation is executed. Doing this in the other order will
+            // lead to an account not found error while trying to replace the root of the
+            // auth cookie because the account lookup will fail/error out.
+            // See https://github.com/rcos/Telescope/issues/185.
+
+            // Try to replace the unlinking account in the authentication cookie's root
             // (if it's authenticated as root).
             let removed_auth: bool = cookie.remove_platform(Self::USER_ACCOUNT_TY).await?;
             // If this is a success, then save the modified authentication cookie and redirect
-            // the user to their profile.
-            // If not, the user has been logged out. Redirect them to the homepage.
+            // the user to their profile at the end.
+            // If not, the user has been logged out. Redirect them to the homepage at the end.
             if removed_auth {
                 id.save(&cookie);
             } else {
                 id.forget();
             }
 
+            // There is a secondary authenticator linked, delete this user account record.
+            // Log a message about the unlinked platform.
+            let platform_id = UnlinkUserAccount::send(user_id, Self::USER_ACCOUNT_TY).await?;
+
+            if let Some(platform_id) = platform_id {
+                info!(
+                    "User {} unlinked {} account with id {}.",
+                    user_id,
+                    Self::USER_ACCOUNT_TY,
+                    platform_id
+                );
+            }
+
             // Get the path to redirect the user to.
             let redirect: String = removed_auth
                 // If the auth was replaced successfully, the user's profile.
-                .then(|| profile_for(username.as_str()))
+                .then(|| format!("/user/{}", user_id))
                 // Otherwise the homepage.
                 .unwrap_or("/".into());
 

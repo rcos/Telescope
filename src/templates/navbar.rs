@@ -3,11 +3,11 @@
 use crate::api::rcos::users::navbar_auth::Authentication;
 use crate::error::TelescopeError;
 use crate::templates::Template;
-use crate::web::profile_for;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
 use serde_json::Value;
+use uuid::Uuid;
 
 /// The handlebars key for the links on the left side of the navbar.
 pub const LEFT_ITEMS: &'static str = "left_items";
@@ -70,13 +70,13 @@ fn userless(req_path: &str) -> Template {
     with_defaults(req_path).field(RIGHT_ITEMS, right_items)
 }
 
-/// Construct a navbar for a given username
-async fn for_user(req_path: &str, username: String) -> Result<Template, TelescopeError> {
+/// Construct a navbar for a given user ID
+async fn for_user(req_path: &str, user_id: Uuid) -> Result<Template, TelescopeError> {
     // Get the navbar auth for this user
-    let navbar_auth = Authentication::get(username.clone()).await?;
+    let navbar_auth = Authentication::get(user_id).await?;
 
     let right_items = vec![
-        item(req_path, "Profile", profile_for(username.as_str()))
+        item(req_path, "Profile", format!("/user/{}", user_id))
             .field(CLASS, "btn mr-2 mb-2 btn-primary"),
         item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
     ];
@@ -91,7 +91,7 @@ async fn for_user(req_path: &str, username: String) -> Result<Template, Telescop
     let admin_link = Value::Object(item(req_path, "Admin", "/admin").fields);
     let coord_link = Value::Object(item(req_path, "Coordinate", "/coordinate").fields);
     let mentor_link = Value::Object(item(req_path, "Mentor", "/mentor").fields);
-    let attend_link = Value::Object(item(req_path, "Attend", "/attend").fields);
+    let attend_link = Value::Object(item(req_path, "Engage", "/engage").fields);
 
     // Add items as necessary based on authentication.
     if navbar_auth.is_admin() {
@@ -114,7 +114,7 @@ async fn for_user(req_path: &str, username: String) -> Result<Template, Telescop
 }
 
 /// Construct a navbar for a user who is partway through account creation and doesn't
-/// have a username yet.
+/// have a user ID yet.
 fn for_auth(req_path: &str) -> Template {
     with_defaults(req_path).field(
         RIGHT_ITEMS,
@@ -123,7 +123,7 @@ fn for_auth(req_path: &str) -> Template {
     )
 }
 
-/// Create a navbar template for
+/// Create a navbar template for a given request.
 pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
     // Extract the authenticated identities from the request.
     let identity: Option<AuthenticationCookie> = Identity::extract(req).await?.identity().await;
@@ -131,15 +131,15 @@ pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> 
     // If the user is authenticated.
     if let Some(authenticated) = identity {
         // Check if there is an authenticated RCOS account
-        if let Some(username) = authenticated.get_rcos_username().await? {
-            // If there is make a navbar with the username.
-            return Ok(for_user(req.path(), username).await?);
+        if let Some(user_id) = authenticated.get_user_id().await? {
+            // If there is make a navbar with the user ID.
+            return Ok(for_user(req.path(), user_id).await?);
         } else {
             // Otherwise the user is in the middle of creating an account.
             return Ok(for_auth(req.path()));
         }
     } else {
-        // If the user is not authenticated or there is no username, return a user-less navbar.
+        // If the user is not authenticated or there is no user ID, return a user-less navbar.
         return Ok(userless(req.path()));
     }
 }

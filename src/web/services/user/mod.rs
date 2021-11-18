@@ -2,7 +2,9 @@
 
 use actix_web::web::ServiceConfig;
 
+mod delete;
 pub mod developers;
+mod join_discord;
 mod login;
 pub mod profile;
 mod register;
@@ -23,5 +25,10 @@ pub fn register(config: &mut ServiceConfig) {
         // Registration related services
         .service(register::register_page)
         .service(register::finish_registration)
-        .service(register::submit_registration);
+        .service(register::submit_registration)
+        // Discord Gateway
+        .service(join_discord::handle)
+        // User Deletion
+        .service(delete::confirm_delete)
+        .service(delete::profile_delete);
 }

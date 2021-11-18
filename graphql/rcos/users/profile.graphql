@@ -1,8 +1,8 @@
 # Profile query -- gets info about the target user and the viewer.
-query Profile($target: String!, $viewer: [String!]!, $now: date!) {
+query Profile($target: uuid!, $viewer: [uuid!]!, $now: date!) {
     # The owner of the profile.
-    target: users_by_pk(username: $target) {
-        username
+    target: users_by_pk(id: $target) {
+        id
         first_name
         last_name
         role
@@ -14,7 +14,7 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
                 title
 
                 # Small groups for this semester that the target user mentors
-                small_groups(where: {small_group_mentors: {username: {_eq: $target}}}) {
+                small_groups(where: {small_group_mentors: {user_id: {_eq: $target}}}) {
                     title
                 }
             }
@@ -90,9 +90,9 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
     # Viewer info
     viewer: users(
         limit: 1,
-        where: {username: {_in: $viewer}}
+        where: {id: {_in: $viewer}}
     ) {
-        username
+        id
         role
 
         # Is the viewer a coordinator?
@@ -111,7 +111,7 @@ query Profile($target: String!, $viewer: [String!]!, $now: date!) {
             where: {
                 small_group: {
                     semester: {start_date: {_lte: $now}, end_date: {_gte: $now}},
-                    small_group_projects: {project: {enrollments: {username: {_eq: $target}}}}
+                    small_group_projects: {project: {enrollments: {user_id: {_eq: $target}}}}
                 }
             }
         ) {

@@ -77,16 +77,24 @@ impl Template {
 impl<T: Into<String>> Index<T> for Template {
     type Output = Value;
 
+    /// Returns [`Value::Null`] if the key is not in the template.
     fn index(&self, index: T) -> &Self::Output {
         // Immutable indexing for fields.
-        &self.fields[&index.into()]
+        self.fields
+            .get(index.into().as_str())
+            .unwrap_or(&Value::Null)
     }
 }
 
 impl<T: Into<String>> IndexMut<T> for Template {
+    /// Returns the existing value or creates a new empty object at the location
+    /// and returns a reference to that.
     fn index_mut(&mut self, index: T) -> &mut Self::Output {
-        // Mutable indexing for fields.
-        &mut self.fields[&index.into()]
+        self.fields
+            // Get the existing entry if available
+            .entry(index)
+            // Or insert an empty object.
+            .or_insert(json!({}))
     }
 }
 

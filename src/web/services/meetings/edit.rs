@@ -5,7 +5,7 @@ use crate::api::rcos::meetings::edit::EditHostSelection;
 use crate::api::rcos::meetings::ALL_MEETING_TYPES;
 use crate::api::rcos::meetings::{
     authorization_for::{AuthorizationFor, UserMeetingAuthorization},
-    creation::context::get_context,
+    creation::context::CreationContext,
     edit,
     get_by_id::{meeting::MeetingMeeting, Meeting},
 };
@@ -22,6 +22,7 @@ use actix_web::{
 };
 use chrono::{DateTime, Local, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
+use uuid::Uuid;
 
 /// The Handlebars file for the meeting edit form.
 const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
@@ -40,14 +41,14 @@ pub fn register(config: &mut ServiceConfig) {
 /// Structure for query which can optionally be passed to the edit page to set a new host.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct HostQuery {
-    /// The new host for the meeting. Empty string for no host.
-    set_host: String,
+    /// The new host for the meeting. Nil UUID for no host.
+    set_host: Uuid,
 }
 
 /// Get meeting data or return a resource not found error.
 async fn get_meeting_data(meeting_id: i64) -> Result<MeetingMeeting, TelescopeError> {
     // Get the meeting data to check that it exists.
-    Meeting::get_by_id(meeting_id)
+    Meeting::get(meeting_id)
         .await?
         .ok_or(TelescopeError::resource_not_found(
             "Meeting Not Found",
@@ -59,8 +60,8 @@ async fn get_meeting_data(meeting_id: i64) -> Result<MeetingMeeting, TelescopeEr
 async fn authorization_for_viewer(
     auth: &AuthenticationCookie,
 ) -> Result<UserMeetingAuthorization, TelescopeError> {
-    // Get username from cookie.
-    let viewer: String = auth.get_rcos_username_or_error().await?;
+    // Get user ID from cookie.
+    let viewer = auth.get_user_id_or_error().await?;
 
     // Query API for auth object.
     return AuthorizationFor::get(Some(viewer)).await;
@@ -71,12 +72,9 @@ async fn meeting_data_checked(
     auth: &AuthenticationCookie,
     meeting_id: i64,
 ) -> Result<MeetingMeeting, TelescopeError> {
-    // Get meeting data. Extract host's username.
+    // Get meeting data. Extract host's user ID.
     let meeting_data = get_meeting_data(meeting_id).await?;
-    let meeting_host: Option<&str> = meeting_data
-        .host
-        .as_ref()
-        .map(|host| host.username.as_str());
+    let meeting_host: Option<_> = meeting_data.host.as_ref().map(|host| host.id);
 
     // Get user's authorization object.
     let authorization = authorization_for_viewer(auth).await?;
@@ -89,34 +87,29 @@ async fn meeting_data_checked(
     }
 }
 
-/// Resolve the desired host username from the set host query parameter or the existing meeting
+/// Resolve the desired host user ID from the set host query parameter or the existing meeting
 /// host.
-fn resolve_host_username(
+fn resolve_host_user_id(
     meeting_data: &MeetingMeeting,
     set_host: Option<Query<HostQuery>>,
-) -> Option<String> {
-    let existing_host: Option<String> = meeting_data.host.as_ref().map(|h| h.username.clone());
-    let new_host: Option<String> = set_host.map(|q| q.0.set_host);
-    return new_host
-        .or(existing_host)
-        // Require that host string is not empty. If it is, no host.
-        .filter(|host| !host.trim().is_empty());
+) -> Option<Uuid> {
+    // The current host ID from the meeting data.
+    let existing_host: Option<Uuid> = meeting_data.host.as_ref().map(|h| h.id);
+
+    // The new host's user ID if not set to nil.
+    let new_host: Option<Uuid> = set_host.and_then(|q| {
+        let set_host = q.set_host;
+        // Check for nil UUID here.
+        (!set_host.is_nil()).then(|| set_host)
+    });
+
+    return new_host.or(existing_host);
 }
 
 /// Resolve the meeting title value. This is the supplied title or a combination of the meeting
 /// type and date.
 fn resolve_meeting_title(meeting_data: &MeetingMeeting) -> String {
-    match meeting_data.title.as_ref() {
-        Some(title) => title.clone(),
-        None => {
-            let meeting_start: &DateTime<Utc> = &meeting_data.start_date_time;
-            format!(
-                "{} - {}",
-                meeting_data.type_,
-                meeting_start.with_timezone(&Local).format("%B %_d, %Y")
-            )
-        }
-    }
+    meeting_data.title()
 }
 
 /// Create the form template for meeting edits.
@@ -136,11 +129,12 @@ async fn edit_page(
 ) -> Result<FormTemplate, TelescopeError> {
     // Get the meeting data. Error on meeting not found or permissions failure.
     let meeting_data = meeting_data_checked(&auth, meeting_id).await?;
-    // Resolve the desired host username.
-    let host: Option<String> = resolve_host_username(&meeting_data, set_host);
+    // Resolve the desired host user ID.
+    let host: Option<Uuid> = resolve_host_user_id(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
-    let context: Value = get_context(host, vec![meeting_data.semester.semester_id.clone()]).await?;
+    let context =
+        CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
     let mut form: FormTemplate = make_form(&meeting_data);
@@ -176,11 +170,12 @@ async fn submit_meeting_edits(
 ) -> Result<HttpResponse, TelescopeError> {
     // Get meeting data. Error if there is no such meeting or the user cannot access it
     let meeting_data = meeting_data_checked(&auth, meeting_id).await?;
-    // Resolve the desired host username.
-    let host: Option<String> = resolve_host_username(&meeting_data, set_host);
+    // Resolve the desired host user ID.
+    let host: Option<Uuid> = resolve_host_user_id(&meeting_data, set_host);
     // Get the creation context (based on the resolved host)
     // so we know what semesters are available.
-    let context: Value = get_context(host, vec![meeting_data.semester.semester_id.clone()]).await?;
+    let context =
+        CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
     let mut form: FormTemplate = make_form(&meeting_data);
@@ -209,7 +204,7 @@ async fn submit_meeting_edits(
         title,
     } = form_data;
 
-    // Like the creation system, semester ID, meeting kind, and host username are not validated.
+    // Like the creation system, semester ID, meeting kind, and host ID are not validated.
 
     // Add submitted data to return form.
     form.template["data"]["semester"] = json!({ "semester_id": &semester });
@@ -334,10 +329,9 @@ async fn submit_meeting_edits(
         external_slides_url: normalize_url(external_slides_url),
         recording_url: normalize_url(recording_url),
         // Extract the host from context object.
-        host: form.template["context"]
-            .get("host")
-            .and_then(|host| host[0]["username"].as_str())
-            .map(|host| host.to_string()),
+        host: form.template["context"]["host"][0]["id"]
+            .as_str()
+            .and_then(|host_id| host_id.parse::<Uuid>().ok()),
     };
 
     // The returned meeting ID should match the existing one but we don't check.
@@ -359,7 +353,7 @@ async fn host_selection(
     req: HttpRequest,
 ) -> Result<Template, TelescopeError> {
     // Check that the user can edit this meeting.
-    let viewer = auth.get_rcos_username_or_error().await?;
+    let viewer = auth.get_user_id_or_error().await?;
     if !AuthorizationFor::get(Some(viewer))
         .await?
         .can_edit_by_id(meeting_id)

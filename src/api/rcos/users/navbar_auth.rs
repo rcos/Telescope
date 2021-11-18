@@ -16,9 +16,9 @@ pub struct Authentication;
 
 impl Authentication {
     /// Get the navbar authentication object for a user.
-    pub async fn get(username: String) -> Result<authentication::ResponseData, TelescopeError> {
+    pub async fn get(user_id: uuid) -> Result<authentication::ResponseData, TelescopeError> {
         send_query::<Self>(authentication::Variables {
-            username,
+            user_id,
             now: Utc::today().naive_utc(),
         })
         .await

@@ -4,6 +4,7 @@ use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetin
 use crate::error::TelescopeError;
 use crate::web::middlewares::authorization::Authorization;
 use actix_web::web::ServiceConfig;
+use uuid::Uuid;
 
 mod create;
 mod delete;
@@ -35,10 +36,10 @@ pub fn register(config: &mut ServiceConfig) {
 fn make_meeting_auth_middleware<F: 'static + Fn(&UserMeetingAuthorization) -> bool>(
     f: &'static F,
 ) -> Authorization {
-    Authorization::new(move |username: String| {
+    Authorization::new(move |user_id: Uuid| {
         Box::pin(async move {
             // Get the user meeting access authorization object.
-            let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(username)).await?;
+            let auth: UserMeetingAuthorization = AuthorizationFor::get(Some(user_id)).await?;
 
             // Call the verification function on the access authorization object.
             (f)(&auth).then(|| ()).ok_or(TelescopeError::Forbidden)

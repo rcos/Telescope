@@ -36,6 +36,16 @@ pub enum TelescopeError {
         message: String,
     },
 
+    #[display(fmt = "{}: {}", header, message)]
+    /// Upstream server returned error. This is usually when adding users to the
+    /// RCOS Discord.
+    GatewayError {
+        /// The header on the jumbotron to be displayed.
+        header: String,
+        /// The message on the jumbotron to be displayed.
+        message: String,
+    },
+
     #[from]
     #[display(fmt = "Error rendering handlebars template: {}", _0)]
     /// An error in rendering a handlebars template. This will report as
@@ -92,6 +102,12 @@ pub enum TelescopeError {
     /// Error interacting with GitHub's GraphQL API. This should generally
     /// report as an ISE.
     GitHubApiError(String),
+
+    #[error(ignore)]
+    #[display(fmt = "Error interacting with Discord API: {}", _0)]
+    /// Error interacting with the Discord API via Serenity. This should report
+    /// as an ISE or a gateway error.
+    SerenityError(String),
 
     #[error(ignore)]
     #[display(fmt = "{} returned error(s) :{:?}", platform, errors)]
@@ -155,6 +171,12 @@ impl TelescopeError {
         Self::GitHubApiError(err.to_string())
     }
 
+    /// Convert a Serenity error into a Telescope error.
+    pub fn serenity_error(err: serenity::Error) -> Self {
+        error!("Serenity Error: {}", err);
+        Self::SerenityError(err.to_string())
+    }
+
     /// Convert reqwest error from RPI CAS service into a Telescope error.
     pub fn rpi_cas_error(err: ReqwestError) -> Self {
         error!("Error querying RPI CAS endpoint: {}", err);
@@ -200,6 +222,11 @@ impl TelescopeError {
                 jumbotron::new(format!("{} - {}", status_code, header), message)
             }
 
+            TelescopeError::GatewayError { header, message } => jumbotron::new(
+                format!("{} - {}", status_code, header),
+                format!("{} Please contact a coordinator or faculty advisor.", message)
+            ),
+
             TelescopeError::FutureCanceled => jumbotron::new(
                 format!("{} - {}", status_code, canonical_reason),
                 "An internal future was canceled unexpectedly. Please try again. If you \
@@ -243,7 +270,7 @@ impl TelescopeError {
                 format!("{} - Bad CSRF Token", status_code),
                 "The CSRF token supplied to the server by this request does not match the \
                 one the server generated for this identity provider for this IP. If you believe \
-                this is in error, please contact a coordinator and file a GitHUb issue.",
+                this is in error, please contact a coordinator and file a GitHub issue.",
             ),
 
             TelescopeError::RcosApiError(err) => jumbotron::new(
@@ -258,6 +285,13 @@ impl TelescopeError {
                 format!("Could not query the GitHub API. Please contact a coordinator and \
                     file a GitHub issue on the Telescope repository. Internal error description: {}",
                     err),
+            ),
+
+            TelescopeError::SerenityError(err) => jumbotron::new(
+                format!("{} - Discord Error", status_code),
+                format!("Error interacting with the Discord API. Please contact a \
+                    coordinator and file a GitHub issue if this error persists. Internal error \
+                    description: {}", err)
             ),
 
             TelescopeError::RpiCasError(err) => jumbotron::new(
@@ -360,6 +394,7 @@ impl ResponseError for TelescopeError {
             TelescopeError::NotAuthenticated => StatusCode::UNAUTHORIZED,
             TelescopeError::Forbidden => StatusCode::FORBIDDEN,
             TelescopeError::RpiCasError(_) => StatusCode::BAD_GATEWAY,
+            TelescopeError::GatewayError { .. } => StatusCode::BAD_GATEWAY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

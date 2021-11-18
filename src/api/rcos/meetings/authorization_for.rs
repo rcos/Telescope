@@ -21,8 +21,8 @@ use authorization_for::{ResponseData, Variables};
 /// Info on the user that dictates their ability to access meeting data.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UserMeetingAuthorization {
-    /// The user's username.
-    pub username: Option<String>,
+    /// The user's ID.
+    pub user_id: Option<uuid>,
     /// The user's role. Faculty advisors can access just about anything.
     role: UserRole,
     /// Is this user a coordinator during an ongoing semester?
@@ -34,7 +34,7 @@ pub struct UserMeetingAuthorization {
 impl Default for UserMeetingAuthorization {
     fn default() -> Self {
         UserMeetingAuthorization {
-            username: None,
+            user_id: None,
             role: UserRole::External,
             is_current_coordinator: false,
             is_current_mentor: false,
@@ -44,9 +44,9 @@ impl Default for UserMeetingAuthorization {
 
 impl UserMeetingAuthorization {
     /// Create an authorization object for a faculty advisor.
-    fn faculty_advisor(username: String) -> Self {
+    fn faculty_advisor(user_id: uuid) -> Self {
         Self {
-            username: Some(username),
+            user_id: Some(user_id),
             role: UserRole::FacultyAdvisor,
             is_current_mentor: false,
             is_current_coordinator: false,
@@ -79,10 +79,10 @@ impl UserMeetingAuthorization {
     }
 
     /// Can the user associated with this authorization edit meetings with a given type
-    /// and optionally specified host username?
-    pub fn can_edit(&self, host_username: Option<&str>) -> bool {
+    /// and optionally specified host user ID?
+    pub fn can_edit(&self, host_user_id: Option<uuid>) -> bool {
         // If there is a host and viewer
-        if let (Some(host), Some(viewer)) = (host_username, self.username.as_ref()) {
+        if let (Some(host), Some(viewer)) = (host_user_id, self.user_id) {
             // and they are the same person (or the viewer has coordinator or higher perms)
             host == viewer || self.can_view_drafts()
         } else {
@@ -97,13 +97,13 @@ impl UserMeetingAuthorization {
         if self.can_view_drafts() {
             Ok(true)
         } else {
-            // Otherwise lookup the meeting and check if the authenticated username matches the host
-            // username.
-            let meeting_host: Option<String> = MeetingHost::get(meeting_id).await?;
-            match (meeting_host, self.username.as_ref()) {
+            // Otherwise lookup the meeting and check if the authenticated user id matches the host
+            // user id.
+            let meeting_host: Option<uuid> = MeetingHost::get(meeting_id).await?;
+            match (meeting_host, self.user_id) {
                 // If there is both a host and a viewer, and they're the same,
                 // the meeting can be edited.
-                (Some(host), Some(viewer)) => Ok(host == *viewer),
+                (Some(host), Some(viewer)) => Ok(host == viewer),
 
                 // In any other case, the meeting is not to be edited by the viewer.
                 _ => Ok(false),
@@ -139,21 +139,20 @@ impl UserMeetingAuthorization {
 
 impl AuthorizationFor {
     /// Get the meeting access authorization rules for a given user.
-    pub async fn get(username: Option<String>) -> Result<UserMeetingAuthorization, TelescopeError> {
-        // If there is no username, then the viewer has default (lowest) authorization.
-        if username.is_none() {
+    pub async fn get(user_id: Option<uuid>) -> Result<UserMeetingAuthorization, TelescopeError> {
+        // If there is no user ID, then the viewer has default (lowest) authorization.
+        if user_id.is_none() {
             return Ok(UserMeetingAuthorization::default());
         }
 
-        // Otherwise unwrap the username.
-        let username: String = username.unwrap();
+        // Otherwise unwrap the user ID.
+        let user_id = user_id.unwrap();
 
         // Create variables for an API query.
         let query_vars: Variables = Variables {
             // Use the current local date.
             now: Local::today().naive_local(),
-            // Clone the username
-            username: username.clone(),
+            user_id,
         };
 
         // Call the API.
@@ -166,7 +165,7 @@ impl AuthorizationFor {
             .unwrap_or(UserRole::External);
 
         if user_role == UserRole::FacultyAdvisor {
-            return Ok(UserMeetingAuthorization::faculty_advisor(username));
+            return Ok(UserMeetingAuthorization::faculty_advisor(user_id));
         }
 
         // If they are not a faculty advisor, check if they are a current coordinator.
@@ -192,7 +191,7 @@ impl AuthorizationFor {
             >= 1;
 
         return Ok(UserMeetingAuthorization {
-            username: Some(username),
+            user_id: Some(user_id),
             role: user_role,
             is_current_coordinator,
             is_current_mentor,

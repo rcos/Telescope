@@ -7,7 +7,7 @@ query LandingPageStatistics($now: date!) {
                 start_date: {_lte: $now}
             }
         },
-        distinct_on: [username]
+        distinct_on: [user_id]
     ) {
         aggregate {
             count

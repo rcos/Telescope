@@ -1,10 +1,11 @@
 query DiscordWhoIs($discord_id: String!) {
     user_accounts(where: {account_id: {_eq: $discord_id}, type: {_eq: "discord"}}, limit: 1) {
-        user {
-            username
+        user: user {
+            id
             first_name
             last_name
             role
+            cohort
 
             # RCS ID info for the user
             rcs_id: user_accounts(where: {type: {_eq: "rpi"}} limit: 1) {

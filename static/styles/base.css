@@ -4,11 +4,8 @@
     --telescope-red: #dd2020;
     --rpi-red: #d6001c;
     --github-blue: #0366d6;
-    --discord-blurple: #7289da;
+    --discord-blurple: #5865F2;
     --discord-white: #ffffff;
-    --discord-greyple: #99aab5;
-    --discord-dark: #2c2f33;
-    --discord-darker: #23272a;
     --discord-black: #000000;
 
     /* Meeting Colors */
@@ -28,6 +25,11 @@
     --meeting-coordinators-text: var(--dark);
     --meeting-other-bg: black;
     --meeting-other-text: var(--light);
+}
+
+@font-face {
+    font-family: "Font Awesome";
+    src: url(https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/webfonts/fa-brands-400.woff2);
 }
 
 /* RCOS themed buttons. */
@@ -56,6 +58,10 @@
 
 .btn.btn-discord:hover {
     color: var(--discord-black);
+}
+
+.fab {
+    font-family: "Font Awesome";
 }
 
 /*
