@@ -121,4 +121,17 @@ query Profile($target: uuid!, $viewer: [uuid!]!, $now: date!) {
             }
         }
     }
+
+    # Available enrollment semester
+    enrollment_available: semesters(where: {
+        _and: [
+            # Only ongoing semesters should be available.
+            {start_date: {_lte: $now}},
+            {end_date: {_lte: $now}},
+            # Filter out semesters user is already enrolled in.
+            {_not: {enrollments: {user_id: {_eq: $target}}}}
+        ]
+    }) {
+        semester_id
+    }
 }

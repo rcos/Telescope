@@ -8,6 +8,7 @@ mod join_discord;
 mod login;
 pub mod profile;
 mod register;
+mod enrollments;
 
 /// Register user related services.
 pub fn register(config: &mut ServiceConfig) {
@@ -16,6 +17,9 @@ pub fn register(config: &mut ServiceConfig) {
 
     // User profile and settings.
     profile::register(config);
+
+    // Enrollment resource.
+    enrollments::register(config);
 
     // Everything else
     config

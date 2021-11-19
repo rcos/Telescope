@@ -82,6 +82,29 @@
                     </small>
                 {{/if}}
             </div>
+
+            {{! Enroll button (if available) }}
+            <div class="col-12 col-md-3 col-lg-2 my-1">
+                {{! RCS ID must be linked to enroll }}
+                {{#if target.rcs_id.[0]}}
+                    {{! Make sure there are available semesters to enroll in}}
+                    {{#if enrollment_available}}
+                        <a class="btn btn-success w-100" href="/enroll">
+                            Enroll
+                        </a>
+                    {{else}}
+                        {{! TODO }}
+                    {{/if}}
+                {{else}}
+                    <button class="disabled btn-danger btn w-100" disabled>
+                        Enrollment unavailable.
+                    </button>
+                    <br>
+                    <small class="text-muted">
+                        You must link RPI CAS to enroll.
+                    </small>
+                {{/if}}
+            </div>
         </div>
     {{/if}}
 
