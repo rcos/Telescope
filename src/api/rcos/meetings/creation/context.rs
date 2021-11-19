@@ -25,13 +25,8 @@ impl CreationContext {
     ) -> Result<creation_context::ResponseData, TelescopeError> {
         send_query::<Self>(creation_context::Variables {
             host: host.map(|h| vec![h]).unwrap_or(vec![]),
-            semester_filter: serde_json::from_value(json!({
-                "_or": [
-                    { "end_date": { "_gte": Utc::today().naive_utc() }},
-                    { "semester_id": {"_in": include_semesters }}
-                ]
-            }))
-            .map_err(|_| TelescopeError::ise("Malformed semester filter in GraphQL query."))?,
+            today: Utc::today().naive_utc(),
+            include_semesters
         })
         .await
     }
