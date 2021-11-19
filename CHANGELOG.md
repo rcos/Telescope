@@ -6,6 +6,9 @@ please submit a pull request fixing it.
 
 ## Unreleased
 
+## 0.8.1 - November 19th, 2021
+- Fixed bug that prevented meeting creation. 
+
 ## 0.8.0 - November 17th, 2021
 - Replaced all usernames with user IDs. ([#130])
 - Updated Hasura to v2.0.10 
