@@ -1,8 +1,11 @@
-query CreationContext($host: [uuid!]!, $semester_filter: semesters_bool_exp!) {
+query CreationContext($host: [uuid!]!, $today: date!, $include_semesters: [String!]!) {
     # Semesters in which a meeting can be created. This will be
-    # all current and duture semesters in ascending order.
+    # all current and future semesters in ascending order.
     available_semesters: semesters(
-        where: $semester_filter,
+        where: {_or: [
+            {end_date: {_gte: $today}},
+            {semester_id: {_in: $include_semesters}}
+        ]},
         order_by: {start_date: asc}
     ) {
         semester_id
