@@ -1,0 +1,66 @@
+# Enrollment related queries and mutations
+
+# Get a single enrollment record.
+query GetSingleEnrollment($user_id: uuid!, $semester_id: String!) {
+    enrollments_by_pk(user_id: $user_id, semester_id: $semester_id) {
+        credits
+        is_coordinator
+        is_for_pay
+        is_project_lead
+
+        user {
+            first_name
+            last_name
+            role
+
+            rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+                account_id
+            }
+        }
+
+        semester {
+            semester_id
+            title
+        }
+
+        project {
+            project_id
+            title
+        }
+    }
+}
+
+# Create an enrollment record
+mutation CreateEnrollment($user_id: uuid!, $semester_id: String!, $credits: Int!, $for_pay: Boolean!) {
+    insert_enrollments_one(object: {
+        user_id: $user_id,
+        semester_id: $semester_id,
+        credits: $credits,
+        is_for_pay: $for_pay
+    }) {
+        user_id
+        semester_id
+    }
+}
+
+# Edit an enrollment record
+mutation EditEnrollment($user_id: uuid!, $semester_id: String!, $credits: Int!, $for_pay: Boolean!) {
+    update_enrollments_by_pk(
+        pk_columns: {semester_id: $semester_id, user_id: $user_id},
+        _set: {credits: $credits, is_for_pay: $for_pay}
+    ) {
+        user_id
+        semester_id
+    }
+}
+
+# Update a user's coordinator status for a semester.
+mutation UpdateCoordinatorStatus($user_id: uuid!, $semester_id: String!, $set_coordinator: Boolean!) {
+    update_enrollments_by_pk(
+        pk_columns: {user_id: $user_id, semester_id: $semester_id},
+        _set: {is_coordinator: $set_coordinator}
+    ) {
+        user_id
+        semester_id
+    }
+}

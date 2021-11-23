@@ -93,7 +93,13 @@
                             Enroll
                         </a>
                     {{else}}
-                        {{! TODO }}
+                        <button class="disabled btn-danger btn w-100" disabled>
+                            Enrollment unavailable.
+                        </button>
+                        <br>
+                        <small class="text-muted">
+                            There are no semesters available for enrollment.
+                        </small>
                     {{/if}}
                 {{else}}
                     <button class="disabled btn-danger btn w-100" disabled>
