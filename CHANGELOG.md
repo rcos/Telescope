@@ -6,6 +6,9 @@ please submit a pull request fixing it.
 
 ## Unreleased
 
+## 0.8.2 - November 30th, 2021
+- Fixed bug that prevented user deletion. 
+
 ## 0.8.1 - November 19th, 2021
 - Fixed bug that prevented meeting creation. 
 
