@@ -7,7 +7,7 @@ please submit a pull request fixing it.
 ## Unreleased
 
 ## 0.8.2 - November 30th, 2021
-- Fixed bug that prevented user deletion. 
+- Fixed bug that prevented user deletion. ([#204])
 
 ## 0.8.1 - November 19th, 2021
 - Fixed bug that prevented meeting creation. 
@@ -148,3 +148,4 @@ please submit a pull request fixing it.
 [#186]: https://github.com/rcos/Telescope/pull/186
 [#188]: https://github.com/rcos/Telescope/issues/188
 [#189]: https://github.com/rcos/Telescope/pull/189
+[#204]: https://github.com/rcos/Telescope/pull/204
