@@ -4,7 +4,7 @@ version = "0.8.3-dev"
 authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.56.1"
 
 [dependencies]
 # command line argument parser

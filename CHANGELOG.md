@@ -5,6 +5,7 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+- Updated minimum rust version to 1.56.1. 
 
 ## 0.8.2 - November 30th, 2021
 - Fixed bug that prevented user deletion. ([#204])
