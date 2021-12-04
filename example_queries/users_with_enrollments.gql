@@ -1,0 +1,20 @@
+query users_with_enrollments {
+  users {
+    id
+    role
+    first_name
+    last_name
+    cohort
+    role
+    enrollments {
+      semester_id
+      is_coordinator
+      credits
+      project {
+        project_id
+        title
+      }
+    }
+  }
+}
+

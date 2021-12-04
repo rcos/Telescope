@@ -1,0 +1,14 @@
+query enrolled_and_no_project($semester_id: String!) {
+  enrollments(
+    where: { semester_id: { _eq: $semester_id }, _not: { project: {} } } # _not : {project: {}} works because project: {} is true for all non-null projects
+  ) {
+    user {
+      id
+      first_name
+      last_name
+    }
+    credits
+    is_for_pay
+    is_coordinator
+  }
+}
