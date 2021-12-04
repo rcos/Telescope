@@ -1,4 +1,5 @@
 # RCOS Database
+
 > RCOS database schema and related tools.
 
 ## Overview
@@ -8,6 +9,7 @@ definition, views and triggers, and tools for importing RCOS data from external
 platforms like Submitty and Venue.
 
 ## Database
+
 The RCOS database is a Postgres DB running on our own infrastructure. Access is
 restricted to coordinators and faculty advisors, but the schema and tools used
 are open-sourced here.
@@ -23,9 +25,14 @@ cannot connect to the database directly and must interact through this API.
 
 Migrations and metadata are managed using the [Hasura CLI](https://hasura.io/docs/1.0/graphql/core/hasura-cli/index.html).
 
+### Running Hasura
+
+```
+hasura console --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
 ## Deployment
 
 1. Write a `.env` file with appropriate values for each key matching the ones used in the `docker-compose.yml` file.
 2. Run `docker-compose up -d` to start everything.
-3. While running, use `docker logs` to inspect the log output of any of the containers. 
-
+3. While running, use `docker logs` to inspect the log output of any of the containers.
