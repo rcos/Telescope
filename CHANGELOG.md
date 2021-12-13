@@ -5,7 +5,7 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
-- Updated minimum rust version to 1.56.1. 
+- Updated minimum rust version to 1.57.0. 
 - Added [Open Graph Protocol](https://ogp.me/) meta tags to site. 
 
 ## 0.8.2 - November 30th, 2021
