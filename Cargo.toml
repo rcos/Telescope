@@ -1,10 +1,10 @@
 [package]
 name = "telescope"
-version = "0.8.2-dev"
+version = "0.8.3-dev"
 authors = ["Antonia \"Nia\" Calia-Bogan <acaliabogan@acaliabogan.dev>"]
 description = "The RCOS webapp"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.57"
 
 [dependencies]
 # command line argument parser
@@ -48,7 +48,7 @@ lazy_static = "~1.4"
 futures = "0.3.18"
 
 # async traits
-async-trait = "0.1.51"
+async-trait = "0.1.52"
 
 # Date and time utilities and formats
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
