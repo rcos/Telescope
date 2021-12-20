@@ -45,7 +45,7 @@ rand = "~0.8"
 lazy_static = "~1.4"
 
 # utilities for dealing with async futures
-futures = "0.3.18"
+futures = "0.3.19"
 
 # async traits
 async-trait = "0.1.52"
