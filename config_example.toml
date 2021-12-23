@@ -29,7 +29,7 @@ api_url = "http://hasura:8080/v1/graphql"
 
 # [REQUIRED]
 # The JSON web token (jwt) key used to encode JWTs when authenticating with
-# the central RCOS API. This shcould match the one in the .env file.
+# the central RCOS API. This should match the one in the .env file.
 jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # [REQUIRED]

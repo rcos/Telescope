@@ -7,6 +7,11 @@ please submit a pull request fixing it.
 ## Unreleased
 - Updated minimum rust version to 1.57.0. 
 - Added [Open Graph Protocol](https://ogp.me/) meta tags to site. 
+- Fixed critical security issues reported by [Chris Reed](https://github.com/cjreed121) (Thanks, Chris, for reporting these to me): 
+  - XSS bug in the meeting description text box. 
+  - Privilege escalation bug on the user settings page. 
+- Fixed two typos also reported by [Chris Reed](https://github.com/cjreed121) (Thanks again Chris)
+- Updates to a variety of dependencies. 
 
 ## 0.8.2 - November 30th, 2021
 - Fixed bug that prevented user deletion. ([#204])

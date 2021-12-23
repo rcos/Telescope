@@ -6,7 +6,9 @@ Telescope is the RCOS website.
 [![GitHub release version](https://img.shields.io/github/release/rcos/Telescope.svg)](https://github.com/rcos/Telescope/releases)
 
 ## User Notes
-If you find issues with Telescope or have a feature ou want added, please make an issue under the issues tab. You should also feel free to contribute your own. Pull requests are welcome. See below for detailed information on building & contributing to telescope.
+If you find issues with Telescope or have a feature you want added, please make an issue under the issues tab. 
+You should also feel free to contribute your own. Pull requests are welcome. 
+See below for detailed information on building & contributing to telescope.
 
 ## Development Notes
 These are note for Telescope Developers on how to find and update Telescope 
@@ -16,7 +18,7 @@ itself.
 Telescope is a large enough project that it may not be immediately obvious where
 certain files are. This section provides a map to this repository.
 - `.github`: This folder holds configuration files related to this repository's 
-    interactions with Github.com. This includes the GitHub issue templates, the 
+    interactions with GitHub.com. This includes the GitHub issue templates, the 
     continuous integration workflows, and the Dependabot configuration.
 - `proposals`: This folder contains the project proposal files that Telescope has
     been submitted under for the Rensselaer Center for Open Source (RCOS).
