@@ -250,7 +250,7 @@ async fn save_changes(
     // First get the json version of the role as a string.
     let role_json: String = json!(role).as_str().expect("Role serialized to JSON string").to_string();
     // Then index into the available roles on the context with the selected role to check availability.
-    // If the selected role does not exist, or is malformed, default to false. 
+    // If the selected role does not exist, or is malformed, default to false.
     if form.template["context"]["roles"].get(&role_json).and_then(Value::as_bool).unwrap_or(false) {
         return Err(TelescopeError::BadRequest {
             header: "Invalid Role Selection".into(),
