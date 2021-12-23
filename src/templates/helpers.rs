@@ -219,11 +219,13 @@ fn markdown_renderer_helper(h: &Helper<'_, '_>, out: &mut dyn Output) -> HelperR
             .ok_or(RenderError::new(
                 "render_markdown expects a markdown string parameter.",
             ))?;
+    // Escape all the HTML in the markdown source to avoid cross-site-scripting issues.
+    let escaped: String = v_htmlescape::escape(markdown_source).to_string();
     // Make a new parser with all options enabled.
-    let parser = MarkdownParser::new_ext(markdown_source, MarkdownOptions::all());
-    // Make and write an html buffer with the rendered markdown.
-    // Set the initial capacity at at least the length of the source markdown.
-    let mut buffer = String::with_capacity(markdown_source.len());
+    let parser = MarkdownParser::new_ext(escaped.as_str(), MarkdownOptions::all());
+    // Make and write an HTML buffer with the rendered markdown.
+    // Set the initial capacity at at least the length of the escaped markdown.
+    let mut buffer = String::with_capacity(escaped.len());
     pulldown_cmark::html::push_html(&mut buffer, parser);
     // Write the rendered HTML to the handlebars output.
     out.write(buffer.as_str())?;

@@ -82,7 +82,7 @@ dependencies = [
  "mime",
  "mime_guess",
  "percent-encoding",
- "v_htmlescape",
+ "v_htmlescape 0.12.0",
 ]
 
 [[package]]
@@ -601,6 +601,12 @@ checksum = "fa17aa1cf56bdd6bb30518767d00e58019d326f3f05d8c3e0730b549d332ea83"
 dependencies = [
  "bytes 0.5.6",
 ]
+
+[[package]]
+name = "buf-min"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4531c8a9fe2fb94e0d2afdf6bb4effd4797baf98dd26b6e20be71a92ac78e8d"
 
 [[package]]
 name = "bumpalo"
@@ -2788,6 +2794,7 @@ dependencies = [
  "toml",
  "url",
  "uuid",
+ "v_htmlescape 0.14.1",
 ]
 
 [[package]]
@@ -3252,8 +3259,18 @@ version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3e0ab5fab1db278a9413d2ea794cb66f471f898c5b020c3c394f6447625d9d4"
 dependencies = [
- "buf-min",
- "v_escape_derive",
+ "buf-min 0.4.0",
+ "v_escape_derive 0.8.4",
+]
+
+[[package]]
+name = "v_escape"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79d297315e8ca0b98255614f409699ea189e5929e820f07f69afcebf96c41f9b"
+dependencies = [
+ "buf-min 0.6.1",
+ "v_escape_derive 0.9.1",
 ]
 
 [[package]]
@@ -3269,13 +3286,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "v_escape_derive"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fe81cf194472e6ddd6545f8e91ee9780de636194c2e896b8ac201ac78389809"
+dependencies = [
+ "syn",
+]
+
+[[package]]
 name = "v_htmlescape"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f9a8af610ad6f7fc9989c9d2590d9764bc61f294884e9ee93baa58795174572"
 dependencies = [
  "cfg-if 1.0.0",
- "v_escape",
+ "v_escape 0.15.0",
+]
+
+[[package]]
+name = "v_htmlescape"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04b32732bcd549ad15fcb01ee63ad03dd6a0289e9ba72b8164707d1f9fa80478"
+dependencies = [
+ "cfg-if 1.0.0",
+ "v_escape 0.18.0",
 ]
 
 [[package]]
