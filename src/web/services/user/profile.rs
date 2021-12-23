@@ -19,6 +19,7 @@ use chrono::{Datelike, Local};
 use serenity::model::guild::Member;
 use serenity::model::user::User;
 use std::collections::HashMap;
+use serde_json::Value;
 use uuid::Uuid;
 
 /// The path from the template directory to the profile template.
@@ -244,6 +245,15 @@ async fn save_changes(
 
     // Convert the cohort to a number or default to no cohort input. This should be checked client side.
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
+
+    // Check that the current user role can switch to the submitted role.
+    if form.template["context"]["roles"].get(role.to_string()).and_then(Value::as_bool).unwrap_or(false) {
+        return Err(TelescopeError::BadRequest {
+            header: "Invalid Role Selection".into(),
+            message: "The selected role is not available at this time".into(),
+            show_status_code: false
+        });
+    }
 
     // Fill the form with the submitted info.
     form.template["context"]["first_name"] = json!(&first_name);
