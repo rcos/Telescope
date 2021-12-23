@@ -4,9 +4,9 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased
+## 0.8.3 - December 22nd, 2021
 - Updated minimum rust version to 1.57.0. 
-- Added [Open Graph Protocol](https://ogp.me/) meta tags to site. 
+- Added [Open Graph Protocol](https://ogp.me/) meta tags to site. ([#205])
 - Fixed critical security issues reported by [Chris Reed](https://github.com/cjreed121) (Thanks, Chris, for reporting these to me): 
   - XSS bug in the meeting description text box. 
   - Privilege escalation bug on the user settings page. 
@@ -156,3 +156,4 @@ please submit a pull request fixing it.
 [#188]: https://github.com/rcos/Telescope/issues/188
 [#189]: https://github.com/rcos/Telescope/pull/189
 [#204]: https://github.com/rcos/Telescope/pull/204
+[#205]: https://github.com/rcos/Telescope/pull/205

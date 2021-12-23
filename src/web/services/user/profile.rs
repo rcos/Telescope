@@ -19,7 +19,6 @@ use chrono::{Datelike, Local};
 use serenity::model::guild::Member;
 use serenity::model::user::User;
 use std::collections::HashMap;
-use serde_json::Value;
 use uuid::Uuid;
 
 /// The path from the template directory to the profile template.
