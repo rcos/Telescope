@@ -247,13 +247,19 @@ async fn save_changes(
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
 
     // Check that the current user role can switch to the submitted role.
-    if form.template["context"]["roles"].get(role.to_string()).and_then(Value::as_bool).unwrap_or(false) {
-        return Err(TelescopeError::BadRequest {
+    form.template["context"]["roles"]
+        // Index the selected role availability.
+        .get(role.to_string())
+        // Convert to bool, default as false.
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+        // Create and propagate error on false.
+        .then(|| ())
+        .ok_or(TelescopeError::BadRequest {
             header: "Invalid Role Selection".into(),
             message: "The selected role is not available at this time".into(),
             show_status_code: false
-        });
-    }
+        })?;
 
     // Fill the form with the submitted info.
     form.template["context"]["first_name"] = json!(&first_name);
