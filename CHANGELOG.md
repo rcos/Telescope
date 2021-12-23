@@ -4,6 +4,8 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
+## Unreleased
+
 ## 0.8.3 - December 22nd, 2021
 - Updated minimum rust version to 1.57.0. 
 - Added [Open Graph Protocol](https://ogp.me/) meta tags to site. ([#205])
