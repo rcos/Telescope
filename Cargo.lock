@@ -2761,7 +2761,7 @@ dependencies = [
 
 [[package]]
 name = "telescope"
-version = "0.8.4-dev"
+version = "0.8.4"
 dependencies = [
  "actix",
  "actix-files",

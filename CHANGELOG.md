@@ -6,6 +6,10 @@ please submit a pull request fixing it.
 
 ## Unreleased
 
+## 0.8.4 - December 29th, 2021
+- Disabled signup using anything except Discord. ([#217])
+- Added descriptions OGP tag. ([#216]) 
+
 ## 0.8.3 - December 22nd, 2021
 - Updated minimum rust version to 1.57.0. 
 - Added [Open Graph Protocol](https://ogp.me/) meta tags to site. ([#205])
@@ -159,3 +163,5 @@ please submit a pull request fixing it.
 [#189]: https://github.com/rcos/Telescope/pull/189
 [#204]: https://github.com/rcos/Telescope/pull/204
 [#205]: https://github.com/rcos/Telescope/pull/205
+[#216]: https://github.com/rcos/Telescope/pull/216
+[#217]: https://github.com/rcos/Telescope/pull/217
