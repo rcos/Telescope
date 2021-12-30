@@ -69,7 +69,7 @@ pub fn login() -> Template {
         item(
             DiscordOAuth::login_path(),
             "btn-discord mb-2",
-            "Login using",
+            "Login using Discord",
             // This is manually coded for in the template file and is not
             // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord"),
