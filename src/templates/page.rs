@@ -30,7 +30,7 @@ pub async fn of(
     title: impl Into<Value>,
     content: &Template
 ) -> Result<Template, TelescopeError> {
-    of_with_tags(req, title, content, None)
+    of_with_tags(req, title, content, None).await
 }
 
 /// Create a new template object to hold the page.
