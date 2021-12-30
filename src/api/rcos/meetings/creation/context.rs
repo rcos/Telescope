@@ -26,7 +26,7 @@ impl CreationContext {
         send_query::<Self>(creation_context::Variables {
             host: host.map(|h| vec![h]).unwrap_or(vec![]),
             today: Utc::today().naive_utc(),
-            include_semesters
+            include_semesters,
         })
         .await
     }
