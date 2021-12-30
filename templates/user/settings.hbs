@@ -63,10 +63,17 @@
                     <label for="cohort-input">Entry year:</label>
 
                     {{! Entry Year. Minimum 1824 (RPI founded). Max: Current year. }}
-                    <input aria-describedby="cohort-description" name="cohort" id="cohort-input" class="form-control"
+                    <input aria-describedby="cohort-description" name="cohort" id="cohort-input"
                            type="number" min="1824" max="{{max_entry_year}}" value="{{context.cohort}}"
+                            {{#if issues.cohort}} class="form-control is-invalid" aria-labelledby="cohort-invalid" {{else}} class="form-control" {{/if}}
                            {{! Diabled on no RCS ID }}
                            {{#if (not context.rcs_id.[0].account_id)}}disabled{{/if}}>
+
+                    {{#if issues.cohort}}
+                        <span id="cohort-invalid" class="invalid-feedback">
+                            {{issues.cohort}}
+                        </span>
+                    {{/if}}
 
                     <small id="cohort-description" class="form-text text-muted">
                         Entry year is only available to users with RPI CAS linked.
