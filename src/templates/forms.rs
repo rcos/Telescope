@@ -63,7 +63,7 @@ impl Responder for FormTemplate {
             let rendered: String = self.render()?;
 
             // Put it in a page.
-            page::with_content(&req, self.page_title, rendered.as_str())
+            page::with_content(&req, self.page_title, rendered.as_str(), None)
                 // Wait for the page to resolve the user ID etc
                 .await?
                 // Render the page to HTML

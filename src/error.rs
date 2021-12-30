@@ -332,7 +332,7 @@ impl TelescopeError {
                 // Render the form.
                 let page_content: String = form.render()?;
                 // Put it in a page.
-                return page::with_content(req, form.page_title, page_content.as_str())
+                return page::with_content(req, form.page_title, page_content.as_str(), None)
                     .await?
                     // Render Page
                     .render()

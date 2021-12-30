@@ -16,6 +16,7 @@ pub mod navbar;
 pub mod page;
 pub mod pagination;
 pub mod static_pages;
+pub mod tags;
 
 /// A template that can be rendered using the handlebars template registry.
 #[derive(Serialize, Debug, Clone)]
@@ -70,7 +71,16 @@ impl Template {
         req: &HttpRequest,
         title: impl Into<Value>,
     ) -> Result<Template, TelescopeError> {
-        page::of(req, title, self).await
+        Self::render_into_page_with_tags(self, req, title, None).await
+    }
+
+    pub async fn render_into_page_with_tags(
+        &self,
+        req: &HttpRequest,
+        title: impl Into<Value>,
+        tags: Option<tags::Tags>
+    ) -> Result<Template, TelescopeError> {
+        page::of_with_tags(req, title, self, tags).await
     }
 }
 
