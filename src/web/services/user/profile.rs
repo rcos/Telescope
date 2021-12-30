@@ -251,11 +251,8 @@ async fn save_changes(
             form.template["issues"]["cohort"] = json!("Please link RPI CAS before setting this.");
             return Err(TelescopeError::invalid_form(&form));
         }
-        /*if form.template["roles"]["student"] == json!(false) {
-
-        }*/
         let cohort_int = cohort.unwrap();
-        let year: i64 = chrono::offset::Utc::now().year() as i64;
+        let year: i64 = Local::today().year() as i64;
         if cohort_int < 1824 || cohort_int > year {
             form.template["issues"]["cohort"] = json!(
                 format!("Year must be between 1824 and {}", year)
