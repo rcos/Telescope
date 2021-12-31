@@ -1,9 +1,9 @@
 use crate::error::TelescopeError;
-use crate::templates::Template;
-use actix_web::{HttpRequest, HttpResponse, Responder};
-use futures::future::{Ready, ready};
 use crate::templates::navbar::Navbar;
 use crate::templates::tags::Tags;
+use crate::templates::Template;
+use actix_web::{HttpRequest, HttpResponse, Responder};
+use futures::future::{ready, Ready};
 
 /// The template for a page shown to the user.
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -30,13 +30,17 @@ impl Page {
     const TEMPLATE_PATH: &'static str = "page";
 
     /// Create a page. Use default OGP tags. Call API to determine navbar privileges.
-    pub async fn new(request: &HttpRequest, title: impl Into<String>, content: Template) -> Result<Self, TelescopeError> {
+    pub async fn new(
+        request: &HttpRequest,
+        title: impl Into<String>,
+        content: Template,
+    ) -> Result<Self, TelescopeError> {
         Ok(Page {
             title: title.into(),
             navbar: Navbar::for_request(request).await?,
             content,
             version: env!("CARGO_PKG_VERSION").to_string(),
-            ogp_tags: Tags::for_request(request)
+            ogp_tags: Tags::for_request(request),
         })
     }
 
@@ -70,7 +74,7 @@ impl Responder for Page {
             // If content can be rendered, respond using the normal template responder.
             Ok(template) => template.respond_to(req),
             // Otherwise return the error immediately.
-            Err(err) => ready(Err(err))
+            Err(err) => ready(Err(err)),
         }
     }
 }

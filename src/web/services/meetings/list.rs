@@ -4,12 +4,12 @@ use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetin
 use crate::api::rcos::meetings::get::Meetings;
 use crate::api::rcos::meetings::MeetingType;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::{Query, ServiceConfig};
 use actix_web::HttpRequest;
 use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
-use crate::templates::page::Page;
 
 /// Register the meetings page.
 pub fn register(c: &mut ServiceConfig) -> &mut ServiceConfig {

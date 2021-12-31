@@ -23,7 +23,7 @@ pub struct Navbar {
     /// If the viewer is creating an account.
     creating_account: bool,
     /// The path of the request to mark a navbar item as active or not.
-    req_path: String
+    req_path: String,
 }
 
 impl Navbar {
@@ -36,7 +36,7 @@ impl Navbar {
             is_student: false,
             user_id: None,
             creating_account: false,
-            req_path: "".to_string()
+            req_path: "".to_string(),
         }
     }
 
@@ -52,10 +52,8 @@ impl Navbar {
     /// Create a navbar and fill appropriately based on request parameters.
     pub async fn for_request(request: &HttpRequest) -> Result<Self, TelescopeError> {
         // Extract the authenticated identities from the request.
-        let identity: Option<AuthenticationCookie> = Identity::extract(request)
-            .await?
-            .identity()
-            .await;
+        let identity: Option<AuthenticationCookie> =
+            Identity::extract(request).await?.identity().await;
 
         // If the user is authenticated.
         if let Some(authenticated) = identity {

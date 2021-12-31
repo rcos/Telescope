@@ -2,11 +2,11 @@
 
 use crate::api::rcos::semesters::mutations::create::CreateSemester;
 use crate::error::TelescopeError;
+use crate::templates::Template;
 use crate::web::services::admin::semesters::semester_id_valid;
 use actix_web::http::header::LOCATION;
-use actix_web::{web::Form, HttpResponse, HttpRequest, Responder};
+use actix_web::{web::Form, HttpRequest, HttpResponse, Responder};
 use chrono::NaiveDate;
-use crate::templates::Template;
 
 /// Create an empty form template for semester creation.
 fn new_semester_form_empty() -> Template {
@@ -60,7 +60,9 @@ pub async fn submit_new(
         });
 
         // Put it in a page.
-        let page = return_form_template.in_page(&req, "Create Semester").await?;
+        let page = return_form_template
+            .in_page(&req, "Create Semester")
+            .await?;
         // Return the page.
         return Err(TelescopeError::InvalidForm(page));
     }
@@ -75,7 +77,9 @@ pub async fn submit_new(
             "end": {"value": end}
         });
 
-        let page = return_form_template.in_page(&req, "Create Semester").await?;
+        let page = return_form_template
+            .in_page(&req, "Create Semester")
+            .await?;
         return Err(TelescopeError::InvalidForm(page));
     }
 
@@ -89,7 +93,9 @@ pub async fn submit_new(
             "end": {"value": end}
         });
 
-        let page = return_form_template.in_page(&req, "Create Semester").await?;
+        let page = return_form_template
+            .in_page(&req, "Create Semester")
+            .await?;
         return Err(TelescopeError::InvalidForm(page));
     }
 

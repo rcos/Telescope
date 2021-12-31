@@ -2,10 +2,10 @@
 
 use crate::error::TelescopeError;
 use crate::templates::auth;
+use crate::templates::page::Page;
 use crate::web::services::auth::identity::Identity;
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};
-use crate::templates::page::Page;
 
 #[get("/login")]
 /// Login page. Users go here and are presented options to login with a variety

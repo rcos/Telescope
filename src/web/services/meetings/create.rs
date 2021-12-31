@@ -11,6 +11,7 @@ use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::services::meetings::make_meeting_auth_middleware;
 use actix_web::http::header::LOCATION;
@@ -21,7 +22,6 @@ use actix_web::HttpResponse;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
 use uuid::Uuid;
-use crate::templates::page::Page;
 
 /// The handlebars template for the user to select a host.
 const HOST_SELECTION_TEMPLATE: &'static str = "meetings/creation/host_selection";
@@ -98,7 +98,10 @@ async fn finish_form(host: Option<Uuid>) -> Result<Template, TelescopeError> {
 
 /// Endpoint to finish meeting creation.
 #[get("/finish")]
-async fn finish(req: HttpRequest, query: Option<Query<FinishQuery>>) -> Result<Page, TelescopeError> {
+async fn finish(
+    req: HttpRequest,
+    query: Option<Query<FinishQuery>>,
+) -> Result<Page, TelescopeError> {
     // Extract query parameter.
     let host = query.map(|q| q.host);
     // Return form in page.
@@ -226,21 +229,17 @@ async fn submit_meeting(
 
     // If meeting starts before semester, save to issues and return form.
     if start_date < semester_start {
-        return_form["issues"]["start_date"] =
-            json!("Start date is before the semester starts.");
+        return_form["issues"]["start_date"] = json!("Start date is before the semester starts.");
     }
     // Same if meeting starts after the end of the semester.
     else if start_date > semester_end {
-        return_form["issues"]["start_date"] =
-            json!("Start date is after the semester ends.");
+        return_form["issues"]["start_date"] = json!("Start date is after the semester ends.");
     }
 
     // Same with end date.
     if end_date < semester_start {
-        return_form["issues"]["end_date"] =
-            json!("End date is before the semester starts.");
-    }
-    else if end_date > semester_end {
+        return_form["issues"]["end_date"] = json!("End date is before the semester starts.");
+    } else if end_date > semester_end {
         return_form["issues"]["end_date"] = json!("End date is after the semester ends.");
     }
     // Also check if the end is before the start.

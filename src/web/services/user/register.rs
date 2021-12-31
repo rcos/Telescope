@@ -1,6 +1,7 @@
 use crate::api::rcos::users::create::CreateOneUser;
 use crate::api::rcos::users::{UserAccountType, UserRole};
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::{auth, Template};
 use crate::web::services::auth::identity::{AuthenticationCookie, RootIdentity};
 use crate::web::services::auth::rpi_cas::RpiCasIdentity;
@@ -8,7 +9,6 @@ use actix_web::http::header::LOCATION;
 use actix_web::web::Form;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use uuid::Uuid;
-use crate::templates::page::Page;
 
 /// The path from the templates directory to the registration template.
 const TEMPLATE_PATH: &'static str = "user/register";

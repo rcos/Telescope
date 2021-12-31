@@ -1,11 +1,11 @@
-use std::ops::{Index, IndexMut};
+use crate::app_data::AppData;
+use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use futures::future::{ready, Ready};
 use serde::Serialize;
 use serde_json::Value;
-use crate::app_data::AppData;
-use crate::error::TelescopeError;
-use crate::templates::page::Page;
+use std::ops::{Index, IndexMut};
 
 pub mod auth;
 pub mod helpers;
@@ -48,13 +48,19 @@ impl Template {
     }
 
     /// Render this template as the content of a page.
-    pub async fn in_page(self, req: &HttpRequest, title: impl Into<String>) -> Result<Page, TelescopeError> {
+    pub async fn in_page(
+        self,
+        req: &HttpRequest,
+        title: impl Into<String>,
+    ) -> Result<Page, TelescopeError> {
         Page::new(req, title, self).await
     }
 }
 
 impl<T> Index<T> for Template
-where T: serde_json::value::Index {
+where
+    T: serde_json::value::Index,
+{
     type Output = Value;
 
     /// Returns [`Value::Null`] if the key is not in the template.
@@ -65,7 +71,9 @@ where T: serde_json::value::Index {
 }
 
 impl<T> IndexMut<T> for Template
-where T: serde_json::value::Index {
+where
+    T: serde_json::value::Index,
+{
     /// Returns the existing value or creates a new empty object at the location
     /// and returns a reference to that.
     fn index_mut(&mut self, index: T) -> &mut Self::Output {

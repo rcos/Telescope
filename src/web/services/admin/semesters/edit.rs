@@ -3,12 +3,12 @@
 use crate::api::rcos::semesters::get_by_id::{semester::SemesterSemestersByPk, Semester};
 use crate::api::rcos::semesters::mutations::edit::EditSemester;
 use crate::error::TelescopeError;
-use actix_web::http::header::LOCATION;
-use actix_web::web::Form;
-use actix_web::{web::Path, HttpResponse, HttpRequest};
-use chrono::NaiveDate;
 use crate::templates::page::Page;
 use crate::templates::Template;
+use actix_web::http::header::LOCATION;
+use actix_web::web::Form;
+use actix_web::{web::Path, HttpRequest, HttpResponse};
+use chrono::NaiveDate;
 
 /// Make the form template for the semester edits.
 fn make_edit_form(id: String, title: String, start: NaiveDate, end: NaiveDate) -> Template {
@@ -34,7 +34,10 @@ pub struct SemesterEdits {
 
 /// Service to display the semester edit form.
 #[get("/semesters/edit/{semester_id}")]
-pub async fn edit(req: HttpRequest, Path(semester_id): Path<String>) -> Result<Page, TelescopeError> {
+pub async fn edit(
+    req: HttpRequest,
+    Path(semester_id): Path<String>,
+) -> Result<Page, TelescopeError> {
     // First lookup the semester.
     let semester_data = Semester::get_by_id(semester_id).await?;
 
@@ -81,7 +84,8 @@ pub async fn submit_edit(
     // Validate dates.
     if start >= end {
         let mut return_form_template: Template = make_edit_form(semester_id, title, start, end);
-        return_form_template.fields["start"]["issue"] = json!("Start date must be before end date.");
+        return_form_template.fields["start"]["issue"] =
+            json!("Start date must be before end date.");
         let page = return_form_template.in_page(&req, "Edit Semester").await?;
         return Err(TelescopeError::InvalidForm(page));
     }

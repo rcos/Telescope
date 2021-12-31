@@ -1,5 +1,5 @@
-use actix_web::HttpRequest;
 use crate::env::global_config;
+use actix_web::HttpRequest;
 
 /// The Open Graph Protocol tags.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -21,7 +21,7 @@ pub struct Tags {
     pub image: String,
 
     /// The site name. This will almost always be "Telescope".
-    pub site_name: String
+    pub site_name: String,
 }
 
 impl Tags {
@@ -44,11 +44,14 @@ impl Default for Tags {
             description: "The Rensselaer Center for Open Source - or RCOS (ar-kos) for short - is \
                 a community of motivated students at Rensselaer Polytechnic Institute who develop \
                 open source projects under the guidance of experienced instructors and student \
-                mentors.".to_string(),
-            image: format!("{}/{}",
-                           global_config().discord_config.telescope_url,
-                           "static/icons/rcos-branding/img/logo-square-red.png"),
-            site_name: "Telescope".to_string()
+                mentors."
+                .to_string(),
+            image: format!(
+                "{}/{}",
+                global_config().discord_config.telescope_url,
+                "static/icons/rcos-branding/img/logo-square-red.png"
+            ),
+            site_name: "Telescope".to_string(),
         }
     }
 }

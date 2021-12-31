@@ -5,6 +5,7 @@ mod semesters;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
 use actix_web::guard;
@@ -13,7 +14,6 @@ use actix_web::web::ServiceConfig;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 use uuid::Uuid;
-use crate::templates::page::Page;
 
 /// Check that a user is an admin.
 fn admin_authorization(user_id: Uuid) -> LocalBoxFuture<'static, AuthorizationResult> {

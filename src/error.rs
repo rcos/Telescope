@@ -1,5 +1,6 @@
 //! Error handling.
 
+use crate::templates::page::Page;
 use crate::templates::{jumbotron, Template};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::error::Error as ActixError;
@@ -12,7 +13,6 @@ use handlebars::RenderError;
 use reqwest::Error as ReqwestError;
 use std::error::Error;
 use std::fmt;
-use crate::templates::page::Page;
 
 /// Custom MIME Type for telescope errors. Should only be used internally
 /// as a signal value.

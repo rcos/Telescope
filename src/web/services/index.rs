@@ -2,9 +2,9 @@
 
 use crate::api::rcos::landing_page_stats::LandingPageStatistics;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use actix_web::HttpRequest;
-use crate::templates::page::Page;
 
 /// Path to the Handlebars file from the templates directory.
 const TEMPLATE_PATH: &'static str = "index";

@@ -10,6 +10,7 @@ use crate::api::rcos::meetings::{
     get_by_id::{meeting::MeetingMeeting, Meeting},
 };
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::services::auth::identity::AuthenticationCookie;
 use crate::web::services::meetings::create::{get_semester_bounds, FinishForm};
@@ -22,7 +23,6 @@ use actix_web::{
 use chrono::{DateTime, Local, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use serde_json::Value;
 use uuid::Uuid;
-use crate::templates::page::Page;
 
 /// The Handlebars file for the meeting edit form.
 const MEETING_EDIT_FORM: &'static str = "meetings/edit/form";
@@ -154,7 +154,11 @@ async fn edit_page(
     form.fields["data"]["end_date"] = json!(meeting_end_local.format("%Y-%m-%d").to_string());
     form.fields["data"]["end_time"] = json!(meeting_end_local.format("%H:%M").to_string());
 
-    form.in_page(&req, format!("Edit {}", resolve_meeting_title(&meeting_data))).await
+    form.in_page(
+        &req,
+        format!("Edit {}", resolve_meeting_title(&meeting_data)),
+    )
+    .await
 }
 
 #[post("/meeting/{meeting_id}/edit")]
@@ -295,7 +299,10 @@ async fn submit_meeting_edits(
     if form["issues"] != json!(null) {
         // Render page.
         let page = form
-            .in_page(&req, format!("Edit {}", resolve_meeting_title(&meeting_data)))
+            .in_page(
+                &req,
+                format!("Edit {}", resolve_meeting_title(&meeting_data)),
+            )
             .await?;
         return Err(TelescopeError::InvalidForm(page));
     }
