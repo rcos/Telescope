@@ -2,7 +2,6 @@
 
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
 use crate::api::rcos::meetings::get_by_id::{meeting::MeetingMeeting, Meeting};
-use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::templates::page::Page;
 use crate::templates::tags::Tags;
@@ -66,17 +65,11 @@ pub async fn meeting(
 
     // Create dynamic OGP tags and start with default so all other fields are correct
     let mut tags = Tags::default();
-    tags.title = if meeting.title.is_some() {
-        format!("RCOS {} - {}", meeting.type_, meeting.title())
-    } else {
-        meeting.title()
-    };
-    tags.url = format!(
-        "{}/meeting/{}",
-        global_config().telescope_url,
-        meeting_id
-    );
+    // Set title and URL trivially.
+    tags.title = meeting.title();
+    tags.url = req.uri().to_string();
 
+    // Build description.
     let mut description = String::new();
     let start = Local.from_utc_datetime(&meeting.start_date_time.naive_utc());
     let end = Local.from_utc_datetime(&meeting.end_date_time.naive_utc());
@@ -102,6 +95,8 @@ pub async fn meeting(
             .as_str(),
         );
     }
+
+    // Add location if available.
     if meeting.location.is_some() {
         let location = meeting.location.as_ref().unwrap();
         if location != "" {
@@ -110,15 +105,20 @@ pub async fn meeting(
     } else if meeting.is_remote {
         description.push_str(" @ Remote");
     }
+
+    // Add a newline for formatting.
     description.push_str("\n");
+
+    // Add the host if possible.
     if meeting.host.is_some() {
         let host = meeting.host.as_ref().unwrap();
         description
             .push_str(format!("Hosted By: {} {}\n", host.first_name, host.last_name).as_str());
     }
-    if meeting.description != "" {
-        description.push_str(meeting.description.as_str());
-    }
+
+    // Add meeting description.
+    description.push_str(meeting.description.as_str());
+    // Add description to OGP tags.
     tags.description = description;
 
     // Build meeting template.
