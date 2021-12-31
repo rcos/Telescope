@@ -2,6 +2,7 @@
 
 mod semesters;
 
+use actix_web::dev::ServiceRequest;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
@@ -14,29 +15,33 @@ use actix_web::web::ServiceConfig;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 use uuid::Uuid;
+use crate::middlewares::authorization::util::extract_user_id;
+use futures::prelude::*;
 
-/// Check that a user is an admin.
-fn admin_authorization(user_id: Uuid) -> LocalBoxFuture<'static, AuthorizationResult> {
+/// Check that a user is an admin, in the form of an authorization middleware.
+fn admin_auth_middleware(req: &ServiceRequest) -> LocalBoxFuture<AuthorizationResult> {
     Box::pin(async move {
-        // Then check that their role is admin.
-        let role: UserRole = RoleLookup::get(user_id)
+        // Get the user ID.
+        let user_id: Uuid = extract_user_id(req).await?;
+        // Lookup the users role. This should never return None, since the user has to exist.
+        let user_role: UserRole = RoleLookup::get(user_id)
             .await?
-            // The role should not be none, since the account needs to exist at this point.
             .expect("Viewer's account does not exist.");
 
-        // Forbid access unless the user is an admin.
-        if !role.is_admin() {
-            Err(TelescopeError::Forbidden)
-        } else {
-            Ok(())
+        // Forbid non-admin users.
+        if !user_role.is_admin() {
+            return Err(TelescopeError::Forbidden);
         }
+
+        // Default to success
+        Ok(())
     })
 }
 
 /// Register admin panel services.
 pub fn register(config: &mut ServiceConfig) {
     // Create admin authorization middleware.
-    let admin_authorization_middleware: Authorization = Authorization::new(admin_authorization);
+    let admin_authorization_middleware: Authorization = Authorization::new(admin_auth_middleware);
 
     // Admin panel index page.
     config.service(

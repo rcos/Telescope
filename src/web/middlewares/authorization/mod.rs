@@ -1,5 +1,7 @@
 //! Middleware for resource access management (authorization).
 
+pub mod util;
+
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_identity::RequestIdentity;
@@ -7,7 +9,7 @@ use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
     error::Error as ActixError,
 };
-use futures::future::{ok, LocalBoxFuture, Ready};
+use futures::future::{LocalBoxFuture, ok, Ready};
 use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
@@ -19,9 +21,11 @@ use uuid::Uuid;
 pub type AuthorizationResult = Result<(), TelescopeError>;
 
 /// The type representing an authorization function reference.
-/// Authorization functions accept an RCOS user ID and respond with
-/// `Ok(())` on success or a telescope error preventing access.
-type AuthorizationCheck = Rc<dyn Fn(Uuid) -> LocalBoxFuture<'static, AuthorizationResult>>;
+/// Authorization functions accept a reference to a `ServiceRequest` and use
+/// it to determine whether the user can access a given page or endpoint. The
+/// response should be `Ok(())` on success or a telescope error preventing access.
+type AuthorizationCheck = Rc<dyn for<'a> Fn(&'a ServiceRequest) -> LocalBoxFuture<'a, AuthorizationResult>>;
+// Use the higher rank lifetime bound to satisfy the compiler.
 
 /// Authorization middleware check's a user's credentials using a stored function
 /// before calling the sub-service. This function may return any telescope error,
@@ -47,12 +51,10 @@ pub struct AuthorizedAccess<S: 'static> {
 
 impl Authorization {
     /// Construct a new authorization transform.
-    pub fn new<F: 'static + Fn(Uuid) -> LocalBoxFuture<'static, AuthorizationResult>>(
-        func: F,
-    ) -> Self {
-        Self {
-            check: Rc::new(func),
-        }
+    pub fn new<F>(func: F) -> Self
+    where F: 'static + for<'a> Fn(&'a ServiceRequest) -> LocalBoxFuture<'a, AuthorizationResult>
+    {
+        Self { check: Rc::new(func) }
     }
 }
 
@@ -98,47 +100,16 @@ where
 
         // Box and pin the async value.
         return Box::pin(async move {
-            // Extract the RCOS user ID.
-            let user_id_result = extract_user_id(&req).await;
+            // Call the authorization check.
+            match (check.as_ref())(&req).await {
+                // On error return a response with the rendered error.
+                // This has to be an Ok variant, otherwise the actix system will bypass
+                // other middlewares.
+                Err(error) => Ok(req.error_response(error)),
 
-            // Properly propagate any errors.
-            if let Err(error) = user_id_result {
-                Ok(req.error_response(error))
-            } else {
-                let user_id = user_id_result.unwrap();
-
-                // Call the authorization check.
-                let authorization_result: AuthorizationResult = (check.as_ref())(user_id).await;
-
-                // Check for an error. We have to explicitly convert to a response here otherwise
-                // actix error handling will skip upstream middlewares.
-                if let Err(telescope_error) = authorization_result {
-                    Ok(req.error_response(telescope_error))
-                } else {
-                    // Otherwise, we are authorized! Go on to call the service.
-                    service.call(req).await
-                }
+                // Otherwise the user is authorized. Call the service.
+                Ok(_) => service.call(req).await
             }
         });
     }
-}
-
-/// Extract the RCOS user ID authenticated with a request or error.
-async fn extract_user_id(req: &ServiceRequest) -> Result<Uuid, TelescopeError> {
-    req
-        // Get the identity of the service request -- this should be a json encoded authentication
-        // cookie if it exists.
-        .get_identity()
-        // Deserialize the authentication cookie object if it exists.
-        .and_then(|ident| serde_json::from_str::<AuthenticationCookie>(ident.as_str()).ok())
-        // If not authenticated, return an error indicating so.
-        .ok_or(TelescopeError::NotAuthenticated)?
-        // Refresh the cookie if necessary.
-        .refresh()
-        .await?
-        // Get the RCOS user ID associated with the authenticated user.
-        .get_user_id()
-        .await?
-        // Respond with an error if the user is not found.
-        .ok_or(TelescopeError::NotAuthenticated)
 }
