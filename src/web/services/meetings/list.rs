@@ -4,6 +4,7 @@ use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetin
 use crate::api::rcos::meetings::get::Meetings;
 use crate::api::rcos::meetings::MeetingType;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::{Query, ServiceConfig};
@@ -33,7 +34,7 @@ async fn meetings_list(
     req: HttpRequest,
     params: Option<Query<MeetingsQuery>>,
     identity: Identity,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Resolve parameters to API query variables
     let start: DateTime<Utc> = params
         .as_ref()
@@ -88,12 +89,12 @@ async fn meetings_list(
             end: end.naive_local().date(),
         });
 
-    // Build a meetings page template
-    return Template::new(TEMPLATE_PATH)
-        .field("meetings", events)
-        .field("query", query)
-        .field("authorization", authorization)
-        // Render it into a page for the user.
-        .render_into_page(&req, "RCOS Meetings")
-        .await;
+    let mut template = Template::new(TEMPLATE_PATH);
+    template.fields = json!({
+        "meetings": events,
+        "query": query,
+        "authorization": authorization,
+    });
+
+    return template.in_page(&req, "RCOS Meetings").await;
 }

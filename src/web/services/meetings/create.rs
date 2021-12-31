@@ -11,7 +11,7 @@ use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
-use crate::templates::forms::FormTemplate;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::services::meetings::make_meeting_auth_middleware;
 use actix_web::http::header::LOCATION;
@@ -56,18 +56,20 @@ struct HostSelectionQuery {
 async fn host_selection_page(
     req: HttpRequest,
     query: Option<Query<HostSelectionQuery>>,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Extract the query parameter.
     let search: Option<String> = query.map(|q| q.search.clone());
     // Query the RCOS API for host selection data.
     let data = HostSelection::get(search.clone()).await?;
 
     // Make and return a template.
-    Template::new(HOST_SELECTION_TEMPLATE)
-        .field("search", search)
-        .field("data", data)
-        .render_into_page(&req, "Select Host")
-        .await
+    let mut template = Template::new(HOST_SELECTION_TEMPLATE);
+    template.fields = json!({
+        "search": search,
+        "data": data,
+    });
+
+    return template.in_page(&req, "Select Host").await;
 }
 
 /// Query on finish meeting page.
@@ -77,15 +79,15 @@ struct FinishQuery {
 }
 
 /// Create an empty instance of the form to finish meeting creation.
-async fn finish_form(host: Option<Uuid>) -> Result<FormTemplate, TelescopeError> {
+async fn finish_form(host: Option<Uuid>) -> Result<Template, TelescopeError> {
     // Query RCOS API for meeting creation context.
     let context = CreationContext::execute(host, Vec::new()).await?;
 
     // Create form.
-    let mut form = FormTemplate::new(FINISH_CREATION_TEMPLATE, "Create Meeting");
+    let mut form = Template::new(FINISH_CREATION_TEMPLATE);
 
     // Add context to form.
-    form.template = json!({
+    form.fields = json!({
         "context": context,
         "meeting_types": &ALL_MEETING_TYPES
     });
@@ -96,11 +98,17 @@ async fn finish_form(host: Option<Uuid>) -> Result<FormTemplate, TelescopeError>
 
 /// Endpoint to finish meeting creation.
 #[get("/finish")]
-async fn finish(query: Option<Query<FinishQuery>>) -> Result<FormTemplate, TelescopeError> {
+async fn finish(
+    req: HttpRequest,
+    query: Option<Query<FinishQuery>>,
+) -> Result<Page, TelescopeError> {
     // Extract query parameter.
     let host = query.map(|q| q.host);
-    // Return form.
-    return finish_form(host).await;
+    // Return form in page.
+    finish_form(host)
+        .await?
+        .in_page(&req, "Create Meeting")
+        .await
 }
 
 /// Form submitted by users to create meeting.
@@ -152,6 +160,7 @@ pub struct FinishForm {
 /// Endpoint that users submit meeting creation forms to.
 #[post("/finish")]
 async fn submit_meeting(
+    req: HttpRequest,
     query: Option<Query<FinishQuery>>,
     Form(form): Form<FinishForm>,
 ) -> Result<HttpResponse, TelescopeError> {
@@ -159,9 +168,9 @@ async fn submit_meeting(
     let host = query.map(|q| q.host.clone());
 
     // Create a form instance to send back to the user if the one they submitted was invalid.
-    let mut return_form: FormTemplate = finish_form(host.clone()).await?;
+    let mut return_form: Template = finish_form(host.clone()).await?;
     // Add previously selected fields to the form.
-    return_form.template["selections"] = json!(&form);
+    return_form["selections"] = json!(&form);
 
     // Validate form fields.
     // Start by destructuring form:
@@ -198,10 +207,10 @@ async fn submit_meeting(
     // they know if they put in all whitespace. This also decreases form resubmission
     // and template complexity.
     let title: Option<String> = (!title.trim().is_empty()).then(|| title);
-    return_form.template["selections"]["title"] = json!(&title);
+    return_form["selections"]["title"] = json!(&title);
 
     // Check that the start date and end dates are during the semester selected.
-    let selected_semester: &Value = return_form.template["context"]["available_semesters"]
+    let selected_semester: &Value = return_form["context"]["available_semesters"]
         // This should be a JSON array
         .as_array()
         .expect("This value should be set as an array")
@@ -220,34 +229,28 @@ async fn submit_meeting(
 
     // If meeting starts before semester, save to issues and return form.
     if start_date < semester_start {
-        return_form.template["issues"]["start_date"] =
-            json!("Start date is before the semester starts.");
-        return Err(TelescopeError::invalid_form(&return_form));
+        return_form["issues"]["start_date"] = json!("Start date is before the semester starts.");
     }
-
     // Same if meeting starts after the end of the semester.
-    if start_date > semester_end {
-        return_form.template["issues"]["start_date"] =
-            json!("Start date is after the semester ends.");
-        return Err(TelescopeError::invalid_form(&return_form));
+    else if start_date > semester_end {
+        return_form["issues"]["start_date"] = json!("Start date is after the semester ends.");
     }
 
     // Same with end date.
     if end_date < semester_start {
-        return_form.template["issues"]["end_date"] =
-            json!("End date is before the semester starts.");
-        return Err(TelescopeError::invalid_form(&return_form));
+        return_form["issues"]["end_date"] = json!("End date is before the semester starts.");
+    } else if end_date > semester_end {
+        return_form["issues"]["end_date"] = json!("End date is after the semester ends.");
     }
-
-    if end_date > semester_end {
-        return_form.template["issues"]["end_date"] = json!("End date is after the semester ends.");
-        return Err(TelescopeError::invalid_form(&return_form));
-    }
-
     // Also check if the end is before the start.
-    if end_date < start_date {
-        return_form.template["issues"]["end_date"] = json!("End date is before start date.");
-        return Err(TelescopeError::invalid_form(&return_form));
+    else if end_date < start_date {
+        return_form["issues"]["end_date"] = json!("End date is before start date.");
+    }
+
+    // Check for errors and return form if necessary.
+    if return_form["issues"] != json!(null) {
+        let page = return_form.in_page(&req, "Create Meeting").await?;
+        return Err(TelescopeError::InvalidForm(page));
     }
 
     // Dates are validated, let's check the times. Start by converting the times from strings.
@@ -273,8 +276,9 @@ async fn submit_meeting(
 
     // Check the ordering.
     if start > end {
-        return_form.template["issues"]["end_time"] = json!("End time is before start time.");
-        return Err(TelescopeError::invalid_form(&return_form));
+        return_form["issues"]["end_time"] = json!("End time is before start time.");
+        let page = return_form.in_page(&req, "Create Meeting").await?;
+        return Err(TelescopeError::InvalidForm(page));
     }
 
     // Ascribe local timezone.

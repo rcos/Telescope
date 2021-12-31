@@ -2,11 +2,15 @@
 
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
 use crate::api::rcos::meetings::get_by_id::{meeting::MeetingMeeting, Meeting};
+use crate::env::global_config;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
+use crate::templates::tags::Tags;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 use actix_web::web::Path;
 use actix_web::HttpRequest;
+use chrono::{Local, TimeZone};
 
 /// The path from the templates directory to this template.
 const TEMPLATE_PATH: &'static str = "meetings/page";
@@ -17,7 +21,7 @@ pub async fn meeting(
     req: HttpRequest,
     Path(meeting_id): Path<i64>,
     identity: Identity,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Get the viewer's user ID.
     let viewer: Option<_> = identity.get_user_id().await?;
     // Get the viewer's authorization info.
@@ -60,12 +64,74 @@ pub async fn meeting(
         });
     }
 
-    // If the meeting is visible to the viewer, make and return the template.
-    return Template::new(TEMPLATE_PATH)
-        .field("meeting", &meeting)
-        .field("auth", authorization)
-        // Rendered inside a page
-        .render_into_page(&req, meeting.title())
-        // Wait for page to render and return result.
-        .await;
+    // Create dynamic OGP tags and start with default so all other fields are correct
+    let mut tags = Tags::default();
+    tags.title = if meeting.title.is_some() {
+        format!("RCOS {} - {}", meeting.type_, meeting.title())
+    } else {
+        meeting.title()
+    };
+    tags.url = format!(
+        "{}/meeting/{}",
+        global_config().discord_config.telescope_url,
+        meeting_id
+    );
+
+    let mut description = String::new();
+    let start = Local.from_utc_datetime(&meeting.start_date_time.naive_utc());
+    let end = Local.from_utc_datetime(&meeting.end_date_time.naive_utc());
+    if start.date() == end.date() {
+        description.push_str(
+            format!(
+                "{}{} -{}",
+                start.format("%B %_d, %Y"),
+                start.format("%_I:%M %P"),
+                end.format("%_I:%M %P")
+            )
+            .as_str(),
+        );
+    } else {
+        description.push_str(
+            format!(
+                "{} at{} - {} at{}",
+                start.format("%B %_d, %Y"),
+                start.format("%_I:%M %P"),
+                end.format("%B %_d, %Y"),
+                end.format("%_I:%M %P")
+            )
+            .as_str(),
+        );
+    }
+    if meeting.location.is_some() {
+        let location = meeting.location.as_ref().unwrap();
+        if location != "" {
+            description.push_str(format!(" @ {}", location).as_str());
+        }
+    } else if meeting.is_remote {
+        description.push_str(" @ Remote");
+    }
+    description.push_str("\n");
+    if meeting.host.is_some() {
+        let host = meeting.host.as_ref().unwrap();
+        description
+            .push_str(format!("Hosted By: {} {}\n", host.first_name, host.last_name).as_str());
+    }
+    if meeting.description != "" {
+        description.push_str(meeting.description.as_str());
+    }
+    tags.description = description;
+
+    // Build meeting template.
+    let mut template = Template::new(TEMPLATE_PATH);
+    template.fields = json!({
+        "meeting": &meeting,
+        "auth": authorization
+    });
+
+    // Build page around meeting template.
+    let mut page = template.in_page(&req, meeting.title()).await?;
+    // Replace default page tags with meeting specific ones.
+    page.ogp_tags = tags;
+    // Return page.
+    return Ok(page);
 }

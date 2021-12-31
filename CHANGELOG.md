@@ -4,7 +4,9 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased
+## Unreleased - 0.8.5
+- Dynamic OGP tags. ([#218])
+- 
 
 ## 0.8.4 - December 29th, 2021
 - Disabled signup using anything except Discord. ([#217])
@@ -165,3 +167,4 @@ please submit a pull request fixing it.
 [#205]: https://github.com/rcos/Telescope/pull/205
 [#216]: https://github.com/rcos/Telescope/pull/216
 [#217]: https://github.com/rcos/Telescope/pull/217
+[#218]: https://github.com/rcos/Telescope/pull/218
