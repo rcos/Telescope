@@ -6,7 +6,7 @@ please submit a pull request fixing it.
 
 ## Unreleased - 0.8.5
 - Dynamic OGP tags. ([#218])
-- 
+- Server side cohort validation. ([#220])
 
 ## 0.8.4 - December 29th, 2021
 - Disabled signup using anything except Discord. ([#217])
@@ -168,3 +168,4 @@ please submit a pull request fixing it.
 [#216]: https://github.com/rcos/Telescope/pull/216
 [#217]: https://github.com/rcos/Telescope/pull/217
 [#218]: https://github.com/rcos/Telescope/pull/218
+[#220]: https://github.com/rcos/Telescope/pull/220
