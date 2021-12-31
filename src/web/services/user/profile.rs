@@ -252,16 +252,14 @@ async fn save_changes(
     // Check if user is allowed to set their cohort and if it is within the valid range.
     if cohort.is_some() {
         if auth.get_rcs_id().await.unwrap().is_none() {
-            form.template["issues"]["cohort"] = json!("Please link RPI CAS before setting this.");
-            return Err(TelescopeError::invalid_form(&form));
+            form["issues"]["cohort"] = json!("Please link RPI CAS before setting this.");
         }
         let cohort_int = cohort.unwrap();
         let year: i64 = Local::today().year() as i64;
         if cohort_int < 1824 || cohort_int > year {
-            form.template["issues"]["cohort"] = json!(
+            form["issues"]["cohort"] = json!(
                 format!("Year must be between 1824 and {}", year)
             );
-            return Err(TelescopeError::invalid_form(&form));
         }
     }
 
