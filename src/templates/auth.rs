@@ -78,19 +78,22 @@ pub fn login() -> Template {
     ];
 
     // Create and return template.
-    return empty().field(HEADER, "Sign In").field(ITEMS, items);
+    let mut template = empty();
+    template[HEADER] = json!("Sign In");
+    template[ITEMS] = json!(items);
+    return template;
 }
 
 /// Create a template to offer the users options to register a new account.
 pub fn register() -> Template {
     // Make list of identity providers in account creation configuration.
     let items: Vec<Map<String, Value>> = vec![
-//         item(
-//             GitHubOauth::register_path(),
-//             "btn-github mb-2",
-//             "Register using GitHub",
-//             Some("github"),
-//         ),
+        //         item(
+        //             GitHubOauth::register_path(),
+        //             "btn-github mb-2",
+        //             "Register using GitHub",
+        //             Some("github"),
+        //         ),
         item(
             DiscordOAuth::register_path(),
             "btn-discord mb-2",
@@ -99,14 +102,17 @@ pub fn register() -> Template {
             // a Feather icon. Do not use it in other places, as it won't work.
             Some("discord"),
         ),
-//         item(
-//             RpiCas::register_path(),
-//             "btn-rpi",
-//             "Register using RPI CAS",
-//             None,
-//         ),
+        //         item(
+        //             RpiCas::register_path(),
+        //             "btn-rpi",
+        //             "Register using RPI CAS",
+        //             None,
+        //         ),
     ];
 
     // Create and return template.
-    return empty().field(HEADER, "Create account").field(ITEMS, items);
+    let mut template = empty();
+    template[HEADER] = json!("Create Account");
+    template[ITEMS] = json!(items);
+    return template;
 }

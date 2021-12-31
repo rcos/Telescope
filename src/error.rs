@@ -1,7 +1,7 @@
 //! Error handling.
 
-use crate::templates::forms::FormTemplate;
-use crate::templates::{jumbotron, page, Template};
+use crate::templates::page::Page;
+use crate::templates::{jumbotron, Template};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;
@@ -11,7 +11,6 @@ use actix_web::{HttpRequest, HttpResponse, ResponseError};
 use graphql_client::Error as GraphQlError;
 use handlebars::RenderError;
 use reqwest::Error as ReqwestError;
-use serde_json::Value;
 use std::error::Error;
 use std::fmt;
 
@@ -124,9 +123,8 @@ pub enum TelescopeError {
     #[display(fmt = "Invalid form submission")]
     /// The user submitted invalid data to a form. This should be reported as a
     /// bad request and the form should be displayed for the user to try again.
-    /// The value here is the serde serialization of the form, since the [`FormTemplate`]
-    /// type does not implement debug
-    InvalidForm(Value),
+    /// The value here is the page to be displayed to the user.
+    InvalidForm(Page),
 
     #[display(fmt = "Request not properly authenticated")]
     /// An unauthenticated user is trying to access a page that requires
@@ -181,17 +179,6 @@ impl TelescopeError {
     pub fn rpi_cas_error(err: ReqwestError) -> Self {
         error!("Error querying RPI CAS endpoint: {}", err);
         TelescopeError::RpiCasError(err.to_string())
-    }
-
-    /// Serialize an invalid form to send back to the user.
-    pub fn invalid_form(form: &FormTemplate) -> Self {
-        // Convert the form to a JSON value.
-        let value = serde_json::to_value(form)
-            // Form should serialize without issue.
-            .expect("Could not serialize form");
-
-        // Construct and return the variant.
-        return TelescopeError::InvalidForm(value);
     }
 
     /// Function that should only be used by the middleware to render a
@@ -322,21 +309,10 @@ impl TelescopeError {
                 ),
             ),
 
-            TelescopeError::InvalidForm(form) => {
-                // Render the form.
-                // Start with a conversion.
-                let form: FormTemplate = serde_json::from_value(form.clone())
-                    // This should not fail.
-                    .expect("Form serialization error.");
-
-                // Render the form.
-                let page_content: String = form.render()?;
-                // Put it in a page.
-                return page::with_content(req, form.page_title, page_content.as_str())
-                    .await?
-                    // Render Page
+            TelescopeError::InvalidForm(page) => {
+                // Render page, converting errors as necessary.
+                return page
                     .render()
-                    // Convert errors as necessary.
                     .map_err(ActixError::from);
             }
 
@@ -355,9 +331,9 @@ impl TelescopeError {
         };
 
         // Put jumbotron in a page and return the content.
-        return page::of(req, "RCOS - Error", &inner_template)
+        return Page::new(req, "RCOS - Error", inner_template)
             .await
-            // Convert and handle jumbotron rendering errors.
+            // Convert and handle any errors.
             .map_err(ActixError::from)?
             // Render the page.
             .render()

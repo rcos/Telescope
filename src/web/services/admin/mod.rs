@@ -5,6 +5,7 @@ mod semesters;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
 use actix_web::guard;
@@ -57,11 +58,11 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 /// Admin page index.
-async fn index(req: HttpRequest) -> Result<Template, TelescopeError> {
+async fn index(req: HttpRequest) -> Result<Page, TelescopeError> {
     // Access is pre-checked by the scope this is in.
     // Return the admin page (currently just a static template).
     return Template::new("admin/index")
         // Rendered in a page of course.
-        .render_into_page(&req, "RCOS Admin")
+        .in_page(&req, "RCOS Admin")
         .await;
 }

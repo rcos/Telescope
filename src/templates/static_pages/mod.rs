@@ -1,5 +1,6 @@
 use crate::error::TelescopeError;
-use crate::templates::{page, Template};
+use crate::templates::page::Page;
+use crate::templates::Template;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 
@@ -20,11 +21,11 @@ pub trait StaticPage {
     }
 
     /// Create a page containing the static content. This is also the actix handler
-    fn page(req: HttpRequest) -> LocalBoxFuture<'static, Result<Template, TelescopeError>> {
+    fn page(req: HttpRequest) -> LocalBoxFuture<'static, Result<Page, TelescopeError>> {
         Box::pin(async move {
             // We have to double wrap this future to avoid lifetime constraint issue?
             // Or at least adding the async block seems to fix it since it moves the template.
-            page::of(&req, Self::PAGE_TITLE, &Self::template()).await
+            Page::new(&req, Self::PAGE_TITLE, Self::template()).await
         })
     }
 }

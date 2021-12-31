@@ -9,9 +9,8 @@ use crate::api::rcos::users::profile::{
 use crate::api::rcos::users::UserRole;
 use crate::env::global_config;
 use crate::error::TelescopeError;
-use crate::templates::forms::FormTemplate;
+use crate::templates::page::Page;
 use crate::templates::Template;
-
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Form, Path, ServiceConfig};
 use actix_web::{http::header::LOCATION, HttpRequest, HttpResponse};
@@ -41,7 +40,7 @@ async fn profile(
     req: HttpRequest,
     identity: Identity,
     Path(id): Path<Uuid>,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Get the viewer's user ID.
     let viewer: Option<Uuid> = identity.get_user_id().await?;
 
@@ -57,7 +56,8 @@ async fn profile(
     }
 
     // Create the profile template to send back to the viewer.
-    let mut template: Template = Template::new(TEMPLATE_NAME).field("data", &response);
+    let mut template: Template = Template::new(TEMPLATE_NAME);
+    template["data"] = json!(&response);
 
     // Get the target user's info.
     let target_user: &ProfileTarget = response.target.as_ref().unwrap();
@@ -87,7 +87,7 @@ async fn profile(
                 // Return early if there was an error.
                 // Otherwise we can go forward and check for the user's membership in the RCOS
                 // Discord server.
-                return template.render_into_page(&req, page_title).await;
+                return template.in_page(&req, page_title).await;
             }
 
             // User returned successfully.
@@ -143,16 +143,16 @@ async fn profile(
     }
 
     // Render the profile template and send to user.
-    return template.render_into_page(&req, page_title).await;
+    return template.in_page(&req, page_title).await;
 }
 
 /// Create a form template for the user settings page.
-fn make_settings_form() -> FormTemplate {
+fn make_settings_form() -> Template {
     // Create the base form.
-    let mut form: FormTemplate = FormTemplate::new(SETTINGS_FORM, "Edit Profile");
+    let mut form = Template::new(SETTINGS_FORM);
 
     // The max entry year should always be the current year.
-    form.template = json!({
+    form.fields = json!({
         "max_entry_year": Local::today().year()
     });
 
@@ -162,7 +162,7 @@ fn make_settings_form() -> FormTemplate {
 /// Get the viewer's user ID and make a profile edit form for them.
 async fn get_context_and_make_form(
     auth: &AuthenticationCookie,
-) -> Result<FormTemplate, TelescopeError> {
+) -> Result<Template, TelescopeError> {
     // Get viewer's user ID. You have to be authenticated to edit your own profile.
     let viewer: Uuid = auth.get_user_id_or_error().await?;
     // Get the context for the edit form.
@@ -181,11 +181,11 @@ async fn get_context_and_make_form(
     let context = context.unwrap();
 
     // Create the form to edit the profile.
-    let mut form: FormTemplate = make_settings_form();
+    let mut form: Template = make_settings_form();
     // Add the context to the form.
-    form.template["context"] = json!(&context);
+    form["context"] = json!(&context);
     // Add user id to the form for the cancel button
-    form.template["user_id"] = json!(&viewer);
+    form["user_id"] = json!(&viewer);
 
     // Add the list of roles (and whether the current role can switch to them).
     let role_list = UserRole::ALL_ROLES
@@ -196,11 +196,11 @@ async fn get_context_and_make_form(
         .collect::<HashMap<_, _>>();
 
     // Add to form.
-    form.template["roles"] = json!(role_list);
+    form["roles"] = json!(role_list);
 
     // Disable student role if the current role is external and there is no RCS ID in the context.
     if context.role.is_external() && context.rcs_id.first().is_none() {
-        form.template["roles"]["student"] = json!(false);
+        form["roles"]["student"] = json!(false);
     }
 
     return Ok(form);
@@ -208,8 +208,11 @@ async fn get_context_and_make_form(
 
 /// User settings form.
 #[get("/edit_profile")]
-async fn settings(auth: AuthenticationCookie) -> Result<FormTemplate, TelescopeError> {
-    return get_context_and_make_form(&auth).await;
+async fn settings(req: HttpRequest, auth: AuthenticationCookie) -> Result<Page, TelescopeError> {
+    get_context_and_make_form(&auth)
+        .await?
+        .in_page(&req, "Edit Profile")
+        .await
 }
 
 /// Edits to the user's profile submitted through the form.
@@ -227,6 +230,7 @@ struct ProfileEdits {
 /// Submission endpoint for the user settings form.
 #[post("/edit_profile")]
 async fn save_changes(
+    req: HttpRequest,
     auth: AuthenticationCookie,
     Form(ProfileEdits {
         first_name,
@@ -240,7 +244,7 @@ async fn save_changes(
 
     // Pass most of the handling here to the GET handler. This will get the context and make
     // and fill the form.
-    let mut form: FormTemplate = get_context_and_make_form(&auth).await?;
+    let mut form: Template = get_context_and_make_form(&auth).await?;
 
     // Convert the cohort to a number or default to no cohort input. This should be checked client side.
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
@@ -252,7 +256,7 @@ async fn save_changes(
         .expect("Role serialized to JSON string")
         .to_string();
     // Then index into the available roles on the context with the selected role to check availability.
-    if form.template["roles"][&role_json] != json!(true) {
+    if form["roles"][&role_json] != json!(true) {
         return Err(TelescopeError::BadRequest {
             header: "Invalid Role Selection".into(),
             message: "The selected role is not available at this time".into(),
@@ -261,20 +265,23 @@ async fn save_changes(
     }
 
     // Fill the form with the submitted info.
-    form.template["context"]["first_name"] = json!(&first_name);
-    form.template["context"]["last_name"] = json!(&last_name);
-    form.template["context"]["cohort"] = json!(&cohort);
-    form.template["context"]["role"] = json!(role);
+    form["context"]["first_name"] = json!(&first_name);
+    form["context"]["last_name"] = json!(&last_name);
+    form["context"]["cohort"] = json!(&cohort);
+    form["context"]["role"] = json!(role);
 
     // Error if first or last name is empty.
     if first_name.trim().is_empty() {
-        form.template["issues"]["first_name"] = json!("Cannot be empty.");
-        return Err(TelescopeError::invalid_form(&form));
+        form["issues"]["first_name"] = json!("Cannot be empty.");
     }
 
     if last_name.trim().is_empty() {
-        form.template["issues"]["last_name"] = json!("Cannot be empty.");
-        return Err(TelescopeError::invalid_form(&form));
+        form["issues"]["last_name"] = json!("Cannot be empty.");
+    }
+
+    if form["issues"] != json!(null) {
+        let page = form.in_page(&req, "Edit Profile").await?;
+        return Err(TelescopeError::InvalidForm(page));
     }
 
     // Execute GraphQL mutation to save changes.

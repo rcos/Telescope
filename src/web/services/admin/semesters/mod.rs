@@ -7,6 +7,7 @@ use regex::Regex;
 
 use crate::api::rcos::semesters::get::{Semesters, PER_PAGE};
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::pagination::PaginationInfo;
 use crate::templates::Template;
 
@@ -25,7 +26,7 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 /// Page to display previous semesters and allow edits.
-async fn index(req: HttpRequest, page_num: Option<Path<u32>>) -> Result<Template, TelescopeError> {
+async fn index(req: HttpRequest, page_num: Option<Path<u32>>) -> Result<Page, TelescopeError> {
     // Resolve the page number. Default to Page 1.
     let page_num: u32 = page_num.map(|path| path.0).unwrap_or(1);
 
@@ -39,15 +40,12 @@ async fn index(req: HttpRequest, page_num: Option<Path<u32>>) -> Result<Template
         as u64;
 
     // Render template and send back to user.
-    Template::new("admin/semesters/index")
-        .field(
-            "pagination",
-            PaginationInfo::new(semester_count, PER_PAGE as u64, page_num as u64),
-        )
-        .field("data", semester_data)
-        // Render in page
-        .render_into_page(&req, "Semester Records")
-        .await
+    let mut template = Template::new("admin/semesters/index");
+    template.fields = json!({
+        "pagination": PaginationInfo::new(semester_count, PER_PAGE as u64, page_num as u64),
+        "data": semester_data
+    });
+    return template.in_page(&req, "Semester Records").await;
 }
 
 lazy_static! {
