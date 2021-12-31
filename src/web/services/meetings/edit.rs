@@ -10,7 +10,7 @@ use crate::api::rcos::meetings::{
     get_by_id::{meeting::MeetingMeeting, Meeting},
 };
 use crate::error::TelescopeError;
-use crate::templates::forms::FormTemplate;
+use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::services::auth::identity::AuthenticationCookie;
 use crate::web::services::meetings::create::{get_semester_bounds, FinishForm};
@@ -113,20 +113,18 @@ fn resolve_meeting_title(meeting_data: &MeetingMeeting) -> String {
 }
 
 /// Create the form template for meeting edits.
-fn make_form(meeting_data: &MeetingMeeting) -> FormTemplate {
-    // Resolve the meeting title.
-    let meeting_title: String = resolve_meeting_title(&meeting_data);
-    // Create the template.
-    return FormTemplate::new(MEETING_EDIT_FORM, format!("Edit {}", meeting_title));
+fn make_form() -> Template {
+    return Template::new(MEETING_EDIT_FORM);
 }
 
 /// Service to display meeting edit form to users who can edit the meeting.
 #[get("/meeting/{meeting_id}/edit")]
 async fn edit_page(
+    req: HttpRequest,
     Path(meeting_id): Path<i64>,
     auth: AuthenticationCookie,
     set_host: Option<Query<HostQuery>>,
-) -> Result<FormTemplate, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Get the meeting data. Error on meeting not found or permissions failure.
     let meeting_data = meeting_data_checked(&auth, meeting_id).await?;
     // Resolve the desired host user ID.
@@ -137,9 +135,9 @@ async fn edit_page(
         CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
-    let mut form: FormTemplate = make_form(&meeting_data);
+    let mut form: Template = make_form();
     // Instantiate form with meeting data, context, and meeting types.
-    form.template = json!({
+    form.fields = json!({
         "data": &meeting_data,
         "meeting_types": ALL_MEETING_TYPES,
         "context": context
@@ -148,19 +146,24 @@ async fn edit_page(
     // Add fields to the template converting the timestamps in the meeting data to the HTML versions.
     let meeting_start: &DateTime<Utc> = &meeting_data.start_date_time;
     let meeting_start_local: DateTime<Local> = meeting_start.with_timezone(&Local);
-    form.template["data"]["start_date"] = json!(meeting_start_local.format("%Y-%m-%d").to_string());
-    form.template["data"]["start_time"] = json!(meeting_start_local.format("%H:%M").to_string());
+    form.fields["data"]["start_date"] = json!(meeting_start_local.format("%Y-%m-%d").to_string());
+    form.fields["data"]["start_time"] = json!(meeting_start_local.format("%H:%M").to_string());
 
     let meeting_end: &DateTime<Utc> = &meeting_data.end_date_time;
     let meeting_end_local: DateTime<Local> = meeting_end.with_timezone(&Local);
-    form.template["data"]["end_date"] = json!(meeting_end_local.format("%Y-%m-%d").to_string());
-    form.template["data"]["end_time"] = json!(meeting_end_local.format("%H:%M").to_string());
+    form.fields["data"]["end_date"] = json!(meeting_end_local.format("%Y-%m-%d").to_string());
+    form.fields["data"]["end_time"] = json!(meeting_end_local.format("%H:%M").to_string());
 
-    return Ok(form);
+    form.in_page(
+        &req,
+        format!("Edit {}", resolve_meeting_title(&meeting_data)),
+    )
+    .await
 }
 
 #[post("/meeting/{meeting_id}/edit")]
 async fn submit_meeting_edits(
+    req: HttpRequest,
     Path(meeting_id): Path<i64>,
     auth: AuthenticationCookie,
     set_host: Option<Query<HostQuery>>,
@@ -178,9 +181,9 @@ async fn submit_meeting_edits(
         CreationContext::execute(host, vec![meeting_data.semester.semester_id.clone()]).await?;
 
     // Create the meeting template.
-    let mut form: FormTemplate = make_form(&meeting_data);
+    let mut form: Template = make_form();
     // Instantiate form with meeting types, context and data.
-    form.template = json!({
+    form.fields = json!({
         "meeting_types": ALL_MEETING_TYPES,
         "context": &context,
         "data": &meeting_data
@@ -207,49 +210,49 @@ async fn submit_meeting_edits(
     // Like the creation system, semester ID, meeting kind, and host ID are not validated.
 
     // Add submitted data to return form.
-    form.template["data"]["semester"] = json!({ "semester_id": &semester });
-    form.template["data"]["type"] = json!(kind);
-    form.template["data"]["description"] = json!(&description);
+    form["data"]["semester"] = json!({ "semester_id": &semester });
+    form["data"]["type"] = json!(kind);
+    form["data"]["description"] = json!(&description);
 
-    form.template["data"]["start_date"] = json!(&start_date);
-    form.template["data"]["end_date"] = json!(&end_date);
-    form.template["data"]["start_time"] = json!(&start_time);
-    form.template["data"]["end_time"] = json!(&end_time);
+    form["data"]["start_date"] = json!(&start_date);
+    form["data"]["end_date"] = json!(&end_date);
+    form["data"]["start_time"] = json!(&start_time);
+    form["data"]["end_time"] = json!(&end_time);
 
     // Handle meeting title -- just whitespace and default to None if empty.
     let title: Option<String> = (!title.trim().is_empty()).then(|| title.trim().to_string());
-    form.template["data"]["title"] = json!(&title);
+    form["data"]["title"] = json!(&title);
 
     // Same with location.
     let location: Option<String> =
         location.and_then(|string| (!string.trim().is_empty()).then(|| string.trim().to_string()));
-    form.template["data"]["location"] = json!(&location);
+    form["data"]["location"] = json!(&location);
 
     // Trim description.
     let description: String = description.trim().to_string();
-    form.template["data"]["description"] = json!(&description);
+    form["data"]["description"] = json!(&description);
 
     // Don't bother trimming URLs, since the GraphQL mutation will normalize them.
-    form.template["data"]["meeting_url"] = json!(&meeting_url);
-    form.template["data"]["recording_url"] = json!(&recording_url);
-    form.template["data"]["external_presentation_url"] = json!(&external_slides_url);
+    form["data"]["meeting_url"] = json!(&meeting_url);
+    form["data"]["recording_url"] = json!(&recording_url);
+    form["data"]["external_presentation_url"] = json!(&external_slides_url);
 
     // Handle flags.
     let is_remote: bool = is_remote.unwrap_or(false);
     let is_draft: bool = is_draft.unwrap_or(false);
-    form.template["data"]["is_remote"] = json!(is_remote);
-    form.template["data"]["is_draft"] = json!(is_draft);
+    form["data"]["is_remote"] = json!(is_remote);
+    form["data"]["is_draft"] = json!(is_draft);
 
     // Validate dates and set an issue in the form if there is one.
     // Get the selected semester info from the context object.
-    let selected_semester: &Value = form.template["context"]["available_semesters"]
+    let selected_semester: &Value = form["context"]["available_semesters"]
         .as_array()
         .expect("There should be an available semesters array in the meeting context.")
         .iter()
         .find(|available_semester| available_semester["semester_id"] == semester.as_str())
         .ok_or(TelescopeError::BadRequest {
             header: "Malformed Meeting Edit Form".into(),
-            message: "Selected semester in available semester list.".into(),
+            message: "Select semester in available semester list.".into(),
             show_status_code: false,
         })?;
 
@@ -257,20 +260,15 @@ async fn submit_meeting_edits(
     let (semester_start, semester_end) = get_semester_bounds(selected_semester);
 
     if end_date < start_date {
-        form.template["issues"]["end_date"] = json!("End date is before start date.");
+        form["issues"]["end_date"] = json!("End date is before start date.");
     } else if start_date > semester_end {
-        form.template["issues"]["start_date"] = json!("Start date is after end of semester.");
+        form["issues"]["start_date"] = json!("Start date is after end of semester.");
     } else if end_date > semester_end {
-        form.template["issues"]["end_date"] = json!("End date is after end of semester.");
+        form["issues"]["end_date"] = json!("End date is after end of semester.");
     } else if start_date < semester_start {
-        form.template["issues"]["start_date"] = json!("Start date is before semester starts.");
+        form["issues"]["start_date"] = json!("Start date is before semester starts.");
     } else if end_date < semester_start {
-        form.template["issues"]["end_date"] = json!("End date is before semester starts.");
-    }
-
-    // If there was an issue, return the form as invalid.
-    if form.template["issues"] != json!(null) {
-        return Err(TelescopeError::invalid_form(&form));
+        form["issues"]["end_date"] = json!("End date is before semester starts.");
     }
 
     // Parse times
@@ -294,8 +292,19 @@ async fn submit_meeting_edits(
 
     // Make sure meeting starts before it ends.
     if start > end {
-        form.template["issues"]["end_time"] = json!("End time is before start time.");
-        return Err(TelescopeError::invalid_form(&form));
+        form["issues"]["end_time"] = json!("End time is before start time.");
+    }
+
+    // If there was an issue, return the form as invalid.
+    if form["issues"] != json!(null) {
+        // Render page.
+        let page = form
+            .in_page(
+                &req,
+                format!("Edit {}", resolve_meeting_title(&meeting_data)),
+            )
+            .await?;
+        return Err(TelescopeError::InvalidForm(page));
     }
 
     // Add timestamps.
@@ -329,7 +338,7 @@ async fn submit_meeting_edits(
         external_slides_url: normalize_url(external_slides_url),
         recording_url: normalize_url(recording_url),
         // Extract the host from context object.
-        host: form.template["context"]["host"][0]["id"]
+        host: form["context"]["host"][0]["id"]
             .as_str()
             .and_then(|host_id| host_id.parse::<Uuid>().ok()),
     };
@@ -351,7 +360,7 @@ async fn host_selection(
     Path(meeting_id): Path<i64>,
     auth: AuthenticationCookie,
     req: HttpRequest,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Check that the user can edit this meeting.
     let viewer = auth.get_user_id_or_error().await?;
     if !AuthorizationFor::get(Some(viewer))
@@ -367,6 +376,6 @@ async fn host_selection(
 
     // Create host selection page template.
     let mut template: Template = Template::new(HOST_SELECTION_TEMPLATE);
-    template.set_field("data", data);
-    return template.render_into_page(&req, "Select Host").await;
+    template["data"] = json!(data);
+    return template.in_page(&req, "Select Host").await;
 }

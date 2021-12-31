@@ -7,29 +7,13 @@ use uuid::Uuid;
 
 use crate::api::rcos::users::developers_page::{AllDevelopers, CurrentDevelopers, PER_PAGE};
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 use crate::templates::pagination::PaginationInfo;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
 
 /// The path to the developers page template from the templates directory.
 const TEMPLATE_PATH: &'static str = "user/developers";
-
-/// Handlebars key for the query info.
-const QUERY: &'static str = "query";
-
-/// Handlebars key for the RCOS API data.
-const DATA: &'static str = "data";
-
-/// Handlebars key for the viewer's user ID.
-const IDENTITY: &'static str = "identity";
-
-/// Handlebars key for the preserved query string from the request.
-/// This should be appended to sub-page links in the template to maintain
-/// consistent user ordering.
-const PRESERVED_QUERY: &'static str = "preserved_query_string";
-
-/// Handlebars key for the value of the pagination info.
-const PAGINATION: &'static str = "pagination";
 
 /// The query parameters passed to the developers page indicating pagination
 /// data and any filters.
@@ -73,7 +57,7 @@ pub async fn developers_page(
     identity: Identity,
     page: Option<Path<u32>>,
     Query(query): Query<DevelopersPageQuery>,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Resolve the page number from the request
     let page_num: u32 = page
         // Extract from path if available.
@@ -103,14 +87,15 @@ pub async fn developers_page(
     // Get the viewers user ID
     let viewer: Option<Uuid> = identity.get_user_id().await?;
 
-    // Render the developers page template and return it inside a page.
-    Template::new(TEMPLATE_PATH)
-        // Add 1 to the page number for use in UI.
-        .field(PAGINATION, get_page_numbers(&api_data, page_num as u64 + 1))
-        .field(DATA, api_data)
-        .field(QUERY, query)
-        .field(IDENTITY, viewer)
-        .field(PRESERVED_QUERY, req.query_string())
-        .render_into_page(&req, "Developers")
-        .await
+    // Build developers page template.
+    let mut template = Template::new(TEMPLATE_PATH);
+    template.fields = json!({
+        "pagination": get_page_numbers(&api_data, page_num as u64 + 1),
+        "data": api_data,
+        "query": query,
+        "identity": viewer,
+        "preserved_query_string": req.query_string()
+    });
+
+    return template.in_page(&req, "Developers").await;
 }
