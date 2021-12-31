@@ -2,7 +2,6 @@ use crate::error::TelescopeError;
 use crate::templates::Template;
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use futures::future::{Ready, ready};
-use serde_json::Value;
 use crate::templates::navbar::Navbar;
 use crate::templates::tags::Tags;
 

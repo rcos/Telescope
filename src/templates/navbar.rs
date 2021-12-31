@@ -2,11 +2,9 @@
 
 use crate::api::rcos::users::navbar_auth::Authentication;
 use crate::error::TelescopeError;
-use crate::templates::Template;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
-use serde_json::Value;
 use uuid::Uuid;
 
 /// The values used for rendering the navbar template at the top of every page.

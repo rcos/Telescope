@@ -1,6 +1,6 @@
 //! Error handling.
 
-use crate::templates::{jumbotron, page, Template};
+use crate::templates::{jumbotron, Template};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::error::Error as ActixError;
 use actix_web::http::header::CONTENT_TYPE;
@@ -10,7 +10,6 @@ use actix_web::{HttpRequest, HttpResponse, ResponseError};
 use graphql_client::Error as GraphQlError;
 use handlebars::RenderError;
 use reqwest::Error as ReqwestError;
-use serde_json::Value;
 use std::error::Error;
 use std::fmt;
 use crate::templates::page::Page;

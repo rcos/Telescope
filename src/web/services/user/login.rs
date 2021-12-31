@@ -1,7 +1,7 @@
 //! Login and logout
 
 use crate::error::TelescopeError;
-use crate::templates::{auth, page, Template};
+use crate::templates::auth;
 use crate::web::services::auth::identity::Identity;
 use actix_web::http::header::LOCATION;
 use actix_web::{HttpRequest, HttpResponse};

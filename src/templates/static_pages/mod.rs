@@ -1,5 +1,5 @@
 use crate::error::TelescopeError;
-use crate::templates::{page, Template};
+use crate::templates::Template;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 use crate::templates::page::Page;

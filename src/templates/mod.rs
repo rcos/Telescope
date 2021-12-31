@@ -1,10 +1,8 @@
 use std::ops::{Index, IndexMut};
-
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use futures::future::{ready, Ready};
 use serde::Serialize;
-use serde_json::{Map, Value};
-
+use serde_json::Value;
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
 use crate::templates::page::Page;

@@ -6,7 +6,6 @@ use crate::web::services::admin::semesters::semester_id_valid;
 use actix_web::http::header::LOCATION;
 use actix_web::{web::Form, HttpResponse, HttpRequest, Responder};
 use chrono::NaiveDate;
-use crate::templates::page::Page;
 use crate::templates::Template;
 
 /// Create an empty form template for semester creation.
