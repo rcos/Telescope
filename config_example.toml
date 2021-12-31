@@ -33,6 +33,12 @@ api_url = "http://hasura:8080/v1/graphql"
 jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # [REQUIRED]
+# The URL that Telescope is running at. This is used to generate links for
+# Discord embeds and for the Open Graph Protocol tags. This should not end with
+# a slash.
+telescope_url = "https://rcos.io"
+
+# [REQUIRED]
 # The GitHub OAuth application credentials.
 # These can be generated at https://github.com/settings/applications/new.
 # Make sure the redirect URL matches the homepage URL followed by
@@ -61,10 +67,6 @@ client_secret = "****************************************"
 # The discord bot token. Generate this under your application settings
 # in the Discord developer dashboard.
 bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# [REQUIRED]
-# The URL that Telescope is running at. This is used to generate links for
-# Discord embeds.
-telescope_url = "https://rcos.io"
 # [REQUIRED]
 # RCOS Discord Server ID. Telescope's bot is a single server bot.
 # No commands are available in any other servers. This must be the ID of the one

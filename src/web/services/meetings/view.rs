@@ -73,7 +73,7 @@ pub async fn meeting(
     };
     tags.url = format!(
         "{}/meeting/{}",
-        global_config().discord_config.telescope_url,
+        global_config().telescope_url,
         meeting_id
     );
 
