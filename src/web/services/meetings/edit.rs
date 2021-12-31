@@ -93,17 +93,19 @@ fn resolve_host_user_id(
     meeting_data: &MeetingMeeting,
     set_host: Option<Query<HostQuery>>,
 ) -> Option<Uuid> {
-    // The current host ID from the meeting data.
-    let existing_host: Option<Uuid> = meeting_data.host.as_ref().map(|h| h.id);
+    match set_host {
+        // If there is a specified nil UUID we want no host. Otherwise, we want the specified UUID.
+        Some(Query(HostQuery{ set_host })) => {
+            if set_host.is_nil() {
+                None
+            } else {
+                Some(set_host)
+            }
+        },
 
-    // The new host's user ID if not set to nil.
-    let new_host: Option<Uuid> = set_host.and_then(|q| {
-        let set_host = q.set_host;
-        // Check for nil UUID here.
-        (!set_host.is_nil()).then(|| set_host)
-    });
-
-    return new_host.or(existing_host);
+        // If there is no host query then use the existing host parameter (which may be none).
+        None => meeting_data.host.as_ref().map(|h| h.id),
+    }
 }
 
 /// Resolve the meeting title value. This is the supplied title or a combination of the meeting
