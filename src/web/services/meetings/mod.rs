@@ -1,12 +1,12 @@
 //! Meetings page and services
 
-use actix_web::dev::ServiceRequest;
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
 use crate::error::TelescopeError;
+use crate::middlewares::authorization::util::extract_user_id;
 use crate::web::middlewares::authorization::Authorization;
+use actix_web::dev::ServiceRequest;
 use actix_web::web::ServiceConfig;
 use uuid::Uuid;
-use crate::middlewares::authorization::util::extract_user_id;
 
 mod create;
 mod delete;
@@ -35,7 +35,9 @@ pub fn register(config: &mut ServiceConfig) {
 }
 
 /// Create an authorization middleware based on a meeting authorization function.
-fn make_meeting_auth_middleware<F: 'static + Fn(&UserMeetingAuthorization) -> bool>(f: &'static F) -> Authorization {
+fn make_meeting_auth_middleware<F: 'static + Fn(&UserMeetingAuthorization) -> bool>(
+    f: &'static F,
+) -> Authorization {
     Authorization::new(move |request: &ServiceRequest| {
         Box::pin(async move {
             // Get the user ID.

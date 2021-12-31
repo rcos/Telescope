@@ -2,20 +2,20 @@
 
 mod semesters;
 
-use actix_web::dev::ServiceRequest;
 use crate::api::rcos::users::role_lookup::RoleLookup;
 use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
+use crate::middlewares::authorization::util::extract_user_id;
 use crate::templates::page::Page;
 use crate::templates::Template;
 use crate::web::middlewares::authorization::{Authorization, AuthorizationResult};
+use actix_web::dev::ServiceRequest;
 use actix_web::guard;
 use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 use uuid::Uuid;
-use crate::middlewares::authorization::util::extract_user_id;
 
 /// Check that a user is an admin, in the form of an authorization middleware.
 fn admin_auth_middleware(req: &ServiceRequest) -> LocalBoxFuture<AuthorizationResult> {

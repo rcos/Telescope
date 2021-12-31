@@ -7,7 +7,7 @@ use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
     error::Error as ActixError,
 };
-use futures::future::{LocalBoxFuture, ok, Ready};
+use futures::future::{ok, LocalBoxFuture, Ready};
 use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
@@ -21,7 +21,8 @@ pub type AuthorizationResult = Result<(), TelescopeError>;
 /// Authorization functions accept a reference to a `ServiceRequest` and use
 /// it to determine whether the user can access a given page or endpoint. The
 /// response should be `Ok(())` on success or a telescope error preventing access.
-type AuthorizationCheck = Rc<dyn for<'a> Fn(&'a ServiceRequest) -> LocalBoxFuture<'a, AuthorizationResult>>;
+type AuthorizationCheck =
+    Rc<dyn for<'a> Fn(&'a ServiceRequest) -> LocalBoxFuture<'a, AuthorizationResult>>;
 // Use the higher rank lifetime bound to satisfy the compiler.
 
 /// Authorization middleware check's a user's credentials using a stored function
@@ -49,9 +50,12 @@ pub struct AuthorizedAccess<S: 'static> {
 impl Authorization {
     /// Construct a new authorization transform.
     pub fn new<F>(func: F) -> Self
-    where F: 'static + for<'a> Fn(&'a ServiceRequest) -> LocalBoxFuture<'a, AuthorizationResult>
+    where
+        F: 'static + for<'a> Fn(&'a ServiceRequest) -> LocalBoxFuture<'a, AuthorizationResult>,
     {
-        Self { check: Rc::new(func) }
+        Self {
+            check: Rc::new(func),
+        }
     }
 }
 
@@ -105,7 +109,7 @@ where
                 Err(error) => Ok(req.error_response(error)),
 
                 // Otherwise the user is authorized. Call the service.
-                Ok(_) => service.call(req).await
+                Ok(_) => service.call(req).await,
             }
         });
     }

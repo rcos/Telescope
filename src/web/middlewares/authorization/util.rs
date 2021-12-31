@@ -1,10 +1,10 @@
 //! Utility functions to help in the creation of authorization middlewares.
 
-use actix_web::dev::ServiceRequest;
-use uuid::Uuid;
-use actix_identity::RequestIdentity;
 use crate::error::TelescopeError;
 use crate::web::services::auth::identity::AuthenticationCookie;
+use actix_identity::RequestIdentity;
+use actix_web::dev::ServiceRequest;
+use uuid::Uuid;
 
 /// Extract the RCOS user ID authenticated with a request or error.
 pub async fn extract_user_id(req: &ServiceRequest) -> Result<Uuid, TelescopeError> {

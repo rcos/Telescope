@@ -257,9 +257,7 @@ async fn save_changes(
         let cohort_int = cohort.unwrap();
         let year: i64 = Local::today().year() as i64;
         if cohort_int < 1824 || cohort_int > year {
-            form["issues"]["cohort"] = json!(
-                format!("Year must be between 1824 and {}", year)
-            );
+            form["issues"]["cohort"] = json!(format!("Year must be between 1824 and {}", year));
         }
     }
 
