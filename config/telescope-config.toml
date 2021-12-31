@@ -2,6 +2,7 @@
 
 log_level = "warn,telescope=info,actix_server=info,actix_web=info,actix=info,reqwest=info"
 api_url = "http://hasura:8080/v1/graphql"
+telescope_url = "https://rcos.io"
 
 # RCOS JWT Secret
 jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -16,5 +17,4 @@ client_secret = "****************************************"
 client_id = "xxxxxxxxxxxxxxxxxxxx"
 client_secret = "****************************************"
 bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-telescope_url = "https://rcos.io"
 rcos_guild_id = "xxxxxxxxxxxxxxxxxx"
