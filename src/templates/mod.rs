@@ -10,7 +10,6 @@ use crate::error::TelescopeError;
 use crate::templates::page::Page;
 
 pub mod auth;
-pub mod forms;
 pub mod helpers;
 pub mod jumbotron;
 pub mod navbar;
