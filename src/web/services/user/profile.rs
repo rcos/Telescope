@@ -249,6 +249,20 @@ async fn save_changes(
     // Convert the cohort to a number or default to no cohort input. This should be checked client side.
     let cohort: Option<i64> = cohort.parse::<i64>().ok();
 
+    // Check if user is allowed to set their cohort and if it is within the valid range.
+    if cohort.is_some() {
+        if auth.get_rcs_id().await.unwrap().is_none() {
+            form["issues"]["cohort"] = json!("Please link RPI CAS before setting this.");
+        }
+        let cohort_int = cohort.unwrap();
+        let year: i64 = Local::today().year() as i64;
+        if cohort_int < 1824 || cohort_int > year {
+            form["issues"]["cohort"] = json!(
+                format!("Year must be between 1824 and {}", year)
+            );
+        }
+    }
+
     // Check that the current user role can switch to the submitted role.
     // First get the json version of the role as a string.
     let role_json: String = json!(role)
