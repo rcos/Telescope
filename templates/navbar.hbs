@@ -52,9 +52,9 @@
             </li>
 
             {{! Privileged nav links }}
-            {{#if is_student}}
-                {{#if is_mentor}}
-                    {{#if is_coordinator}}
+            {{#if (or is_student (or is_mentor (or is_coordinator is_admin)))}}
+                {{#if (or is_mentor (or is_coordinator is_admin))}}
+                    {{#if (or is_coordinator is_admin)}}
                         {{#if is_admin}}
                             {{! Admin panel }}
                             <li class="nav-item {{#if (eq req_path "/admin")}} active {{/if}}">
@@ -107,7 +107,7 @@
                     </a>
                 </li>
             {{else}}
-                {{#with user_id}}
+                {{#if user_id}}
                     {{! Link to profile and logout }}
 
                     {{! Profile }}
@@ -139,7 +139,7 @@
                             Login
                         </a>
                     </li>
-                {{/with}}
+                {{/if}}
             {{/if}}
         </ul>
     </nav>
