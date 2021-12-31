@@ -3,17 +3,18 @@
 use crate::api::rcos::semesters::get_by_id::{semester::SemesterSemestersByPk, Semester};
 use crate::api::rcos::semesters::mutations::edit::EditSemester;
 use crate::error::TelescopeError;
-use crate::templates::forms::FormTemplate;
 use actix_web::http::header::LOCATION;
 use actix_web::web::Form;
-use actix_web::{web::Path, HttpResponse};
+use actix_web::{web::Path, HttpResponse, HttpRequest};
 use chrono::NaiveDate;
+use crate::templates::page::Page;
+use crate::templates::Template;
 
 /// Make the form template for the semester edits.
-fn make_edit_form(id: String, title: String, start: NaiveDate, end: NaiveDate) -> FormTemplate {
-    let mut form = FormTemplate::new("admin/semesters/forms/edit", "Edit Semester");
+fn make_edit_form(id: String, title: String, start: NaiveDate, end: NaiveDate) -> Template {
+    let mut form = Template::new("admin/semesters/forms/edit");
 
-    form.template = json!({
+    form.fields = json!({
         "id": id,
         "title": {"value": title},
         "start": {"value": start},
@@ -33,7 +34,7 @@ pub struct SemesterEdits {
 
 /// Service to display the semester edit form.
 #[get("/semesters/edit/{semester_id}")]
-pub async fn edit(Path(semester_id): Path<String>) -> Result<FormTemplate, TelescopeError> {
+pub async fn edit(req: HttpRequest, Path(semester_id): Path<String>) -> Result<Page, TelescopeError> {
     // First lookup the semester.
     let semester_data = Semester::get_by_id(semester_id).await?;
 
@@ -52,13 +53,17 @@ pub async fn edit(Path(semester_id): Path<String>) -> Result<FormTemplate, Teles
         start_date,
         end_date,
     } = semester_data.unwrap();
+
     // Build and return the form with it.
-    return Ok(make_edit_form(semester_id, title, start_date, end_date));
+    make_edit_form(semester_id, title, start_date, end_date)
+        .in_page(&req, "Edit Semester")
+        .await
 }
 
 /// Service to receive semester edits.
 #[post("/semesters/edit/{semester_id}")]
 pub async fn submit_edit(
+    req: HttpRequest,
     Path(semester_id): Path<String>,
     Form(SemesterEdits { title, start, end }): Form<SemesterEdits>,
 ) -> Result<HttpResponse, TelescopeError> {
@@ -67,16 +72,18 @@ pub async fn submit_edit(
 
     // Validate title
     if title.trim().is_empty() {
-        let mut return_form: FormTemplate = make_edit_form(semester_id, title, start, end);
-        return_form.template["title"]["issue"] = json!("Title cannot be empty.");
-        return Err(TelescopeError::invalid_form(&return_form));
+        let mut return_form_template: Template = make_edit_form(semester_id, title, start, end);
+        return_form_template.fields["title"]["issue"] = json!("Title cannot be empty.");
+        let page = return_form_template.in_page(&req, "Edit Semester").await?;
+        return Err(TelescopeError::InvalidForm(page));
     }
 
     // Validate dates.
     if start >= end {
-        let mut return_form: FormTemplate = make_edit_form(semester_id, title, start, end);
-        return_form.template["start"]["issue"] = json!("Start date must be before end date.");
-        return Err(TelescopeError::invalid_form(&return_form));
+        let mut return_form_template: Template = make_edit_form(semester_id, title, start, end);
+        return_form_template.fields["start"]["issue"] = json!("Start date must be before end date.");
+        let page = return_form_template.in_page(&req, "Edit Semester").await?;
+        return Err(TelescopeError::InvalidForm(page));
     }
 
     // Data is valid. Execute changes.

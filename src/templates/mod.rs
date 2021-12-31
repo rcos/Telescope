@@ -7,6 +7,7 @@ use serde_json::{Map, Value};
 
 use crate::app_data::AppData;
 use crate::error::TelescopeError;
+use crate::templates::page::Page;
 
 pub mod auth;
 pub mod forms;
@@ -19,15 +20,13 @@ pub mod static_pages;
 pub mod tags;
 
 /// A template that can be rendered using the handlebars template registry.
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Template {
     /// The file to use to render this template.
-    #[serde(skip)]
-    handlebars_file: &'static str,
+    pub handlebars_file: String,
 
     /// The fields to render.
-    #[serde(flatten)]
-    fields: Map<String, Value>,
+    pub fields: Value,
 }
 
 impl Template {
@@ -35,23 +34,9 @@ impl Template {
     /// the templates directory.
     pub fn new(path: &'static str) -> Self {
         Self {
-            handlebars_file: path,
-            fields: Map::new(),
+            handlebars_file: path.into(),
+            fields: json!({}),
         }
-    }
-
-    /// Builder style method to add a field to this template instance.
-    /// This will panic if there is a serialization failure.
-    pub fn field(mut self, key: impl Into<String>, val: impl Serialize) -> Self {
-        self.set_field(key, val);
-        self
-    }
-
-    /// Setter method for fields on this template instance.
-    /// This will panic if there is a serialization failure.
-    pub fn set_field(&mut self, key: impl Into<String>, val: impl Serialize) {
-        let serialized_val = serde_json::to_value(val).expect("Failed to serialize value");
-        self.fields.insert(key.into(), serialized_val);
     }
 
     /// Render this template using the global handlebars registry.
@@ -60,51 +45,34 @@ impl Template {
             // Get the global handlebars registry
             .get_handlebars_registry()
             // Render this template's file with this template's data
-            .render(self.handlebars_file, self)
+            .render(self.handlebars_file.as_str(), &self.fields)
             // Convert any rendering errors that occur.
             .map_err(TelescopeError::RenderingError)
     }
 
     /// Render this template as the content of a page.
-    pub async fn render_into_page(
-        &self,
-        req: &HttpRequest,
-        title: impl Into<Value>,
-    ) -> Result<Template, TelescopeError> {
-        Self::render_into_page_with_tags(self, req, title, None).await
-    }
-
-    pub async fn render_into_page_with_tags(
-        &self,
-        req: &HttpRequest,
-        title: impl Into<Value>,
-        tags: Option<tags::Tags>
-    ) -> Result<Template, TelescopeError> {
-        page::of_with_tags(req, title, self, tags).await
+    pub async fn in_page(self, req: &HttpRequest, title: impl Into<String>) -> Result<Page, TelescopeError> {
+        Page::new(req, title, self).await
     }
 }
 
-impl<T: Into<String>> Index<T> for Template {
+impl<T> Index<T> for Template
+where T: serde_json::value::Index {
     type Output = Value;
 
     /// Returns [`Value::Null`] if the key is not in the template.
     fn index(&self, index: T) -> &Self::Output {
         // Immutable indexing for fields.
-        self.fields
-            .get(index.into().as_str())
-            .unwrap_or(&Value::Null)
+        self.fields.index(index)
     }
 }
 
-impl<T: Into<String>> IndexMut<T> for Template {
+impl<T> IndexMut<T> for Template
+where T: serde_json::value::Index {
     /// Returns the existing value or creates a new empty object at the location
     /// and returns a reference to that.
     fn index_mut(&mut self, index: T) -> &mut Self::Output {
-        self.fields
-            // Get the existing entry if available
-            .entry(index)
-            // Or insert an empty object.
-            .or_insert(json!({}))
+        self.fields.index_mut(index)
     }
 }
 

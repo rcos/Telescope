@@ -4,11 +4,13 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-            {{> og_tags tags}}
+        {{! Open Graph Protocol meta tags }}
+        {{> og_tags tags }}
 
         <title>
             {{title}}
         </title>
+
         <link rel="stylesheet" href="/static/styles/base.css" type="text/css">
         <link rel="shortcut icon" type="image/png" href="/static/icons/rcos-branding/img/logo-circle-red.png">
 
@@ -28,7 +30,7 @@
     </head>
     <body class="bg-dark text-light d-flex flex-column min-vh-100">
         <header>
-            {{> navbar/navbar this.navbar}}
+            {{> navbar this.navbar}}
         </header>
         <div class="container px-1 align-items-center mb-2">
             {{{ content }}}

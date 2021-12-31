@@ -1,64 +1,77 @@
 use crate::error::TelescopeError;
-use crate::templates::navbar;
 use crate::templates::Template;
-use crate::templates::tags;
-use actix_web::HttpRequest;
+use actix_web::{HttpRequest, HttpResponse, Responder};
+use futures::future::{Ready, ready};
 use serde_json::Value;
+use crate::templates::navbar::Navbar;
+use crate::templates::tags::Tags;
 
-/// The path to the page template from the templates directory.
-const TEMPLATE_PATH: &'static str = "page";
+/// The template for a page shown to the user.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Page {
+    /// The page title. Displayed on the tab in browser. Not necessarily the
+    /// same as the OGP title.
+    pub title: String,
 
-/// The handlebars field to store the title.
-pub const TITLE: &'static str = "title";
+    /// The value used to render the navbar.
+    pub navbar: Navbar,
 
-/// The handlebars field to store the navbar object.
-pub const NAVBAR: &'static str = "navbar";
+    /// The content that will be rendered in the page.
+    pub content: Template,
 
-/// The handlebars field to store the content of the page.
-pub const CONTENT: &'static str = "content";
+    /// The current telescope version.
+    version: String,
 
-/// The handlebars field to store the version that telescope
-/// is currently running.
-pub const VERSION: &'static str = "version";
-
-/// The handlebars field to fill OG tags
-pub const TAGS: &'static str = "tags";
-
-/// Calls of_with_tags with a None option for tags so default tags are used
-pub async fn of(
-    req: &HttpRequest,
-    title: impl Into<Value>,
-    content: &Template
-) -> Result<Template, TelescopeError> {
-    of_with_tags(req, title, content, None).await
+    /// Open Graph Protocol tags.
+    pub ogp_tags: Tags,
 }
 
-/// Create a new template object to hold the page.
-/// The content of the page is rendered here and must be re-rendered if updated.
-pub async fn of_with_tags(
-    req: &HttpRequest,
-    title: impl Into<Value>,
-    content: &Template,
-    tags: Option<tags::Tags>
-) -> Result<Template, TelescopeError> {
-    // Render the content of this page
-    let content_rendered: String = content.render()?;
-    // Create the page.
-    return with_content(req, title, content_rendered.as_str(), tags).await;
+impl Page {
+    /// The path to the page template from the templates directory.
+    const TEMPLATE_PATH: &'static str = "page";
+
+    /// Create a page. Use default OGP tags. Call API to determine navbar privileges.
+    pub async fn new(request: &HttpRequest, title: impl Into<String>, content: Template) -> Result<Self, TelescopeError> {
+        Ok(Page {
+            title: title.into(),
+            navbar: Navbar::for_request(request).await?,
+            content,
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            ogp_tags: Tags::for_request(request)
+        })
+    }
+
+    /// Render the page content and turn the page object into a template object.
+    pub fn as_template(&self) -> Result<Template, TelescopeError> {
+        // Render the page content.
+        let content_rendered: String = self.content.render()?;
+        // Turn this object into a JSON value.
+        let mut template = Template::new(Self::TEMPLATE_PATH);
+        // Set the fields of the template to this object.
+        template.fields = json!(&self);
+        // Replace the content field with the rendered content.
+        template["content"] = json!(content_rendered);
+        // Return the template.
+        return Ok(template);
+    }
+
+    /// Render this page into a string using the handlebars template registry.
+    pub fn render(&self) -> Result<String, TelescopeError> {
+        self.as_template()?.render()
+    }
 }
 
-/// Create a template with a content string rather than another template.
-pub async fn with_content(
-    req: &HttpRequest,
-    title: impl Into<Value>,
-    content: &str,
-    tags: Option<tags::Tags>
-) -> Result<Template, TelescopeError> {
-    // Build the rest of the page
-    Ok(Template::new(TEMPLATE_PATH)
-        .field(TITLE, title.into())
-        .field(NAVBAR, navbar::for_request(req).await?)
-        .field(CONTENT, content)
-        .field(VERSION, env!("CARGO_PKG_VERSION"))
-        .field(TAGS, tags.unwrap_or(tags::Tags::default())))
+// Implement responder for page so that we can return pages from services/handlers.
+impl Responder for Page {
+    type Error = TelescopeError;
+    type Future = Ready<Result<HttpResponse, Self::Error>>;
+
+    fn respond_to(self, req: &HttpRequest) -> Self::Future {
+        match self.as_template() {
+            // If content can be rendered, respond using the normal template responder.
+            Ok(template) => template.respond_to(req),
+            // Otherwise return the error immediately.
+            Err(err) => ready(Err(err))
+        }
+    }
 }

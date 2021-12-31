@@ -78,7 +78,10 @@ pub fn login() -> Template {
     ];
 
     // Create and return template.
-    return empty().field(HEADER, "Sign In").field(ITEMS, items);
+    let mut template = empty();
+    template[HEADER] = json!("Sign In");
+    template[ITEMS] = json!(items);
+    return template;
 }
 
 /// Create a template to offer the users options to register a new account.
@@ -108,5 +111,8 @@ pub fn register() -> Template {
     ];
 
     // Create and return template.
-    return empty().field(HEADER, "Create account").field(ITEMS, items);
+    let mut template = empty();
+    template[HEADER] = json!("Create Account");
+    template[ITEMS] = json!(items);
+    return template;
 }

@@ -9,137 +9,82 @@ use actix_web::HttpRequest;
 use serde_json::Value;
 use uuid::Uuid;
 
-/// The handlebars key for the links on the left side of the navbar.
-pub const LEFT_ITEMS: &'static str = "left_items";
-
-/// The handlebars key for the links on the right side of the navbar.
-pub const RIGHT_ITEMS: &'static str = "right_items";
-
-/// The handlebars key for denoting whether an item on the navbar is active.
-pub const IS_ACTIVE: &'static str = "is_active";
-
-/// The handlebars key for the URL of a navbar link.
-pub const LOCATION: &'static str = "location";
-
-/// The handlebars key for the CSS class attributes of a link on the navbar.
-pub const CLASS: &'static str = "class";
-
-/// The handlebars key for the text inside a link on the navbar.
-pub const TEXT: &'static str = "text";
-
-/// Create an empty navbar template with a reference to the navbar handlebars
-/// file.
-fn empty_navbar() -> Template {
-    Template::new("navbar/navbar")
+/// The values used for rendering the navbar template at the top of every page.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Navbar {
+    /// If the currently signed in user is an admin.
+    is_admin: bool,
+    /// If the currently signed in user is a coordinator.
+    is_coordinator: bool,
+    /// If the currently signed in user is a mentor.
+    is_mentor: bool,
+    /// If the currently signed in user is a student.
+    is_student: bool,
+    /// The user ID of the currently signed in user.
+    user_id: Option<Uuid>,
+    /// If the viewer is creating an account.
+    creating_account: bool,
+    /// The path of the request to mark a navbar item as active or not.
+    req_path: String
 }
 
-/// Create a navbar item with the given text and location.
-fn item(req_path: &str, text: impl Into<String>, location: impl Into<String>) -> Template {
-    let loc_str: String = location.into();
-    Template::new("navbar/item")
-        .field(TEXT, text.into())
-        .field(LOCATION, loc_str.as_str())
-        .field(IS_ACTIVE, req_path == loc_str.as_str())
-        .field(CLASS, "nav-link")
-}
-
-/// Create an empty navbar and add the default links that should be visible to
-/// everyone at all times.
-fn with_defaults(req_path: &str) -> Template {
-    let left_items = vec![
-        item(req_path, "Home", "/"),
-        item(req_path, "Projects", "/projects"),
-        item(req_path, "Developers", "/developers"),
-        item(req_path, "Sponsors", "/sponsors"),
-        // item(req_path, "Blog", "/blog"),
-        item(req_path, "Meetings", "/meetings"),
-    ];
-
-    // Add items to empty navbar.
-    empty_navbar().field(LEFT_ITEMS, left_items)
-}
-
-/// Construct a navbar for an anonymous viewer by adding onto the defaults.
-fn userless(req_path: &str) -> Template {
-    let right_items = vec![
-        item(req_path, "Sign Up", "/register").field(CLASS, "btn mr-2 mb-2 btn-primary"),
-        item(req_path, "Sign In", "/login").field(CLASS, "btn mr-2 mb-2 btn-primary"),
-    ];
-
-    // Add items to right side of navbar.
-    with_defaults(req_path).field(RIGHT_ITEMS, right_items)
-}
-
-/// Construct a navbar for a given user ID
-async fn for_user(req_path: &str, user_id: Uuid) -> Result<Template, TelescopeError> {
-    // Get the navbar auth for this user
-    let navbar_auth = Authentication::get(user_id).await?;
-
-    let right_items = vec![
-        item(req_path, "Profile", format!("/user/{}", user_id))
-            .field(CLASS, "btn mr-2 mb-2 btn-primary"),
-        item(req_path, "Logout", "/logout").field(CLASS, "btn mr-2 mb-2 btn-secondary"),
-    ];
-
-    // Add items to right side of navbar
-    let mut base_navbar = with_defaults(req_path).field(RIGHT_ITEMS, right_items);
-
-    // Get mutable ref to left side of navbar.
-    let left_items = base_navbar[LEFT_ITEMS].as_array_mut().unwrap();
-
-    // Make items to add for privileged users and convert to JSON values.
-    let admin_link = Value::Object(item(req_path, "Admin", "/admin").fields);
-    let coord_link = Value::Object(item(req_path, "Coordinate", "/coordinate").fields);
-    let mentor_link = Value::Object(item(req_path, "Mentor", "/mentor").fields);
-    let attend_link = Value::Object(item(req_path, "Engage", "/engage").fields);
-
-    // Add items as necessary based on authentication.
-    if navbar_auth.is_admin() {
-        left_items.push(admin_link);
-        left_items.push(coord_link);
-        left_items.push(mentor_link);
-        left_items.push(attend_link);
-    } else if navbar_auth.is_coordinating() {
-        left_items.push(coord_link);
-        left_items.push(mentor_link);
-        left_items.push(attend_link);
-    } else if navbar_auth.is_mentoring() {
-        left_items.push(mentor_link);
-        left_items.push(attend_link);
-    } else if navbar_auth.is_student() {
-        left_items.push(attend_link);
+impl Navbar {
+    /// Create the most empty navbar with all default values.
+    fn empty() -> Self {
+        Navbar {
+            is_admin: false,
+            is_coordinator: false,
+            is_mentor: false,
+            is_student: false,
+            user_id: None,
+            creating_account: false,
+            req_path: "".to_string()
+        }
     }
 
-    return Ok(base_navbar);
-}
-
-/// Construct a navbar for a user who is partway through account creation and doesn't
-/// have a user ID yet.
-fn for_auth(req_path: &str) -> Template {
-    with_defaults(req_path).field(
-        RIGHT_ITEMS,
-        vec![item(req_path, "Cancel Account Creation", "/logout")
-            .field(CLASS, "btn mr-2 mb-2 btn-danger")],
-    )
-}
-
-/// Create a navbar template for a given request.
-pub async fn for_request(req: &HttpRequest) -> Result<Template, TelescopeError> {
-    // Extract the authenticated identities from the request.
-    let identity: Option<AuthenticationCookie> = Identity::extract(req).await?.identity().await;
-
-    // If the user is authenticated.
-    if let Some(authenticated) = identity {
-        // Check if there is an authenticated RCOS account
-        if let Some(user_id) = authenticated.get_user_id().await? {
-            // If there is make a navbar with the user ID.
-            return Ok(for_user(req.path(), user_id).await?);
-        } else {
-            // Otherwise the user is in the middle of creating an account.
-            return Ok(for_auth(req.path()));
+    /// Create a navbar for a viewer without an account. This is the default navbar.
+    fn userless(request: &HttpRequest) -> Self {
+        Navbar {
+            req_path: request.path().to_string(),
+            // Fill remaining fields from empty navbar.
+            ..Self::empty()
         }
-    } else {
-        // If the user is not authenticated or there is no user ID, return a user-less navbar.
-        return Ok(userless(req.path()));
+    }
+
+    /// Create a navbar and fill appropriately based on request parameters.
+    pub async fn for_request(request: &HttpRequest) -> Result<Self, TelescopeError> {
+        // Extract the authenticated identities from the request.
+        let identity: Option<AuthenticationCookie> = Identity::extract(request)
+            .await?
+            .identity()
+            .await;
+
+        // If the user is authenticated.
+        if let Some(authenticated) = identity {
+            // Create a navbar instance to modify and return.
+            let mut navbar = Self::userless(request);
+
+            // Check if there is an authenticated RCOS account
+            if let Some(user_id) = authenticated.get_user_id().await? {
+                // If there is make a navbar with the user ID.
+                // Get the navbar auth for this user.
+                let navbar_auth = Authentication::get(user_id).await?;
+                // Modify navbar as necessary.
+                navbar.user_id = Some(user_id);
+                navbar.is_admin = navbar_auth.is_admin();
+                navbar.is_coordinator = navbar_auth.is_coordinating();
+                navbar.is_mentor = navbar_auth.is_mentoring();
+                navbar.is_student = navbar_auth.is_student();
+                // Return modified navbar.
+                return Ok(navbar);
+            } else {
+                // Otherwise the user is in the middle of creating an account.
+                navbar.creating_account = true;
+                return Ok(navbar);
+            }
+        } else {
+            // If the user is not authenticated or there is no user ID, return a default navbar.
+            return Ok(Self::userless(request));
+        }
     }
 }

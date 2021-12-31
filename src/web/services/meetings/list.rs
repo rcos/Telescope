@@ -9,6 +9,7 @@ use crate::web::services::auth::identity::Identity;
 use actix_web::web::{Query, ServiceConfig};
 use actix_web::HttpRequest;
 use chrono::{Date, DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
+use crate::templates::page::Page;
 
 /// Register the meetings page.
 pub fn register(c: &mut ServiceConfig) -> &mut ServiceConfig {
@@ -33,7 +34,7 @@ async fn meetings_list(
     req: HttpRequest,
     params: Option<Query<MeetingsQuery>>,
     identity: Identity,
-) -> Result<Template, TelescopeError> {
+) -> Result<Page, TelescopeError> {
     // Resolve parameters to API query variables
     let start: DateTime<Utc> = params
         .as_ref()
@@ -88,12 +89,12 @@ async fn meetings_list(
             end: end.naive_local().date(),
         });
 
-    // Build a meetings page template
-    return Template::new(TEMPLATE_PATH)
-        .field("meetings", events)
-        .field("query", query)
-        .field("authorization", authorization)
-        // Render it into a page for the user.
-        .render_into_page(&req, "RCOS Meetings")
-        .await;
+    let mut template = Template::new(TEMPLATE_PATH);
+    template.fields = json!({
+        "meetings": events,
+        "query": query,
+        "authorization": authorization,
+    });
+
+    return template.in_page(&req, "RCOS Meetings").await;
 }

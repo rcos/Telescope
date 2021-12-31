@@ -1,0 +1,146 @@
+<nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img src="/static/icons/rcos-branding/img/logo-square-red.png" style="height: 32px;" alt="RCOS Logo">
+    </a>
+    <button class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbar"
+            aria-controls="navbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+    >
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <nav id="navbar" class="navbar-collapse collapse">
+        <ul class="navbar-nav mr-auto">
+            {{! Always visible nav buttons }}
+
+            {{! Home }}
+            <li class="nav-item {{#if (eq req_path "/")}} active {{/if}}">
+                <a href="/" class="nav-link">
+                    Home
+                </a>
+            </li>
+
+            {{! Projects }}
+            <li class="nav-item {{#if (eq req_path "/projects")}} active {{/if}}">
+                <a href="/projects" class="nav-link">
+                    Projects
+                </a>
+            </li>
+
+            {{! Developers }}
+            <li class="nav-item {{#if (eq req_path "/developers")}} active {{/if}}">
+                <a href="/developers" class="nav-link">
+                    Developers
+                </a>
+            </li>
+
+            {{! Sponsors }}
+            <li class="nav-item {{#if (eq req_path "/sponsors")}} active {{/if}}">
+                <a href="/sponsors" class="nav-link">
+                    Sponsors
+                </a>
+            </li>
+
+            {{! Meetings }}
+            <li class="nav-item {{#if (eq req_path "/meetings")}} active {{/if}}">
+                <a href="/meetings" class="nav-link">
+                    Meetings
+                </a>
+            </li>
+
+            {{! Privileged nav links }}
+            {{#if is_student}}
+                {{#if is_mentor}}
+                    {{#if is_coordinator}}
+                        {{#if is_admin}}
+                            {{! Admin panel }}
+                            <li class="nav-item {{#if (eq req_path "/admin")}} active {{/if}}">
+                                <a href="/admin" class="nav-link">
+                                    Admin
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{! Coordinator Panel }}
+                        <li class="nav-item {{#if (eq req_path "/coordinate")}} active {{/if}}">
+                            <a href="/coordinate" class="nav-link">
+                                Coordinate
+                            </a>
+                        </li>
+                    {{/if}}
+
+                    {{! Mentor Panel }}
+                    <li class="nav-item {{#if (eq req_path "/mentor")}} active {{/if}}">
+                        <a href="/mentor" class="nav-link">
+                            Mentor
+                        </a>
+                    </li>
+                {{/if}}
+
+                {{! Stuendent engagement panel -- attendance and assignments }}
+                <li class="nav-item {{#if (eq req_path "/engage")}} active {{/if}}">
+                    <a href="/engage" class="nav-link">
+                        Engage
+                    </a>
+                </li>
+            {{/if}}
+        </ul>
+        <ul class="navbar-nav">
+            {{! Handbook link should be available to all users }}
+            <li class="nav-item">
+                <a href="https://handbook.rcos.io" class="btn btn-outline-info mr-2 mb-2" target="_blank" rel="noreferrer noopener">
+                    Handbook <i data-feather="external-link" style="height: 1em; width: auto;"></i>
+                </a>
+            </li>
+
+            {{! The other buttons depend on the viewer }}
+            {{#if creating_account}}
+                {{! Account creation buttons }}
+
+                {{! Cancel }}
+                <li class="nav-item">
+                    <a href="/logout" class="btn btn-danger mr-2 mb-2">
+                        Cancel Account Creation <i data-feahter="x-circle"></i>
+                    </a>
+                </li>
+            {{else}}
+                {{#with user_id}}
+                    {{! Link to profile and logout }}
+
+                    {{! Profile }}
+                    <li class="nav-item">
+                        <a href="/user/{{user_id}}" class="btn btn-primary mr-2 mb-2">
+                            Profile
+                        </a>
+                    </li>
+
+                    {{! Logout }}
+                    <li class="nav-item">
+                        <a href="/logout" class="btn btn-secondary mr-2 mb-2">
+                            Logout
+                        </a>
+                    </li>
+                {{else}}
+                    {{! Link to sign up or login }}
+
+                    {{! Register }}
+                    <li class="nav-item">
+                        <a href="/register" class="btn btn-primary mr-2 mb-2">
+                            Create Account
+                        </a>
+                    </li>
+
+                    {{! Login }}
+                    <li class="nav-item">
+                        <a href="/login" class="btn btn-primary mr-2 mb-2">
+                            Login
+                        </a>
+                    </li>
+                {{/with}}
+            {{/if}}
+        </ul>
+    </nav>
+</nav>
