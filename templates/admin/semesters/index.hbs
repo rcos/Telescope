@@ -30,26 +30,39 @@
 
                         {{! Stats }}
 
-                        {{#with enrollments_aggregate.aggregate}}
-                            <td>{{count}}</td>
-                        {{else}}
-                            <td>unavailable</td>
-                        {{/with}}
+                        {{! Enrollment count }}
+                        <td class="text-center">
+                            {{#with enrollments_aggregate.aggregate}}
+                                {{count}}
+                            {{else}}
+                                unavailable
+                            {{/with}}
+                        </td>
 
-                        {{#with projects.aggregate}}
-                            <td>{{count}}</td>
-                        {{else}}
-                            <td>unavailable</td>
-                        {{/with}}
+                        {{! Project count }}
+                        <td class="text-center">
+                            {{#with projects.aggregate}}
+                                {{count}}
+                            {{else}}
+                                unavailable
+                            {{/with}}
+                        </td>
 
-                        {{#with meetings_aggregate.aggregate}}
-                            <td><a href="/meetings?{{url_encode semester_id=../../semester_id}}" {{count}}</td>
-                        {{else}}
-                            <td>unavailable</td>
-                        {{/with}}
-
+                        {{! Meetings by semester link }}
                         <td>
-                            <a href="/admin/semesters/edit/{{semester_id}}" class="btn btn-primary">
+                            {{#if meetings_aggregate.aggregate}}
+                                {{! Link to meetings by semester in coordinator page }}
+                                <a href="/coordinate/{{semester_id}}/meetings" class="w-100 btn btn-info">
+                                    {{meetings_aggregate.aggregate.count}}
+                                </a>
+                            {{else}}
+                                unavailable
+                            {{/if}}
+                        </td>
+
+                        {{! Edit semester link }}
+                        <td>
+                            <a href="/admin/semesters/edit/{{semester_id}}" class="btn btn-primary w-100">
                                 Edit
                             </a>
                         </td>
