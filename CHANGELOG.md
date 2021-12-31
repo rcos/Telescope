@@ -5,6 +5,7 @@ has been made to fill in the gaps. If you find an issue anywhere in this changel
 please submit a pull request fixing it. 
 
 ## Unreleased
+- Added meeting counts and filtering by semester in admin panel. 
 
 ## 0.8.5 - December 31st, 2021
 - Changes to the config file:

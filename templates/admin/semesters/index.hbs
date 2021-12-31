@@ -17,6 +17,7 @@
                     <th scope="col">End</th>
                     <th scope="col">Enrollments</th>
                     <th scope="col">Projects</th>
+                    <th scope="col">Meetings</th>
                 </tr>
             </thead>
 
@@ -37,6 +38,12 @@
 
                         {{#with projects.aggregate}}
                             <td>{{count}}</td>
+                        {{else}}
+                            <td>unavailable</td>
+                        {{/with}}
+
+                        {{#with meetings_aggregate.aggregate}}
+                            <td><a href="/meetings?{{url_encode semester_id=../../semester_id}}" {{count}}</td>
                         {{else}}
                             <td>unavailable</td>
                         {{/with}}

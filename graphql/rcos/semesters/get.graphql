@@ -24,5 +24,12 @@ query Semesters($offset: Int!, $limit: Int!) {
                 count
             }
         }
+
+        # Meetings
+        meetings_aggregate {
+            aggregate {
+                count
+            }
+        }
     }
 }

@@ -1,11 +1,17 @@
-# Get all the public meetings between two timestamps
-query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolean!, $accept_types: [meeting_type!]!) {
+# Meetings query
+query Meetings(
+    $time_filter: timestamptz_comparison_exp,
+    $semester_id_filter: String_comparison_exp,
+    $include_drafts: Boolean!,
+    $accept_types: [meeting_type!]!
+) {
     meetings(
         where: {
             # Use this instead of comparison so that if $include_drafts
             # is true, we still get finalized meetings as well.
             is_draft: {_in: [false, $include_drafts]},
-            start_date_time: {_gte: $start, _lt: $end},
+            start_date_time: $time_filter,
+            semester_id: $semester_id_filter,
             type: {_in: $accept_types}
         },
         # Order chronologically
