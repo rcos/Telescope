@@ -27,9 +27,6 @@ pub struct DiscordConfig {
     /// bot API.
     pub bot_token: String,
 
-    /// The URL that Telescope is running at (to build links in discord embeds.)
-    pub telescope_url: String,
-
     /// The RCOS Discord Guild ID.
     pub rcos_guild_id: String,
 }
@@ -66,6 +63,10 @@ struct TelescopeConfig {
     /// Profiles. These can be used and specified at runtime to override values
     /// defined globally. Profiles are scoped and can have sub profiles.
     profile: Option<HashMap<String, TelescopeConfig>>,
+
+    /// The URL that Telescope is running at. This is used in Discord embeds
+    /// and the Open Graph Protocol meta tags. Should not end with a slash.
+    telescope_url: Option<String>,
 }
 
 /// A concrete config found by searching the specified profile and parents
@@ -83,6 +84,8 @@ pub struct ConcreteConfig {
     pub discord_config: DiscordConfig,
     /// The url of the RCOS API that telescope will read and write to.
     pub api_url: String,
+    /// The domain that telescope is available at. Should not end with a slash.
+    pub telescope_url: String,
     /// The JWT secret used to authenticate with the central API.
     pub jwt_secret: String,
 }
@@ -126,6 +129,9 @@ impl TelescopeConfig {
             jwt_secret: self
                 .reverse_lookup(profile_slice, |c| c.jwt_secret.clone())
                 .expect("Could not resolve JWT secret."),
+            telescope_url: self
+                .reverse_lookup(profile_slice, |c| c.telescope_url.clone())
+                .expect("Could not resolve Telescope URl.")
         }
     }
 

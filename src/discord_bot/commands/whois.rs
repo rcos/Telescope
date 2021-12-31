@@ -138,7 +138,7 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                                     // Link to their profile
                                     .url(format!(
                                         "{}/user/{}",
-                                        global_config().discord_config.telescope_url,
+                                        global_config().telescope_url,
                                         u.id
                                     ))
                                     // List their role inline

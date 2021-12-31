@@ -4,9 +4,13 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased - 0.8.5
+## Unreleased
+
+## 0.8.5 - December 31st, 2021
+- Changes to the config file:
+  - The public telescope URL is now in the root of the config rather than the Discord section.  
 - Dynamic OGP tags. ([#218])
-- 
+- Server side cohort validation. ([#220])
 
 ## 0.8.4 - December 29th, 2021
 - Disabled signup using anything except Discord. ([#217])
@@ -168,3 +172,4 @@ please submit a pull request fixing it.
 [#216]: https://github.com/rcos/Telescope/pull/216
 [#217]: https://github.com/rcos/Telescope/pull/217
 [#218]: https://github.com/rcos/Telescope/pull/218
+[#220]: https://github.com/rcos/Telescope/pull/220
