@@ -3,8 +3,6 @@
 pub mod util;
 
 use crate::error::TelescopeError;
-use crate::web::services::auth::identity::AuthenticationCookie;
-use actix_identity::RequestIdentity;
 use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
     error::Error as ActixError,
@@ -15,7 +13,6 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
-use uuid::Uuid;
 
 /// The type returned by authorization functions.
 pub type AuthorizationResult = Result<(), TelescopeError>;

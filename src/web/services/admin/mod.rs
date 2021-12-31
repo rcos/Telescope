@@ -16,7 +16,6 @@ use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
 use uuid::Uuid;
 use crate::middlewares::authorization::util::extract_user_id;
-use futures::prelude::*;
 
 /// Check that a user is an admin, in the form of an authorization middleware.
 fn admin_auth_middleware(req: &ServiceRequest) -> LocalBoxFuture<AuthorizationResult> {
