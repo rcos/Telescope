@@ -4,7 +4,8 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased
+## Unreleased - 0.8.6
+- Fixed bug in rendering of registration form. ([#222])
 
 ## 0.8.5 - December 31st, 2021
 - Changes to the config file:
@@ -173,3 +174,4 @@ please submit a pull request fixing it.
 [#217]: https://github.com/rcos/Telescope/pull/217
 [#218]: https://github.com/rcos/Telescope/pull/218
 [#220]: https://github.com/rcos/Telescope/pull/220
+[#222]: https://github.com/rcos/Telescope/pull/222
