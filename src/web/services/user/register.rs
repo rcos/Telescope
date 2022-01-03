@@ -143,6 +143,10 @@ pub async fn finish_registration(
         // Otherwise create a form for the authenticated the user's cookie.
         // And convert it to an HttpResponse
         return empty_registration_form(&identity_cookie.root)
+            // We can just use the question mark here as the error will auto convert
+            // from a telescope error to an actix error.
+            .await?
+            .in_page(&req, "Create Account")
             .await
             .respond_to(&req)
             .await;
