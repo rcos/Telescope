@@ -88,7 +88,7 @@ async fn profile(
                 // Return early if there was an error.
                 // Otherwise we can go forward and check for the user's membership in the RCOS
                 // Discord server.
-                return template.in_page(&req, page_title.clone()).await;
+                return template.in_page(&req, page_title).await;
             }
 
             // User returned successfully.
@@ -148,10 +148,8 @@ async fn profile(
 
     let mut tags = Tags::default();
     tags.title = page_title.clone();
-    tags.url = format!("/user/{}", id);
-    let mut description = String::new();
-    description.push_str(target_user.role.to_string().as_str());
-    description.push_str("\n");
+    tags.url = req.uri().to_string();
+    let mut description = format!("{}\n", target_user.role);
     if target_user.rcs_id.len() > 0 {
         description.push_str("Email: ");
         description.push_str(&target_user.rcs_id[0].account_id);
