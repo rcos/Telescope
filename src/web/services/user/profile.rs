@@ -19,6 +19,7 @@ use serenity::model::guild::Member;
 use serenity::model::user::User;
 use std::collections::HashMap;
 use uuid::Uuid;
+use crate::templates::tags::Tags;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -143,7 +144,42 @@ async fn profile(
     }
 
     // Render the profile template and send to user.
-    return template.in_page(&req, page_title).await;
+    let mut page = template.in_page(&req, page_title.clone()).await?;
+
+    let mut tags = Tags::default();
+    tags.title = page_title.clone();
+    tags.url = req.uri().to_string();
+    let mut description = format!("{}\n", target_user.role);
+    if target_user.rcs_id.len() > 0 {
+        description.push_str("Email: ");
+        description.push_str(&target_user.rcs_id[0].account_id);
+        description.push_str("@rpi.edu\n");
+    }
+    if target_user.enrollments.len() > 0 {
+        description.push_str("Enrollments:\n");
+        for enrollment in &target_user.enrollments {
+            let semester = &enrollment.semester;
+            description.push_str(&semester.title);
+            let project = enrollment.project.as_ref();
+            if project.is_some() {
+                let project = project.unwrap();
+                description.push_str(" - ");
+                if enrollment.is_coordinator {
+                    description.push_str("Coordinator - ");
+                }
+                description.push_str(&project.title);
+                if enrollment.is_project_lead {
+                    description.push_str(" - Project Lead");
+                }
+            }
+            description.push_str("\n");
+        }
+    }
+    tags.description = description;
+
+    page.ogp_tags = tags;
+
+    return Ok(page)
 }
 
 /// Create a form template for the user settings page.
