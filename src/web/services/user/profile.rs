@@ -10,6 +10,7 @@ use crate::api::rcos::users::UserRole;
 use crate::env::global_config;
 use crate::error::TelescopeError;
 use crate::templates::page::Page;
+use crate::templates::tags::Tags;
 use crate::templates::Template;
 use crate::web::services::auth::identity::{AuthenticationCookie, Identity};
 use actix_web::web::{Form, Path, ServiceConfig};
@@ -19,7 +20,6 @@ use serenity::model::guild::Member;
 use serenity::model::user::User;
 use std::collections::HashMap;
 use uuid::Uuid;
-use crate::templates::tags::Tags;
 
 /// The path from the template directory to the profile template.
 const TEMPLATE_NAME: &'static str = "user/profile";
@@ -179,7 +179,7 @@ async fn profile(
 
     page.ogp_tags = tags;
 
-    return Ok(page)
+    return Ok(page);
 }
 
 /// Create a form template for the user settings page.

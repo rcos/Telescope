@@ -7,7 +7,7 @@ use crate::api::rcos::meetings::{
     authorization_for::{AuthorizationFor, UserMeetingAuthorization},
     creation::context::CreationContext,
     edit,
-    get_by_id::{GetMeetingById, get_meeting_by_id::GetMeetingByIdMeeting},
+    get_by_id::{get_meeting_by_id::GetMeetingByIdMeeting, GetMeetingById},
 };
 use crate::error::TelescopeError;
 use crate::templates::page::Page;

@@ -77,7 +77,8 @@ async fn meetings_list(
     let visible_meeting_types: Vec<MeetingType> = authorization.viewable_types();
 
     // Query the RCOS API to get meeting data.
-    let events: Vec<_> = GetMeetings::execute(start, end, include_drafts, visible_meeting_types).await?;
+    let events: Vec<_> =
+        GetMeetings::execute(start, end, include_drafts, visible_meeting_types).await?;
 
     // Get the values to pre-fill in the filters.
     let query = params
