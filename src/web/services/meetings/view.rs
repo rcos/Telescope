@@ -76,21 +76,21 @@ pub async fn meeting(
     if start.date() == end.date() {
         description.push_str(
             format!(
-                "{}{} -{}",
-                start.format("%B %_d, %Y"),
-                start.format("%_I:%M %P"),
-                end.format("%_I:%M %P")
+                "{} {} - {}",
+                start.format("%B %-d, %Y"),
+                start.format("%-I:%M %P"),
+                end.format("%-I:%M %P")
             )
             .as_str(),
         );
     } else {
         description.push_str(
             format!(
-                "{} at{} - {} at{}",
-                start.format("%B %_d, %Y"),
-                start.format("%_I:%M %P"),
-                end.format("%B %_d, %Y"),
-                end.format("%_I:%M %P")
+                "{} at {} - {} at {}",
+                start.format("%B %-d, %Y"),
+                start.format("%-I:%M %P"),
+                end.format("%B %-d, %Y"),
+                end.format("%-I:%M %P")
             )
             .as_str(),
         );
@@ -109,12 +109,17 @@ pub async fn meeting(
     // Add a newline for formatting.
     description.push_str("\n");
 
+    // Add meeting type.
+    description.push_str(format!("{}", meeting.type_).as_str());
+
     // Add the host if possible.
     if meeting.host.is_some() {
         let host = meeting.host.as_ref().unwrap();
         description
-            .push_str(format!("Hosted By: {} {}\n", host.first_name, host.last_name).as_str());
+            .push_str(format!(" hosted by: {} {}", host.first_name, host.last_name).as_str());
     }
+
+    description.push_str("\n");
 
     // Add meeting description.
     description.push_str(meeting.description.as_str());
