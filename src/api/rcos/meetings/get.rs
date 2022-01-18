@@ -13,18 +13,18 @@ use chrono::{DateTime, Utc};
     query_path = "graphql/rcos/meetings/get.graphql",
     response_derives = "Debug,Clone,Serialize"
 )]
-pub struct Meetings;
+pub struct GetMeetings;
 
-use self::meetings::{MeetingsMeetings, Variables};
+use self::get_meetings::{GetMeetingsMeetings, Variables};
 
-impl Meetings {
+impl GetMeetings {
     /// Get the meetings between two times, optionally filter to finalized meetings only.
-    pub async fn get(
+    pub async fn execute(
         start: DateTime<Utc>,
         end: DateTime<Utc>,
         include_drafts: bool,
         accept_types: Vec<MeetingType>,
-    ) -> Result<Vec<MeetingsMeetings>, TelescopeError> {
+    ) -> Result<Vec<GetMeetingsMeetings>, TelescopeError> {
         Ok(send_query::<Self>(Variables {
             start,
             end,

@@ -1,7 +1,7 @@
 //! List of meetings page.
 
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
-use crate::api::rcos::meetings::get::Meetings;
+use crate::api::rcos::meetings::get::GetMeetings;
 use crate::api::rcos::meetings::MeetingType;
 use crate::error::TelescopeError;
 use crate::templates::page::Page;
@@ -77,7 +77,7 @@ async fn meetings_list(
     let visible_meeting_types: Vec<MeetingType> = authorization.viewable_types();
 
     // Query the RCOS API to get meeting data.
-    let events: Vec<_> = Meetings::get(start, end, include_drafts, visible_meeting_types).await?;
+    let events: Vec<_> = GetMeetings::execute(start, end, include_drafts, visible_meeting_types).await?;
 
     // Get the values to pre-fill in the filters.
     let query = params

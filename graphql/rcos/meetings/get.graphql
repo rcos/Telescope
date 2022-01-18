@@ -1,5 +1,47 @@
-# Get all the public meetings between two timestamps
-query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolean!, $accept_types: [meeting_type!]!) {
+# A variety of meeting retrieval queries using various parameters
+
+# All the info most pages that display meeting info need. If there is more,
+# you can either add it here and keep using this fragment or create a dedicated
+# query.
+fragment MeetingInfo on meetings {
+    meeting_id
+    start_date_time
+    end_date_time
+    external_presentation_url
+    title
+    type
+
+    recording_url
+    meeting_url
+    is_remote
+    is_draft
+
+    location
+
+    description
+
+    # Get info about the host
+    host: user {
+        id
+        first_name
+        last_name
+    }
+
+    semester {
+        semester_id
+        title
+    }
+
+    # Attendance count
+    attendances: meeting_attendances_aggregate {
+        aggregate {
+            count
+        }
+    }
+}
+
+# Get all the meetings between two timestamps
+query GetMeetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolean!, $accept_types: [meeting_type!]!) {
     meetings(
         where: {
             # Use this instead of comparison so that if $include_drafts
@@ -12,29 +54,15 @@ query Meetings($start: timestamptz!, $end: timestamptz!, $include_drafts: Boolea
         order_by: {
             start_date_time: asc
         }
-    ) {
-        meeting_id
-        start_date_time
-        end_date_time
-        external_presentation_url
-        title
-        type
+    ) {...MeetingInfo}
+}
 
-        recording_url
-        meeting_url
-        is_remote
+# Get all the meetings for a given semester
+query GetMeetingsBySemester($semester_id: String!) {
+    meetings(where: {semester_id: {_eq: $semester_id}}) {...MeetingInfo}
+}
 
-        is_draft
-
-        location
-
-        description
-
-        # Get info about the host
-        host: user {
-            id
-            first_name
-            last_name
-        }
-    }
+# Get some info about a specific meeting.
+query GetMeetingById($id: Int!) {
+    meeting: meetings_by_pk(meeting_id: $id) {...MeetingInfo}
 }

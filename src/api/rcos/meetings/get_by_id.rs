@@ -8,16 +8,16 @@ use crate::error::TelescopeError;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/meetings/get_by_id.graphql",
+    query_path = "graphql/rcos/meetings/get.graphql",
     response_derives = "Debug,Clone,Serialize"
 )]
-pub struct Meeting;
+pub struct GetMeetingById;
 
-use self::meeting::{MeetingMeeting, Variables};
+use self::get_meeting_by_id::{GetMeetingByIdMeeting, Variables};
 
-impl Meeting {
+impl GetMeetingById {
     /// Get a meeting by its ID.
-    pub async fn get(meeting_id: i64) -> Result<Option<MeetingMeeting>, TelescopeError> {
+    pub async fn get(meeting_id: i64) -> Result<Option<GetMeetingByIdMeeting>, TelescopeError> {
         Ok(send_query::<Self>(Variables { id: meeting_id })
             // Wait for API response
             .await?
@@ -26,7 +26,7 @@ impl Meeting {
     }
 }
 
-impl MeetingMeeting {
+impl GetMeetingByIdMeeting {
     /// Get the title of this meeting. This is the user-defined title if there is one, otherwise
     /// a title is constructed from the start date and meeting type.
     pub fn title(&self) -> String {

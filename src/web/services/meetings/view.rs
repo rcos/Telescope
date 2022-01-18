@@ -1,7 +1,7 @@
 //! Service to view a meeting's details.
 
 use crate::api::rcos::meetings::authorization_for::{AuthorizationFor, UserMeetingAuthorization};
-use crate::api::rcos::meetings::get_by_id::{meeting::MeetingMeeting, Meeting};
+use crate::api::rcos::meetings::get_by_id::GetMeetingById;
 use crate::error::TelescopeError;
 use crate::templates::page::Page;
 use crate::templates::tags::Tags;
@@ -26,7 +26,7 @@ pub async fn meeting(
     // Get the viewer's authorization info.
     let authorization: UserMeetingAuthorization = AuthorizationFor::get(viewer).await?;
     // Get the meeting data from the RCOS API.
-    let meeting: Option<MeetingMeeting> = Meeting::get(meeting_id).await?;
+    let meeting: Option<_> = GetMeetingById::get(meeting_id).await?;
     // Check to make sure the meeting exists.
     if meeting.is_none() {
         return Err(TelescopeError::resource_not_found(
@@ -36,7 +36,7 @@ pub async fn meeting(
     }
 
     // Unwrap the meeting object.
-    let meeting: MeetingMeeting = meeting.unwrap();
+    let meeting = meeting.unwrap();
     // Make sure that the meeting is visible to the user.
     // First check for draft status.
     let meeting_host: Option<_> = meeting.host.as_ref().map(|host| host.id);

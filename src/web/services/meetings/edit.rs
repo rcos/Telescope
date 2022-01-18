@@ -7,7 +7,7 @@ use crate::api::rcos::meetings::{
     authorization_for::{AuthorizationFor, UserMeetingAuthorization},
     creation::context::CreationContext,
     edit,
-    get_by_id::{meeting::MeetingMeeting, Meeting},
+    get_by_id::{GetMeetingById, get_meeting_by_id::GetMeetingByIdMeeting},
 };
 use crate::error::TelescopeError;
 use crate::templates::page::Page;
@@ -46,9 +46,9 @@ struct HostQuery {
 }
 
 /// Get meeting data or return a resource not found error.
-async fn get_meeting_data(meeting_id: i64) -> Result<MeetingMeeting, TelescopeError> {
+async fn get_meeting_data(meeting_id: i64) -> Result<GetMeetingByIdMeeting, TelescopeError> {
     // Get the meeting data to check that it exists.
-    Meeting::get(meeting_id)
+    GetMeetingById::get(meeting_id)
         .await?
         .ok_or(TelescopeError::resource_not_found(
             "Meeting Not Found",
@@ -71,7 +71,7 @@ async fn authorization_for_viewer(
 async fn meeting_data_checked(
     auth: &AuthenticationCookie,
     meeting_id: i64,
-) -> Result<MeetingMeeting, TelescopeError> {
+) -> Result<GetMeetingByIdMeeting, TelescopeError> {
     // Get meeting data. Extract host's user ID.
     let meeting_data = get_meeting_data(meeting_id).await?;
     let meeting_host: Option<_> = meeting_data.host.as_ref().map(|host| host.id);
@@ -90,7 +90,7 @@ async fn meeting_data_checked(
 /// Resolve the desired host user ID from the set host query parameter or the existing meeting
 /// host.
 fn resolve_host_user_id(
-    meeting_data: &MeetingMeeting,
+    meeting_data: &GetMeetingByIdMeeting,
     set_host: Option<Query<HostQuery>>,
 ) -> Option<Uuid> {
     match set_host {
@@ -110,7 +110,7 @@ fn resolve_host_user_id(
 
 /// Resolve the meeting title value. This is the supplied title or a combination of the meeting
 /// type and date.
-fn resolve_meeting_title(meeting_data: &MeetingMeeting) -> String {
+fn resolve_meeting_title(meeting_data: &GetMeetingByIdMeeting) -> String {
     meeting_data.title()
 }
 
