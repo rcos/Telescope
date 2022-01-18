@@ -24,7 +24,7 @@ actix-files = "~0.5"
 actix-identity = "~0.3"
 
 # Handlebars for HTML rendering and templating.
-handlebars = {version = "~4.1", features = ["dir_source"]}
+handlebars = {version = "~4.2", features = ["dir_source"]}
 # HTML Escaping with help from SIMD.
 v_htmlescape = "0.14.1"
 
