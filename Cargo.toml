@@ -89,7 +89,7 @@ graphql_client = "0.10.0"
 # Discord API and integration
 # Serenity for sharding and models
 [dependencies.serenity]
-version = "0.10.9"
+version = "0.10.10"
 features = [
     # Builder stype methods on Discord's API objects
     "builder",
