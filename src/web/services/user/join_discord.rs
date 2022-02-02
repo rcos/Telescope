@@ -1,12 +1,14 @@
 //! Page and service to let users into RCOS Discord and give them the verified role.
 
-use crate::api::discord::rcos_discord_verified_role_id;
+use crate::api::discord::{global_discord_client, rcos_discord_verified_role_id};
 use crate::api::rcos::users::discord_whois::DiscordWhoIs;
 use crate::error::TelescopeError;
 
 use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_web::HttpResponse;
 use reqwest::header::LOCATION;
+use serenity::model::prelude::RoleId;
+use crate::env::global_config;
 
 /// Let users into the RCOS discord.
 #[get("/join_discord")]
@@ -86,13 +88,26 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
     );
 
     // Get RCOS Discord Verified role ID if possible. If not, user empty role list.
-    let roles = rcos_discord_verified_role_id()
+    let verified_role: RoleId = rcos_discord_verified_role_id()
         .await?
-        .map(|role| vec![role])
         .ok_or(TelescopeError::ise("Could not get Verified role ID."))?;
 
-    // Add user to Discord.
-    discord.add_to_rcos_guild(Some(nickname), roles).await?;
+    // Add user to Discord with verified role and nickname.
+    discord.add_to_rcos_guild(Some(nickname), vec![verified_role]).await?;
+
+    // If user was already in the discord, they may not have the verified role, and the
+    // previous call will do nothing. Make an additional call here to add the verified role
+    // to the user if they don't already have it.
+    // See https://github.com/rcos/Telescope/issues/236.
+
+    // Get the rcos discord guild ID.
+    let rcos_discord_guild = global_config().discord_config.rcos_guild_id();
+
+    // Make the call to add the verified role
+    global_discord_client()
+        .add_member_role(rcos_discord_guild, discord_user_id, verified_role.0)
+        .await
+        .map_err(TelescopeError::serenity_error)?;
 
     // On success, redirect user back to their profile.
     Ok(HttpResponse::Found()

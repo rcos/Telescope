@@ -8,6 +8,8 @@ please submit a pull request fixing it.
 - Fixed bug in rendering of registration form. ([#222])
 - User profile OGP tags ([#228])
 - Added Spring 2022 RCOS proposal ([#240])
+- Updated minimum rust version to 1.58.1.
+- Fixed bug that missed verified role on users already in the RCOS Discord. ([#236], #PR)
 
 ## 0.8.5 - December 31st, 2021
 - Changes to the config file:
@@ -179,3 +181,4 @@ please submit a pull request fixing it.
 [#222]: https://github.com/rcos/Telescope/pull/222
 [#228]: https://github.com/rcos/Telescope/pull/228
 [#240]: https://github.com/rcos/Telescope/pull/240
+[#236]: https://github.com/rcos/Telescope/issues/236
