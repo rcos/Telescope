@@ -7,6 +7,7 @@ please submit a pull request fixing it.
 ## Unreleased - 0.8.6
 - Fixed bug in rendering of registration form. ([#222])
 - User profile OGP tags ([#228])
+- Added Spring 2022 RCOS proposal ([#240])
 
 ## 0.8.5 - December 31st, 2021
 - Changes to the config file:
@@ -177,3 +178,4 @@ please submit a pull request fixing it.
 [#220]: https://github.com/rcos/Telescope/pull/220
 [#222]: https://github.com/rcos/Telescope/pull/222
 [#228]: https://github.com/rcos/Telescope/pull/228
+[#240]: https://github.com/rcos/Telescope/pull/240
