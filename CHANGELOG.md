@@ -4,10 +4,15 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased - 0.8.6
+## Unreleased - 0.9.1
+
+## 0.9.0 - February 2nd, 2022
 - Fixed bug in rendering of registration form. ([#222])
 - Added meeting counts and filtering by semester in admin panel. 
 - User profile OGP tags ([#228])
+- Added Spring 2022 RCOS proposal ([#240])
+- Updated minimum rust version to 1.58.1.
+- Fixed bug that missed verified role on users already in the RCOS Discord. ([#236], [#242])
 
 ## 0.8.5 - December 31st, 2021
 - Changes to the config file:
@@ -178,3 +183,6 @@ please submit a pull request fixing it.
 [#220]: https://github.com/rcos/Telescope/pull/220
 [#222]: https://github.com/rcos/Telescope/pull/222
 [#228]: https://github.com/rcos/Telescope/pull/228
+[#236]: https://github.com/rcos/Telescope/issues/236
+[#240]: https://github.com/rcos/Telescope/pull/240
+[#242]: https://github.com/rcos/Telescope/pull/242
