@@ -4,7 +4,9 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased - 0.8.6
+## Unreleased - 0.9.1
+
+## 0.9.0 - February 2nd, 2022
 - Fixed bug in rendering of registration form. ([#222])
 - User profile OGP tags ([#228])
 - Added Spring 2022 RCOS proposal ([#240])
