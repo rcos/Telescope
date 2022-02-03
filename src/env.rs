@@ -131,7 +131,7 @@ impl TelescopeConfig {
                 .expect("Could not resolve JWT secret."),
             telescope_url: self
                 .reverse_lookup(profile_slice, |c| c.telescope_url.clone())
-                .expect("Could not resolve Telescope URl.")
+                .expect("Could not resolve Telescope URl."),
         }
     }
 
