@@ -136,11 +136,7 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                                     // Title with the user's name
                                     .title(format!("{} {}", u.first_name, u.last_name))
                                     // Link to their profile
-                                    .url(format!(
-                                        "{}/user/{}",
-                                        global_config().telescope_url,
-                                        u.id
-                                    ))
+                                    .url(format!("{}/user/{}", global_config().telescope_url, u.id))
                                     // List their role inline
                                     .field("User Role", u.role, true);
 

@@ -95,13 +95,13 @@ fn resolve_host_user_id(
 ) -> Option<Uuid> {
     match set_host {
         // If there is a specified nil UUID we want no host. Otherwise, we want the specified UUID.
-        Some(Query(HostQuery{ set_host })) => {
+        Some(Query(HostQuery { set_host })) => {
             if set_host.is_nil() {
                 None
             } else {
                 Some(set_host)
             }
-        },
+        }
 
         // If there is no host query then use the existing host parameter (which may be none).
         None => meeting_data.host.as_ref().map(|h| h.id),

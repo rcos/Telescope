@@ -190,7 +190,7 @@ impl DiscordIdentity {
             });
     }
 
-    /// Add this user to the RCOS Discord. Set their nickname and give them the "Verified" role.
+    /// Add this user to the RCOS Discord. Set their nickname and give them the specified roles.
     pub async fn add_to_rcos_guild(
         &self,
         nickname: Option<String>,
