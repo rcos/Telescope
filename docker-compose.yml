@@ -16,7 +16,8 @@ services:
 
   # Hasura Postgres -> GraphQL engine
   hasura:
-    image: hasura/graphql-engine:v2.0.10
+    platform: linux/arm64
+    image: hasura/graphql-engine:latest
     restart: unless-stopped
     depends_on:
       - db
