@@ -1,7 +1,11 @@
 //! Discord slash command to generate channels, categories and roles for small groups, projects, and project ptches.
 //! Limited to coordinators, faculty advisors, and sysadmins.
 
-use crate::api::rcos::users::discord_whois::DiscordWhoIs;
+
+// TODO: Limited to certain role
+// TODO: handle event
+
+use crate::api::rcos::users::discord_generate::DiscordGenerate;
 use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption,
@@ -81,66 +85,6 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
             .unwrap()
             .name
             .as_str();
-        // Check if option name match any of name set previously.
-        match option_name{
-            OPTION_NAME[0] => {
-                
-            },
-            OPTION_NAME[1] => {
-
-            },
-            OPTION_NAME[2] => {
-
-            },
-            OPTION_NAME[3] => {
-
-            },
-            _ =>error!{
-                "'/generate' command missing option. Interaction: {:#?}",
-                interaction
-            },
-        }
-
-    // Lookup users on the RCOS API.
-    let rcos_api_response = DiscordWhoIs::send(user_id)
-        .await
-        // Log the error if there is one.
-        .map_err(|err| {
-            error!("Could not query the RCOS API: {}", err);
-            err
-        });
-
-   // Respond with an embed indicating an error on RCOS API error.
-   if let Err(err) = rcos_api_response {
-    return interaction
-        .create_interaction_response(&ctx.http, |create_response| {
-            create_response
-                // Sent the response to be a message
-                .kind(InteractionResponseType::ChannelMessageWithSource)
-                // Set the content of the message.
-                .interaction_response_data(|rdata| {
-                    rdata
-                        // Do not allow any mentions
-                        .allowed_mentions(|am| am.empty_parse())
-                        // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
-                        .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("RCOS API Error")
-                                .description(
-                                    "We could not process generate command because the \
-                            RCOS API responded with an error. Please contact a coordinator and \
-                            report this error on Telescope's GitHub.",
-                                )
-                                // Include the error as a field of the embed.
-                                .field("Error Message", err, false)
-                        })
-                })
-        })
-        .await;
-}
-
+            
 
 }
