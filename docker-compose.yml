@@ -5,7 +5,6 @@ version: "3.1"
 services:
   db:
     image: postgres:latest
-    restart: always
     environment:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     volumes:
@@ -16,7 +15,7 @@ services:
 
   # Hasura Postgres -> GraphQL engine
   hasura:
-    image: hasura/graphql-engine:v2.0.10
+    image: hasura/graphql-engine:v2.2.0
     restart: unless-stopped
     depends_on:
       - db
