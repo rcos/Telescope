@@ -5,7 +5,7 @@
 // TODO: Limited to certain role
 // TODO: handle event
 
-//use crate::api::rcos::projects::discord_generate::DiscordGenerate;
+use crate::api::rcos::projects::discord_generate::DiscordGenerate;
 use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
@@ -120,7 +120,7 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                                     .color(ERROR_COLOR)
                                     .title("Permission Error")
                                     .description(
-                                        "We could not generate channels/roles/categories for you due to lacking of permission."
+                                        "We could not generate channels/roles/categories for you due to lack of permission."
                                     )
                                     // Include the error as a field of the embed.
                                     .field("Error Message","Permissoion Error", false)
@@ -131,11 +131,23 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                 return interaction.create_interaction_response(&ctx.http, |create_response|{
                     create_response.kind(InteractionResponseType::ChannelMessageWithSource)
                         .interaction_response_data(|rdata| {
-                            rdata.content("ok")
+                            rdata
+                             // Do not allow any mentions
+                            .allowed_mentions(|am| am.empty_parse())
+                             // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
+                            .create_embed(|embed| {
+                                // Add common attributes
+                                embed_common(embed)
+                                    .title("Ok")
+                                    .description(
+                                        "Ok"
+                                    )
+
+                            })
                         })
                 }).await;
             }
-    
 }
 
 
