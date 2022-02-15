@@ -1,0 +1,24 @@
+fragment AssoicationInfo on small_group_projects {
+    project_id
+    title
+    # If project roles are created, what are the role ids.
+    project_roles{
+        role_id
+    }
+        # If project channel  is created, what is the channel id and kind.
+    project_channels{
+        channel_id
+        kind
+    }
+}
+
+
+query Projects($limit: Int!, $offset: Int!, $search: String!, $now: date!) {
+    projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
+        _or: [
+            {title: {_ilike: $search}},
+            {description: {_ilike: $search}},
+        ],
+        enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
+    }) { ...AssoicationInfo }
+}

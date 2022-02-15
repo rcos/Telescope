@@ -1,4 +1,4 @@
-/*
+
 use crate::api::rcos::prelude::*;
 use crate::api::rcos::send_query;
 use crate::api::rcos::projects::projects_page::{AllProjects, CurrentProjects};
@@ -15,8 +15,9 @@ use crate::error::TelescopeError;
 pub struct DiscordGenerate;
 
 impl DiscordGenerate{
-    pub fn get_project() -> Result<ResponseData, TelescopeError>{
-
+    pub async fn get() -> Result<ResponseData, TelescopeError>{
+            let project_id = CurrentProjects::get(0).map(|project| project.project_id);
+            let project_channel_id = send_query(variables: T::Variables)
     }
 }
-*/
+*
