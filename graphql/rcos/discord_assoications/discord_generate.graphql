@@ -1,0 +1,9 @@
+mutation DiscordGenerate($project_id: String!){
+        insert_channel_one(object: {
+        project_id: $project_id
+        channel_id: $channel_id,
+        kind: $kind,
+    }) {
+        channel_id
+    }
+}

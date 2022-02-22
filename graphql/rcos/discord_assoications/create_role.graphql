@@ -1,0 +1,11 @@
+mutation CreateOneRole(
+    $project_id: Int!,
+    $role_id: String!,
+) {
+    insert_project_roles_one(object: {
+        project_id: $project_id
+        role_id: $role_id,
+    }) {
+        role_id
+    }
+}   
