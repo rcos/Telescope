@@ -1,4 +1,4 @@
-mutation CreateOneChannel(
+mutation CreateOneProjectChannel(
     $project_id: Int!,
     $channel_id: String!,
     $kind: channel_type!,

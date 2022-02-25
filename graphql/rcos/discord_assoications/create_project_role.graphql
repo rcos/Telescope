@@ -1,4 +1,4 @@
-mutation CreateOneRole(
+mutation CreateOneProjectRole(
     $project_id: Int!,
     $role_id: String!,
 ) {

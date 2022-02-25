@@ -1,0 +1,5 @@
+query AccountLookup($user_id: String!) {
+    user_accounts(where: {user_id: {_eq: $user_id}, type: {_eq: "discord"}}, limit: 1) {
+        account_id
+    }
+}
