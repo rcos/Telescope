@@ -1,0 +1,11 @@
+mutation CreateOneProjectCategory(
+    $project_id: Int!,
+    $category_id: String!,
+) {
+    insert_project_categories_one(object: {
+        project_id: $project_id
+        category_id: $category_id,
+    }) {
+        category_id
+    }
+}

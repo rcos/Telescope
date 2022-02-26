@@ -16,7 +16,7 @@ pub struct CreateOneSmallGroupChannel;
 
 impl CreateOneSmallGroupChannel{
     pub async fn execute(small_group_id : i64,  channel_id: String, kind: channel_type) -> Result<Option<String>, TelescopeError>{
-        send_query::<Self>(create_small_group_channel::Variables{
+        send_query::<Self>(create_one_small_group_channel::Variables{
             small_group_id,
             channel_id,
             kind,

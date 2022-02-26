@@ -1,5 +1,6 @@
 fragment SmallGroupAssoicationInfo on small_groups {
     small_group_id
+    semester_id
     title
     
     small_group_categories{
@@ -22,9 +23,8 @@ query CurrSmallGroups( $offset: Int!, $search: String!, $now: date!) {
     small_groups( offset: $offset, order_by: [{title: asc}], where: {
         _or: [
             {title: {_ilike: $search}},
-            {description: {_ilike: $search}},
         ],
-        enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
+        semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
 
         }) { ...SmallGroupAssoicationInfo }
 }

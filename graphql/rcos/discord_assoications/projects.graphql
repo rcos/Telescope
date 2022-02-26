@@ -10,14 +10,18 @@ fragment AssoicationInfo on projects {
         channel_id
         kind
     }
-    # find member who enroll this project.
+    # Find member who enroll this project.
     enrollments{
         user_id
+    }
+    
+    # If project category created, what is the category id.
+    project_categories{
+        category_id
     }
 }
 
 
-<<<<<<< HEAD
 query CurrProjects( $offset: Int!, $search: String!, $now: date!) {
     projects( offset: $offset, order_by: [{title: asc}], where: {
         _or: [
@@ -26,13 +30,5 @@ query CurrProjects( $offset: Int!, $search: String!, $now: date!) {
         ],
         enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
         }
-=======
-query Projects($limit: Int!, $offset: Int!, $search: String!) {
-    projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
-        _or: [
-            {title: {_ilike: $search}},
-            {description: {_ilike: $search}},
-        ]}
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
     )  { ...AssoicationInfo }
 }

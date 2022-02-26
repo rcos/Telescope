@@ -1,5 +1,6 @@
 .idea/
 target/
+.Ds_Store/
 
 # .env is to store development env variables.
 .env

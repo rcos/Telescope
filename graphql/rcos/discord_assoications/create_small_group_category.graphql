@@ -1,12 +1,10 @@
 mutation CreateOneSmallGroupCategory(
     $small_group_id: Int!,
     $category_id: String!,
-    $kind: channel_type!,
 ) {
-    insert_channel_one(object: {
+    insert_small_group_categories_one(object: {
         small_group_id: $small_group_id
         category_id: $category_id,
-        kind: $kind,
     }) {
         category_id
     }

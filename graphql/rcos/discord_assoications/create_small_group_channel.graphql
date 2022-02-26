@@ -1,18 +1,10 @@
 mutation CreateOneSmallGroupChannel(
-<<<<<<< HEAD
     $small_group_id: Int!,
-=======
-    $project_id: String!,
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
     $channel_id: String!,
     $kind: channel_type!,
 ) {
-    insert_channel_one(object: {
-<<<<<<< HEAD
+    insert_small_group_channels_one(object: {
         small_group_id: $small_group_id
-=======
-        project_id: $project_id
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
         channel_id: $channel_id,
         kind: $kind,
     }) {

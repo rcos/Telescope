@@ -6,20 +6,12 @@
 // TODO: handle event
 
 //use crate::api::rcos::discord_assoications::channels::ProjectChannels;
-<<<<<<< HEAD
 use crate::api::rcos::discord_assoications::{project_info, small_group_info, create_project_channel,
-     create_project_role, create_small_group_channel, create_small_group_role,
+     create_project_role,  create_project_category,create_small_group_channel, create_small_group_role, create_small_group_category,
      ChannelType};
 use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
-=======
-use crate::api::rcos::projects::projects_page;
-use crate::api::rcos::discord_assoications::{project_info, create_channel, create_role, ChannelType};
-use crate::discord_bot::commands::InteractionResult;
-use crate::env::global_config;
-use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed, CreateChannel};
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
 use serenity::client::Context;
 use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 use serenity::model::interactions::{
@@ -29,16 +21,10 @@ use serenity::model::prelude::InteractionApplicationCommandCallbackDataFlags;
 use serenity::model::id:: {RoleId, GuildId};
 use serenity::utils::Color;
 use serenity::Result as SerenityResult;
-use serenity::model::channel::{ChannelType as SerenityChannelType, GuildChannel, PermissionOverwrite,
+use serenity::model::channel::{ChannelType as SerenityChannelType, PermissionOverwrite,
     PermissionOverwriteType};
 use  serenity::model::permissions::Permissions;
-use serenity::model::guild::Guild;
-<<<<<<< HEAD
-use serenity::model::id::{ChannelId, UserId};
-=======
 use serenity::model::id::ChannelId;
-use serenity::cache::Cache;
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
 
 // The name of this slash command.
 pub const COMMAND_NAME: &'static str = "generate";
@@ -153,7 +139,7 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
             }
         match option_name{
             _ if option_name == OPTION_NAME[0] => {
-                handle_generate_channel(ctx, interaction).await
+                handle_generate_channels(ctx, interaction).await
             }
             _ if option_name == OPTION_NAME[1] => {
                 handle_generate_role(ctx, interaction).await
@@ -162,13 +148,7 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                 handle_generate_categories(ctx, interaction).await
             }
             _ if option_name == OPTION_NAME[3] => {
-                return interaction.create_interaction_response(&ctx.http, |create_response|{
-                    create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|rdata| {
-                            rdata
-                                .content("Not implemented.")
-                        })
-                }).await;
+                handle_generate_all(ctx, interaction).await
             }
             _ =>{
                 return interaction.create_interaction_response(&ctx.http, |create_response|{
@@ -216,219 +196,180 @@ fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
 }
 
 // handler for /generate channel commands
- async fn handle_generate_channel(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
-<<<<<<< HEAD
+ async fn handle_generate_channels(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
      // Create channel for projects
-    let rcos_api_response = project_info::CurrProjects::get(0, None)
-=======
-    let rcos_api_response = project_info::Projects::get(0, None)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
+    let rcos_api_response_project = project_info::CurrProjects::get(0, None)
     .await
     .map_err(|err| {
     error!("Could not query the RCOS API: {}", err);
     err
 });
 
-<<<<<<< HEAD
-    if let Err(err) = rcos_api_response{
-        return interaction.create_interaction_response(&ctx.http, |create_response|{
-            create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|rdata| {
-                    rdata
-                        // Do not allow any mentions
-                        .allowed_mentions(|am| am.empty_parse())
-                        // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                        .create_embed(|embed| {
-                        // Add common attributes
-                            embed_common(embed)
-=======
-if let Err(err) = rcos_api_response{
-    return interaction.create_interaction_response(&ctx.http, |create_response|{
-        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-            .interaction_response_data(|rdata| {
-                rdata
-                    // Do not allow any mentions
-                    .allowed_mentions(|am| am.empty_parse())
-                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                    .create_embed(|embed| {
-                        // Add common attributes
-                        embed_common(embed)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
-                            .color(ERROR_COLOR)
-                            .title("RCOS API Error")
-                            .description(
-                                "We could not get data about projects because the \
-                                RCOS API responded with an error. Please contact a coordinator and \
-                                report this error on Telescope's GitHub.",)
-                             // Include the error as a field of the embed.
-                            .field("Error Message",err, false)
-                    })
-            })
-        }).await;
-<<<<<<< HEAD
+    if let Err(err) = rcos_api_response_project{
+        return interaction_error("RCOS API Error",
+        "We could not get data about projects because the \
+        RCOS API responded with an error. Please contact a coordinator and \
+        report this error on Telescope's GitHub.",
+        &err, &ctx, &interaction).await;
     }
 
     // Get list of discord association information for projects.
-    let projects_associate_info = rcos_api_response.unwrap().projects;
+    let projects_associate_info = rcos_api_response_project.unwrap().projects;
 
-for project in projects_associate_info{
-    // Create voice channel for projects if not previously created.
-    if !project.project_channels.iter().any(|channel| channel.kind == ChannelType::DiscordVoice){
-        // Generate permission for certain groups for the channel.
-        let overwrite = if let None  =  project.project_role{
-=======
-}
-
-// Get list of discord association information for projects.
-let projects_associate_info = rcos_api_response.unwrap().projects;
-
-// Create channel for projects if not previously created.
-for project in projects_associate_info{
-    if project.project_channels.is_empty(){
-        // Generate permission for certain groups for the channel.
-        let overwrite = if let true =  project.project_role.is_none(){
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
-            generate_permission(None)
-        }else{
-            generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())))
-        };
-
-<<<<<<< HEAD
-        // Get parent channel(category) from data.
-        let category_id = project.
-            project_channels
-            .into_iter()
-            .filter(|channel| channel.kind == ChannelType::DiscordCategory)
-            .map(|channel| channel.channel_id)
-            .collect::<Vec<_>>()
-            .pop();
-
-        // Create channel for guild.
-        let channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
-            if let None = category_id{
-                c.name(&project.title)
-                .kind(SerenityChannelType::Voice)
-                .permissions(overwrite)
-            //Create channel under project category if category is created.
+    for project in projects_associate_info{
+        // Create voice channel for projects if not previously created.
+        if !project.project_channels.iter().any(|channel| channel.kind == ChannelType::DiscordVoice){
+            // Generate permission for certain groups for the channel.
+            let overwrite = if let None  =  project.project_role{
+                generate_permission(None)
             }else{
-                c.name(&project.title)
-                .kind(SerenityChannelType::Voice)
-                .permissions(overwrite)
-                .category(ChannelId(category_id.unwrap().parse::<u64>().unwrap()))
-            }   
-=======
-        let channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
-            c.name(&project.title)
-            .kind(SerenityChannelType::Text)
-            .permissions(overwrite)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
-        }).await
-            .map_err(|err| {
-                error!("Could not create the channel: {}", err);
-                err
-            });
+                generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())))
+            };
 
-        if let Err(err) = channel{
-            return interaction.create_interaction_response(&ctx.http, |create_response|{
-<<<<<<< HEAD
-                create_response.kind(InteractionResponseType::ChannelMessageWithSource )
-=======
-                create_response.kind(InteractionResponseType::ChannelMessageWithSource)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
-                    .interaction_response_data(|rdata| {
-                        rdata
-                            // Do not allow any mentions
-                            .allowed_mentions(|am| am.empty_parse())
-                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                            .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("Discord Error")
-                                .description(
-                                    "We could not create channel for projects",)
-                                    // Include the error as a field of the embed.
-                                    .field("Error Message",err, false)
-                            })
-                    })
-            }).await;
-        }
-
-        // insert channel data into database
-        let insert_channel = create_channel::CreateOneChannel::execute(
-                project.project_id, 
-                channel.unwrap().id.to_string(),
-                 ChannelType::DiscordVoice)
-                 .await
-                .map_err(|err|{
-                    error!("Could not insert project channel data to into database: {}", err);
+            // Get parent channel(category) from data.
+            let categories = project
+                .project_categories;
+        
+            // directly create channels if no category for this project.
+            if categories.is_empty(){
+                let voice_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                    c.name(&project.title)
+                    .kind(SerenityChannelType::Voice)
+                    .permissions(overwrite.clone())
+                }).await
+                .map_err(|err| {
+                    error!("Could not create the voice channel: {}", err);
                     err
                 });
 
-        if let Err(err) = insert_channel{
-            return interaction.create_interaction_response(&ctx.http, |create_response|{
-                create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|rdata| {
-                        rdata
-                            // Do not allow any mentions
-                            .allowed_mentions(|am| am.empty_parse())
-                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                            .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("Database Error")
-                                .description(
-                                    "We could not insert channel for projects into database",)
-                                    // Include the error as a field of the embed.
-                                    .field("Error Message",err, false)
-                            })
-                    })
-            }).await;
+                let text_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                    c.name(&project.title)
+                    .kind(SerenityChannelType::Text)
+                    .permissions(overwrite.clone())
+                }).await
+                .map_err(|err| {
+                    error!("Could not create the text channel: {}", err);
+                    err
+                });
+                
+                if let Err(err) = voice_channel{
+                    return interaction_error("Discord Error", "We could not create voice channel for projects",&err, &ctx, &interaction).await;
+                }
+                if let Err(err) = text_channel{
+                    return interaction_error("Discord Error", "We could not create text channel for projects",&err, &ctx, &interaction).await;
+                }
+                // insert voice channel data into database
+                let insert_voice_channel = create_project_channel::CreateOneProjectChannel::execute(
+                project.project_id, 
+                voice_channel.unwrap().id.to_string(),
+                 ChannelType::DiscordVoice)
+                 .await
+                .map_err(|err|{
+                    error!("Could not insert project voice channel data to into database: {}", err);
+                    err
+                });
+
+                // insert text channel data into database
+                let insert_text_channel = create_project_channel::CreateOneProjectChannel::execute(
+                    project.project_id, 
+                    text_channel.unwrap().id.to_string(),
+                     ChannelType::DiscordText)
+                     .await
+                    .map_err(|err|{
+                        error!("Could not insert project text channel data to into database: {}", err);
+                        err
+                    });
+
+                if let Err(err) = insert_voice_channel{
+                    return interaction_error("Database Error", "We could not insert voice channel for projects into database",&err, &ctx, &interaction).await;
+                }
+                if let Err(err) = insert_text_channel{
+                    return interaction_error("Database Error", "We could not insert text channel for projects into database",&err, &ctx, &interaction).await;
+                }
+                // else create voice channel for each cateogry that project owns
+            }else{
+                for category in categories{
+                    // Create voice channel for guild.
+                    let voice_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                        c.name(&project.title)
+                        .kind(SerenityChannelType::Voice)
+                        .permissions(overwrite.clone())
+                        .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
+                    }).await
+                    .map_err(|err| {
+                        error!("Could not create the voice channel: {}", err);
+                        err
+                    });
+
+                    // Create text channel for guild.
+                    let text_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                        c.name(&project.title)
+                        .kind(SerenityChannelType::Text)
+                        .permissions(overwrite.clone())
+                        .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
+                    }).await
+                    .map_err(|err| {
+                        error!("Could not create the text channel: {}", err);
+                        err
+                    });
+
+                    if let Err(err) = voice_channel{
+                        return interaction_error("Discord Error", "We could not create voice channel for projects",&err, &ctx, &interaction).await;
+                    }
+
+                    if let Err(err) = text_channel{
+                        return interaction_error("Discord Error", "We could not create text channel for projects",&err, &ctx, &interaction).await;
+                    }
+
+                    // insert voice channel data into database
+                    let insert_voice_channel = create_project_channel::CreateOneProjectChannel::execute(
+                    project.project_id, 
+                    voice_channel.unwrap().id.to_string(),
+                    ChannelType::DiscordVoice)
+                    .await
+                    .map_err(|err|{
+                        error!("Could not insert project voice channel data to into database: {}", err);
+                        err
+                    });
+
+                    // insert text channel data into database
+                    let insert_text_channel = create_project_channel::CreateOneProjectChannel::execute(
+                        project.project_id, 
+                        text_channel.unwrap().id.to_string(),
+                        ChannelType::DiscordText)
+                        .await
+                        .map_err(|err|{
+                            error!("Could not insert project text channel data to into database: {}", err);
+                            err
+                        });
+
+                    if let Err(err) = insert_voice_channel{
+                        return interaction_error("Database Error", "We could not insert voice channel for projects into database",&err, &ctx, &interaction).await;
+                    }
+                    if let Err(err) = insert_text_channel{
+                        return interaction_error("Database Error", "We could not insert text channel for projects into database",&err, &ctx, &interaction).await;
+                    }
+                }
+            }
         }
     }
-}
 
-<<<<<<< HEAD
      // Create channel for small groups
-    rcos_api_response = small_group_info::CurrSmallGroups::get(0, None)
+    let rcos_api_response_small_group = small_group_info::CurrSmallGroups::get(0, None)
      .await
      .map_err(|err| {
      error!("Could not query the RCOS API: {}", err);
      err
- });
+    });
  
-     if let Err(err) = rcos_api_response{
-         return interaction.create_interaction_response(&ctx.http, |create_response|{
-             create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                 .interaction_response_data(|rdata| {
-                     rdata
-                         // Do not allow any mentions
-                         .allowed_mentions(|am| am.empty_parse())
-                         // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                         .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                         .create_embed(|embed| {
-                         // Add common attributes
-                             embed_common(embed)
-                             .color(ERROR_COLOR)
-                             .title("RCOS API Error")
-                             .description(
-                                 "We could not get data about small groups because the \
-                                 RCOS API responded with an error. Please contact a coordinator and \
-                                 report this error on Telescope's GitHub.",)
-                              // Include the error as a field of the embed.
-                             .field("Error Message",err, false)
-                     })
-             })
-         }).await;
+     if let Err(err) = rcos_api_response_small_group{
+        return interaction_error("RCOS API Error", "We could not get data about small groups because the \
+        RCOS API responded with an error. Please contact a coordinator and \
+        report this error on Telescope's GitHub.",&err, &ctx, &interaction).await;
      }
  
      // Get list of discord association information for small groups.
-    let small_groups_associate_info = rcos_api_response.unwrap().small_groups;
+    let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
  
     for small_group in small_groups_associate_info{
          // Create voice channel for projects if not previously created.
@@ -441,94 +382,108 @@ for project in projects_associate_info{
             };
  
             // Get parent channel(category) from data.
-            let category_id = small_group.
-                 small_group_channels
-                .into_iter()
-                .filter(|channel| channel.kind == ChannelType::DiscordCategory)
-                .map(|channel| channel.channel_id)
-                .collect::<Vec<_>>()
-                .pop();
- 
-            // Create channel for guild.
-            let channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
-                 if let None = category_id{
-                     c.name(&small_group.title)
+            let categories = small_group
+                 .small_group_categories;
+            // If no category, directly create channel for small group
+            if categories.is_empty(){
+                let voice_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                     c.name(small_group.title.clone()+&small_group.semester_id)
                     .kind(SerenityChannelType::Voice)
-                    .permissions(overwrite)
-                //Create channel under project category if category is created.
-                }else{
-                    c.name(&small_group.title)
-                    .kind(SerenityChannelType::Voice)
-                    .permissions(overwrite)
-                    .category(ChannelId(category_id.unwrap().parse::<u64>().unwrap()))
-                }   
-            }).await
-             .map_err(|err| {
-                 error!("Could not create the channel: {}", err);
-                 err
-             });
+                    .permissions(overwrite.clone())})
+                    .await
+                    .map_err(|err| {
+                        error!("Could not create the voice channel: {}", err);
+                        err
+                    });
+                
+                let text_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                    c.name(small_group.title.clone()+&small_group.semester_id)
+                        .kind(SerenityChannelType::Text)
+                        .permissions(overwrite.clone())})
+                        .await
+                        .map_err(|err| {
+                            error!("Could not create the text channel: {}", err);
+                           err
+                        });
+                if let Err(err) = voice_channel{
+                    return interaction_error("Discord Error", "We could not create voice channel for small groups",&err, &ctx, &interaction).await;
+                }
+                if let Err(err) = text_channel{
+                    return interaction_error("Discord Error", "We could not create text channel for small groups",&err, &ctx, &interaction).await;
+                }
  
-            if let Err(err) = channel{
-                 return interaction.create_interaction_response(&ctx.http, |create_response|{
-                     create_response.kind(InteractionResponseType::ChannelMessageWithSource )
-                         .interaction_response_data(|rdata| {
-                             rdata
-                             // Do not allow any mentions
-                             .allowed_mentions(|am| am.empty_parse())
-                             // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                             .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                             .create_embed(|embed| {
-                             // Add common attributes
-                             embed_common(embed)
-                                 .color(ERROR_COLOR)
-                                 .title("Discord Error")
-                                 .description(
-                                     "We could not create channel for projects",)
-                                     // Include the error as a field of the embed.
-                                     .field("Error Message",err, false)
-                             })
-                     })
-                 }).await;
+                // insert channel data into database
+                let insert_voice_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                    small_group.small_group_id, 
+                    voice_channel.unwrap().id.to_string(),
+                    ChannelType::DiscordVoice)
+                    .await
+                    .map_err(|err|{
+                         error!("Could not insert small group channel data to into database: {}", err);
+                        err
+                    });
+ 
+                if let Err(err) = insert_voice_channel{
+                    return interaction_error("Database Error", "We could not insert voice channel for small groups into database",&err, &ctx, &interaction).await;
+                }
+            }else{
+                for category in categories{
+                    let voice_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                        c.name(&small_group.title)
+                        .kind(SerenityChannelType::Voice)
+                        .permissions(overwrite.clone())
+                        .category(ChannelId(category.category_id.parse::<u64>().unwrap()))})
+                        .await
+                        .map_err(|err| {
+                            error!("Could not create the voice channel: {}", err);
+                        err
+                        });
+                    let text_channel = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                        c.name(&small_group.title)
+                        .kind(SerenityChannelType::Text)
+                        .permissions(overwrite.clone())
+                        .category(ChannelId(category.category_id.parse::<u64>().unwrap()))})
+                        .await
+                        .map_err(|err| {
+                            error!("Could not create the voice channel: {}", err);
+                            err
+                        });
+ 
+                    if let Err(err) = voice_channel{
+                        return interaction_error("Discord Error", "We could not create voice channel for small groups",&err, &ctx, &interaction).await;
+                   }
+                   if let Err(err) = text_channel{
+                    return interaction_error("Discord Error", "We could not create text channel for small groups",&err, &ctx, &interaction).await;
+               }
+                    // insert channel data into database
+                    let insert_voice_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                        small_group.small_group_id, 
+                        voice_channel.unwrap().id.to_string(),
+                        ChannelType::DiscordVoice)
+                        .await
+                        .map_err(|err|{
+                             error!("Could not insert small group voice channel data to into database: {}", err);
+                            err
+                        });
+                     let insert_text_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                        small_group.small_group_id, 
+                        text_channel.unwrap().id.to_string(),
+                        ChannelType::DiscordText)
+                        .await
+                        .map_err(|err|{
+                             error!("Could not insert small group text channel data to into database: {}", err);
+                            err
+                        });
+                    if let Err(err) = insert_voice_channel{
+                        return interaction_error("Database Error", "We could not insert voice channel for small groups into database",&err, &ctx, &interaction).await;
+                    }
+                    if let Err(err) = insert_voice_channel{
+                        return interaction_error("Database Error", "We could not insert voice channel for small groups into database",&err, &ctx, &interaction).await;
+                    }
+                }
             }
- 
-         // insert channel data into database
-         let insert_channel = create_channel::CreateOneChannel::execute(
-            small_group.small_group_channels, 
-                 channel.unwrap().id.to_string(),
-                  ChannelType::DiscordVoice)
-                  .await
-                 .map_err(|err|{
-                     error!("Could not insert project channel data to into database: {}", err);
-                     err
-                 });
- 
-         if let Err(err) = insert_channel{
-             return interaction.create_interaction_response(&ctx.http, |create_response|{
-                 create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                     .interaction_response_data(|rdata| {
-                         rdata
-                             // Do not allow any mentions
-                             .allowed_mentions(|am| am.empty_parse())
-                             // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                             .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                             .create_embed(|embed| {
-                             // Add common attributes
-                             embed_common(embed)
-                                 .color(ERROR_COLOR)
-                                 .title("Database Error")
-                                 .description(
-                                     "We could not insert channel for projects into database",)
-                                     // Include the error as a field of the embed.
-                                     .field("Error Message",err, false)
-                             })
-                     })
-             }).await;
-         }
-     }
- }
-=======
-
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
+        }
+    }
     return interaction.create_interaction_response(&ctx.http, |create_response|{
         create_response.kind(InteractionResponseType::ChannelMessageWithSource)
             .interaction_response_data(|rdata| {
@@ -541,11 +496,7 @@ for project in projects_associate_info{
                         // Add common attributes
                         embed_common(embed)
                             .title("OK")
-<<<<<<< HEAD
                             .description("Channel created for projcets and/or small groups")
-=======
-                            .description("Channel created for projects")
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
                     })
             })
     }).await;
@@ -553,41 +504,20 @@ for project in projects_associate_info{
 
 // handler for /generate role commands
 async fn handle_generate_role(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
-<<<<<<< HEAD
-    let rcos_api_response = project_info::CurrProjects::get(0, None)
-=======
-    let rcos_api_response = project_info::Projects::get(0, None)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
+    let rcos_api_response_project = project_info::CurrProjects::get(0, None)
     .await
     .map_err(|err| {
     error!("Could not query the RCOS API: {}", err);
     err
 });
-    if let Err(err) = rcos_api_response{
-        return interaction.create_interaction_response(&ctx.http, |create_response|{
-            create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|rdata| {
-                    rdata
-                    // Do not allow any mentions
-                    .allowed_mentions(|am| am.empty_parse())
-                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                    .create_embed(|embed| {
-                        // Add common attributes
-                        embed_common(embed)
-                            .color(ERROR_COLOR)
-                            .title("RCOS API Error")
-                            .description(
-                                "We could not get data about projects because the \
-                                RCOS API responded with an error. Please contact a coordinator and \
-                                report this error on Telescope's GitHub.",)
-                             // Include the error as a field of the embed.
-                            .field("Error Message",err, false)
-                    })
-            })
-        }).await;
+    if let Err(err) = rcos_api_response_project{
+        return interaction_error("RCOS API Error",
+        "We could not get data about projects because the \
+        RCOS API responded with an error. Please contact a coordinator and \
+        report this error on Telescope's GitHub.",
+        &err, &ctx, &interaction).await;
     }
-    let projects_associate_info = rcos_api_response.unwrap().projects;
+    let projects_associate_info = rcos_api_response_project.unwrap().projects;
     // Create role for project if is not previously set.
     for project in projects_associate_info{
         if project.project_role.is_none(){
@@ -600,32 +530,12 @@ async fn handle_generate_role(ctx: &Context, interaction: &ApplicationCommandInt
                     err
                 });
             if let Err(err) = role{
-                return interaction.create_interaction_response(&ctx.http, |create_response|{
-                create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|rdata| {
-                        rdata
-                            // Do not allow any mentions
-                            .allowed_mentions(|am| am.empty_parse())
-                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                            .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("Discord Error")
-                                .description("We could not create role for projects",)
-                                // Include the error as a field of the embed.
-                                .field("Error Message",err, false)
-                            })
-                     })
-                }).await;
+                return interaction_error("Discord Error",
+                "We could not create role for projects",
+                &err, &ctx, &interaction).await;
             }
-<<<<<<< HEAD
             // Insert project role data into database.
-            let insert_role = create_role::CreateOneRole::execute(project.project_id , role.unwrap().id.to_string())
-=======
-            let insert_role = create_role::CreateOneRole::execute(project.project_id , role.unwrap().to_string())
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
+            let insert_role = create_project_role::CreateOneProjectRole::execute(project.project_id , role.unwrap().id.to_string())
                 .await
                 .map_err(|err|{
                     error!("Could not insert project role data to into database: {}", err);
@@ -633,36 +543,56 @@ async fn handle_generate_role(ctx: &Context, interaction: &ApplicationCommandInt
                 });
             
             if let Err(err) = insert_role{
-                return interaction.create_interaction_response(&ctx.http, |create_response|{
-                    create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|rdata| {
-                            rdata
-                                // Do not allow any mentions
-                                .allowed_mentions(|am| am.empty_parse())
-                                // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                                .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                                .create_embed(|embed| {
-                                // Add common attributes
-                                embed_common(embed)
-                                    .color(ERROR_COLOR)
-                                    .title("Database Error")
-                                    .description(
-                                        "We could not insert role for projects into database",)
-                                        // Include the error as a field of the embed.
-                                        .field("Error Message",err, false)
-                                })
-                        })
-                }).await;
+                return interaction_error("Database Error",
+                "We could not insert role for projects into database",
+                &err, &ctx, &interaction).await;
             }
         }
-<<<<<<< HEAD
-=======
-        /*
-        for member in project.enrollments.user_id{
+    }
+    let rcos_api_response_small_group = small_group_info::CurrSmallGroups::get(0, None)
+    .await
+    .map_err(|err| {
+    error!("Could not query the RCOS API: {}", err);
+    err
+});
+    if let Err(err) = rcos_api_response_small_group{
+        return interaction_error("RCOS API Error",
+        "We could not get data about small groups because the \
+        RCOS API responded with an error. Please contact a coordinator and \
+        report this error on Telescope's GitHub.",
+        &err, &ctx, &interaction).await;
+    }
+    let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
+    // Create role for project if is not previously set.
+    for small_group in small_groups_associate_info{
+        if small_group.small_group_role.is_none(){
+            let role = GuildId(global_config().discord_config.rcos_guild_id()).create_role(&ctx.http, |r|{
+                r.name(small_group.title.clone()+&small_group.semester_id)
+                    .mentionable(true)
+            }).await
+                .map_err(|err| {
+                    error!("Could not create the channel: {}", err);
+                    err
+                });
+            if let Err(err) = role{
+                return interaction_error("Discord Error",
+                "We could not create role for small groups",
+                &err, &ctx, &interaction).await;
+            }
+            // Insert project role data into database.
+            let insert_role = create_small_group_role::CreateOneSmallGroupRole::execute(small_group.small_group_id , role.unwrap().id.to_string())
+                .await
+                .map_err(|err|{
+                    error!("Could not insert small group role data to into database: {}", err);
+                    err
+                });
             
+            if let Err(err) = insert_role{
+                return interaction_error("Database Error",
+                "We could not insert role for small groups into database",
+                &err, &ctx, &interaction).await;
+            }
         }
-        */
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
     }
 
     return interaction.create_interaction_response(&ctx.http, |create_response|{
@@ -677,153 +607,127 @@ async fn handle_generate_role(ctx: &Context, interaction: &ApplicationCommandInt
                 // Add common attributes
                     embed_common(embed)
                         .title("OK")
-                        .description("Role created for projects")
+                        .description("Role created for projects/small groups.")
                 })
             })
     }).await;
 }
 
-<<<<<<< HEAD
 // handler for /generate categories commands
 async fn handle_generate_categories(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
-    let rcos_api_response = project_info::CurrProjects::get(0, None)
-=======
-// TODO
-// handler for /generate categories commands
-async fn handle_generate_categories(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
-    let rcos_api_response = project_info::Projects::get(0, None)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
+    let rcos_api_response_project = project_info::CurrProjects::get(0, None)
     .await
     .map_err(|err| {
     error!("Could not query the RCOS API: {}", err);
     err
 });
 
-if let Err(err) = rcos_api_response{
-    return interaction.create_interaction_response(&ctx.http, |create_response|{
-        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-            .interaction_response_data(|rdata| {
-                rdata
-                    // Do not allow any mentions
-                    .allowed_mentions(|am| am.empty_parse())
-                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                    .create_embed(|embed| {
-                        // Add common attributes
-                        embed_common(embed)
-                            .color(ERROR_COLOR)
-                            .title("RCOS API Error")
-                            .description(
-                                "We could not get data about projects because the \
-                                RCOS API responded with an error. Please contact a coordinator and \
-                                report this error on Telescope's GitHub.",)
-                             // Include the error as a field of the embed.
-                            .field("Error Message",err, false)
-                    })
-            })
-        }).await;
-}
+    if let Err(err) = rcos_api_response_project{
+        return interaction_error("RCOS API Error",
+        "We could not get data about projects because the \
+        RCOS API responded with an error. Please contact a coordinator and \
+        report this error on Telescope's GitHub.",
+        &err, &ctx, &interaction).await;
+    }
 
-// Get list of discord association information for projects.
-let projects_associate_info = rcos_api_response.unwrap().projects;
+    // Get list of discord association information for projects.
+    let projects_associate_info = rcos_api_response_project.unwrap().projects;
 
-<<<<<<< HEAD
-// Create category for projects if not previously created.
-for project in projects_associate_info{
-    if !project.project_channels.iter().any(|channel| channel.kind == ChannelType::DiscordCategory){
-=======
-// Create channel for projects if not previously created.
-for project in projects_associate_info{
-    if project.project_channels.is_empty(){
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
-        // Generate permission for certain groups for the channel.
-        let overwrite = if let true =  project.project_role.is_none(){
-            generate_permission(None)
-        }else{
-            generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())))
-        };
+    // Create category for projects if not previously created.
+    for project in projects_associate_info{
+        if project.project_categories.is_empty(){
+            // Generate permission for certain groups for the channel.
+            let overwrite = if let true =  project.project_role.is_none(){
+                generate_permission(None)
+            }else{
+                generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())))
+            };
 
-        let category = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
-            c.name(&project.title)
-            .kind(SerenityChannelType::Category)
-            .permissions(overwrite)
-        }).await
-            .map_err(|err| {
-                error!("Could not create the category: {}", err);
-                err
-            });
+            let category = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                c.name(&project.title)
+                .kind(SerenityChannelType::Category)
+                .permissions(overwrite)
+            }).await
+                .map_err(|err| {
+                    error!("Could not create the category for project: {}", err);
+                    err
+                });
 
-        if let Err(err) = category{
-            return interaction.create_interaction_response(&ctx.http, |create_response|{
-                create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|rdata| {
-                        rdata
-                            // Do not allow any mentions
-                            .allowed_mentions(|am| am.empty_parse())
-                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                            .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("Discord Error")
-                                .description(
-                                    "We could not create category for projects",)
-                                    // Include the error as a field of the embed.
-                                    .field("Error Message",err, false)
-                            })
-                    })
-            }).await;
-        }
+            if let Err(err) = category{
+                return interaction_error("Discord Error", "We could not create category for project", &err, &ctx, &interaction).await;
+            }
 
-<<<<<<< HEAD
-        // insert category data into database
-        let insert_category = create_channel::CreateOneChannel::execute(
+            // insert category data into database
+            let insert_category = create_project_category::CreateOneProjectCategory::execute(
                 project.project_id, 
-                category.unwrap().id.to_string(),
-                 ChannelType::DiscordCategory)
-=======
-        // insert channel data into database
-        let insert_channel = create_channel::CreateOneChannel::execute(
-                project.project_id, 
-                category.unwrap().id.to_string(),
-                 ChannelType::DiscordVoice)
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
+                category.unwrap().id.to_string())
                  .await
                 .map_err(|err|{
                     error!("Could not insert project category data to into database: {}", err);
                     err
                 });
 
-<<<<<<< HEAD
+            if let Err(err) = insert_category{
+                return interaction_error("Database Error", "We could not insert category for projects into database",&err, &ctx, &interaction).await;
+            }
+        }
+    }
+
+    let rcos_api_response_small_group = small_group_info::CurrSmallGroups::get(0, None)
+        .await
+        .map_err(|err| {
+            error!("Could not query the RCOS API: {}", err);
+            err
+        });
+
+    if let Err(err) = rcos_api_response_small_group{
+        return interaction_error("RCOS API Error",
+        "We could not get data about small groups because the \
+        RCOS API responded with an error. Please contact a coordinator and \
+        report this error on Telescope's GitHub.",
+        &err, &ctx, &interaction).await;
+    }
+
+    let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
+    // Create category for projects if not previously created.
+    for small_group in small_groups_associate_info{
+        if small_group.small_group_categories.is_empty(){
+            // Generate permission for certain groups for the channel.
+            let overwrite = if let true =  small_group.small_group_role.is_none(){
+                generate_permission(None)
+            }else{
+                generate_permission(Some(RoleId(small_group.small_group_role.unwrap().role_id.parse::<u64>().unwrap())))
+            };
+
+            let category = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
+                c.name(small_group.title.clone()+&small_group.semester_id)
+                .kind(SerenityChannelType::Category)
+                .permissions(overwrite)
+            }).await
+                .map_err(|err| {
+                    error!("Could not create the category for small group: {}", err);
+                    err
+                });
+
+        if let Err(err) = category{
+            return interaction_error("Discord Error", "We could not create category for small group", &err, &ctx, &interaction).await;
+        }
+
+        // insert category data into database
+        let insert_category = create_small_group_category::CreateOneSmallGroupCategory::execute(
+            small_group.small_group_id, 
+            category.unwrap().id.to_string())
+             .await
+            .map_err(|err|{
+                error!("Could not insert small group category data to into database: {}", err);
+                err
+            });
+
         if let Err(err) = insert_category{
-=======
-        if let Err(err) = insert_channel{
->>>>>>> f746ca16d56c965efc2a96e3ae4e91bf91df1971
-            return interaction.create_interaction_response(&ctx.http, |create_response|{
-                create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|rdata| {
-                        rdata
-                            // Do not allow any mentions
-                            .allowed_mentions(|am| am.empty_parse())
-                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                            .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .color(ERROR_COLOR)
-                                .title("Database Error")
-                                .description(
-                                    "We could not insert category for projects into database",)
-                                    // Include the error as a field of the embed.
-                                    .field("Error Message",err, false)
-                            })
-                    })
-            }).await;
+            return interaction_error("Database Error", "We could not insert category for small group into database",&err, &ctx, &interaction).await;
         }
     }
 }
-
 
     return interaction.create_interaction_response(&ctx.http, |create_response|{
         create_response.kind(InteractionResponseType::ChannelMessageWithSource)
@@ -837,15 +741,33 @@ for project in projects_associate_info{
                         // Add common attributes
                         embed_common(embed)
                             .title("OK")
-                            .description("Category created for projects")
+                            .description("Category created for projects and/or small groups")
                     })
             })
     }).await;
 }
-/*
+
 async fn handle_generate_all(ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
+    let _generate_role = handle_generate_role(ctx, interaction).await;
+    let _generate_categories = handle_generate_categories(ctx, interaction).await;
+    let _handle_generate_channel = handle_generate_channels(ctx, interaction).await;
+    return interaction.create_interaction_response(&ctx.http, |create_response|{
+        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
+            .interaction_response_data(|rdata| {
+                rdata
+                    // Do not allow any mentions
+                    .allowed_mentions(|am| am.empty_parse())
+                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
+                    .create_embed(|embed| {
+                        // Add common attributes
+                        embed_common(embed)
+                            .title("OK")
+                            .description("Categories, roles, and channels are created for project and/or small groups.")
+                    })
+            })
+    }).await;
 }
-*/
 
 
 // Grant permission for certain users
@@ -884,3 +806,27 @@ fn generate_permission(project_role: Option<RoleId>) -> Vec<PermissionOverwrite>
     return overwrite;
 }
 
+
+
+// Return error for interaction
+async fn interaction_error(error_title: &str,error_description: &str, err: impl ToString, ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
+    return interaction.create_interaction_response(&ctx.http, |create_response|{
+        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
+            .interaction_response_data(|rdata| {
+                rdata
+                    // Do not allow any mentions
+                    .allowed_mentions(|am| am.empty_parse())
+                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
+                    .create_embed(|embed| {
+                    // Add common attributes
+                        embed_common(embed)
+                        .color(ERROR_COLOR)
+                        .title(error_title)
+                        .description(error_description)
+                         // Include the error as a field of the embed.
+                        .field("Error Message",err, false)
+                })
+        })
+    }).await;
+}
