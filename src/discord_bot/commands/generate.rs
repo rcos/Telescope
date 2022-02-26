@@ -2,10 +2,7 @@
 //! Limited to coordinators, faculty advisors, and sysadmins.
 
 
-// TODO: Limited to certain role
-// TODO: handle event
-
-//use crate::api::rcos::discord_assoications::channels::ProjectChannels;
+use std::collections::HashMap;
 use crate::api::rcos::discord_assoications::{project_info, small_group_info, create_project_channel,
      create_project_role,  create_project_category,create_small_group_channel, create_small_group_role, create_small_group_category,
      ChannelType};
@@ -25,22 +22,96 @@ use serenity::model::channel::{ChannelType as SerenityChannelType, PermissionOve
     PermissionOverwriteType};
 use  serenity::model::permissions::Permissions;
 use serenity::model::id::ChannelId;
+use serenity::model::guild::Role;
 
 // The name of this slash command.
 pub const COMMAND_NAME: &'static str = "generate";
 pub const OPTION_NAME: [&'static str; 4] = ["channels", "roles", "categories", "all"];
-// Id of the @everyone role.
-pub const EVERYONE: &'static RoleId = &RoleId(939274049824129026);
-// Id of the role who have permission to use /generate slash command.
-pub const ROLE_ID: [&'static RoleId; 2] = [&RoleId(939836159134158858), &RoleId(940751879493799936)];
 pub const ERROR_COLOR: Color = Color::new(0xE6770B);
 
 // Hepler function to check if user has permission to do /generate command.
-pub fn has_permission(role: & RoleId) -> bool{
-    if ROLE_ID.contains(&role){
-        return true;
+pub fn has_permission(invoker: &RoleId, roles: &Vec<Role>) -> bool{
+    roles.into_iter().any(|role| role.name != "@everyone" && role.id == *invoker)
+}
+
+// Grant permission for certain users
+fn generate_permission(project_role: Option<RoleId>, roles: Vec< Role>) -> Vec<PermissionOverwrite>{
+    let mut overwrite = Vec::new();
+    // set channel to be private
+
+
+    for role in roles{
+        // set channel to be private
+        if role.name == "@everyone"{
+            overwrite.push(PermissionOverwrite{
+                allow: Permissions::empty(),
+                deny: Permissions::READ_MESSAGES,
+                 kind: PermissionOverwriteType::Role(role.id),
+            })
+            // Grant permission for faculty and advisor.
+        }else{
+            overwrite.push(PermissionOverwrite{
+                allow: Permissions::all(),
+                deny: Permissions::empty(),
+                kind: PermissionOverwriteType::Role(role.id)
+            });
+        }
     }
-    false
+    
+    // If roles for the project have been generated, also grant permission for users who have the roles.
+    if let Some(r) = project_role{
+        overwrite.push(PermissionOverwrite{
+            allow: 
+            Permissions:: READ_MESSAGES |
+            Permissions::SEND_MESSAGES | 
+            Permissions::EMBED_LINKS | 
+            Permissions:: ATTACH_FILES | 
+            Permissions::READ_MESSAGE_HISTORY |
+            Permissions:: CONNECT|
+            Permissions:: SPEAK,
+            deny: Permissions::empty(),
+            kind: PermissionOverwriteType::Role(r)
+        });
+    }
+    return overwrite;
+}
+
+
+
+// Return error for interaction
+async fn interaction_error(error_title: &str,error_description: &str, err: impl ToString, ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
+    return interaction.create_interaction_response(&ctx.http, |create_response|{
+        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
+            .interaction_response_data(|rdata| {
+                rdata
+                    // Do not allow any mentions
+                    .allowed_mentions(|am| am.empty_parse())
+                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
+                    .create_embed(|embed| {
+                    // Add common attributes
+                        embed_common(embed)
+                        .color(ERROR_COLOR)
+                        .title(error_title)
+                        .description(error_description)
+                         // Include the error as a field of the embed.
+                        .field("Error Message",err, false)
+                })
+        })
+    }).await;
+}
+
+// Get roles information about @everyone, Faculty Advisors and Coordinator in the guilds.
+async fn get_roles(ctx: &Context) -> Vec<Role>{
+         GuildId(global_config().discord_config.rcos_guild_id())
+        .roles(&ctx)
+        .await
+        .unwrap()
+        .into_values()
+        .collect::<Vec<Role>>()
+        .into_iter()
+        .filter(|role| role.name == "@everyone" || role.name == "Faculty Advisors" || role.name == "Coordinators")
+        .collect()
 }
 
 // Build the option for the /generate command.
@@ -112,9 +183,12 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
             .roles
             .as_slice();
         
+            // Get the roles having permission to call /generate command
+        let permitted_roles = get_roles(ctx).await;
+        
         // If invoker's role does not have permission,
         // respond with an embed indicating an error.
-        if !roles.iter().any(|e| has_permission(e)){
+        if !roles.iter().any(|e| has_permission(e, &permitted_roles)){
                 return interaction.create_interaction_response(&ctx.http, |create_response|{
                     create_response.kind(InteractionResponseType::ChannelMessageWithSource)
                         .interaction_response_data(|rdata| {
@@ -217,13 +291,13 @@ fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
     let projects_associate_info = rcos_api_response_project.unwrap().projects;
 
     for project in projects_associate_info{
-        // Create voice channel for projects if not previously created.
-        if !project.project_channels.iter().any(|channel| channel.kind == ChannelType::DiscordVoice){
+        // Create channels for projects if not previously created.
+        if project.project_channels.is_empty(){
             // Generate permission for certain groups for the channel.
             let overwrite = if let None  =  project.project_role{
-                generate_permission(None)
+                generate_permission(None,get_roles(ctx).await)
             }else{
-                generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())))
+                generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())), get_roles(ctx).await)
             };
 
             // Get parent channel(category) from data.
@@ -373,12 +447,12 @@ fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
  
     for small_group in small_groups_associate_info{
          // Create voice channel for projects if not previously created.
-        if !small_group.small_group_channels.iter().any(|channel| channel.kind == ChannelType::DiscordVoice){
+        if small_group.small_group_channels.is_empty(){
              // Generate permission for certain groups for the channel.
             let overwrite = if let None  =  small_group.small_group_role{
-                generate_permission(None)
+                generate_permission(None,get_roles(ctx).await)
             }else{
-                 generate_permission(Some(RoleId(small_group.small_group_role.unwrap().role_id.parse::<u64>().unwrap())))
+                 generate_permission(Some(RoleId(small_group.small_group_role.unwrap().role_id.parse::<u64>().unwrap())), get_roles(ctx).await)
             };
  
             // Get parent channel(category) from data.
@@ -638,9 +712,9 @@ async fn handle_generate_categories(ctx: &Context, interaction: &ApplicationComm
         if project.project_categories.is_empty(){
             // Generate permission for certain groups for the channel.
             let overwrite = if let true =  project.project_role.is_none(){
-                generate_permission(None)
+                generate_permission(None, get_roles(ctx).await)
             }else{
-                generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())))
+                generate_permission(Some(RoleId(project.project_role.unwrap().role_id.parse::<u64>().unwrap())), get_roles(ctx).await)
             };
 
             let category = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
@@ -694,9 +768,9 @@ async fn handle_generate_categories(ctx: &Context, interaction: &ApplicationComm
         if small_group.small_group_categories.is_empty(){
             // Generate permission for certain groups for the channel.
             let overwrite = if let true =  small_group.small_group_role.is_none(){
-                generate_permission(None)
+                generate_permission(None, get_roles(ctx).await)
             }else{
-                generate_permission(Some(RoleId(small_group.small_group_role.unwrap().role_id.parse::<u64>().unwrap())))
+                generate_permission(Some(RoleId(small_group.small_group_role.unwrap().role_id.parse::<u64>().unwrap())), get_roles(ctx).await)
             };
 
             let category = GuildId(global_config().discord_config.rcos_guild_id()).create_channel(&ctx.http, |c|{
@@ -766,67 +840,5 @@ async fn handle_generate_all(ctx: &Context, interaction: &ApplicationCommandInte
                             .description("Categories, roles, and channels are created for project and/or small groups.")
                     })
             })
-    }).await;
-}
-
-
-// Grant permission for certain users
-fn generate_permission(project_role: Option<RoleId>) -> Vec<PermissionOverwrite>{
-    // set channel to be private
-     let mut overwrite = vec![PermissionOverwrite{
-        allow: Permissions::empty(),
-        deny: Permissions::READ_MESSAGES,
-         kind: PermissionOverwriteType::Role(*EVERYONE),
-    }];
-
-    // Grant permission for faculty and advisor.
-    for role in ROLE_ID{
-        overwrite.push(PermissionOverwrite{
-            allow: Permissions::all(),
-            deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Role(*role)
-        });
-    }
-    
-    // If roles for the project have been generated, also grant permission for users who have the roles.
-    if let Some(r) = project_role{
-        overwrite.push(PermissionOverwrite{
-            allow: 
-            Permissions:: READ_MESSAGES |
-            Permissions::SEND_MESSAGES | 
-            Permissions::EMBED_LINKS | 
-            Permissions:: ATTACH_FILES | 
-            Permissions::READ_MESSAGE_HISTORY |
-            Permissions:: CONNECT|
-            Permissions:: SPEAK,
-            deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Role(r)
-        });
-    }
-    return overwrite;
-}
-
-
-
-// Return error for interaction
-async fn interaction_error(error_title: &str,error_description: &str, err: impl ToString, ctx: &Context, interaction: &ApplicationCommandInteraction) -> SerenityResult<()>{
-    return interaction.create_interaction_response(&ctx.http, |create_response|{
-        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-            .interaction_response_data(|rdata| {
-                rdata
-                    // Do not allow any mentions
-                    .allowed_mentions(|am| am.empty_parse())
-                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)                            
-                    .create_embed(|embed| {
-                    // Add common attributes
-                        embed_common(embed)
-                        .color(ERROR_COLOR)
-                        .title(error_title)
-                        .description(error_description)
-                         // Include the error as a field of the embed.
-                        .field("Error Message",err, false)
-                })
-        })
     }).await;
 }
