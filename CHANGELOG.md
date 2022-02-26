@@ -4,7 +4,8 @@ version 0.6.4 and earlier may not be entirely accurate or complete. A best effor
 has been made to fill in the gaps. If you find an issue anywhere in this changelog, 
 please submit a pull request fixing it. 
 
-## Unreleased - 0.9.1
+## Unreleased
+- Update Hasura version ([#247])
 
 ## 0.9.0 - February 2nd, 2022
 - Fixed bug in rendering of registration form. ([#222])
@@ -187,3 +188,4 @@ please submit a pull request fixing it.
 [#236]: https://github.com/rcos/Telescope/issues/236
 [#240]: https://github.com/rcos/Telescope/pull/240
 [#242]: https://github.com/rcos/Telescope/pull/242
+[#247]: https://github.com/rcos/Telescope/pull/247
