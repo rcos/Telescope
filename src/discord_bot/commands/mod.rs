@@ -8,8 +8,8 @@ use serenity::model::guild::Guild;
 use serenity::model::interactions::application_command::ApplicationCommand;
 use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 
-mod whois;
 mod generate;
+mod whois;
 
 /// Interactions return a boxed future of a serenity result.
 type InteractionResult<'a> = BoxFuture<'a, serenity::Result<()>>;
@@ -31,7 +31,6 @@ struct Command {
     handler: InteractionHandler,
 }
 
-
 /// Static list of all of Telescope's Discord slash commands.
 const COMMANDS: &'static [Command] = &[
     // /whois
@@ -45,10 +44,8 @@ const COMMANDS: &'static [Command] = &[
         name: generate::COMMAND_NAME,
         builder: generate::create_generate,
         handler: generate::handle_generate,
-        
     },
 ];
-
 
 // Global command map.
 lazy_static! { static ref COMMAND_MAP: DashMap<String, InteractionHandler> = {
@@ -82,7 +79,7 @@ pub fn get_handler(command_name: &str) -> Option<InteractionHandler> {
 /// Register all telescope slash command for a whitelisted guild.
 pub async fn register_commands_for_guild(ctx: &mut Context, guild: &Guild) -> serenity::Result<()> {
     // Register each command to the whitelisted Guild ID.
-    
+
     for cmd in COMMANDS {
         // Create the default command application command object with no fields.
         let mut command_builder: CreateApplicationCommand = CreateApplicationCommand::default();

@@ -9,19 +9,26 @@ use crate::error::TelescopeError;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/discord_assoications/create_project_channel.graphql",
+    query_path = "graphql/rcos/discord_assoications/project/create_project_channel.graphql"
 )]
 pub struct CreateOneProjectChannel;
 
-
-impl CreateOneProjectChannel{
-    pub async fn execute(project_id : i64,  channel_id: String, kind: channel_type) -> Result<Option<String>, TelescopeError>{
-        send_query::<Self>(create_one_project_channel::Variables{
+impl CreateOneProjectChannel {
+    pub async fn execute(
+        project_id: i64,
+        channel_id: String,
+        kind: channel_type,
+    ) -> Result<Option<String>, TelescopeError> {
+        send_query::<Self>(create_one_project_channel::Variables {
             project_id,
             channel_id,
             kind,
-        }).await
-        .map(|response| response.insert_project_channels_one.map(|obj| obj.channel_id))
-        
+        })
+        .await
+        .map(|response| {
+            response
+                .insert_project_channels_one
+                .map(|obj| obj.channel_id)
+        })
     }
 }
