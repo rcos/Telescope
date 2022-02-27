@@ -1,6 +1,5 @@
 //! RCOS API mutation to create a discord channel for a given projct id.
 
-use crate::api::rcos::prelude::*;
 use crate::api::rcos::send_query;
 
 use crate::error::TelescopeError;

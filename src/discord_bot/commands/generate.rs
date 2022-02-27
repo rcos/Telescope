@@ -1,11 +1,14 @@
 //! Discord slash command to generate channels, categories and roles for small groups, projects, and project ptches.
 //! Limited to coordinators, faculty advisors, and sysadmins.
 
-use crate::api::rcos::discord_assoications::{
-    create_project_category, create_project_channel, create_project_role,
-    create_small_group_category, create_small_group_channel, create_small_group_role, project_info,
-    small_group_info, ChannelType,
+use crate::api::rcos::discord_assoications::project::{
+    create_project_category, create_project_channel, create_project_role, project_info,
 };
+use crate::api::rcos::discord_assoications::small_group::{
+    create_small_group_category, create_small_group_channel, create_small_group_role,
+    small_group_info,
+};
+use crate::api::rcos::discord_assoications::ChannelType;
 use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
@@ -50,7 +53,7 @@ fn generate_permission(project_role: Option<RoleId>, roles: Vec<Role>) -> Vec<Pe
                 deny: Permissions::READ_MESSAGES,
                 kind: PermissionOverwriteType::Role(role.id),
             })
-            // Grant permission for faculty and advisor.
+            // Grant permission for Faculty Advisors, Coordinators and Sysadmins.
         } else {
             overwrite.push(PermissionOverwrite {
                 allow: Permissions::all(),
@@ -199,7 +202,7 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                              // Do not allow any mentions
                             .allowed_mentions(|am| am.empty_parse())
                              // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)              
+                            .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
                             .create_embed(|embed| {
                                 // Add common attributes
                                 embed_common(embed)
@@ -548,7 +551,7 @@ async fn handle_generate_channels(
     let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
 
     for small_group in small_groups_associate_info {
-        // Create voice channel for projects if not previously created.
+        // Create voice channel for small groups if not previously created.
         if small_group.small_group_channels.is_empty() {
             // Generate permission for certain groups for the channel.
             let overwrite = if let None = small_group.small_group_role {
@@ -717,10 +720,10 @@ async fn handle_generate_channels(
                         )
                         .await;
                     }
-                    if let Err(err) = insert_voice_channel {
+                    if let Err(err) = insert_text_channel {
                         return interaction_error(
                             "Database Error",
-                            "We could not insert voice channel for small groups into database",
+                            "We could not insert text channel for small groups into database",
                             &err,
                             &ctx,
                             &interaction,
@@ -864,7 +867,7 @@ async fn handle_generate_role(
                 )
                 .await;
             }
-            // Insert project role data into database.
+            // Insert small group role data into database.
             let insert_role = create_small_group_role::CreateOneSmallGroupRole::execute(
                 small_group.small_group_id,
                 role.unwrap().id.to_string(),
