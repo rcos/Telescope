@@ -36,7 +36,7 @@ pub const ERROR_COLOR: Color = Color::new(0xE6770B);
 pub fn has_permission(invoker: &RoleId, roles: &Vec<Role>) -> bool {
     roles
         .into_iter()
-        .any(|role| role.name != "@everyone" && role.id == *invoker)
+        .any(|role| (role.name != "@everyone" && role.id == *invoker) || role.has_permission(Permissions::ADMINISTRATOR) )
 }
 
 // Grant permission for certain users
@@ -191,9 +191,10 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
     // Get the roles having permission to call /generate command
     let permitted_roles = get_roles(ctx).await;
 
-    // If invoker's role does not have permission,
+    // If invoker's role does not have permission, or is not admin 
     // respond with an embed indicating an error.
-    if !roles.iter().any(|e| has_permission(e, &permitted_roles)) {
+    if !roles.iter().any(|e| has_permission(e, &permitted_roles)) &&
+    !interaction.member.as_ref().unwrap().permissions.unwrap().administrator(){
         return interaction.create_interaction_response(&ctx.http, |create_response|{
                     create_response.kind(InteractionResponseType::ChannelMessageWithSource)
                         .interaction_response_data(|rdata| {
@@ -208,10 +209,10 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                                     .color(ERROR_COLOR)
                                     .title("Permission Error")
                                     .description(
-                                        "We could not generate channels/roles/categories for you due to lack of permission."
+                                        "You need Coordinator/Faculty Advisor role."
                                     )
                                     // Include the error as a field of the embed.
-                                    .field("Error Message","Permissoion Error", false)
+                                    .field("Error Message","Permission Error", false)
                             })
                         })
                 }).await;
