@@ -1,8 +1,7 @@
 //! Discord slash command to generate channels, categories and roles for small groups, projects, and project ptches.
 //! Limited to coordinators, faculty advisors, and sysadmins.
 
-use crate::api::rcos::discord_assoications::project::{
-    create_project_category, create_project_channel, create_project_role, project_info,
+use crate::api::rcos::discord_assoications::project::{create_project_channel, create_project_role, project_info,
 };
 use crate::api::rcos::discord_assoications::small_group::{
     create_small_group_category, create_small_group_channel, create_small_group_role,
@@ -272,18 +271,21 @@ async fn handle_generate_channels(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
 ) -> SerenityResult<()> {
-    // Create channel for projects
-    let rcos_api_response_project = project_info::CurrProjects::get(0, None)
+
+
+
+    // Create channel for small groups
+    let rcos_api_response = small_group_info::CurrSmallGroups::get(0, None)
         .await
         .map_err(|err| {
             error!("Could not query the RCOS API: {}", err);
             err
         });
 
-    if let Err(err) = rcos_api_response_project {
+    if let Err(err) = rcos_api_response {
         return interaction_error(
             "RCOS API Error",
-            "We could not get data about projects because the \
+            "We could not get data about small groups because the \
         RCOS API responded with an error. Please contact a coordinator and \
         report this error on Telescope's GitHub.",
             &err,
@@ -293,62 +295,63 @@ async fn handle_generate_channels(
         .await;
     }
 
-    // Get list of discord association information for projects.
-    let projects_associate_info = rcos_api_response_project.unwrap().projects;
+    // Get list of discord association information for small groups.
+    let small_groups_associate_info = rcos_api_response.unwrap().small_groups;
 
-    for project in projects_associate_info {
-        // Create channels for projects if not previously created.
-        if project.project_channels.is_empty() {
-            // Generate permission for certain groups for the channel.
-            let overwrite = if let None = project.project_role {
-                generate_permission(None, get_roles(ctx).await)
-            } else {
-                generate_permission(
-                    Some(RoleId(
-                        project
-                            .project_role
-                            .unwrap()
-                            .role_id
-                            .parse::<u64>()
-                            .unwrap(),
-                    )),
-                    get_roles(ctx).await,
-                )
-            };
-
-            // Get parent channel(category) from data.
-            let categories = project.project_categories;
-
-            // directly create channels if no category for this project.
-            if categories.is_empty() {
+    for small_group in small_groups_associate_info{
+        // Get parent channel(category) from data.
+        let categories = small_group.small_group_categories;
+        // Get list of projects of small group.
+        let small_group_projects = &small_group.small_group_projects;
+        for category in categories {
+            // Create voice channel for small groups if not previously created.
+            if small_group.small_group_channels.is_empty() {
+                // Generate permission for certain groups for the channel.
+                let overwrite = if let None = small_group.small_group_role {
+                    generate_permission(None, get_roles(ctx).await)
+                } else {
+                    generate_permission(
+                        Some(RoleId(
+                            small_group
+                                .small_group_role
+                                .as_ref()
+                                .unwrap()
+                                .role_id
+                                .parse::<u64>()
+                                .unwrap(),
+                        )),
+                        get_roles(ctx).await,
+                    )
+                };
                 let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                    .create_channel(&ctx.http, |c| {
-                        c.name(&project.title)
-                            .kind(SerenityChannelType::Voice)
+                .create_channel(&ctx.http, |c| {
+                    c.name(&small_group.title)
+                        .kind(SerenityChannelType::Voice)
                             .permissions(overwrite.clone())
+                            .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
                     })
                     .await
                     .map_err(|err| {
                         error!("Could not create the voice channel: {}", err);
                         err
                     });
-
                 let text_channel = GuildId(global_config().discord_config.rcos_guild_id())
                     .create_channel(&ctx.http, |c| {
-                        c.name(&project.title)
+                        c.name(&small_group.title)
                             .kind(SerenityChannelType::Text)
                             .permissions(overwrite.clone())
+                            .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
                     })
                     .await
                     .map_err(|err| {
-                        error!("Could not create the text channel: {}", err);
+                        error!("Could not create the voice channel: {}", err);
                         err
                     });
-
+    
                 if let Err(err) = voice_channel {
                     return interaction_error(
                         "Discord Error",
-                        "We could not create voice channel for projects",
+                        "We could not create voice channel for small groups",
                         &err,
                         &ctx,
                         &interaction,
@@ -358,48 +361,36 @@ async fn handle_generate_channels(
                 if let Err(err) = text_channel {
                     return interaction_error(
                         "Discord Error",
-                        "We could not create text channel for projects",
+                        "We could not create text channel for small groups",
                         &err,
                         &ctx,
                         &interaction,
                     )
                     .await;
                 }
-                // insert voice channel data into database
-                let insert_voice_channel =
-                    create_project_channel::CreateOneProjectChannel::execute(
-                        project.project_id,
-                        voice_channel.unwrap().id.to_string(),
-                        ChannelType::DiscordVoice,
-                    )
+                // insert channel data into database
+                let insert_voice_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                    small_group.small_group_id,
+                    voice_channel.unwrap().id.to_string(),
+                    ChannelType::DiscordVoice)
                     .await
-                    .map_err(|err| {
-                        error!(
-                            "Could not insert project voice channel data to into database: {}",
-                            err
-                        );
+                    .map_err(|err|{
+                         error!("Could not insert small group voice channel data to into database: {}", err);
                         err
                     });
-
-                // insert text channel data into database
-                let insert_text_channel = create_project_channel::CreateOneProjectChannel::execute(
-                    project.project_id,
+                let insert_text_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                    small_group.small_group_id,
                     text_channel.unwrap().id.to_string(),
-                    ChannelType::DiscordText,
-                )
-                .await
-                .map_err(|err| {
-                    error!(
-                        "Could not insert project text channel data to into database: {}",
-                        err
-                    );
-                    err
-                });
-
+                    ChannelType::DiscordText)
+                        .await
+                        .map_err(|err|{
+                        error!("Could not insert small group text channel data to into database: {}", err);
+                         err
+                        });
                 if let Err(err) = insert_voice_channel {
                     return interaction_error(
                         "Database Error",
-                        "We could not insert voice channel for projects into database",
+                        "We could not insert voice channel for small groups into database",
                         &err,
                         &ctx,
                         &interaction,
@@ -409,20 +400,42 @@ async fn handle_generate_channels(
                 if let Err(err) = insert_text_channel {
                     return interaction_error(
                         "Database Error",
-                        "We could not insert text channel for projects into database",
+                        "We could not insert text channel for small groups into database",
                         &err,
                         &ctx,
                         &interaction,
                     )
                     .await;
                 }
-                // else create voice channel for each cateogry that project owns
-            } else {
-                for category in categories {
-                    // Create voice channel for guild.
+            }
+
+            // Create Voice and Text channel under small group category
+            for small_group_project in small_group_projects{
+                // Create channels for small group projects if not previously created.
+                if small_group_project.project.project_channels.is_empty() {
+                // Generate permission for certain groups for the channel.
+                let overwrite = if let None = small_group_project.project.project_role {
+                    generate_permission(None, get_roles(ctx).await)
+                } else {
+                    generate_permission(
+                        Some(RoleId(
+                                small_group_project
+                                .project
+                                .project_role
+                                .as_ref()
+                                .unwrap()
+                                .role_id
+                                .parse::<u64>()
+                                .unwrap(),
+                        )),
+                        get_roles(ctx).await,
+                    )
+                };
+
+                    // Create voice channel.
                     let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
                         .create_channel(&ctx.http, |c| {
-                            c.name(&project.title)
+                            c.name(&small_group_project.project.title)
                                 .kind(SerenityChannelType::Voice)
                                 .permissions(overwrite.clone())
                                 .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
@@ -433,10 +446,10 @@ async fn handle_generate_channels(
                             err
                         });
 
-                    // Create text channel for guild.
+                    // Create text channel.
                     let text_channel = GuildId(global_config().discord_config.rcos_guild_id())
                         .create_channel(&ctx.http, |c| {
-                            c.name(&project.title)
+                            c.name(&small_group_project.project.title)
                                 .kind(SerenityChannelType::Text)
                                 .permissions(overwrite.clone())
                                 .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
@@ -472,7 +485,7 @@ async fn handle_generate_channels(
                     // insert voice channel data into database
                     let insert_voice_channel =
                         create_project_channel::CreateOneProjectChannel::execute(
-                            project.project_id,
+                            small_group_project.project.project_id,
                             voice_channel.unwrap().id.to_string(),
                             ChannelType::DiscordVoice,
                         )
@@ -488,7 +501,7 @@ async fn handle_generate_channels(
                     // insert text channel data into database
                     let insert_text_channel =
                         create_project_channel::CreateOneProjectChannel::execute(
-                            project.project_id,
+                            small_group_project.project.project_id,
                             text_channel.unwrap().id.to_string(),
                             ChannelType::DiscordText,
                         )
@@ -523,216 +536,7 @@ async fn handle_generate_channels(
                     }
                 }
             }
-        }
-    }
-
-    // Create channel for small groups
-    let rcos_api_response_small_group = small_group_info::CurrSmallGroups::get(0, None)
-        .await
-        .map_err(|err| {
-            error!("Could not query the RCOS API: {}", err);
-            err
-        });
-
-    if let Err(err) = rcos_api_response_small_group {
-        return interaction_error(
-            "RCOS API Error",
-            "We could not get data about small groups because the \
-        RCOS API responded with an error. Please contact a coordinator and \
-        report this error on Telescope's GitHub.",
-            &err,
-            &ctx,
-            &interaction,
-        )
-        .await;
-    }
-
-    // Get list of discord association information for small groups.
-    let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
-
-    for small_group in small_groups_associate_info {
-        // Create voice channel for small groups if not previously created.
-        if small_group.small_group_channels.is_empty() {
-            // Generate permission for certain groups for the channel.
-            let overwrite = if let None = small_group.small_group_role {
-                generate_permission(None, get_roles(ctx).await)
-            } else {
-                generate_permission(
-                    Some(RoleId(
-                        small_group
-                            .small_group_role
-                            .unwrap()
-                            .role_id
-                            .parse::<u64>()
-                            .unwrap(),
-                    )),
-                    get_roles(ctx).await,
-                )
-            };
-
-            // Get parent channel(category) from data.
-            let categories = small_group.small_group_categories;
-            // If no category, directly create channel for small group
-            if categories.is_empty() {
-                let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                    .create_channel(&ctx.http, |c| {
-                        c.name(small_group.title.clone() + &small_group.semester_id)
-                            .kind(SerenityChannelType::Voice)
-                            .permissions(overwrite.clone())
-                    })
-                    .await
-                    .map_err(|err| {
-                        error!("Could not create the voice channel: {}", err);
-                        err
-                    });
-
-                let text_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                    .create_channel(&ctx.http, |c| {
-                        c.name(small_group.title.clone() + &small_group.semester_id)
-                            .kind(SerenityChannelType::Text)
-                            .permissions(overwrite.clone())
-                    })
-                    .await
-                    .map_err(|err| {
-                        error!("Could not create the text channel: {}", err);
-                        err
-                    });
-                if let Err(err) = voice_channel {
-                    return interaction_error(
-                        "Discord Error",
-                        "We could not create voice channel for small groups",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
-                }
-                if let Err(err) = text_channel {
-                    return interaction_error(
-                        "Discord Error",
-                        "We could not create text channel for small groups",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
-                }
-
-                // insert channel data into database
-                let insert_voice_channel =
-                    create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                        small_group.small_group_id,
-                        voice_channel.unwrap().id.to_string(),
-                        ChannelType::DiscordVoice,
-                    )
-                    .await
-                    .map_err(|err| {
-                        error!(
-                            "Could not insert small group channel data to into database: {}",
-                            err
-                        );
-                        err
-                    });
-
-                if let Err(err) = insert_voice_channel {
-                    return interaction_error(
-                        "Database Error",
-                        "We could not insert voice channel for small groups into database",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
-                }
-            } else {
-                for category in categories {
-                    let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                        .create_channel(&ctx.http, |c| {
-                            c.name(&small_group.title)
-                                .kind(SerenityChannelType::Voice)
-                                .permissions(overwrite.clone())
-                                .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
-                        })
-                        .await
-                        .map_err(|err| {
-                            error!("Could not create the voice channel: {}", err);
-                            err
-                        });
-                    let text_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                        .create_channel(&ctx.http, |c| {
-                            c.name(&small_group.title)
-                                .kind(SerenityChannelType::Text)
-                                .permissions(overwrite.clone())
-                                .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
-                        })
-                        .await
-                        .map_err(|err| {
-                            error!("Could not create the voice channel: {}", err);
-                            err
-                        });
-
-                    if let Err(err) = voice_channel {
-                        return interaction_error(
-                            "Discord Error",
-                            "We could not create voice channel for small groups",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
-                    }
-                    if let Err(err) = text_channel {
-                        return interaction_error(
-                            "Discord Error",
-                            "We could not create text channel for small groups",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
-                    }
-                    // insert channel data into database
-                    let insert_voice_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                        small_group.small_group_id,
-                        voice_channel.unwrap().id.to_string(),
-                        ChannelType::DiscordVoice)
-                        .await
-                        .map_err(|err|{
-                             error!("Could not insert small group voice channel data to into database: {}", err);
-                            err
-                        });
-                    let insert_text_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                        small_group.small_group_id,
-                        text_channel.unwrap().id.to_string(),
-                        ChannelType::DiscordText)
-                        .await
-                        .map_err(|err|{
-                             error!("Could not insert small group text channel data to into database: {}", err);
-                            err
-                        });
-                    if let Err(err) = insert_voice_channel {
-                        return interaction_error(
-                            "Database Error",
-                            "We could not insert voice channel for small groups into database",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
-                    }
-                    if let Err(err) = insert_text_channel {
-                        return interaction_error(
-                            "Database Error",
-                            "We could not insert text channel for small groups into database",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
-                    }
-                }
-            }
-        }
+       }
     }
     return interaction
         .create_interaction_response(&ctx.http, |create_response| {
@@ -849,7 +653,7 @@ async fn handle_generate_role(
         if small_group.small_group_role.is_none() {
             let role = GuildId(global_config().discord_config.rcos_guild_id())
                 .create_role(&ctx.http, |r| {
-                    r.name(small_group.title.clone() + &small_group.semester_id)
+                    r.name(small_group.title)
                         .mentionable(true)
                 })
                 .await
@@ -920,107 +724,14 @@ async fn handle_generate_categories(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
 ) -> SerenityResult<()> {
-    let rcos_api_response_project = project_info::CurrProjects::get(0, None)
+    let rcos_api_response = small_group_info::CurrSmallGroups::get(0, None)
         .await
         .map_err(|err| {
             error!("Could not query the RCOS API: {}", err);
             err
         });
 
-    if let Err(err) = rcos_api_response_project {
-        return interaction_error(
-            "RCOS API Error",
-            "We could not get data about projects because the \
-        RCOS API responded with an error. Please contact a coordinator and \
-        report this error on Telescope's GitHub.",
-            &err,
-            &ctx,
-            &interaction,
-        )
-        .await;
-    }
-
-    // Get list of discord association information for projects.
-    let projects_associate_info = rcos_api_response_project.unwrap().projects;
-
-    // Create category for projects if not previously created.
-    for project in projects_associate_info {
-        if project.project_categories.is_empty() {
-            // Generate permission for certain groups for the channel.
-            let overwrite = if let true = project.project_role.is_none() {
-                generate_permission(None, get_roles(ctx).await)
-            } else {
-                generate_permission(
-                    Some(RoleId(
-                        project
-                            .project_role
-                            .unwrap()
-                            .role_id
-                            .parse::<u64>()
-                            .unwrap(),
-                    )),
-                    get_roles(ctx).await,
-                )
-            };
-
-            let category = GuildId(global_config().discord_config.rcos_guild_id())
-                .create_channel(&ctx.http, |c| {
-                    c.name(&project.title)
-                        .kind(SerenityChannelType::Category)
-                        .permissions(overwrite)
-                })
-                .await
-                .map_err(|err| {
-                    error!("Could not create the category for project: {}", err);
-                    err
-                });
-
-            if let Err(err) = category {
-                return interaction_error(
-                    "Discord Error",
-                    "We could not create category for project",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
-            }
-
-            // insert category data into database
-            let insert_category = create_project_category::CreateOneProjectCategory::execute(
-                project.project_id,
-                category.unwrap().id.to_string(),
-            )
-            .await
-            .map_err(|err| {
-                error!(
-                    "Could not insert project category data to into database: {}",
-                    err
-                );
-                err
-            });
-
-            if let Err(err) = insert_category {
-                return interaction_error(
-                    "Database Error",
-                    "We could not insert category for projects into database",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
-            }
-        }
-    }
-
-    let rcos_api_response_small_group = small_group_info::CurrSmallGroups::get(0, None)
-        .await
-        .map_err(|err| {
-            error!("Could not query the RCOS API: {}", err);
-            err
-        });
-
-    if let Err(err) = rcos_api_response_small_group {
+    if let Err(err) = rcos_api_response{
         return interaction_error(
             "RCOS API Error",
             "We could not get data about small groups because the \
@@ -1033,7 +744,7 @@ async fn handle_generate_categories(
         .await;
     }
 
-    let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
+    let small_groups_associate_info = rcos_api_response.unwrap().small_groups;
     // Create category for projects if not previously created.
     for small_group in small_groups_associate_info {
         if small_group.small_group_categories.is_empty() {
@@ -1056,7 +767,7 @@ async fn handle_generate_categories(
 
             let category = GuildId(global_config().discord_config.rcos_guild_id())
                 .create_channel(&ctx.http, |c| {
-                    c.name(small_group.title.clone() + &small_group.semester_id)
+                    c.name(small_group.title)
                         .kind(SerenityChannelType::Category)
                         .permissions(overwrite)
                 })

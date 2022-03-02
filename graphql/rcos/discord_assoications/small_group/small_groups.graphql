@@ -16,6 +16,18 @@ fragment SmallGroupAssoicationInfo on small_groups {
         channel_id
         kind
     }
+    small_group_projects{
+        project{
+            project_id
+            title
+            project_channels{
+                channel_id
+            }
+            project_role{
+                role_id
+            }
+        }
+    }
 }
 
 

@@ -14,11 +14,6 @@ fragment AssoicationInfo on projects {
     enrollments{
         user_id
     }
-    
-    # If project category created, what is the category id.
-    project_categories{
-        category_id
-    }
 }
 
 
