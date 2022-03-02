@@ -1,7 +1,8 @@
 //! Discord slash command to generate channels, categories and roles for small groups, projects, and project ptches.
 //! Limited to coordinators, faculty advisors, and sysadmins.
 
-use crate::api::rcos::discord_associations::project::{create_project_channel, create_project_role, project_info,
+use crate::api::rcos::discord_associations::project::{
+    create_project_channel, create_project_role, project_info,
 };
 use crate::api::rcos::discord_associations::small_group::{
     create_small_group_category, create_small_group_channel, create_small_group_role,
@@ -34,9 +35,10 @@ pub const ERROR_COLOR: Color = Color::new(0xE6770B);
 
 // Hepler function to check if user has permission to do /generate command.
 pub fn has_permission(invoker: &RoleId, roles: &Vec<Role>) -> bool {
-    roles
-        .into_iter()
-        .any(|role| (role.name != "@everyone" && role.id == *invoker) || role.has_permission(Permissions::ADMINISTRATOR) )
+    roles.into_iter().any(|role| {
+        (role.name != "@everyone" && role.id == *invoker)
+            || role.has_permission(Permissions::ADMINISTRATOR)
+    })
 }
 
 // Grant permission for certain users
@@ -191,31 +193,39 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
     // Get the roles having permission to call /generate command
     let permitted_roles = get_roles(ctx).await;
 
-    // If invoker's role does not have permission, or is not admin 
+    // If invoker's role does not have permission, or is not admin
     // respond with an embed indicating an error.
-    if !roles.iter().any(|e| has_permission(e, &permitted_roles)) &&
-    !interaction.member.as_ref().unwrap().permissions.unwrap().administrator(){
-        return interaction.create_interaction_response(&ctx.http, |create_response|{
-                    create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|rdata| {
-                            rdata
-                             // Do not allow any mentions
+    if !roles.iter().any(|e| has_permission(e, &permitted_roles))
+        && !interaction
+            .member
+            .as_ref()
+            .unwrap()
+            .permissions
+            .unwrap()
+            .administrator()
+    {
+        return interaction
+            .create_interaction_response(&ctx.http, |create_response| {
+                create_response
+                    .kind(InteractionResponseType::ChannelMessageWithSource)
+                    .interaction_response_data(|rdata| {
+                        rdata
+                            // Do not allow any mentions
                             .allowed_mentions(|am| am.empty_parse())
-                             // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                            // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
                             .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
                             .create_embed(|embed| {
                                 // Add common attributes
                                 embed_common(embed)
                                     .color(ERROR_COLOR)
                                     .title("Permission Error")
-                                    .description(
-                                        "You need Coordinator/Faculty Advisor role."
-                                    )
+                                    .description("You need Coordinator/Faculty Advisor role.")
                                     // Include the error as a field of the embed.
-                                    .field("Error Message","Permission Error", false)
+                                    .field("Error Message", "Permission Error", false)
                             })
-                        })
-                }).await;
+                    })
+            })
+            .await;
     }
     match option_name {
         _ if option_name == OPTION_NAME[0] => handle_generate_channels(ctx, interaction).await,
@@ -272,9 +282,6 @@ async fn handle_generate_channels(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
 ) -> SerenityResult<()> {
-
-
-
     // Create channel for small groups
     let rcos_api_response = small_group_info::CurrSmallGroups::get(0, None)
         .await
@@ -299,7 +306,7 @@ async fn handle_generate_channels(
     // Get list of discord association information for small groups.
     let small_groups_associate_info = rcos_api_response.unwrap().small_groups;
 
-    for small_group in small_groups_associate_info{
+    for small_group in small_groups_associate_info {
         // Get parent channel(category) from data.
         let categories = small_group.small_group_categories;
         // Get list of projects of small group.
@@ -325,9 +332,9 @@ async fn handle_generate_channels(
                     )
                 };
                 let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                .create_channel(&ctx.http, |c| {
-                    c.name(&small_group.title)
-                        .kind(SerenityChannelType::Voice)
+                    .create_channel(&ctx.http, |c| {
+                        c.name(&small_group.title)
+                            .kind(SerenityChannelType::Voice)
                             .permissions(overwrite.clone())
                             .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
                     })
@@ -348,7 +355,7 @@ async fn handle_generate_channels(
                         error!("Could not create the voice channel: {}", err);
                         err
                     });
-    
+
                 if let Err(err) = voice_channel {
                     return interaction_error(
                         "Discord Error",
@@ -370,24 +377,34 @@ async fn handle_generate_channels(
                     .await;
                 }
                 // insert channel data into database
-                let insert_voice_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                    small_group.small_group_id,
-                    voice_channel.unwrap().id.to_string(),
-                    ChannelType::DiscordVoice)
+                let insert_voice_channel =
+                    create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                        small_group.small_group_id,
+                        voice_channel.unwrap().id.to_string(),
+                        ChannelType::DiscordVoice,
+                    )
                     .await
-                    .map_err(|err|{
-                         error!("Could not insert small group voice channel data to into database: {}", err);
+                    .map_err(|err| {
+                        error!(
+                            "Could not insert small group voice channel data to into database: {}",
+                            err
+                        );
                         err
                     });
-                let insert_text_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                    small_group.small_group_id,
-                    text_channel.unwrap().id.to_string(),
-                    ChannelType::DiscordText)
-                        .await
-                        .map_err(|err|{
-                        error!("Could not insert small group text channel data to into database: {}", err);
-                         err
-                        });
+                let insert_text_channel =
+                    create_small_group_channel::CreateOneSmallGroupChannel::execute(
+                        small_group.small_group_id,
+                        text_channel.unwrap().id.to_string(),
+                        ChannelType::DiscordText,
+                    )
+                    .await
+                    .map_err(|err| {
+                        error!(
+                            "Could not insert small group text channel data to into database: {}",
+                            err
+                        );
+                        err
+                    });
                 if let Err(err) = insert_voice_channel {
                     return interaction_error(
                         "Database Error",
@@ -411,27 +428,27 @@ async fn handle_generate_channels(
             }
 
             // Create Voice and Text channel under small group category
-            for small_group_project in small_group_projects{
+            for small_group_project in small_group_projects {
                 // Create channels for small group projects if not previously created.
                 if small_group_project.project.project_channels.is_empty() {
-                // Generate permission for certain groups for the channel.
-                let overwrite = if let None = small_group_project.project.project_role {
-                    generate_permission(None, get_roles(ctx).await)
-                } else {
-                    generate_permission(
-                        Some(RoleId(
+                    // Generate permission for certain groups for the channel.
+                    let overwrite = if let None = small_group_project.project.project_role {
+                        generate_permission(None, get_roles(ctx).await)
+                    } else {
+                        generate_permission(
+                            Some(RoleId(
                                 small_group_project
-                                .project
-                                .project_role
-                                .as_ref()
-                                .unwrap()
-                                .role_id
-                                .parse::<u64>()
-                                .unwrap(),
-                        )),
-                        get_roles(ctx).await,
-                    )
-                };
+                                    .project
+                                    .project_role
+                                    .as_ref()
+                                    .unwrap()
+                                    .role_id
+                                    .parse::<u64>()
+                                    .unwrap(),
+                            )),
+                            get_roles(ctx).await,
+                        )
+                    };
 
                     // Create voice channel.
                     let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
@@ -537,7 +554,7 @@ async fn handle_generate_channels(
                     }
                 }
             }
-       }
+        }
     }
     return interaction
         .create_interaction_response(&ctx.http, |create_response| {
@@ -653,10 +670,7 @@ async fn handle_generate_role(
     for small_group in small_groups_associate_info {
         if small_group.small_group_role.is_none() {
             let role = GuildId(global_config().discord_config.rcos_guild_id())
-                .create_role(&ctx.http, |r| {
-                    r.name(small_group.title)
-                        .mentionable(true)
-                })
+                .create_role(&ctx.http, |r| r.name(small_group.title).mentionable(true))
                 .await
                 .map_err(|err| {
                     error!("Could not create the channel: {}", err);
@@ -732,7 +746,7 @@ async fn handle_generate_categories(
             err
         });
 
-    if let Err(err) = rcos_api_response{
+    if let Err(err) = rcos_api_response {
         return interaction_error(
             "RCOS API Error",
             "We could not get data about small groups because the \
