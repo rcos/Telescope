@@ -5412,15 +5412,177 @@
               }
             },
             {
-              "args": [],
+              "args": [
+                {
+                  "defaultValue": null,
+                  "description": "distinct select on columns",
+                  "name": "distinct_on",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "final_grade_appeal_select_column",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "limit the number of rows returned",
+                  "name": "limit",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "skip the first n rows. Use only with order_by",
+                  "name": "offset",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "sort the rows by one or more columns",
+                  "name": "order_by",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "final_grade_appeal_order_by",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "filter the rows returned",
+                  "name": "where",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "final_grade_appeal_bool_exp",
+                    "ofType": null
+                  }
+                }
+              ],
               "deprecationReason": null,
-              "description": "An object relationship",
+              "description": "An array relationship",
               "isDeprecated": false,
-              "name": "final_grade_appeal",
+              "name": "final_grade_appeals",
               "type": {
-                "kind": "OBJECT",
-                "name": "final_grade_appeal",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "final_grade_appeal",
+                      "ofType": null
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "args": [
+                {
+                  "defaultValue": null,
+                  "description": "distinct select on columns",
+                  "name": "distinct_on",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "final_grade_appeal_select_column",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "limit the number of rows returned",
+                  "name": "limit",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "skip the first n rows. Use only with order_by",
+                  "name": "offset",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "sort the rows by one or more columns",
+                  "name": "order_by",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "final_grade_appeal_order_by",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "description": "filter the rows returned",
+                  "name": "where",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "final_grade_appeal_bool_exp",
+                    "ofType": null
+                  }
+                }
+              ],
+              "deprecationReason": null,
+              "description": "An aggregate relationship",
+              "isDeprecated": false,
+              "name": "final_grade_appeals_aggregate",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "final_grade_appeal_aggregate",
+                  "ofType": null
+                }
               }
             },
             {
@@ -6375,7 +6537,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsByUserIdSemesterId",
+              "name": "workshopProposalsByReviewerIdSemesterId",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -6466,7 +6628,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsByUserIdSemesterId_aggregate",
+              "name": "workshopProposalsByReviewerIdSemesterId_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7239,7 +7401,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "final_grade_appeal",
+              "name": "final_grade_appeals",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "final_grade_appeal_bool_exp",
@@ -7419,7 +7581,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserIdSemesterId",
+              "name": "workshopProposalsByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_bool_exp",
@@ -7554,10 +7716,10 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "final_grade_appeal",
+              "name": "final_grade_appeals",
               "type": {
                 "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_obj_rel_insert_input",
+                "name": "final_grade_appeal_arr_rel_insert_input",
                 "ofType": null
               }
             },
@@ -7734,7 +7896,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserIdSemesterId",
+              "name": "workshopProposalsByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_arr_rel_insert_input",
@@ -8290,10 +8452,10 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "final_grade_appeal",
+              "name": "final_grade_appeals_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_order_by",
+                "name": "final_grade_appeal_aggregate_order_by",
                 "ofType": null
               }
             },
@@ -8470,7 +8632,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserIdSemesterId_aggregate",
+              "name": "workshopProposalsByReviewerIdSemesterId_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_aggregate_order_by",
@@ -11801,41 +11963,6 @@
           "interfaces": [],
           "kind": "OBJECT",
           "name": "final_grade_appeal_mutation_response",
-          "possibleTypes": null
-        },
-        {
-          "description": "input type for inserting object relation for remote table \"final_grade_appeal\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "data",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "final_grade_appeal_insert_input",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": "on conflict condition",
-              "name": "on_conflict",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "final_grade_appeal_on_conflict",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "final_grade_appeal_obj_rel_insert_input",
           "possibleTypes": null
         },
         {
@@ -17139,7 +17266,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -17237,18 +17364,6 @@
               "isDeprecated": false,
               "name": "user",
               "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
-              "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
@@ -17256,6 +17371,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByReviewerId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -17566,7 +17693,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -17646,7 +17773,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -17720,7 +17847,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -17800,7 +17927,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -18346,7 +18473,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -18426,7 +18553,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -19254,60 +19381,6 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "pay_requests",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows which have to be deleted",
-                  "name": "where",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "project_categories_bool_exp",
-                      "ofType": null
-                    }
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "delete data from the table: \"project_categories\"",
-              "isDeprecated": false,
-              "name": "delete_project_categories",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_mutation_response",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": null,
-                  "name": "category_id",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "String",
-                      "ofType": null
-                    }
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "delete single row from the table: \"project_categories\"",
-              "isDeprecated": false,
-              "name": "delete_project_categories_by_pk",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories",
                 "ofType": null
               }
             },
@@ -21186,88 +21259,6 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "pay_requests",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "the rows to be inserted",
-                  "name": "objects",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "LIST",
-                      "name": null,
-                      "ofType": {
-                        "kind": "NON_NULL",
-                        "name": null,
-                        "ofType": {
-                          "kind": "INPUT_OBJECT",
-                          "name": "project_categories_insert_input",
-                          "ofType": null
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "on conflict condition",
-                  "name": "on_conflict",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_on_conflict",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "insert data into the table: \"project_categories\"",
-              "isDeprecated": false,
-              "name": "insert_project_categories",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_mutation_response",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "the row to be inserted",
-                  "name": "object",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "project_categories_insert_input",
-                      "ofType": null
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "on conflict condition",
-                  "name": "on_conflict",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_on_conflict",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "insert a single row into the table: \"project_categories\"",
-              "isDeprecated": false,
-              "name": "insert_project_categories_one",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories",
                 "ofType": null
               }
             },
@@ -23530,100 +23521,6 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "pay_requests",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "increments the numeric columns with given value of the filtered values",
-                  "name": "_inc",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_inc_input",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sets the columns of the filtered rows to the given values",
-                  "name": "_set",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_set_input",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows which have to be updated",
-                  "name": "where",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "project_categories_bool_exp",
-                      "ofType": null
-                    }
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "update data of the table: \"project_categories\"",
-              "isDeprecated": false,
-              "name": "update_project_categories",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_mutation_response",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "increments the numeric columns with given value of the filtered values",
-                  "name": "_inc",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_inc_input",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sets the columns of the filtered rows to the given values",
-                  "name": "_set",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_set_input",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": null,
-                  "name": "pk_columns",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "project_categories_pk_columns_input",
-                      "ofType": null
-                    }
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "update single row of the table: \"project_categories\"",
-              "isDeprecated": false,
-              "name": "update_project_categories_by_pk",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories",
                 "ofType": null
               }
             },
@@ -26517,1471 +26414,6 @@
           "possibleTypes": null
         },
         {
-          "description": "columns and relationships of \"project_categories\"",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "category_id",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "created_at",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "timestamptz",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "project",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "projects",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                }
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregated selection of \"project_categories\"",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "aggregate",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_aggregate_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "nodes",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_categories",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_aggregate",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate fields of \"project_categories\"",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "avg",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_avg_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": null,
-                  "name": "columns",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": null,
-                  "name": "distinct",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "count",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "max",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_max_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "min",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_min_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "stddev",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_stddev_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "stddev_pop",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_stddev_pop_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "stddev_samp",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_stddev_samp_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "sum",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_sum_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "var_pop",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_var_pop_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "var_samp",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_var_samp_fields",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "variance",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories_variance_fields",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_aggregate_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by aggregate values of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "avg",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_avg_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "count",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "max",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_max_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "min",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_min_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "stddev",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_stddev_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "stddev_pop",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_stddev_pop_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "stddev_samp",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_stddev_samp_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "sum",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_sum_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "var_pop",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_var_pop_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "var_samp",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_var_samp_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "variance",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_variance_order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_aggregate_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "input type for inserting array relation for remote table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "data",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "project_categories_insert_input",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": "on conflict condition",
-              "name": "on_conflict",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_on_conflict",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_arr_rel_insert_input",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate avg on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_avg_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by avg() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_avg_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "Boolean expression to filter rows from the table \"project_categories\". All fields are combined with a logical 'AND'.",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "_and",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "_not",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "_or",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "String_comparison_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "created_at",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "timestamptz_comparison_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "projects_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "Int_comparison_exp",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_bool_exp",
-          "possibleTypes": null
-        },
-        {
-          "description": "unique or primary key constraints on table \"project_categories\"",
-          "enumValues": [
-            {
-              "deprecationReason": null,
-              "description": "unique or primary key constraint",
-              "isDeprecated": false,
-              "name": "project_categories_pkey"
-            },
-            {
-              "deprecationReason": null,
-              "description": "unique or primary key constraint",
-              "isDeprecated": false,
-              "name": "project_categories_project_id_key"
-            }
-          ],
-          "fields": null,
-          "inputFields": null,
-          "interfaces": null,
-          "kind": "ENUM",
-          "name": "project_categories_constraint",
-          "possibleTypes": null
-        },
-        {
-          "description": "input type for incrementing numeric columns in table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_inc_input",
-          "possibleTypes": null
-        },
-        {
-          "description": "input type for inserting data into table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "created_at",
-              "type": {
-                "kind": "SCALAR",
-                "name": "timestamptz",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "projects_obj_rel_insert_input",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_insert_input",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate max on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "category_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "created_at",
-              "type": {
-                "kind": "SCALAR",
-                "name": "timestamptz",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_max_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by max() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "created_at",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_max_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate min on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "category_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "created_at",
-              "type": {
-                "kind": "SCALAR",
-                "name": "timestamptz",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_min_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by min() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "created_at",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_min_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "response of any mutation on the table \"project_categories\"",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "number of rows affected by the mutation",
-              "isDeprecated": false,
-              "name": "affected_rows",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "data from the rows affected by the mutation",
-              "isDeprecated": false,
-              "name": "returning",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_categories",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_mutation_response",
-          "possibleTypes": null
-        },
-        {
-          "description": "on conflict condition type for table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "constraint",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "project_categories_constraint",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": "[]",
-              "description": null,
-              "name": "update_columns",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "project_categories_update_column",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "where",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_bool_exp",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_on_conflict",
-          "possibleTypes": null
-        },
-        {
-          "description": "Ordering options when selecting data from \"project_categories\".",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "created_at",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "projects_order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "primary key columns input for table: project_categories",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_pk_columns_input",
-          "possibleTypes": null
-        },
-        {
-          "description": "select columns of table \"project_categories\"",
-          "enumValues": [
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
-              "name": "category_id"
-            },
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
-              "name": "created_at"
-            },
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
-              "name": "project_id"
-            }
-          ],
-          "fields": null,
-          "inputFields": null,
-          "interfaces": null,
-          "kind": "ENUM",
-          "name": "project_categories_select_column",
-          "possibleTypes": null
-        },
-        {
-          "description": "input type for updating data in table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "category_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "created_at",
-              "type": {
-                "kind": "SCALAR",
-                "name": "timestamptz",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_set_input",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate stddev on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_stddev_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by stddev() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_stddev_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate stddev_pop on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_stddev_pop_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by stddev_pop() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_stddev_pop_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate stddev_samp on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_stddev_samp_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by stddev_samp() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_stddev_samp_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate sum on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_sum_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by sum() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_sum_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "update columns of table \"project_categories\"",
-          "enumValues": [
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
-              "name": "category_id"
-            },
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
-              "name": "created_at"
-            },
-            {
-              "deprecationReason": null,
-              "description": "column name",
-              "isDeprecated": false,
-              "name": "project_id"
-            }
-          ],
-          "fields": null,
-          "inputFields": null,
-          "interfaces": null,
-          "kind": "ENUM",
-          "name": "project_categories_update_column",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate var_pop on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_var_pop_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by var_pop() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_var_pop_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate var_samp on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_var_samp_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by var_samp() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_var_samp_order_by",
-          "possibleTypes": null
-        },
-        {
-          "description": "aggregate variance on columns",
-          "enumValues": null,
-          "fields": [
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "project_id",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "kind": "OBJECT",
-          "name": "project_categories_variance_fields",
-          "possibleTypes": null
-        },
-        {
-          "description": "order by variance() on columns of table \"project_categories\"",
-          "enumValues": null,
-          "fields": null,
-          "inputFields": [
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_id",
-              "type": {
-                "kind": "ENUM",
-                "name": "order_by",
-                "ofType": null
-              }
-            }
-          ],
-          "interfaces": null,
-          "kind": "INPUT_OBJECT",
-          "name": "project_categories_variance_order_by",
-          "possibleTypes": null
-        },
-        {
           "description": "The Discord channel IDs associated with projects.\n\n\ncolumns and relationships of \"project_channels\"\n",
           "enumValues": null,
           "fields": [
@@ -29565,7 +27997,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -29751,18 +28183,6 @@
               "isDeprecated": false,
               "name": "user",
               "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
-              "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
@@ -29770,6 +28190,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByReviewerId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -30300,7 +28732,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -30450,7 +28882,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -30545,7 +28977,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -30695,7 +29127,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -31417,7 +29849,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -31567,7 +29999,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -37370,180 +35802,6 @@
                       "name": null,
                       "ofType": {
                         "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_categories_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "project_categories",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_categories",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_categories_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "project_categories_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "project_categories_aggregate",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
                         "name": "project_channels_select_column",
                         "ofType": null
                       }
@@ -39060,16 +37318,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "project_categories",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_bool_exp",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "project_channels",
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -39299,16 +37547,6 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_categories",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_arr_rel_insert_input",
                 "ofType": null
               }
             },
@@ -39985,16 +38223,6 @@
               "type": {
                 "kind": "ENUM",
                 "name": "order_by",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "project_categories_aggregate",
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "project_categories_aggregate_order_by",
                 "ofType": null
               }
             },
@@ -42702,207 +40930,6 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "pay_requests",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_categories_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "project_categories",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_categories",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_categories_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "project_categories_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "project_categories_aggregate",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": null,
-                  "name": "category_id",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "String",
-                      "ofType": null
-                    }
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "fetch data from the table: \"project_categories\" using primary key columns",
-              "isDeprecated": false,
-              "name": "project_categories_by_pk",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories",
                 "ofType": null
               }
             },
@@ -59495,18 +57522,6 @@
               "isDeprecated": false,
               "name": "user",
               "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
-              "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
@@ -59514,6 +57529,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByGraderId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -60146,7 +58173,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -60331,7 +58358,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -61010,7 +59037,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
@@ -65671,207 +63698,6 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "pay_requests",
-                "ofType": null
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_categories_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An array relationship",
-              "isDeprecated": false,
-              "name": "project_categories",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "OBJECT",
-                      "name": "project_categories",
-                      "ofType": null
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": "distinct select on columns",
-                  "name": "distinct_on",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "ENUM",
-                        "name": "project_categories_select_column",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "limit the number of rows returned",
-                  "name": "limit",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "skip the first n rows. Use only with order_by",
-                  "name": "offset",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "sort the rows by one or more columns",
-                  "name": "order_by",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "project_categories_order_by",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                {
-                  "defaultValue": null,
-                  "description": "filter the rows returned",
-                  "name": "where",
-                  "type": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "project_categories_bool_exp",
-                    "ofType": null
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "An aggregate relationship",
-              "isDeprecated": false,
-              "name": "project_categories_aggregate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "project_categories_aggregate",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [
-                {
-                  "defaultValue": null,
-                  "description": null,
-                  "name": "category_id",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "String",
-                      "ofType": null
-                    }
-                  }
-                }
-              ],
-              "deprecationReason": null,
-              "description": "fetch data from the table: \"project_categories\" using primary key columns",
-              "isDeprecated": false,
-              "name": "project_categories_by_pk",
-              "type": {
-                "kind": "OBJECT",
-                "name": "project_categories",
                 "ofType": null
               }
             },
@@ -72075,7 +69901,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "mentorProposalsByUserId",
+              "name": "mentorProposalsByReviewerId",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72166,7 +69992,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "mentorProposalsByUserId_aggregate",
+              "name": "mentorProposalsByReviewerId_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72609,7 +70435,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "projectPitchesByUserId",
+              "name": "projectPitchesByReviewerId",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72700,7 +70526,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "projectPitchesByUserId_aggregate",
+              "name": "projectPitchesByReviewerId_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -73321,7 +71147,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "statusUpdateSubmissionsByUserId",
+              "name": "statusUpdateSubmissionsByGraderId",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -73412,7 +71238,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "statusUpdateSubmissionsByUserId_aggregate",
+              "name": "statusUpdateSubmissionsByGraderId_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -73859,7 +71685,7 @@
               "deprecationReason": null,
               "description": "An array relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsByUserId",
+              "name": "workshopProposalsByReviewerId",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -73950,7 +71776,7 @@
               "deprecationReason": null,
               "description": "An aggregate relationship",
               "isDeprecated": false,
-              "name": "workshopProposalsByUserId_aggregate",
+              "name": "workshopProposalsByReviewerId_aggregate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -74542,7 +72368,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "mentorProposalsByUserId",
+              "name": "mentorProposalsByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "mentor_proposals_bool_exp",
@@ -74582,7 +72408,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPitchesByUserId",
+              "name": "projectPitchesByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_bool_exp",
@@ -74632,7 +72458,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "statusUpdateSubmissionsByUserId",
+              "name": "statusUpdateSubmissionsByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "status_update_submissions_bool_exp",
@@ -74672,7 +72498,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserId",
+              "name": "workshopProposalsByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_bool_exp",
@@ -74847,7 +72673,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "mentorProposalsByUserId",
+              "name": "mentorProposalsByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "mentor_proposals_arr_rel_insert_input",
@@ -74887,7 +72713,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPitchesByUserId",
+              "name": "projectPitchesByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_arr_rel_insert_input",
@@ -74937,7 +72763,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "statusUpdateSubmissionsByUserId",
+              "name": "statusUpdateSubmissionsByGraderId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "status_update_submissions_arr_rel_insert_input",
@@ -74977,7 +72803,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserId",
+              "name": "workshopProposalsByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_arr_rel_insert_input",
@@ -75441,7 +73267,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "mentorProposalsByUserId_aggregate",
+              "name": "mentorProposalsByReviewerId_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "mentor_proposals_aggregate_order_by",
@@ -75481,7 +73307,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "projectPitchesByUserId_aggregate",
+              "name": "projectPitchesByReviewerId_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "project_pitches_aggregate_order_by",
@@ -75531,7 +73357,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "statusUpdateSubmissionsByUserId_aggregate",
+              "name": "statusUpdateSubmissionsByGraderId_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "status_update_submissions_aggregate_order_by",
@@ -75571,7 +73397,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "workshopProposalsByUserId_aggregate",
+              "name": "workshopProposalsByReviewerId_aggregate",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "workshop_proposals_aggregate_order_by",
@@ -76153,7 +73979,7 @@
               "deprecationReason": null,
               "description": "An object relationship",
               "isDeprecated": false,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "OBJECT",
                 "name": "enrollments",
@@ -76331,18 +74157,6 @@
               "isDeprecated": false,
               "name": "user",
               "type": {
-                "kind": "OBJECT",
-                "name": "users",
-                "ofType": null
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": "An object relationship",
-              "isDeprecated": false,
-              "name": "userByUserId",
-              "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
@@ -76350,6 +74164,18 @@
                   "name": "users",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": "An object relationship",
+              "isDeprecated": false,
+              "name": "userByReviewerId",
+              "type": {
+                "kind": "OBJECT",
+                "name": "users",
+                "ofType": null
               }
             },
             {
@@ -76896,7 +74722,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_bool_exp",
@@ -77026,7 +74852,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_bool_exp",
@@ -77125,7 +74951,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_obj_rel_insert_input",
@@ -77255,7 +75081,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_obj_rel_insert_input",
@@ -77996,7 +75822,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "enrollmentByUserIdSemesterId",
+              "name": "enrollmentByReviewerIdSemesterId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "enrollments_order_by",
@@ -78126,7 +75952,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "userByUserId",
+              "name": "userByReviewerId",
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "users_order_by",
