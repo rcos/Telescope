@@ -1,4 +1,4 @@
-fragment AssoicationInfo on projects {
+fragment AssociationInfo on projects {
     project_id
     title
     # If project roles are created, what are the role ids.
@@ -25,5 +25,5 @@ query CurrProjects( $offset: Int!, $search: String!, $now: date!) {
         ],
         enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
         }
-    )  { ...AssoicationInfo }
+    )  { ...AssociationInfo }
 }

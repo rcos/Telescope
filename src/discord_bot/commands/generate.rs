@@ -1,13 +1,13 @@
 //! Discord slash command to generate channels, categories and roles for small groups, projects, and project ptches.
 //! Limited to coordinators, faculty advisors, and sysadmins.
 
-use crate::api::rcos::discord_assoications::project::{create_project_channel, create_project_role, project_info,
+use crate::api::rcos::discord_associations::project::{create_project_channel, create_project_role, project_info,
 };
-use crate::api::rcos::discord_assoications::small_group::{
+use crate::api::rcos::discord_associations::small_group::{
     create_small_group_category, create_small_group_channel, create_small_group_role,
     small_group_info,
 };
-use crate::api::rcos::discord_assoications::ChannelType;
+use crate::api::rcos::discord_associations::ChannelType;
 use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};

@@ -1,4 +1,4 @@
-fragment SmallGroupAssoicationInfo on small_groups {
+fragment SmallGroupAssociationInfo on small_groups {
     small_group_id
     semester_id
     title
@@ -38,5 +38,5 @@ query CurrSmallGroups( $offset: Int!, $search: String!, $now: date!) {
         ],
         semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
 
-        }) { ...SmallGroupAssoicationInfo }
+        }) { ...SmallGroupAssociationInfo }
 }

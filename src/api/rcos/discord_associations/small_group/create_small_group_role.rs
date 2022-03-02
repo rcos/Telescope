@@ -8,24 +8,20 @@ use crate::error::TelescopeError;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/discord_assoications/small_group/create_small_group_category.graphql"
+    query_path = "graphql/rcos/discord_associations/small_group/create_small_group_role.graphql"
 )]
-pub struct CreateOneSmallGroupCategory;
+pub struct CreateOneSmallGroupRole;
 
-impl CreateOneSmallGroupCategory {
+impl CreateOneSmallGroupRole {
     pub async fn execute(
         small_group_id: i64,
-        category_id: String,
+        role_id: String,
     ) -> Result<Option<String>, TelescopeError> {
-        send_query::<Self>(create_one_small_group_category::Variables {
+        send_query::<Self>(create_one_small_group_role::Variables {
             small_group_id,
-            category_id,
+            role_id,
         })
         .await
-        .map(|response| {
-            response
-                .insert_small_group_categories_one
-                .map(|obj| obj.category_id)
-        })
+        .map(|response| response.insert_small_group_roles_one.map(|obj| obj.role_id))
     }
 }

@@ -8,7 +8,7 @@ use crate::error::TelescopeError;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "graphql/rcos/schema.json",
-    query_path = "graphql/rcos/discord_assoications/project/create_project_role.graphql"
+    query_path = "graphql/rcos/discord_associations/project/create_project_role.graphql"
 )]
 pub struct CreateOneProjectRole;
 
