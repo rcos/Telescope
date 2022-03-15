@@ -73,7 +73,7 @@ oauth2 = "4.1.0"
 reqwest = {version = "0.10", features = ["json", "rustls"], default-features = false}
 
 # Fast Concurrent HashMap. (this is used for CSRF tokens)
-dashmap = "~5.0"
+dashmap = "~5.2"
 
 # CommonMark markdown rendering.
 pulldown-cmark = "0.9.1"
