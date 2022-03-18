@@ -113,6 +113,31 @@ async fn interaction_error(
         .await;
 }
 
+// Return success for interaction
+async fn interaction_success(
+    ctx: &Context,
+    interaction: &ApplicationCommandInteraction,
+    description: &str,
+) -> SerenityResult<()> {
+    return interaction
+        .create_interaction_response(&ctx.http, |create_response| {
+            create_response
+                .kind(InteractionResponseType::ChannelMessageWithSource)
+                .interaction_response_data(|rdata| {
+                    rdata
+                        // Do not allow any mentions
+                        .allowed_mentions(|am| am.empty_parse())
+                        // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
+                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
+                        .create_embed(|embed| {
+                            // Add common attributes
+                            embed_common(embed).title("OK").description(description)
+                        })
+                })
+        })
+        .await;
+}
+
 // Get roles information about @everyone, Faculty Advisors and Coordinator in the guilds.
 async fn get_roles(ctx: &Context) -> Vec<Role> {
     GuildId(global_config().discord_config.rcos_guild_id())
@@ -228,9 +253,48 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
             .await;
     }
     match option_name {
-        _ if option_name == OPTION_NAME[0] => handle_generate_channels(ctx, interaction).await,
-        _ if option_name == OPTION_NAME[1] => handle_generate_role(ctx, interaction).await,
-        _ if option_name == OPTION_NAME[2] => handle_generate_categories(ctx, interaction).await,
+        _ if option_name == OPTION_NAME[0] => {
+            let result = handle_generate_channels(ctx, interaction).await;
+            match result {
+                Some(x) => x,
+                None => {
+                    interaction_success(
+                        ctx,
+                        interaction,
+                        "Channel created for projcets and/or small groups",
+                    )
+                    .await
+                }
+            }
+        }
+        _ if option_name == OPTION_NAME[1] => {
+            let result = handle_generate_role(ctx, interaction).await;
+            match result {
+                Some(x) => x,
+                None => {
+                    interaction_success(
+                        ctx,
+                        interaction,
+                        "Role created for projcets and/or small groups",
+                    )
+                    .await
+                }
+            }
+        }
+        _ if option_name == OPTION_NAME[2] => {
+            let result = handle_generate_categories(ctx, interaction).await;
+            match result {
+                Some(x) => x,
+                None => {
+                    interaction_success(
+                        ctx,
+                        interaction,
+                        "Category created for projcets and/or small groups",
+                    )
+                    .await
+                }
+            }
+        }
         _ if option_name == OPTION_NAME[3] => handle_generate_all(ctx, interaction).await,
         _ => {
             return interaction
@@ -281,7 +345,7 @@ fn embed_common(create_embed: &mut CreateEmbed) -> &mut CreateEmbed {
 async fn handle_generate_channels(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
-) -> SerenityResult<()> {
+) -> Option<SerenityResult<()>> {
     // Create channel for small groups
     let rcos_api_response = small_group_info::CurrSmallGroups::get(0, None)
         .await
@@ -291,16 +355,18 @@ async fn handle_generate_channels(
         });
 
     if let Err(err) = rcos_api_response {
-        return interaction_error(
-            "RCOS API Error",
-            "We could not get data about small groups because the \
+        return Some(
+            interaction_error(
+                "RCOS API Error",
+                "We could not get data about small groups because the \
         RCOS API responded with an error. Please contact a coordinator and \
         report this error on Telescope's GitHub.",
-            &err,
-            &ctx,
-            &interaction,
-        )
-        .await;
+                &err,
+                &ctx,
+                &interaction,
+            )
+            .await,
+        );
     }
 
     // Get list of discord association information for small groups.
@@ -357,24 +423,28 @@ async fn handle_generate_channels(
                     });
 
                 if let Err(err) = voice_channel {
-                    return interaction_error(
-                        "Discord Error",
-                        "We could not create voice channel for small groups",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
+                    return Some(
+                        interaction_error(
+                            "Discord Error",
+                            "We could not create voice channel for small groups",
+                            &err,
+                            &ctx,
+                            &interaction,
+                        )
+                        .await,
+                    );
                 }
                 if let Err(err) = text_channel {
-                    return interaction_error(
-                        "Discord Error",
-                        "We could not create text channel for small groups",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
+                    return Some(
+                        interaction_error(
+                            "Discord Error",
+                            "We could not create text channel for small groups",
+                            &err,
+                            &ctx,
+                            &interaction,
+                        )
+                        .await,
+                    );
                 }
                 // insert channel data into database
                 let insert_voice_channel =
@@ -406,24 +476,28 @@ async fn handle_generate_channels(
                         err
                     });
                 if let Err(err) = insert_voice_channel {
-                    return interaction_error(
-                        "Database Error",
-                        "We could not insert voice channel for small groups into database",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
+                    return Some(
+                        interaction_error(
+                            "Database Error",
+                            "We could not insert voice channel for small groups into database",
+                            &err,
+                            &ctx,
+                            &interaction,
+                        )
+                        .await,
+                    );
                 }
                 if let Err(err) = insert_text_channel {
-                    return interaction_error(
-                        "Database Error",
-                        "We could not insert text channel for small groups into database",
-                        &err,
-                        &ctx,
-                        &interaction,
-                    )
-                    .await;
+                    return Some(
+                        interaction_error(
+                            "Database Error",
+                            "We could not insert text channel for small groups into database",
+                            &err,
+                            &ctx,
+                            &interaction,
+                        )
+                        .await,
+                    );
                 }
             }
 
@@ -479,25 +553,29 @@ async fn handle_generate_channels(
                         });
 
                     if let Err(err) = voice_channel {
-                        return interaction_error(
-                            "Discord Error",
-                            "We could not create voice channel for projects",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
+                        return Some(
+                            interaction_error(
+                                "Discord Error",
+                                "We could not create voice channel for projects",
+                                &err,
+                                &ctx,
+                                &interaction,
+                            )
+                            .await,
+                        );
                     }
 
                     if let Err(err) = text_channel {
-                        return interaction_error(
-                            "Discord Error",
-                            "We could not create text channel for projects",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
+                        return Some(
+                            interaction_error(
+                                "Discord Error",
+                                "We could not create text channel for projects",
+                                &err,
+                                &ctx,
+                                &interaction,
+                            )
+                            .await,
+                        );
                     }
 
                     // insert voice channel data into database
@@ -533,55 +611,41 @@ async fn handle_generate_channels(
                         });
 
                     if let Err(err) = insert_voice_channel {
-                        return interaction_error(
-                            "Database Error",
-                            "We could not insert voice channel for projects into database",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
+                        return Some(
+                            interaction_error(
+                                "Database Error",
+                                "We could not insert voice channel for projects into database",
+                                &err,
+                                &ctx,
+                                &interaction,
+                            )
+                            .await,
+                        );
                     }
                     if let Err(err) = insert_text_channel {
-                        return interaction_error(
-                            "Database Error",
-                            "We could not insert text channel for projects into database",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await;
+                        return Some(
+                            interaction_error(
+                                "Database Error",
+                                "We could not insert text channel for projects into database",
+                                &err,
+                                &ctx,
+                                &interaction,
+                            )
+                            .await,
+                        );
                     }
                 }
             }
         }
     }
-    return interaction
-        .create_interaction_response(&ctx.http, |create_response| {
-            create_response
-                .kind(InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|rdata| {
-                    rdata
-                        // Do not allow any mentions
-                        .allowed_mentions(|am| am.empty_parse())
-                        // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
-                        .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .title("OK")
-                                .description("Channel created for projcets and/or small groups")
-                        })
-                })
-        })
-        .await;
+    return None;
 }
 
 // handler for /generate role commands
 async fn handle_generate_role(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
-) -> SerenityResult<()> {
+) -> Option<SerenityResult<()>> {
     let rcos_api_response_project = project_info::CurrProjects::get(0, None)
         .await
         .map_err(|err| {
@@ -589,16 +653,18 @@ async fn handle_generate_role(
             err
         });
     if let Err(err) = rcos_api_response_project {
-        return interaction_error(
-            "RCOS API Error",
-            "We could not get data about projects because the \
+        return Some(
+            interaction_error(
+                "RCOS API Error",
+                "We could not get data about projects because the \
         RCOS API responded with an error. Please contact a coordinator and \
         report this error on Telescope's GitHub.",
-            &err,
-            &ctx,
-            &interaction,
-        )
-        .await;
+                &err,
+                &ctx,
+                &interaction,
+            )
+            .await,
+        );
     }
     let projects_associate_info = rcos_api_response_project.unwrap().projects;
     // Create role for project if is not previously set.
@@ -612,14 +678,16 @@ async fn handle_generate_role(
                     err
                 });
             if let Err(err) = role {
-                return interaction_error(
-                    "Discord Error",
-                    "We could not create role for projects",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
+                return Some(
+                    interaction_error(
+                        "Discord Error",
+                        "We could not create role for projects",
+                        &err,
+                        &ctx,
+                        &interaction,
+                    )
+                    .await,
+                );
             }
             // Insert project role data into database.
             let insert_role = create_project_role::CreateOneProjectRole::execute(
@@ -636,14 +704,16 @@ async fn handle_generate_role(
             });
 
             if let Err(err) = insert_role {
-                return interaction_error(
-                    "Database Error",
-                    "We could not insert role for projects into database",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
+                return Some(
+                    interaction_error(
+                        "Database Error",
+                        "We could not insert role for projects into database",
+                        &err,
+                        &ctx,
+                        &interaction,
+                    )
+                    .await,
+                );
             }
         }
     }
@@ -654,16 +724,18 @@ async fn handle_generate_role(
             err
         });
     if let Err(err) = rcos_api_response_small_group {
-        return interaction_error(
-            "RCOS API Error",
-            "We could not get data about small groups because the \
+        return Some(
+            interaction_error(
+                "RCOS API Error",
+                "We could not get data about small groups because the \
         RCOS API responded with an error. Please contact a coordinator and \
         report this error on Telescope's GitHub.",
-            &err,
-            &ctx,
-            &interaction,
-        )
-        .await;
+                &err,
+                &ctx,
+                &interaction,
+            )
+            .await,
+        );
     }
     let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
     // Create role for project if is not previously set.
@@ -677,14 +749,16 @@ async fn handle_generate_role(
                     err
                 });
             if let Err(err) = role {
-                return interaction_error(
-                    "Discord Error",
-                    "We could not create role for small groups",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
+                return Some(
+                    interaction_error(
+                        "Discord Error",
+                        "We could not create role for small groups",
+                        &err,
+                        &ctx,
+                        &interaction,
+                    )
+                    .await,
+                );
             }
             // Insert small group role data into database.
             let insert_role = create_small_group_role::CreateOneSmallGroupRole::execute(
@@ -701,44 +775,27 @@ async fn handle_generate_role(
             });
 
             if let Err(err) = insert_role {
-                return interaction_error(
-                    "Database Error",
-                    "We could not insert role for small groups into database",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
+                return Some(
+                    interaction_error(
+                        "Database Error",
+                        "We could not insert role for small groups into database",
+                        &err,
+                        &ctx,
+                        &interaction,
+                    )
+                    .await,
+                );
             }
         }
     }
-
-    return interaction
-        .create_interaction_response(&ctx.http, |create_response| {
-            create_response
-                .kind(InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|rdata| {
-                    rdata
-                        // Do not allow any mentions
-                        .allowed_mentions(|am| am.empty_parse())
-                        // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
-                        .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .title("OK")
-                                .description("Role created for projects/small groups.")
-                        })
-                })
-        })
-        .await;
+    return None;
 }
 
 // handler for /generate categories commands
 async fn handle_generate_categories(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
-) -> SerenityResult<()> {
+) -> Option<SerenityResult<()>> {
     let rcos_api_response = small_group_info::CurrSmallGroups::get(0, None)
         .await
         .map_err(|err| {
@@ -747,16 +804,18 @@ async fn handle_generate_categories(
         });
 
     if let Err(err) = rcos_api_response {
-        return interaction_error(
-            "RCOS API Error",
-            "We could not get data about small groups because the \
+        return Some(
+            interaction_error(
+                "RCOS API Error",
+                "We could not get data about small groups because the \
         RCOS API responded with an error. Please contact a coordinator and \
         report this error on Telescope's GitHub.",
-            &err,
-            &ctx,
-            &interaction,
-        )
-        .await;
+                &err,
+                &ctx,
+                &interaction,
+            )
+            .await,
+        );
     }
 
     let small_groups_associate_info = rcos_api_response.unwrap().small_groups;
@@ -793,14 +852,16 @@ async fn handle_generate_categories(
                 });
 
             if let Err(err) = category {
-                return interaction_error(
-                    "Discord Error",
-                    "We could not create category for small group",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
+                return Some(
+                    interaction_error(
+                        "Discord Error",
+                        "We could not create category for small group",
+                        &err,
+                        &ctx,
+                        &interaction,
+                    )
+                    .await,
+                );
             }
 
             // insert category data into database
@@ -819,60 +880,42 @@ async fn handle_generate_categories(
                 });
 
             if let Err(err) = insert_category {
-                return interaction_error(
-                    "Database Error",
-                    "We could not insert category for small group into database",
-                    &err,
-                    &ctx,
-                    &interaction,
-                )
-                .await;
+                return Some(
+                    interaction_error(
+                        "Database Error",
+                        "We could not insert category for small group into database",
+                        &err,
+                        &ctx,
+                        &interaction,
+                    )
+                    .await,
+                );
             }
         }
     }
-
-    return interaction
-        .create_interaction_response(&ctx.http, |create_response| {
-            create_response
-                .kind(InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|rdata| {
-                    rdata
-                        // Do not allow any mentions
-                        .allowed_mentions(|am| am.empty_parse())
-                        // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                        .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
-                        .create_embed(|embed| {
-                            // Add common attributes
-                            embed_common(embed)
-                                .title("OK")
-                                .description("Category created for projects and/or small groups")
-                        })
-                })
-        })
-        .await;
+    return None;
 }
 
 async fn handle_generate_all(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
 ) -> SerenityResult<()> {
-    let _generate_role = handle_generate_role(ctx, interaction).await;
-    let _generate_categories = handle_generate_categories(ctx, interaction).await;
-    let _handle_generate_channel = handle_generate_channels(ctx, interaction).await;
-    return interaction.create_interaction_response(&ctx.http, |create_response|{
-        create_response.kind(InteractionResponseType::ChannelMessageWithSource)
-            .interaction_response_data(|rdata| {
-                rdata
-                    // Do not allow any mentions
-                    .allowed_mentions(|am| am.empty_parse())
-                    // Use the ephemeral flag to mark the response as only visible to the user who invoked it.
-                    .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL)
-                    .create_embed(|embed| {
-                        // Add common attributes
-                        embed_common(embed)
-                            .title("OK")
-                            .description("Categories, roles, and channels are created for project and/or small groups.")
-                    })
-            })
-    }).await;
+    let generate_role = handle_generate_role(ctx, interaction).await;
+    if generate_role.is_some() {
+        return generate_role.unwrap();
+    }
+    let generate_categories = handle_generate_categories(ctx, interaction).await;
+    if generate_categories.is_some() {
+        return generate_categories.unwrap();
+    }
+    let handle_generate_channel = handle_generate_channels(ctx, interaction).await;
+    if handle_generate_channel.is_some() {
+        return handle_generate_channel.unwrap();
+    }
+    interaction_success(
+        ctx,
+        interaction,
+        "Categories, roles, and channels are created for project and/or small groups.",
+    )
+    .await
 }
