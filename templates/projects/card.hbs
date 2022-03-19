@@ -1,0 +1,32 @@
+{{! Project card template -- this is used in the project list and on user profiles }}
+
+<div class="card my-2" id="project-{{project_id}}" style="border-color: var(--meeting-{{type}}-bg); border-width: 4px;">
+    <h3 class="card-header"
+        style="background: url({{cover_image_url}}); border-radius: 0;">
+        {{title}}
+        <span class="float-right">
+            <a href="/project/{{project_id}}" class="btn btn-primary">
+                View Details
+            </a>
+        </span>
+    </h3>
+
+    <div class="list-group list-group-flush text-dark">
+        {{#with most_recent_pm}}
+            <div class="list-group-item">
+                    <span class="text-muted">
+                        Hosted by <a href="/user/{{user.id}}">{{first_name}} {{last_name}}</a>
+                    </span>
+            </div>
+        {{/with}}
+
+        {{#if description}}
+            <div class="list-group-item">
+                <small class="text-muted mb-2">
+                    User supplied description:
+                </small>
+                {{render_markdown description}}
+            </div>
+        {{/if}}
+    </div>
+</div>
