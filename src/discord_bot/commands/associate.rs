@@ -166,12 +166,23 @@ pub fn associate_option<'a>(
             .name(option)
             .kind(ApplicationCommandOptionType::SubCommandGroup)
             .description("associate category to project and/or small group."),
+        _ => obj,
+    }
+}
+
+pub fn associate_sub_option<'a>(
+    obj: &'a mut CreateApplicationCommandOption,
+    option: &'a str,
+) -> &'a mut CreateApplicationCommandOption{
+    match option{
         _ if option == SUBCOMMAND[0] => obj
             .name(option)
-            .kind(ApplicationCommandOptionType::SubCommand),
+            .kind(ApplicationCommandOptionType::SubCommand)
+            .description("assoicate to project"),
         _ if option == SUBCOMMAND[1] => obj
             .name(option)
-            .kind(ApplicationCommandOptionType::SubCommand),
+            .kind(ApplicationCommandOptionType::SubCommand)
+            .description("associate to small group"),
         _ => obj,
     }
 }
@@ -182,9 +193,8 @@ pub fn create_associate(obj: &mut CreateApplicationCommand) -> &mut CreateApplic
         .name(COMMAND_NAME)
         .description("associate channel, role, category to project and/or small group. Limited to faculty advisor, coordinator, and sysamin.");
     for subcommand_group in SUBCOMMAND_GROUP {
-        let object_group = obj.create_option(|object| associate_option(object, subcommand_group));
         for subcommand in SUBCOMMAND {
-            object_group.create_option(|obj| associate_option(obj, subcommand));
+            obj.create_option(|obj| associate_option(obj, subcommand_group).create_sub_option( |obj| associate_sub_option(obj, subcommand)));
         }
     }
     return obj;
