@@ -33,13 +33,12 @@ impl CurrProjects {
     query_path = "graphql/rcos/discord_associations/project/find_project.graphql",
     response_derives = "Debug,Clone,Serialize"
 )]
-pub struct FindCurrProject;
+pub struct FindProject;
 
-impl FindCurrProject {
-    pub async fn get_by_id(id: i64) -> Result<find_curr_project::ResponseData, TelescopeError> {
-        send_query::<Self>(find_curr_project::Variables {
+impl FindProject {
+    pub async fn get_by_id(id: i64) -> Result<find_project::ResponseData, TelescopeError> {
+        send_query::<Self>(find_project::Variables {
             id: id,
-            now: Utc::today().naive_utc(),
         })
         .await
     }

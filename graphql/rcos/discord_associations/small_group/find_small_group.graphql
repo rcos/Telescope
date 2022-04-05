@@ -30,9 +30,8 @@ fragment SmallGroupAssociationInfo on small_groups {
     }
 }
 
-query FindCurrSmallGroup( $id: Int!, $now: date!) {
+query FindSmallGroup( $id: Int!) {
     small_groups( where: {
         small_group_id: {_eq: $id},
-        semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
         }) { ...SmallGroupAssociationInfo }
 }

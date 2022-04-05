@@ -17,9 +17,8 @@ fragment AssociationInfo on projects {
 }
 
 
-query FindCurrProject( $id: Int!, $now: date!) {
+query FindProject( $id: Int!) {
     projects( where: {
         project_id: {_eq: $id},
-        enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
         }) { ...AssociationInfo }
 }

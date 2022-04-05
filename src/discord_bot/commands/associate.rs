@@ -4,10 +4,10 @@
 use std::collections::HashMap;
 
 use crate::api::rcos::discord_associations::project::{
-     create_project_role, project_info,
+    create_project_channel, create_project_role, project_info,
 };
 use crate::api::rcos::discord_associations::small_group::{
-    create_small_group_category, create_small_group_channel, small_group_info,
+    create_small_group_category, create_small_group_channel, create_small_group_role, small_group_info,
 };
 use crate::api::rcos::discord_associations::ChannelType;
 
@@ -16,8 +16,7 @@ use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
 use serenity::client::Context;
 use serenity::model::channel::{
-    ChannelType as SerenityChannelType, PermissionOverwrite,
-    PermissionOverwriteType,
+    ChannelType as SerenityChannelType,
 };
 use serenity::model::guild::Role;
 use serenity::model::id::ChannelId;
@@ -192,7 +191,7 @@ pub fn associate_sub_option<'a>(
             _ if subcommand_group == SUBCOMMAND_GROUP[0] => obj
                 .name(option)
                 .kind(ApplicationCommandOptionType::SubCommand)
-                .description("associate to small groups")
+                .description("Associate to small groups")
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
                         .name("channel_name")
@@ -210,7 +209,7 @@ pub fn associate_sub_option<'a>(
             _ if subcommand_group == SUBCOMMAND_GROUP[1] => obj
                 .name(option)
                 .kind(ApplicationCommandOptionType::SubCommand)
-                .description("associate to small groups")
+                .description("Associate to small groups")
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
                         .name("role_name")
@@ -228,7 +227,7 @@ pub fn associate_sub_option<'a>(
             _ if subcommand_group == SUBCOMMAND_GROUP[2] => obj
                 .name(option)
                 .kind(ApplicationCommandOptionType::SubCommand)
-                .description("associate to small groups")
+                .description("Associate to small groups")
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
                         .name("category_name")
@@ -508,7 +507,7 @@ pub async fn handle_associate_channel(
         // Associate existing channel to project
         _ if subcommand == SUBCOMMAND[0] => {
             let rcos_api_response =
-                project_info::FindCurrProject::get_by_id(id)
+                project_info::FindProject::get_by_id(id)
                     .await
                     .map_err(|e| {
                         error!("Error getting project info: {}", e);
@@ -571,7 +570,7 @@ pub async fn handle_associate_channel(
         // Associate existing channel to small group
         _ if subcommand == SUBCOMMAND[1] => {
             // Get information about small group from RCOS API.
-            let rcos_api_response = small_group_info::FindCurrSmallGroup::get_by_id(id)
+            let rcos_api_response = small_group_info::FindSmallGroup::get_by_id(id)
                 .await
                 .map_err(|e| {
                     error!("Error getting small group info: {}", e);
@@ -708,7 +707,7 @@ pub async fn handle_associate_role(
         // Associate existing role to project
         _ if subcommand == SUBCOMMAND[0] => {
             let rcos_api_response =
-                project_info::FindCurrProject::get_by_id(id)
+                project_info::FindProject::get_by_id(id)
                     .await
                     .map_err(|e| {
                         error!("Error getting project info: {}", e);
@@ -769,7 +768,7 @@ pub async fn handle_associate_role(
         }
         // Associate existing role to small group
         _ if subcommand == SUBCOMMAND[1] => {
-            let rcos_api_response = small_group_info::FindCurrSmallGroup::get_by_id(id)
+            let rcos_api_response = small_group_info::FindSmallGroup::get_by_id(id)
                 .await
                 .map_err(|e| {
                     error!("Error getting small group info: {}", e);
@@ -917,7 +916,7 @@ pub async fn handle_associate_category(
         _ if subcommand == SUBCOMMAND[1] => {
             // Get information about small group from RCOS API.
             let rcos_api_response =
-                small_group_info::FindCurrSmallGroup::get_by_id(small_group_id.clone())
+                small_group_info::FindSmallGroup::get_by_id(small_group_id.clone())
                     .await
                     .map_err(|e| {
                         error!("Error getting small group info: {}", e);
