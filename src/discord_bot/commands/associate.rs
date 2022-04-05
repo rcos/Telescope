@@ -47,46 +47,6 @@ pub fn has_permission(invoker: &RoleId, roles: &Vec<Role>) -> bool {
     })
 }
 
-// Grant permission for certain users
-fn generate_permission(project_role: Option<RoleId>, roles: Vec<Role>) -> Vec<PermissionOverwrite> {
-    let mut overwrite = Vec::new();
-    // set channel to be private
-
-    for role in roles {
-        // set channel to be private
-        if role.name == "@everyone" {
-            overwrite.push(PermissionOverwrite {
-                allow: Permissions::empty(),
-                deny: Permissions::READ_MESSAGES,
-                kind: PermissionOverwriteType::Role(role.id),
-            })
-            // Grant permission for Faculty Advisors, Coordinators and Sysadmins.
-        } else {
-            overwrite.push(PermissionOverwrite {
-                allow: Permissions::all(),
-                deny: Permissions::empty(),
-                kind: PermissionOverwriteType::Role(role.id),
-            });
-        }
-    }
-
-    // If roles for the project have been generated, also grant permission for users who have the roles.
-    if let Some(r) = project_role {
-        overwrite.push(PermissionOverwrite {
-            allow: Permissions::READ_MESSAGES
-                | Permissions::SEND_MESSAGES
-                | Permissions::EMBED_LINKS
-                | Permissions::ATTACH_FILES
-                | Permissions::READ_MESSAGE_HISTORY
-                | Permissions::CONNECT
-                | Permissions::SPEAK,
-            deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Role(r),
-        });
-    }
-    return overwrite;
-}
-
 // Return error for interaction
 async fn interaction_error(
     error_title: &str,
@@ -203,7 +163,7 @@ pub fn associate_sub_option<'a>(
                 )
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
-                        .name("project_name")
+                        .name("project_id")
                         .description("associate existing channel with projects.")
                         .kind(ApplicationCommandOptionType::Integer)
                         .clone(),
@@ -221,7 +181,7 @@ pub fn associate_sub_option<'a>(
                 )
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
-                        .name("project_name")
+                        .name("project_id")
                         .description("Project to be associated with.")
                         .kind(ApplicationCommandOptionType::Integer)
                         .clone(),
@@ -260,7 +220,7 @@ pub fn associate_sub_option<'a>(
                 )
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
-                        .name("small_group_name")
+                        .name("small_group_id")
                         .description("small group to be asscoiated.")
                         .kind(ApplicationCommandOptionType::Integer)
                         .clone(),
@@ -278,7 +238,7 @@ pub fn associate_sub_option<'a>(
                 )
                 .add_sub_option(
                     CreateApplicationCommandOption { 0: HashMap::new() }
-                        .name("small_group_name")
+                        .name("small_group_id")
                         .description("associate existing category with small groups.")
                         .kind(ApplicationCommandOptionType::Integer)
                         .clone(),
@@ -440,8 +400,8 @@ async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> S
                                     // Add common attributes
                                     embed_common(embed)
                                         .color(ERROR_COLOR)
-                                        .title("Option Error")
-                                        .description("Wrong option name .")
+                                        .title("Discord Error")
+                                        .description("Wrong option name.")
                                         // Include the error as a field of the embed.
                                         .field("Error Message", "Option Error", false)
                                 })
@@ -497,8 +457,19 @@ pub async fn handle_associate_channel(
             channel_id = partial_channel.id;
             if partial_channel.kind == SerenityChannelType::Text {
                 channel_kind = ChannelType::DiscordText;
-            } else {
+            } else if partial_channel.kind == SerenityChannelType::Voice {
                 channel_kind = ChannelType::DiscordVoice;
+            } else {
+                return Some(
+                    interaction_error(
+                        "Discord Error",
+                        "Error Channel Type.",
+                        "Please select a valid voice/text channel.",
+                        ctx,
+                        interaction,
+                    )
+                    .await,
+                );
             }
         }
         _ => {
@@ -530,13 +501,14 @@ pub async fn handle_associate_channel(
         .value
         .as_ref()
         .unwrap()
-        .to_string();
+        .as_i64()
+        .unwrap();
 
     match subcommand {
         // Associate existing channel to project
         _ if subcommand == SUBCOMMAND[0] => {
             let rcos_api_response =
-                project_info::CurrProjects::get(0, Some(id))
+                project_info::FindCurrProject::get_by_id(id)
                     .await
                     .map_err(|e| {
                         error!("Error getting project info: {}", e);
@@ -572,7 +544,7 @@ pub async fn handle_associate_channel(
             }
             let project = project_info.get(0).unwrap();
             // Insert associated channel data into database.
-            let insert_channel = create_small_group_channel::CreateOneSmallGroupChannel::execute(
+            let insert_channel = create_project_channel::CreateOneProjectChannel::execute(
                 project.project_id,
                 channel_id.to_string(),
                 channel_kind,
@@ -599,7 +571,7 @@ pub async fn handle_associate_channel(
         // Associate existing channel to small group
         _ if subcommand == SUBCOMMAND[1] => {
             // Get information about small group from RCOS API.
-            let rcos_api_response = small_group_info::CurrSmallGroups::get(0, Some(id))
+            let rcos_api_response = small_group_info::FindCurrSmallGroup::get_by_id(id)
                 .await
                 .map_err(|e| {
                     error!("Error getting small group info: {}", e);
@@ -729,13 +701,14 @@ pub async fn handle_associate_role(
         .value
         .as_ref()
         .unwrap()
-        .to_string();
+        .as_i64()
+        .unwrap();
 
     match subcommand {
         // Associate existing role to project
         _ if subcommand == SUBCOMMAND[0] => {
             let rcos_api_response =
-                project_info::CurrProjects::get(0, Some(id))
+                project_info::FindCurrProject::get_by_id(id)
                     .await
                     .map_err(|e| {
                         error!("Error getting project info: {}", e);
@@ -796,7 +769,7 @@ pub async fn handle_associate_role(
         }
         // Associate existing role to small group
         _ if subcommand == SUBCOMMAND[1] => {
-            let rcos_api_response = small_group_info::CurrSmallGroups::get(0, Some(id))
+            let rcos_api_response = small_group_info::FindCurrSmallGroup::get_by_id(id)
                 .await
                 .map_err(|e| {
                     error!("Error getting small group info: {}", e);
@@ -832,7 +805,7 @@ pub async fn handle_associate_role(
             }
             let small_group = small_group_info.get(0).unwrap();
             // Insert associated role data into database.
-            let insert_role = create_project_role::CreateOneProjectRole::execute(
+            let insert_role = create_small_group_role::CreateOneSmallGroupRole::execute(
                 small_group.small_group_id,
                 role_id.to_string(),
             )
@@ -943,12 +916,13 @@ pub async fn handle_associate_category(
         // Associate existing category to small group
         _ if subcommand == SUBCOMMAND[1] => {
             // Get information about small group from RCOS API.
-            let rcos_api_response = small_group_info::FindCurrSmallGroup::get_by_id( small_group_id.clone())
-                .await
-                .map_err(|e| {
-                    error!("Error getting small group info: {}", e);
-                    e
-                });
+            let rcos_api_response =
+                small_group_info::FindCurrSmallGroup::get_by_id(small_group_id.clone())
+                    .await
+                    .map_err(|e| {
+                        error!("Error getting small group info: {}", e);
+                        e
+                    });
             if let Err(err) = rcos_api_response {
                 return Some(
                     interaction_error(

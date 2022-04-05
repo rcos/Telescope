@@ -32,7 +32,7 @@ impl CurrSmallGroups {
     response_derives = "Debug,Clone,Serialize"
 )]
 pub struct FindCurrSmallGroup;
-impl FindCurrSmallGroup{
+impl FindCurrSmallGroup {
     pub async fn get_by_id(id: i64) -> Result<find_curr_small_group::ResponseData, TelescopeError> {
         send_query::<Self>(find_curr_small_group::Variables {
             id: id,
@@ -41,4 +41,3 @@ impl FindCurrSmallGroup{
         .await
     }
 }
-

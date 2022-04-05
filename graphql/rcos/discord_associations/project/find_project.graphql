@@ -1,0 +1,25 @@
+fragment AssociationInfo on projects {
+    project_id
+    title
+    # If project roles are created, what are the role ids.
+    project_role{
+        role_id
+    }
+    # If project channel  is created, what is the channel id and kind.
+    project_channels{
+        channel_id
+        kind
+    }
+    # Find member who enroll this project.
+    enrollments{
+        user_id
+    }
+}
+
+
+query FindCurrProject( $id: Int!, $now: date!) {
+    projects( where: {
+        project_id: {_eq: $id},
+        enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
+        }) { ...AssociationInfo }
+}
