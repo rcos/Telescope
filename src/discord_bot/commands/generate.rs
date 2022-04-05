@@ -5,8 +5,7 @@ use crate::api::rcos::discord_associations::project::{
     create_project_channel, create_project_role, project_info,
 };
 use crate::api::rcos::discord_associations::small_group::{
-    create_small_group_category, create_small_group_channel, create_small_group_role,
-    small_group_info,
+    create_small_group_category, create_small_group_role, small_group_info,
 };
 use crate::api::rcos::discord_associations::ChannelType;
 use crate::discord_bot::commands::InteractionResult;
@@ -378,129 +377,6 @@ async fn handle_generate_channels(
         // Get list of projects of small group.
         let small_group_projects = &small_group.small_group_projects;
         for category in categories {
-            // Create voice channel for small groups if not previously created.
-            if small_group.small_group_channels.is_empty() {
-                // Generate permission for certain groups for the channel.
-                let overwrite = if let None = small_group.small_group_role {
-                    generate_permission(None, get_roles(ctx).await)
-                } else {
-                    generate_permission(
-                        Some(RoleId(
-                            small_group
-                                .small_group_role
-                                .as_ref()
-                                .unwrap()
-                                .role_id
-                                .parse::<u64>()
-                                .unwrap(),
-                        )),
-                        get_roles(ctx).await,
-                    )
-                };
-                let voice_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                    .create_channel(&ctx.http, |c| {
-                        c.name(&small_group.title)
-                            .kind(SerenityChannelType::Voice)
-                            .permissions(overwrite.clone())
-                            .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
-                    })
-                    .await
-                    .map_err(|err| {
-                        error!("Could not create the voice channel: {}", err);
-                        err
-                    });
-                let text_channel = GuildId(global_config().discord_config.rcos_guild_id())
-                    .create_channel(&ctx.http, |c| {
-                        c.name(&small_group.title)
-                            .kind(SerenityChannelType::Text)
-                            .permissions(overwrite.clone())
-                            .category(ChannelId(category.category_id.parse::<u64>().unwrap()))
-                    })
-                    .await
-                    .map_err(|err| {
-                        error!("Could not create the voice channel: {}", err);
-                        err
-                    });
-
-                if let Err(err) = voice_channel {
-                    return Some(
-                        interaction_error(
-                            "Discord Error",
-                            "We could not create voice channel for small groups",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await,
-                    );
-                }
-                if let Err(err) = text_channel {
-                    return Some(
-                        interaction_error(
-                            "Discord Error",
-                            "We could not create text channel for small groups",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await,
-                    );
-                }
-                // insert channel data into database
-                let insert_voice_channel =
-                    create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                        small_group.small_group_id,
-                        voice_channel.unwrap().id.to_string(),
-                        ChannelType::DiscordVoice,
-                    )
-                    .await
-                    .map_err(|err| {
-                        error!(
-                            "Could not insert small group voice channel data to into database: {}",
-                            err
-                        );
-                        err
-                    });
-                let insert_text_channel =
-                    create_small_group_channel::CreateOneSmallGroupChannel::execute(
-                        small_group.small_group_id,
-                        text_channel.unwrap().id.to_string(),
-                        ChannelType::DiscordText,
-                    )
-                    .await
-                    .map_err(|err| {
-                        error!(
-                            "Could not insert small group text channel data to into database: {}",
-                            err
-                        );
-                        err
-                    });
-                if let Err(err) = insert_voice_channel {
-                    return Some(
-                        interaction_error(
-                            "Database Error",
-                            "We could not insert voice channel for small groups into database",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await,
-                    );
-                }
-                if let Err(err) = insert_text_channel {
-                    return Some(
-                        interaction_error(
-                            "Database Error",
-                            "We could not insert text channel for small groups into database",
-                            &err,
-                            &ctx,
-                            &interaction,
-                        )
-                        .await,
-                    );
-                }
-            }
-
             // Create Voice and Text channel under small group category
             for small_group_project in small_group_projects {
                 // Create channels for small group projects if not previously created.
@@ -740,12 +616,15 @@ async fn handle_generate_role(
     let small_groups_associate_info = rcos_api_response_small_group.unwrap().small_groups;
     // Create role for project if is not previously set.
     for small_group in small_groups_associate_info {
+        let small_group_projects = &small_group.small_group_projects;
         if small_group.small_group_role.is_none() {
             let role = GuildId(global_config().discord_config.rcos_guild_id())
-                .create_role(&ctx.http, |r| r.name(small_group.title).mentionable(true))
+                .create_role(&ctx.http, |r| {
+                    r.name(small_group.title.clone()).mentionable(true)
+                })
                 .await
                 .map_err(|err| {
-                    error!("Could not create the channel: {}", err);
+                    error!("Unable to  create the role: {}", err);
                     err
                 });
             if let Err(err) = role {
@@ -785,6 +664,58 @@ async fn handle_generate_role(
                     )
                     .await,
                 );
+            }
+        }
+        // Create role for small group projects if is not previously set.
+        for small_group_project in small_group_projects {
+            if small_group_project.project.project_role.is_none() {
+                let role = GuildId(global_config().discord_config.rcos_guild_id())
+                    .create_role(&ctx.http, |r| {
+                        r.name(small_group_project.project.title.clone())
+                            .mentionable(true)
+                    })
+                    .await
+                    .map_err(|err| {
+                        error!("Unable to  create the role: {}", err);
+                        err
+                    });
+                if let Err(err) = role {
+                    return Some(
+                        interaction_error(
+                            "Discord Error",
+                            "We could not create role for small group projects",
+                            &err,
+                            &ctx,
+                            &interaction,
+                        )
+                        .await,
+                    );
+                }
+                let insert_role = create_project_role::CreateOneProjectRole::execute(
+                    small_group_project.project.project_id,
+                    role.unwrap().id.to_string(),
+                )
+                .await
+                .map_err(|err| {
+                    error!(
+                        "Could not insert small group role data to into database: {}",
+                        err
+                    );
+                    err
+                });
+
+                if let Err(err) = insert_role {
+                    return Some(
+                        interaction_error(
+                            "Database Error",
+                            "We could not insert role for small groups into database",
+                            &err,
+                            &ctx,
+                            &interaction,
+                        )
+                        .await,
+                    );
+                }
             }
         }
     }
