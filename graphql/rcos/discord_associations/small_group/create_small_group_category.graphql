@@ -1,0 +1,11 @@
+mutation CreateOneSmallGroupCategory(
+    $small_group_id: Int!,
+    $category_id: String!,
+) {
+    insert_small_group_categories_one(object: {
+        small_group_id: $small_group_id
+        category_id: $category_id,
+    }) {
+        category_id
+    }
+}

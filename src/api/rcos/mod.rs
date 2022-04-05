@@ -9,7 +9,7 @@ use reqwest::{header::HeaderValue, header::ACCEPT, Client};
 use serde_json::Value;
 
 mod auth;
-pub mod discord_assoications;
+pub mod discord_associations;
 pub mod landing_page_stats;
 pub mod meetings;
 pub mod prelude;

@@ -3,7 +3,7 @@
 // Ignore compiler warnings for lowercase typenames.
 #![allow(nonstandard_style)]
 
-use crate::api::rcos::discord_assoications::ChannelType;
+use crate::api::rcos::discord_associations::ChannelType;
 use crate::api::rcos::{
     meetings::MeetingType,
     users::{UserAccountType, UserRole},

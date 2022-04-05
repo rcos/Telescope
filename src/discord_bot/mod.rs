@@ -97,7 +97,7 @@ impl Actor for DiscordBot {
 
         // Log a link to invite the bot to a server.
         info!("Invite bot using \
-        https://discord.com/api/oauth2/authorize?client_id={}&permissions=2147549184&response_type=code&scope=bot%20applications.commands",
+        https://discord.com/api/oauth2/authorize?client_id={}&permissions=19595806737&response_type=code&scope=bot%20applications.commands",
               discord_conf.client_id.as_str());
 
         // Listen for incoming Discord events on this actor's context.

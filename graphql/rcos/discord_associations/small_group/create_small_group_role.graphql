@@ -1,0 +1,11 @@
+mutation CreateOneSmallGroupRole(
+    $small_group_id: Int!,
+    $role_id: String!,
+) {
+    insert_small_group_roles_one(object: {
+        small_group_id: $small_group_id
+        role_id: $role_id,
+    }) {
+        role_id
+    }
+}   

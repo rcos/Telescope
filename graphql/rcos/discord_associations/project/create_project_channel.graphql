@@ -1,0 +1,13 @@
+mutation CreateOneProjectChannel(
+    $project_id: Int!,
+    $channel_id: String!,
+    $kind: channel_type!,
+) {
+    insert_project_channels_one(object: {
+        project_id: $project_id
+        channel_id: $channel_id,
+        kind: $kind,
+    }) {
+        channel_id
+    }
+}   
