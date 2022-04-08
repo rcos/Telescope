@@ -1,0 +1,13 @@
+mutation CreateOneSmallGroupChannel(
+    $small_group_id: Int!,
+    $channel_id: String!,
+    $kind: channel_type!,
+) {
+    insert_small_group_channels_one(object: {
+        small_group_id: $small_group_id
+        channel_id: $channel_id,
+        kind: $kind,
+    }) {
+        channel_id
+    }
+}

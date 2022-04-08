@@ -1,0 +1,12 @@
+fragment SmallGroupAssociationInfo on small_groups {
+    small_group_id
+    semester_id
+    title
+}
+
+query FindCurrSmallGroup( $id: Int!, $now: date!) {
+    small_groups( where: {
+        small_group_id: {_eq: $id},
+        semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
+        }) { ...SmallGroupAssociationInfo }
+}
