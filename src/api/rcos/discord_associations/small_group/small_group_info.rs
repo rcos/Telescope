@@ -34,9 +34,6 @@ impl CurrSmallGroups {
 pub struct FindSmallGroup;
 impl FindSmallGroup {
     pub async fn get_by_id(id: i64) -> Result<find_small_group::ResponseData, TelescopeError> {
-        send_query::<Self>(find_small_group::Variables {
-            id: id,
-        })
-        .await
+        send_query::<Self>(find_small_group::Variables { id: id }).await
     }
 }

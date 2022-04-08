@@ -37,9 +37,6 @@ pub struct FindProject;
 
 impl FindProject {
     pub async fn get_by_id(id: i64) -> Result<find_project::ResponseData, TelescopeError> {
-        send_query::<Self>(find_project::Variables {
-            id: id,
-        })
-        .await
+        send_query::<Self>(find_project::Variables { id: id }).await
     }
 }

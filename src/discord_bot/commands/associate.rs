@@ -7,7 +7,8 @@ use crate::api::rcos::discord_associations::project::{
     create_project_channel, create_project_role, project_info,
 };
 use crate::api::rcos::discord_associations::small_group::{
-    create_small_group_category, create_small_group_channel, create_small_group_role, small_group_info,
+    create_small_group_category, create_small_group_channel, create_small_group_role,
+    small_group_info,
 };
 use crate::api::rcos::discord_associations::ChannelType;
 
@@ -15,9 +16,7 @@ use crate::discord_bot::commands::InteractionResult;
 use crate::env::global_config;
 use serenity::builder::{CreateApplicationCommand, CreateApplicationCommandOption, CreateEmbed};
 use serenity::client::Context;
-use serenity::model::channel::{
-    ChannelType as SerenityChannelType,
-};
+use serenity::model::channel::ChannelType as SerenityChannelType;
 use serenity::model::guild::Role;
 use serenity::model::id::ChannelId;
 use serenity::model::id::{GuildId, RoleId};
@@ -506,13 +505,10 @@ pub async fn handle_associate_channel(
     match subcommand {
         // Associate existing channel to project
         _ if subcommand == SUBCOMMAND[0] => {
-            let rcos_api_response =
-                project_info::FindProject::get_by_id(id)
-                    .await
-                    .map_err(|e| {
-                        error!("Error getting project info: {}", e);
-                        e
-                    });
+            let rcos_api_response = project_info::FindProject::get_by_id(id).await.map_err(|e| {
+                error!("Error getting project info: {}", e);
+                e
+            });
             if let Err(err) = rcos_api_response {
                 return Some(
                     interaction_error(
@@ -706,13 +702,10 @@ pub async fn handle_associate_role(
     match subcommand {
         // Associate existing role to project
         _ if subcommand == SUBCOMMAND[0] => {
-            let rcos_api_response =
-                project_info::FindProject::get_by_id(id)
-                    .await
-                    .map_err(|e| {
-                        error!("Error getting project info: {}", e);
-                        e
-                    });
+            let rcos_api_response = project_info::FindProject::get_by_id(id).await.map_err(|e| {
+                error!("Error getting project info: {}", e);
+                e
+            });
             if let Err(err) = rcos_api_response {
                 return Some(
                     interaction_error(
