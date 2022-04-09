@@ -1,0 +1,13 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/kamilkisiela/graphql-config@v4.3.0/config-schema.json",
+  "projects": {
+    "github": {
+      "schema": ["./graphql/github/schema.json"],
+      "documents": ["./graphql/github/**/*.graphql"]
+    },
+    "rcos": {
+      "schema": ["./graphql/rcos/schema.json"],
+      "documents": ["./graphql/rcos/**/*.graphql"]
+    }
+  }
+}
