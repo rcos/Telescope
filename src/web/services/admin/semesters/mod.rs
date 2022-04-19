@@ -13,6 +13,8 @@ use crate::templates::Template;
 
 mod create;
 mod edit;
+mod view_enrollments;
+mod view_projects;
 
 /// Register semester services.
 pub fn register(config: &mut ServiceConfig) {

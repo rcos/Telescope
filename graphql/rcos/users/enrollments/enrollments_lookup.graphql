@@ -1,0 +1,7 @@
+
+# GraphQL query to lookup enrollment by semester id.
+query EnrollmentsLookup($semester_id: String!) {
+    enrollments(id: $semester_id) {
+        user
+    }
+}

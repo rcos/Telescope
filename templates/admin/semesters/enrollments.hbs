@@ -1,0 +1,99 @@
+<h1>Enrollments</h1>
+
+{{! Form to filter users -- use the action attribute to prevent queries from a later page indexing incorrectly }}
+<form method="get" class="mb-2 form-inline" action="/developers">
+    <div class="input-group mr-2">
+        <div class="input-group-prepend">
+            <div class="input-group-text">
+                <i data-feather="search"></i>
+            </div>
+        </div>
+        <input type="search" name="search" class="form-control" placeholder="Search..." aria-label="Search"
+            {{#with query.search}} value="{{this}}" {{else}} {{! empty string -- no value }} {{/with}}
+        >
+    </div>
+
+    <div class="form-check mr-2">
+        <input class="form-check-input" type="checkbox" name="include_old" id="include-old" value="true"
+            {{#if query.include_old}} checked {{/if}}
+        >
+        <label for="include-old" class="form-check-label">
+            Include previous members
+        </label>
+    </div>
+
+    <button class="btn btn-primary" type="submit">View</button>
+</form>
+
+{{! Pagination buttons }}
+{{> pagination/pagination_bar pagination=pagination prefix="/developers/" preserved_query_string=preserved_query_string}}
+
+{{! User info }}
+{{#each data.users}}
+    <div class="my-2 card text-dark">
+        <div class="card-header">
+            <h3 class="card-title">
+                {{first_name}} {{last_name}}
+
+                <span class="float-right">
+                    {{! Email if viewer is logged in and it's available }}
+                    {{#if ../identity}}
+                        {{#with rcs_id.[0].account_id}}
+                            <a class="btn btn-secondary mr-1" href="mailto:{{this}}@rpi.edu">
+                                <i data-feather="mail"></i> {{this}}@rpi.edu
+                            </a>
+                        {{else}}
+                            {{! No RPI email -- render nothing}}
+                        {{~/with}}
+                    {{/if}}
+
+                    <a class="btn btn-primary" href="/user/{{id}}">
+                        Profile
+                    </a>
+                </span>
+            </h3>
+        </div>
+
+        {{! Only render the card body if there's content in it }}
+        {{#if (or coordinating mentoring) }}
+            <div class="card-body">
+                {{! Coordinating history }}
+                {{#with coordinating}}
+                    <h5 class="card-title">Coordinating</h5>
+                    <ul>
+                        {{#each this}}
+                            <li>
+                                {{semester.title}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    {{! No coordinating history -- generate nothing }}
+                {{/with}}
+
+                {{! Mentoring history }}
+                {{#with mentoring}}
+                    <h5 class="card-title">Mentoring</h5>
+                    <ul>
+                        {{#each this}}
+                            <li>{{small_group.semester.title}}: {{small_group.title}}</li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    {{! No mentoring history -- generate nothing }}
+                {{/with}}
+            </div>
+        {{/if}}
+    </div>
+{{else}}
+    {{! No users -- display a message }}
+    <div class="justify-content-center">
+        Could not find any users matching these parameters.
+
+        {{! Additional message on only current users }}
+        {{#unless query.include_old}}
+            Perhaps the current semester is over or there have not been any recorded enrollments yet. You can check the
+            box above to include all RCOS members from previous semesters.
+        {{/unless}}
+    </div>
+{{/each}}
