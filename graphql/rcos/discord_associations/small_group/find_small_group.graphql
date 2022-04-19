@@ -1,0 +1,37 @@
+fragment SmallGroupAssociationInfo on small_groups {
+    small_group_id
+    semester_id
+    title
+    
+    small_group_categories{
+        category_id
+    }
+
+    # If project roles are created, what are the role ids.
+    small_group_role{
+        role_id
+    }
+        # If project channel  is created, what is the channel id and kind.
+    small_group_channels{
+        channel_id
+        kind
+    }
+    small_group_projects{
+        project{
+            project_id
+            title
+            project_channels{
+                channel_id
+            }
+            project_role{
+                role_id
+            }
+        }
+    }
+}
+
+query FindSmallGroup( $id: Int!) {
+    small_groups( where: {
+        small_group_id: {_eq: $id},
+        }) { ...SmallGroupAssociationInfo }
+}

@@ -25,3 +25,15 @@ impl CurrSmallGroups {
         .await
     }
 }
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "graphql/rcos/schema.json",
+    query_path = "graphql/rcos/discord_associations/small_group/find_small_group.graphql",
+    response_derives = "Debug,Clone,Serialize"
+)]
+pub struct FindSmallGroup;
+impl FindSmallGroup {
+    pub async fn get_by_id(id: i64) -> Result<find_small_group::ResponseData, TelescopeError> {
+        send_query::<Self>(find_small_group::Variables { id: id }).await
+    }
+}

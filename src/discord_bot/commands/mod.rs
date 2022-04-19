@@ -8,9 +8,9 @@ use serenity::model::guild::Guild;
 use serenity::model::interactions::application_command::ApplicationCommand;
 use serenity::model::interactions::application_command::ApplicationCommandInteraction;
 
+mod associate;
 mod generate;
 mod whois;
-
 /// Interactions return a boxed future of a serenity result.
 type InteractionResult<'a> = BoxFuture<'a, serenity::Result<()>>;
 
@@ -44,6 +44,11 @@ const COMMANDS: &'static [Command] = &[
         name: generate::COMMAND_NAME,
         builder: generate::create_generate,
         handler: generate::handle_generate,
+    },
+    Command {
+        name: associate::COMMAND_NAME,
+        builder: associate::create_associate,
+        handler: associate::handle_associate,
     },
 ];
 
