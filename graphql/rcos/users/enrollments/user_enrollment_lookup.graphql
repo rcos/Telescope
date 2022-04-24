@@ -11,7 +11,33 @@ fragment EnrollmentsInfo on enrollments{
             rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
                 account_id
             }
+            # Semesters coordinating
+            coordinating: enrollments(
+                where: {
+                    is_coordinator: {_eq: true}
+                },
+                order_by: [
+                    {semester: {start_date: desc}}
+                ]
+            ) {
+                semester {
+                    title
+                }
+            }
+
+            # Semesters mentoring
+            mentoring: small_group_mentors(order_by: [
+                {small_group: {semester: {start_date: desc}}}
+                ]) {
+                small_group {
+                    title
+                    semester {
+                        title
+                    }
+                }
+            }
         }
+
 }
 # GraphQL query to lookup user enrollment by semester id.
 query UserEnrollmentLookup(

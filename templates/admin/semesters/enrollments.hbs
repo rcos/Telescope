@@ -1,4 +1,4 @@
-<h1>{{data.[0].semseter.[0].title}} Enrollments</h1>
+<h1>{{title}} Enrollments</h1>
 
 {{! Form to filter users -- use the action attribute to prevent queries from a later page indexing incorrectly }}
 <form method="get" class="mb-2 form-inline" action="/admin/semesters/enrollments/{{id}}">
@@ -17,6 +17,10 @@
 
 {{! Pagination buttons }}
 {{> pagination/pagination_bar pagination=pagination prefix=prefix preserved_query_string=preserved_query_string}}
+
+<a class="btn btn-primary w-10 mb-1" target="_blank" href="/admin/download/enrollments/{{id}}">
+    Export to CSV
+</a>
 
 {{#each data}}
     <div class="my-2 card text-dark">
@@ -43,10 +47,10 @@
         </div>
 
         {{! Only render the card body if there's content in it }}
-        {{#if (or coordinating mentoring) }}
+        {{#if (or user.coordinating user.mentoring) }}
             <div class="card-body">
                 {{! Coordinating history }}
-                {{#with coordinating}}
+                {{#with user.coordinating}}
                     <h5 class="card-title">Coordinating</h5>
                     <ul>
                         {{#each this}}
@@ -60,7 +64,7 @@
                 {{/with}}
 
                 {{! Mentoring history }}
-                {{#with mentoring}}
+                {{#with user.mentoring}}
                     <h5 class="card-title">Mentoring</h5>
                     <ul>
                         {{#each this}}
@@ -77,11 +81,5 @@
     {{! No users -- display a message }}
     <div class="justify-content-center">
         Could not find any users matching these parameters.
-
-        {{! Additional message on only current users }}
-        {{#unless query.include_old}}
-            Perhaps the current semester is over or there have not been any recorded enrollments yet. You can check the
-            box above to include all RCOS members from previous semesters.
-        {{/unless}}
     </div>
 {{/each}}
