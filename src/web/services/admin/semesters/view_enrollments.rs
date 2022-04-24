@@ -1,9 +1,10 @@
 //! Semester record creation.
 
-use actix_files::NamedFile;
-use actix_web::http::header::{ContentDisposition, DispositionParam, DispositionType};
+use actix_web::http::header::{
+    self as header, ContentDisposition, DispositionParam, DispositionType,
+};
 use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
-use actix_web::HttpRequest;
+use actix_web::{HttpRequest, HttpResponse};
 use csv::WriterBuilder;
 use serde::Serialize;
 use serde_json::Value;
@@ -74,46 +75,42 @@ fn get_page_numbers(api_response: &Value, current_page: u64) -> Option<Paginatio
 // download page for enrollments csv file.
 // When user access to this page, a csv file will be created and written at /tmp/.
 #[get("/download/enrollments/{semester_id}")]
-pub async fn export_to_csv(Path(semester_id): Path<String>) -> Result<NamedFile, TelescopeError> {
+pub async fn export_to_csv(
+    Path(semester_id): Path<String>,
+) -> Result<HttpResponse, TelescopeError> {
     let query_response = EnrollmentsLookup::get(semester_id.clone()).await?;
-    let path = "/tmp/".to_owned() + semester_id.as_str().clone() + "_enrollments.csv";
-    let mut wtr = WriterBuilder::new().from_path(path.clone()).unwrap();
-    let api_data = query_response.enrollments;
-    for data in api_data {
-        wtr.serialize(Enrollments {
-            semester_id: data.semester_id.to_string(),
-            project_id: data
-                .project_id
-                .map(|v| v.to_string())
-                .unwrap_or_else(|| "".to_string()),
-            is_project_lead: data.is_project_lead.to_string(),
-            is_coordinator: data.is_coordinator.to_string(),
-            credits: data.credits.to_string(),
-            is_for_pay: data.is_for_pay.to_string(),
-            mid_year_grade: data
-                .mid_year_grade
-                .map(|v| v.to_string())
-                .unwrap_or_else(|| "".to_string()),
-            final_grade: data
-                .final_grade
-                .map(|v| v.to_string())
-                .unwrap_or_else(|| "".to_string()),
-            created_at: data.created_at.to_string(),
-            user_id: data.user_id.to_string(),
-        })
-        .unwrap();
+    let mut buffer = Vec::new();
+    // scope to ensure writer is dropped after its done, so we can use the buffer
+    {
+        let mut wtr = WriterBuilder::new().from_writer(&mut buffer);
+        let api_data = query_response.enrollments;
+        wtr.serialize(api_data).map_err(|e| {
+            TelescopeError::ise(format!(
+                "There was an issue writing the data to CSV: {:?}",
+                e
+            ))
+        })?;
+        wtr.flush().map_err(|e| {
+            TelescopeError::ise(format!(
+                "There was an issue finalizing the CSV file: {:?}",
+                e
+            ))
+        })?;
     }
-    wtr.flush();
-
-    let file = actix_files::NamedFile::open(path);
-    if !file.is_ok() {
-        return Err(TelescopeError::PageNotFound);
-    }
-    let param = DispositionParam::Filename(semester_id + "_enrollments.csv");
-    Ok(file.unwrap().set_content_disposition(ContentDisposition {
-        disposition: DispositionType::Attachment,
-        parameters: vec![param],
-    }))
+    let resp = HttpResponse::Ok()
+        .set_header(header::CONTENT_TYPE, "text/csv")
+        .set_header(
+            header::CONTENT_DISPOSITION,
+            ContentDisposition {
+                disposition: DispositionType::Attachment,
+                parameters: vec![DispositionParam::Filename(format!(
+                    "enrollments-{}.csv",
+                    semester_id
+                ))],
+            },
+        )
+        .body(buffer);
+    Ok(resp)
 }
 
 pub async fn enrollments_page_index(
