@@ -18,11 +18,14 @@ mod view_projects;
 
 /// Register semester services.
 pub fn register(config: &mut ServiceConfig) {
+    view_enrollments::register_services(config);
+    
     config
         .service(create::new)
         .service(create::submit_new)
         .service(edit::edit)
         .service(edit::submit_edit)
+        .service(view_enrollments::export_to_csv)
         .route("/semesters", aweb::get().to(index))
         .route("/semesters/{page}", aweb::get().to(index));
 }

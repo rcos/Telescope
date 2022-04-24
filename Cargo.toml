@@ -37,6 +37,9 @@ serde = {version = "1.0.136", features = ["derive"]}
 serde_json = "1.0.79"
 serde_urlencoded = "~0.7"
 
+# export data to csv
+csv = "1.1"
+
 # Regular expressions
 regex = "1"
 

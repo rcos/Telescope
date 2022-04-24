@@ -15,13 +15,13 @@
                     <th scope="col">Title</th>
                     <th scope="col">Start</th>
                     <th scope="col">End</th>
-                    <th scope="col"><button class="btn btn-info">Enrollments</th>
-                    <th scope="col"><button class="btn btn-info">Projects</th>
+                    <th scope="col">Enrollments</th>
+                    <th scope="col">Projects</th>
                 </tr>
             </thead>
 
             <tbody>
-                {{#each data.semesters}}
+                {{#each data.semesters as | semesters |}}
                     <tr>
                         <th scope="row">{{title}}</th>
                         <td>{{format_date start_date}}</td>
@@ -30,7 +30,12 @@
                         {{! Stats }}
 
                         {{#with enrollments_aggregate.aggregate}}
-                            <td>{{count}}</td>
+                            <td>
+                                <a href="/admin/semesters/enrollments/{{semesters.semester_id}}/1"class="btn btn-info">
+                                    {{count}}
+                                </a>
+                            </td>
+                            
                         {{else}}
                             <td>unavailable</td>
                         {{/with}}
@@ -42,7 +47,7 @@
                         {{/with}}
 
                         <td>
-                            <a href="/admin/semesters/edit/{{semester_id}}" class="btn btn-primary">
+                            <a href="/admin/semesters/edit/{{semester_id}}" class="btn btn-info">
                                 Edit
                             </a>
                         </td>

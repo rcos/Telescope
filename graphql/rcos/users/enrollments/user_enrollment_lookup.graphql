@@ -1,0 +1,46 @@
+
+fragment EnrollmentsInfo on enrollments{
+        semester{
+            title
+        }
+        user{
+            first_name
+            last_name
+            id
+            # RCS ID if available
+            rcs_id: user_accounts(where: {type: {_eq: "rpi"}}) {
+                account_id
+            }
+        }
+}
+# GraphQL query to lookup user enrollment by semester id.
+query UserEnrollmentLookup(
+    $limit: Int!,
+    $offset: Int!,
+    $search: String!, 
+    $semester_id: String!,
+) {
+        # Current user count -- used to determine the number of pages.
+    user_count: enrollments_aggregate(where: {
+            semester_id: {_eq: $semester_id},
+            _or: [
+                {user: {first_name: {_ilike: $search}}},
+                {user: {last_name: {_ilike: $search}}},
+                {user: {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}}},
+            ]
+    }) {aggregate {count} }
+
+    enrollments(
+        limit: $limit,
+        offset: $offset,
+        where:{
+            semester_id: {_eq: $semester_id},
+            _or: [
+                {user: {first_name: {_ilike: $search}}},
+                {user: {last_name: {_ilike: $search}}},
+                {user: {user_accounts: {account_id: {_ilike: $search}, type: {_eq: "rpi"}}}},
+            ]
+        } 
+        order_by: {project_id: asc}
+        ) {... EnrollmentsInfo}
+}

@@ -1,7 +1,7 @@
-<h1>Enrollments</h1>
+<h1>{{data.[0].semseter.[0].title}} Enrollments</h1>
 
 {{! Form to filter users -- use the action attribute to prevent queries from a later page indexing incorrectly }}
-<form method="get" class="mb-2 form-inline" action="/developers">
+<form method="get" class="mb-2 form-inline" action="/admin/semesters/enrollments/{{id}}">
     <div class="input-group mr-2">
         <div class="input-group-prepend">
             <div class="input-group-text">
@@ -12,33 +12,22 @@
             {{#with query.search}} value="{{this}}" {{else}} {{! empty string -- no value }} {{/with}}
         >
     </div>
-
-    <div class="form-check mr-2">
-        <input class="form-check-input" type="checkbox" name="include_old" id="include-old" value="true"
-            {{#if query.include_old}} checked {{/if}}
-        >
-        <label for="include-old" class="form-check-label">
-            Include previous members
-        </label>
-    </div>
-
     <button class="btn btn-primary" type="submit">View</button>
 </form>
 
 {{! Pagination buttons }}
-{{> pagination/pagination_bar pagination=pagination prefix="/developers/" preserved_query_string=preserved_query_string}}
+{{> pagination/pagination_bar pagination=pagination prefix=prefix preserved_query_string=preserved_query_string}}
 
-{{! User info }}
-{{#each data.users}}
+{{#each data}}
     <div class="my-2 card text-dark">
         <div class="card-header">
             <h3 class="card-title">
-                {{first_name}} {{last_name}}
+                {{user.first_name}} {{user.last_name}}
 
                 <span class="float-right">
                     {{! Email if viewer is logged in and it's available }}
                     {{#if ../identity}}
-                        {{#with rcs_id.[0].account_id}}
+                        {{#with user.rcs_id.[0].account_id}}
                             <a class="btn btn-secondary mr-1" href="mailto:{{this}}@rpi.edu">
                                 <i data-feather="mail"></i> {{this}}@rpi.edu
                             </a>
@@ -46,8 +35,7 @@
                             {{! No RPI email -- render nothing}}
                         {{~/with}}
                     {{/if}}
-
-                    <a class="btn btn-primary" href="/user/{{id}}">
+                    <a class="btn btn-primary" href="/user/{{user.id}}">
                         Profile
                     </a>
                 </span>
