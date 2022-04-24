@@ -18,7 +18,7 @@ mod view_enrollments;
 /// Register semester services.
 pub fn register(config: &mut ServiceConfig) {
     view_enrollments::register_services(config);
-    
+
     config
         .service(create::new)
         .service(create::submit_new)

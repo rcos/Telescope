@@ -1,12 +1,12 @@
 //! API interactions for RCOS users from the central RCOS API.
 
 pub mod accounts;
-pub mod enrollments;
 pub mod create;
 pub mod delete;
 pub mod developers_page;
 pub mod discord_whois;
 pub mod edit_profile;
+pub mod enrollments;
 pub mod navbar_auth;
 pub mod profile;
 pub mod role_lookup;

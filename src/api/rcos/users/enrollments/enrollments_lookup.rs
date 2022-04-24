@@ -1,9 +1,8 @@
 //! RCOS API query to get enrollment record.
 
-use crate::api::rcos::{prelude::*, search_strings::resolve_search_string};
 use crate::api::rcos::send_query;
+use crate::api::rcos::{prelude::*, search_strings::resolve_search_string};
 use crate::error::TelescopeError;
-
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -14,10 +13,13 @@ use crate::error::TelescopeError;
 
 pub struct EnrollmentsLookup;
 
-impl EnrollmentsLookup{
-    pub async fn get(semester_id: String) -> Result<enrollments_lookup::ResponseData, TelescopeError> {
+impl EnrollmentsLookup {
+    pub async fn get(
+        semester_id: String,
+    ) -> Result<enrollments_lookup::ResponseData, TelescopeError> {
         send_query::<Self>(enrollments_lookup::Variables {
-            semester_id: semester_id})
-            .await
+            semester_id: semester_id,
+        })
+        .await
     }
 }
