@@ -9,7 +9,9 @@ use csv::WriterBuilder;
 use serde::Serialize;
 use serde_json::Value;
 use uuid::Uuid;
+use chrono::Utc;
 
+use crate::api::rcos::semesters::get_by_id::semester::SemesterSemestersByPk;
 use crate::api::rcos::semesters::get_by_id::Semester;
 use crate::api::rcos::users::enrollments::enrollments_lookup::EnrollmentsLookup;
 use crate::api::rcos::users::enrollments::user_enrollment_lookup::UserEnrollmentLookup;
@@ -128,22 +130,38 @@ pub async fn enrollments_page_index(
     }
 
     // Get the API data by sending one of the enrollment page queries.
-    let semester = Semester::get_by_id(semester_id.clone()).await?;
+    let semester = Semester::get_by_id(semester_id.clone())
+        .await?
+        .unwrap_or_else(|| SemesterSemestersByPk {
+            semester_id: semester_id.clone(),
+            title: "".to_string(),
+            start_date: Utc::today().naive_utc(),
+            end_date: Utc::today().naive_utc(),
+        });
     let query_response =
         UserEnrollmentLookup::get_by_id(page_num, query.search.clone(), semester_id.clone())
             .await?;
     let enrollments = query_response.enrollments.clone();
-    let enrollment_data = serde_json::to_value(enrollments).unwrap();
-    let api_data = serde_json::to_value(query_response).unwrap();
+    let enrollment_data = serde_json::to_value(enrollments).map_err(|e| {
+        TelescopeError::ise(format!(
+            "Could not serialize enrollments data to JSON format: {}",
+            e
+        ))
+    })?;
+    let api_data = serde_json::to_value(query_response).map_err(|e| {
+        TelescopeError::ise(format!(
+            "Could not serialize API data to JSON format: {}",
+            e
+        ))
+    })?;
 
-    //let users = query_response.enrollments.get(0).unwrap().user;
     // Get the viewers user ID
     let viewer: Option<Uuid> = identity.get_user_id().await?;
     let prefix = "/admin/semesters/enrollments/".to_owned() + &semester_id + "/";
     let mut template = Template::new(TEMPLATE_PATH);
     template.fields = json!({
         "pagination": get_page_numbers(&api_data, page_num as u64 + 1),
-        "title": semester.unwrap().title,
+        "title": semester.title,
         "data": enrollment_data,
         "id": semester_id,
         "identity": viewer,
@@ -160,20 +178,36 @@ pub async fn enrollments_page(
     Query(query): Query<EnrollmentPageQuery>,
 ) -> Result<Page, TelescopeError> {
     // Get the API data by sending one of the enrollment page queries.
-    let semester = Semester::get_by_id(semester_id.clone()).await?;
+    let semester = Semester::get_by_id(semester_id.clone())
+        .await?
+        .unwrap_or_else(|| SemesterSemestersByPk {
+            semester_id: semester_id.clone(),
+            title: "".to_string(),
+            start_date: Utc::today().naive_utc(),
+            end_date: Utc::today().naive_utc(),
+        });
     let query_response =
         UserEnrollmentLookup::get_by_id(0, query.search.clone(), semester_id.clone()).await?;
     let enrollments = query_response.enrollments.clone();
-    let enrollment_data = serde_json::to_value(enrollments).unwrap();
-    let api_data = serde_json::to_value(query_response).unwrap();
+    let enrollment_data = serde_json::to_value(enrollments).map_err(|e| {
+        TelescopeError::ise(format!(
+            "Could not serialize enrollments data to JSON format: {}",
+            e
+        ))
+    })?;
+    let api_data = serde_json::to_value(query_response).map_err(|e| {
+        TelescopeError::ise(format!(
+            "Could not serialize API data to JSON format: {}",
+            e
+        ))
+    })?;
 
-    //let users = query_response.enrollments.get(0).unwrap().user;
     // Get the viewers user ID
     let viewer: Option<Uuid> = identity.get_user_id().await?;
     let prefix = "/admin/semesters/enrollments/".to_owned() + &semester_id + "/";
     let mut template = Template::new(TEMPLATE_PATH);
     template.fields = json!({
-        "title": semester.unwrap().title,
+        "title": semester.title,
         "pagination": get_page_numbers(&api_data, 1),
         "data": enrollment_data,
         "id": semester_id,
