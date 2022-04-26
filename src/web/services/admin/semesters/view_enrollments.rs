@@ -5,11 +5,11 @@ use actix_web::http::header::{
 };
 use actix_web::web::{self as aweb, Path, Query, ServiceConfig};
 use actix_web::{HttpRequest, HttpResponse};
+use chrono::Utc;
 use csv::WriterBuilder;
 use serde::Serialize;
 use serde_json::Value;
 use uuid::Uuid;
-use chrono::Utc;
 
 use crate::api::rcos::semesters::get_by_id::semester::SemesterSemestersByPk;
 use crate::api::rcos::semesters::get_by_id::Semester;
@@ -86,12 +86,14 @@ pub async fn export_to_csv(
     {
         let mut wtr = WriterBuilder::new().from_writer(&mut buffer);
         let api_data = query_response.enrollments;
-        wtr.serialize(api_data).map_err(|e| {
-            TelescopeError::ise(format!(
-                "There was an issue writing the data to CSV: {:?}",
-                e
-            ))
-        })?;
+        for enrollment in api_data {
+            wtr.serialize(enrollment).map_err(|e| {
+                TelescopeError::ise(format!(
+                    "There was an issue writing the data to CSV: {:?}",
+                    e
+                ))
+            })?;
+        }
         wtr.flush().map_err(|e| {
             TelescopeError::ise(format!(
                 "There was an issue finalizing the CSV file: {:?}",
