@@ -42,7 +42,7 @@ query CurrentProjects($limit: Int!, $offset: Int!, $search: String!, $now: date!
         enrollments: {semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}}
     }) { aggregate { count } }
 
-    projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
+    projects(limit: $limit, offset: $offset, order_by: [{created_at: desc}], where: {
         _or: [
             {title: {_ilike: $search}},
             {description: {_ilike: $search}},
@@ -60,7 +60,7 @@ query AllProjects($limit: Int!, $offset: Int!, $search: String!) {
         ]
     }) { aggregate { count } }
 
-    projects(limit: $limit, offset: $offset, order_by: [{title: asc}], where: {
+    projects(limit: $limit, offset: $offset, order_by: [{created_at: desc}], where: {
         _or: [
             {title: {_ilike: $search}},
             {description: {_ilike: $search}},

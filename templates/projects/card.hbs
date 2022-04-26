@@ -2,7 +2,7 @@
 
 <div class="card my-2" id="project-{{project_id}}" style="border-color: var(--meeting-{{type}}-bg); border-width: 4px;">
     <h3 class="card-header"
-        style="background: url({{cover_image_url}}); border-radius: 0;">
+        style="background: {{#if cover_image_url}}url({{cover_image_url}}){{else}}var(--red){{/if}}; border-radius: 0;">
         {{title}}
         <span class="float-right">
             <a href="/project/{{project_id}}" class="btn btn-primary">
@@ -22,9 +22,6 @@
 
         {{#if description}}
             <div class="list-group-item">
-                <small class="text-muted mb-2">
-                    User supplied description:
-                </small>
                 {{render_markdown description}}
             </div>
         {{/if}}

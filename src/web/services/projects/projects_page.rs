@@ -9,7 +9,7 @@ const TEMPLATE_PATH: &'static str = "projects/list";
 
 #[get("/projects")]
 pub async fn get(req: HttpRequest) -> Result<Page, TelescopeError> {
-    let projects = projects_page::CurrentProjects::get(0, None).await?;
+    let projects = projects_page::AllProjects::get(0, None).await?;
     let mut template = Template::new(TEMPLATE_PATH);
     template.fields = json!({ "projects": projects.projects });
     return template.in_page(&req, "RCOS Projects").await;
