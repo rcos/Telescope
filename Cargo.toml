@@ -82,7 +82,7 @@ dashmap = "~5.2"
 pulldown-cmark = "0.9.1"
 
 # UUID used in user IDs.
-uuid = {version = "0.8.2", features = ["serde", "v4"]}
+uuid = {version = "1.1.2", features = ["serde", "v4"]}
 
 # API stuff
 
