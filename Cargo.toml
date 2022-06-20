@@ -67,7 +67,7 @@ url = {version = "2", features = ["serde"]}
 derive_more = "~0.99"
 
 # JSON web tokens
-jsonwebtoken = "~8.0"
+jsonwebtoken = "~8.1"
 
 # OAuth2 models and flows
 oauth2 = "4.1.0"
