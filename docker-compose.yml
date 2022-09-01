@@ -11,10 +11,10 @@ services:
         - "443:443"
 
     hasura:
-        image: hasura/graphql-engine:v2.4.0
+        image: hasura/graphql-engine:v2.11.1
         restart: unless-stopped
         environment:
-            # https://hasura.io/docs/1.0/graphql/core/deployment/graphql-engine-flags/reference.html
+            # https://hasura.io/docs/latest/deployment/graphql-engine-flags/reference
             HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "web_anon"
             HASURA_GRAPHQL_DATABASE_URL: "${DATABASE_URL}"
             HASURA_GRAPHQL_DEV_MODE: "false"
@@ -22,13 +22,6 @@ services:
             HASURA_GRAPHQL_JWT_SECRET: "{ \"type\": \"HS256\", \"key\": \"${RCOS_JWT_SECRET}\" }"
             HASURA_GRAPHQL_LOG_LEVEL: "warn"
             HASURA_GRAPHQL_ADMIN_SECRET: "${RCOS_ADMIN_SECRET}"
-
-    wikijs:
-        image: requarks/wiki:2
-        restart: unless-stopped
-        volumes:
-        - /home/rcos/config/wiki.yml:/wiki/config.yml
-        - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
 
     telescope:
         image: docker.pkg.github.com/rcos/telescope/telescope:0.9.0

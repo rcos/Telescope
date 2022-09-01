@@ -8,20 +8,6 @@ rcos.io {
     reverse_proxy telescope:80
 }
 
-api.rcos.io {
-    encode zstd gzip
-    log { output discard }
-
-    reverse_proxy postgrest:3000
-}
-
-wiki.rcos.io {
-    encode zstd gzip
-    log { output discard }
-
-    reverse_proxy wikijs:3000
-}
-
 gql.rcos.io {
     encode zstd gzip
     log { output discard }
