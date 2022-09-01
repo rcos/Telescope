@@ -23,13 +23,6 @@ services:
             HASURA_GRAPHQL_LOG_LEVEL: "warn"
             HASURA_GRAPHQL_ADMIN_SECRET: "${RCOS_ADMIN_SECRET}"
 
-    wikijs:
-        image: requarks/wiki:2
-        restart: unless-stopped
-        volumes:
-        - /home/rcos/config/wiki.yml:/wiki/config.yml
-        - /home/rcos/config/db-cert.crt:/wiki/db-cert.crt
-
     telescope:
         image: docker.pkg.github.com/rcos/telescope/telescope:0.9.0
         restart: unless-stopped
