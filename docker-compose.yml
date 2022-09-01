@@ -11,10 +11,10 @@ services:
         - "443:443"
 
     hasura:
-        image: hasura/graphql-engine:v2.4.0
+        image: hasura/graphql-engine:v2.11.1
         restart: unless-stopped
         environment:
-            # https://hasura.io/docs/1.0/graphql/core/deployment/graphql-engine-flags/reference.html
+            # https://hasura.io/docs/latest/deployment/graphql-engine-flags/reference
             HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "web_anon"
             HASURA_GRAPHQL_DATABASE_URL: "${DATABASE_URL}"
             HASURA_GRAPHQL_DEV_MODE: "false"
