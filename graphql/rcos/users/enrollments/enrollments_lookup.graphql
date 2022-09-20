@@ -1,0 +1,22 @@
+# GraphQL query to lookup enrollment data by semester id.
+query EnrollmentsLookup(
+    $semester_id: String!,
+) {
+    enrollments(
+        where:{
+            semester_id: {_eq: $semester_id}
+        } 
+            order_by: {semester_id: asc}
+    ){
+        semester_id,
+        project_id,
+        is_project_lead,
+        is_coordinator,
+        credits,
+        is_for_pay,
+        mid_year_grade,
+        final_grade,
+        created_at,
+        user_id,
+    }
+}

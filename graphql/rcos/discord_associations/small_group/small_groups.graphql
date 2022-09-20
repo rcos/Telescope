@@ -1,0 +1,42 @@
+fragment SmallGroupAssociationInfo on small_groups {
+    small_group_id
+    semester_id
+    title
+    
+    small_group_categories{
+        category_id
+    }
+
+    # If project roles are created, what are the role ids.
+    small_group_role{
+        role_id
+    }
+        # If project channel  is created, what is the channel id and kind.
+    small_group_channels{
+        channel_id
+        kind
+    }
+    small_group_projects{
+        project{
+            project_id
+            title
+            project_channels{
+                channel_id
+            }
+            project_role{
+                role_id
+            }
+        }
+    }
+}
+
+
+query CurrSmallGroups( $offset: Int!, $search: String!, $now: date!) {
+    small_groups( offset: $offset, order_by: [{title: asc}], where: {
+        _or: [
+            {title: {_ilike: $search}},
+        ],
+        semester: {start_date: {_lte: $now}, end_date: {_gte: $now}}
+
+        }) { ...SmallGroupAssociationInfo }
+}
