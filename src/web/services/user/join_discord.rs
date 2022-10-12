@@ -8,9 +8,7 @@ use crate::env::global_config;
 use crate::web::services::auth::identity::AuthenticationCookie;
 use actix_web::HttpResponse;
 use reqwest::header::LOCATION;
-use serenity::builder::EditMember;
 use serenity::model::prelude::RoleId;
-use serenity::utils;
 
 /// Let users into the RCOS discord.
 #[get("/join_discord")]
@@ -95,12 +93,9 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
         .ok_or(TelescopeError::ise("Could not get Verified role ID."))?;
 
     // Add user to Discord with verified role and nickname.
-    
-    let nickname_copy = &nickname;
     discord
-        .add_to_rcos_guild(Some(nickname_copy.to_string()), vec![verified_role])
+        .add_to_rcos_guild(Some(nickname), vec![verified_role])
         .await?;
-    
 
     // If user was already in the discord, they may not have the verified role, and the
     // previous call will do nothing. Make an additional call here to add the verified role
@@ -113,17 +108,6 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
     // Make the call to add the verified role
     global_discord_client()
         .add_member_role(rcos_discord_guild, discord_user_id, verified_role.0)
-        .await
-        .map_err(TelescopeError::serenity_error)?;
-
-
-    // If user was already in the discord, they might not have a correctly formatted nickname
-    // Therefore we need to add it manually
-    let mut builder = EditMember::default();
-    builder.nickname(nickname);
-    let map = utils::hashmap_to_json_map(builder.0);
-    global_discord_client()
-        .edit_member(global_config().discord_config.rcos_guild_id(), discord_user_id, &map)
         .await
         .map_err(TelescopeError::serenity_error)?;
 
