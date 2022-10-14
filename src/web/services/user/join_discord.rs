@@ -96,9 +96,8 @@ pub async fn handle(auth: AuthenticationCookie) -> Result<HttpResponse, Telescop
 
     // Add user to Discord with verified role and nickname.
     
-    let nickname_copy = &nickname;
     discord
-        .add_to_rcos_guild(Some(nickname_copy.to_string()), vec![verified_role])
+        .add_to_rcos_guild(Some(nickname.clone()), vec![verified_role])
         .await?;
     
 
