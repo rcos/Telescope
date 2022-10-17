@@ -79,6 +79,11 @@ impl UserRole {
         self == UserRole::Sysadmin || self == UserRole::FacultyAdvisor
     }
 
+    //TEMPORARY
+    pub fn is_coordinator(self) -> bool {
+        self == UserRole::Sysadmin || self == UserRole::FacultyAdvisor
+    }
+
     /// Does this role represent an external user or mentor?
     pub fn is_external(self) -> bool {
         self == UserRole::External || self == UserRole::ExternalMentor
