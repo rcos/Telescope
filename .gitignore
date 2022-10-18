@@ -13,3 +13,6 @@ graphql/rcos/.graphqlconfig
 graphql/rcos/schema.graphql
 graphql/github/schema.graphql
 graphql/github/.graphqlconfig
+
+# All future changes to the Caddyfile should be ignored due to it needing changes on macOS docker
+Caddyfile.dev
