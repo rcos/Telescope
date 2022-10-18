@@ -67,6 +67,9 @@ struct TelescopeConfig {
     /// The URL that Telescope is running at. This is used in Discord embeds
     /// and the Open Graph Protocol meta tags. Should not end with a slash.
     telescope_url: Option<String>,
+
+    /// IP address and port to listen on
+    address: Option<String>,
 }
 
 /// A concrete config found by searching the specified profile and parents
@@ -88,6 +91,8 @@ pub struct ConcreteConfig {
     pub telescope_url: String,
     /// The JWT secret used to authenticate with the central API.
     pub jwt_secret: String,
+    /// IP address and port to listen on
+    pub address: String,
 }
 
 impl TelescopeConfig {
@@ -132,6 +137,9 @@ impl TelescopeConfig {
             telescope_url: self
                 .reverse_lookup(profile_slice, |c| c.telescope_url.clone())
                 .expect("Could not resolve Telescope URl."),
+            address: self
+                .reverse_lookup(profile_slice, |c| c.address.clone())
+                .expect("Could not resolve address to bind on."),
         }
     }
 

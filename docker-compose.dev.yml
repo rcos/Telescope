@@ -1,0 +1,53 @@
+# Development docker-compose file. Will pull up local Postgres database
+# and local PostgREST API for running telescope locally.
+version: "3.1"
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - "/var/run/postgres/postgres.sock:/var/run/postgres/postgres.sock"
+      - "db_data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+
+  # Hasura Postgres -> GraphQL engine
+  hasura:
+    image: hasura/graphql-engine:v2.2.0
+    depends_on:
+      - db
+    environment:
+      # https://hasura.io/docs/1.0/graphql/core/deployment/graphql-engine-flags/reference.html
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "web_anon"
+      HASURA_GRAPHQL_DATABASE_URL: "${DATABASE_URL}"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_JWT_SECRET: "{ \"type\": \"HS256\", \"key\": \"${RCOS_JWT_SECRET}\" }"
+      HASURA_GRAPHQL_LOG_LEVEL: "info"
+      HASURA_GRAPHQL_ADMIN_SECRET: "${HASURA_GRAPHQL_ADMIN_SECRET}"
+    ports:
+      - "8000:8080"
+
+  # Use caddy for reverse proxy and TLS/SSL certs.
+  caddy:
+    image: caddy:2
+    volumes:
+      - "caddy_data:/data"
+      - "${PWD}/Caddyfile.dev:/etc/caddy/Caddyfile"
+    ports:
+      - "8001:8001"
+      - "8443:443"
+
+
+volumes:
+  db_data:
+  caddy_data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
