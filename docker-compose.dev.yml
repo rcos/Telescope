@@ -16,6 +16,7 @@ services:
   # Hasura Postgres -> GraphQL engine
   hasura:
     image: hasura/graphql-engine:v2.2.0
+    restart: unless-stopped
     depends_on:
       - db
     environment:
@@ -45,6 +46,7 @@ volumes:
   db_data:
   caddy_data:
 
+# We need to ensure a stable gateway ip if we want the caddyfile to point to the host each time
 networks:
   default:
     ipam:

@@ -46,6 +46,11 @@ See below for detailed information on building & contributing to telescope.
     to register a new GitHub OAuth application or get a new client secret.
     You will also have to create a discord OAuth app and bot token. Instructions
     can be found in `config_example.toml`.  
+    
+    You must make sure that some of the items in the `.env` file match.
+    For example, the database password in `POSTGRES_PASSWORD` needs to be the
+    same as the one in `DATABASE_URL`. If you forget to do this, you will need
+    to reset the database (`docker-compose down --volumes`).
    
 5. Build and start the docker images.
     ```shell
@@ -53,7 +58,7 @@ See below for detailed information on building & contributing to telescope.
     ```
 
 6. Run the database migrations. Replace the "xx.." in the command with the admin 
-   secret from your `.env` file. Make sure the `admin-secret` is at least 32 characters long.
+   secret from your `.env` file. **Make sure the `admin-secret` is at least 32 characters long.**
     ```shell
     hasura --project rcos-data/ migrate --admin-secret xxxxxxxxxxxxxxxxxxxxxxxx --endpoint http://localhost:8000 apply
     ``` 
@@ -76,6 +81,33 @@ See below for detailed information on building & contributing to telescope.
    ```shell
    docker-compose up --build -d
    ```
+
+### Running Telescope outside of Docker
+
+Developing telescope with Docker is useful because you are testing Telescope in
+an almost identical environment to that which it runs on in production. In order
+to improve compile speed, due to the incremental compilation cache of Rust, you
+may want to develop and run Telescope outside of Docker. You can do this by
+following these *optional* instructions:
+
+1. Telescope typically uses the standard web port 80, but outside of Docker you
+   will need to change that to 8080 by setting `address` to `0.0.0.0:8080` in
+   `config.toml`. This is because port 80 is restricted.
+   
+2. On macOS, Docker runs within a virtual machine. That means that you need to
+   change `Caddyfile.dev` to point to your computer outside the virtual machine.
+   You only need to do this if you are using Docker Desktop on macOS.
+
+    ```
+    localhost:443 {
+        encode zstd gzip
+        reverse_proxy host.docker.internal:8080
+    }
+    ```
+
+3. The commands you use to run and test Telescope need to be changed. To start
+   the supporting services like Hasura, Postgres, and Caddy, run `docker-compose
+   -f docker-compose.dev.yml up -d`. To start Telescope, run `cargo run`.
 
 ## Development Notes
 These are note for Telescope Developers on how to find and update Telescope 
