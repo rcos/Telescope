@@ -1,0 +1,21 @@
+<h1>{{title}} Enrollments</h1>
+
+{{#each data}}
+<div class="my-2 card text-dark">
+    <div class="card-header">
+        <h3 class="card-title">
+        {{user.first_name}} {{user.last_name}} 
+        <span class = "float-right">
+           {{#unless (and is_not_admin user.coordinating)}} 
+                <a class="btn btn-primary" href="/coordinate/semesters/enrollments/{{../semester_id}}/{{user.id}}/edit"> Edit User</a>
+           {{/unless}}
+        </span> 
+        </h3>
+
+    </div>
+</div>
+{{else}}
+<div class="justify-content-center">
+    Could not find any users matching these parameters.
+</div>
+{{/each}}

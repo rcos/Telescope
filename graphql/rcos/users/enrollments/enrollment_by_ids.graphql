@@ -1,0 +1,24 @@
+query EnrollmentByIds(
+    $semester_id: String!,
+    $user_id: uuid!,
+){
+  enrollments_by_pk(semester_id: $semester_id, user_id: $user_id) {
+    final_grade
+    is_for_pay
+    is_coordinator
+    is_project_lead
+    mid_year_grade
+    project_id,
+    user {
+      first_name
+      last_name
+    }
+    semester {
+      title
+    }
+  }
+  projects(where: {_or: {}}) {
+    title
+  }
+}
+

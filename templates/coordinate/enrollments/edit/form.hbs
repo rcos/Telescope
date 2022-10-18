@@ -1,0 +1,44 @@
+<div class="row justify-content-center no-gutters">
+    {{#with data.enrollments_by_pk}}
+    <div class="card text-dark col-sm-11 col-md-9 col-lg-8">
+        <div class="card-header">
+           <h1 class="card-title">
+                Edit {{user.first_name}} {{user.last_name}}'s enrollment in {{semester.title}}
+           </h1>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <div class="form-row">
+                    <label for="lead-select">Is Project Lead:</label>
+                    <select class="form-control" id="lead-select", name="project-lead" required>
+                        <option value="true" {{#if is_project_lead}} selected {{/if}}> true </option>
+                        <option value="false" {{#unless is_project_lead}} selected {{/unless}}> false </option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="coordinator-select">Is Coordinator:</label>
+                    <select class="form-control" id="coordinator-select", name="coordinator" required>
+                        <option value="true" {{#if is_coordinator}} selected {{/if}}> true </option>
+                        <option value="false" {{#unless is_coordinator}} selected {{/unless}}> false </option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="pay-select">Is for Pay:</label>
+                    <select class="form-control" id="pay-select", name="pay" required>
+                        <option value="true" {{#if is_for_pay}} selected {{/if}}> true </option>
+                        <option value="false" {{#unless is_for_pay}} selected {{/unless}}> false </option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="mid-year-grade">Mid Year Grade:</label>
+                    <input id="mid-year-grade" type="number" value="{{mid_year_grade}}"/>
+                </div>
+                <div class="form-row">
+                    <label for="final_grade">Final Grade:</label>
+                    <input id="final_grade" type="number" value="{{final_grade}}"/>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{/with}}
+</div>
