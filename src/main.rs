@@ -92,8 +92,8 @@ async fn main() -> std::io::Result<()> {
             .default_service(aweb::to(web::services::not_found::not_found))
     })
     // Bind to 80 (this gets reversed proxied by Caddy later)
-    .bind("0.0.0.0:8080")
-    .expect("Could not bind http://localhost:8080")
+    .bind("0.0.0.0:80")
+    .expect("Could not bind http://localhost:80")
     // Start the server running.
     .run();
 
