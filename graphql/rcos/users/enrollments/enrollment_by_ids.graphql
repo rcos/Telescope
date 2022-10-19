@@ -18,6 +18,7 @@ query EnrollmentByIds(
     }
   }
   projects(where: {_or: {}}) {
+    project_id
     title
   }
 }
