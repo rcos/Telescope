@@ -4,6 +4,7 @@ query EnrollmentByIds(
 ){
   enrollments_by_pk(semester_id: $semester_id, user_id: $user_id) {
     final_grade
+    credits
     is_for_pay
     is_coordinator
     is_project_lead

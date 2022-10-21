@@ -31,15 +31,15 @@
                 </div>
                 <div class="form-row">
                     <label for="mid-year-grade">Mid Year Grade:</label>
-                    <input id="mid-year-grade" type="number" name="mid_grade" value="{{mid_year_grade}}"/>
+                    <input id="mid-year-grade" type="number" step="0.01" name="mid_grade" value="{{mid_year_grade}}"/>
                 </div>
                 <div class="form-row">
                     <label for="final_grade">Final Grade:</label>
-                    <input id="final_grade" type="number" name="final_grade" value="{{final_grade}}"/>
+                    <input id="final_grade" type="number" step="0.01" name="final_grade" value="{{final_grade}}"/>
                 </div>
                 <div class="form-row">
                     <label for="credit-count">Credit Count:</label>
-                    <input id="credit-count" type="number" name="credit" value="{{credit}}"/>
+                    <input id="credit-count" type="number" name="credit" value="{{credits}}"/>
                 </div>
                 {{/with}}
                 {{#with data}}
@@ -47,7 +47,7 @@
                     <label for="project-select">Project:</label>
                     <select class="form-control" name="project" id="project-select">
                         {{#each projects}}
-                            <option value="project_id" {{#if (eq project_id enrollments_by_pk.project_id)}} selected {{/if}}>{{title}}</option>
+                            <option value={{project_id}} {{#if (eq project_id ../enrollments_by_pk.project_id)}} selected {{/if}}>{{title}}</option>
                         {{/each}}
                     </select>
                 </div>

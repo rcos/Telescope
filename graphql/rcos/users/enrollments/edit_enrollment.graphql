@@ -1,0 +1,27 @@
+mutation EditEnrollment($semester_id: String!,
+  $user_id: uuid!,
+  $credits: Int!
+	$pay: Boolean!,
+	$coordinator: Boolean!,
+	$lead: Boolean!,
+	$mid_grade: Float!,
+	$final_grade: Float!,
+	$project: Int!) {
+  update_enrollments_by_pk(
+    pk_columns: {
+      semester_id: $semester_id,
+      user_id: $user_id
+    },
+    _set: {
+      credits: $credits,
+      is_coordinator: $coordinator,
+      is_for_pay: $pay,
+      is_project_lead: $lead,
+      mid_year_grade: $mid_grade,
+      project_id: $project,
+      final_grade: $final_grade
+    }) {
+    user_id
+  }
+}
+
