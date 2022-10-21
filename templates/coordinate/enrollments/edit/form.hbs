@@ -10,7 +10,7 @@
             <form method="post">
                 <div class="form-row">
                     <label for="lead-select">Is Project Lead:</label>
-                    <select class="form-control" id="lead-select", name="project-lead" required>
+                    <select class="form-control" id="lead-select", name="lead" required>
                         <option value="true" {{#if is_project_lead}} selected {{/if}}> true </option>
                         <option value="false" {{#unless is_project_lead}} selected {{/unless}}> false </option>
                     </select>
@@ -31,21 +31,21 @@
                 </div>
                 <div class="form-row">
                     <label for="mid-year-grade">Mid Year Grade:</label>
-                    <input id="mid-year-grade" type="number" value="{{mid_year_grade}}"/>
+                    <input id="mid-year-grade" type="number" name="mid_grade" value="{{mid_year_grade}}"/>
                 </div>
                 <div class="form-row">
                     <label for="final_grade">Final Grade:</label>
-                    <input id="final_grade" type="number" value="{{final_grade}}"/>
+                    <input id="final_grade" type="number" name="final_grade" value="{{final_grade}}"/>
                 </div>
                 <div class="form-row">
                     <label for="credit-count">Credit Count:</label>
-                    <input id="credit-count" type="number" value="{{credit}}"/>
+                    <input id="credit-count" type="number" name="credit" value="{{credit}}"/>
                 </div>
                 {{/with}}
                 {{#with data}}
                 <div class="form-row">
                     <label for="project-select">Project:</label>
-                    <select class="form-control" id="project-select">
+                    <select class="form-control" name="project" id="project-select">
                         {{#each projects}}
                             <option value="project_id" {{#if (eq project_id enrollments_by_pk.project_id)}} selected {{/if}}>{{title}}</option>
                         {{/each}}
