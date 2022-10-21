@@ -1,0 +1,10 @@
+<h1>RCOS Projects</h1>
+
+{{#each projects}}
+    {{> projects/card this}}
+{{else}}
+    {{! No meetings -- display a message }}
+    <div class="justify-content-center">
+        Could not find any projects matching these parameters.
+    </div>
+{{/each}}
