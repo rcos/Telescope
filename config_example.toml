@@ -38,6 +38,13 @@ jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # a slash.
 telescope_url = "https://rcos.io"
 
+
+# [REQUIRED]
+# The address for Telescope's server to bind at. You should leave this at
+# default if you are running Telescope with the default setup in
+# docker compose behind caddy
+address = "127.0.0.1:80"
+
 # [REQUIRED]
 # The GitHub OAuth application credentials.
 # These can be generated at https://github.com/settings/applications/new.

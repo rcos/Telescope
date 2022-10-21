@@ -1,0 +1,9 @@
+localhost:8001 {
+    encode zstd gzip
+    reverse_proxy hasura:8080
+}
+
+localhost:443 {
+    encode zstd gzip
+    reverse_proxy 172.18.0.1:8080
+}
