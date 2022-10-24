@@ -7,11 +7,14 @@ use crate::api::rcos::users::enrollments::edit_enrollment::edit_enrollment::Vari
 use crate::api::rcos::users::enrollments::edit_enrollment;
 use actix_web::web::{Path, ServiceConfig, HttpRequest};
 use crate::api::rcos::prelude::*;
+use serde::{
+    de,
+    Deserialize
+};
 
 const ENROLLMENT_EDIT_FORM: &str = "coordinate/enrollments/edit/form";
 
-
-//there is one potential issue with this page, a coordinator probably shouldn't be able to edit
+//there is one potential issue with this page, a ooordinator probably shouldn't be able to edit
 //their own enrollment or the enrollments of other coordinators, while there won't be an edit
 //button on those restricted enrollments for coordinators, they can access the edit page for those
 //enrollments if they put in the url directly.  I don't have a solution for this right now
@@ -28,6 +31,7 @@ Path((semester_id, user_id)): Path<(String, String)>,
 ) -> Result<Page, TelescopeError>{
     let uuid = user_id.parse::<uuid>().ok().unwrap();
     let enrollment_data =  EnrollmentByIds::get(uuid, semester_id).await?;
+    dbg!(enrollment_data.clone());
    
     let mut form = Template::new(ENROLLMENT_EDIT_FORM);
     form.fields = json!({
@@ -63,10 +67,10 @@ Form(form_data): Form<EnrollmentForm>,
         lead,
         coordinator,
         pay,
-        project: project.unwrap(),
-        credits: credit.unwrap(),
-        mid_grade: mid_grade.unwrap(),
-        final_grade: final_grade.unwrap(),
+        project,
+        credits: credit,
+        mid_grade,
+        final_grade,
     };
 
     let _user_id = edit_enrollment::EditEnrollment::execute(edit_variables).await;
@@ -84,6 +88,19 @@ Form(form_data): Form<EnrollmentForm>,
 
 }
 
+// Modification of a snippet found on an Actix Web github issue. Helps with null value numbers
+pub fn deserialize_option_ignore_error<'de, T, D>(d: D) -> Result<Option<T>, D::Error>
+where
+    T: de::Deserialize<'de>,
+    D: de::Deserializer<'de>,
+{
+    let res = T::deserialize(d);
+    match res{
+        Ok(..) => Ok(res.ok()),
+        Err(..) => Ok(None),
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EnrollmentForm { 
     #[serde(default)]
@@ -95,14 +112,15 @@ pub struct EnrollmentForm {
     #[serde(default)]
     pub pay: bool,
 
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_option_ignore_error")]
     pub mid_grade: Option<f64>,
 
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_option_ignore_error")]
     pub final_grade: Option<f64>,
 
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_option_ignore_error")]
     pub credit: Option<i64>,
 
+    #[serde(default, deserialize_with = "deserialize_option_ignore_error")]
     pub project: Option<i64>, 
 }

@@ -1,12 +1,12 @@
 mutation EditEnrollment($semester_id: String!,
   $user_id: uuid!,
-  $credits: Int!
+  $credits: Int,
 	$pay: Boolean!,
 	$coordinator: Boolean!,
 	$lead: Boolean!,
-	$mid_grade: Float!,
-	$final_grade: Float!,
-	$project: Int!) {
+	$mid_grade: Float,
+	$final_grade: Float,
+	$project: Int) {
   update_enrollments_by_pk(
     pk_columns: {
       semester_id: $semester_id,

@@ -46,6 +46,7 @@
                 <div class="form-row">
                     <label for="project-select">Project:</label>
                     <select class="form-control" name="project" id="project-select">
+                        <option>None</option>
                         {{#each projects}}
                             <option value={{project_id}} {{#if (eq project_id ../enrollments_by_pk.project_id)}} selected {{/if}}>{{title}}</option>
                         {{/each}}

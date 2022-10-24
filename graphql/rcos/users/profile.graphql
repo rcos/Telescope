@@ -27,6 +27,8 @@ query Profile($target: uuid!, $viewer: [uuid!]!, $now: date!) {
             credits
             is_for_pay
             is_project_lead
+            mid_year_grade
+            final_grade
         }
 
         # The user's discord, if it exists
