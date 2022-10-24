@@ -48,7 +48,7 @@ req: HttpRequest,
 Path((semester_id, user_id)): Path<(String, String)>,
 Form(form_data): Form<EnrollmentForm>,
 ) -> Result<Page, TelescopeError>{
-    let uid = user_id.parse::<uuid>().ok().unwrap();
+    let uuid = user_id.parse::<uuid>().ok().unwrap();
 
     let EnrollmentForm {
         lead,
@@ -59,7 +59,6 @@ Form(form_data): Form<EnrollmentForm>,
         mid_grade,
         final_grade,
     } = form_data;
-    let uuid = user_id.parse::<uuid>().ok().unwrap();
 
     let edit_variables = Variables {
         semester_id: semester_id.clone(),
@@ -77,7 +76,7 @@ Form(form_data): Form<EnrollmentForm>,
 
     //We make another request here immediately after editing it, maybe not ideal speed wise.
     //Consider changing later?
-    let enrollment_data =  EnrollmentByIds::get(uid, semester_id).await?;
+    let enrollment_data =  EnrollmentByIds::get(uuid, semester_id).await?;
    
     let mut form = Template::new(ENROLLMENT_EDIT_FORM);
     form.fields = json!({

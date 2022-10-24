@@ -35,6 +35,10 @@ pub fn register(config: &mut ServiceConfig) {
         "/semesters/enrollments/{semester_id}/{page}",
         aweb::get().to(enrollments_page_index),
     );
+    config.route(
+        "/semesters/enrollments/{semester_id}",
+        aweb::get().to(enrollments_page_index),
+    );
 }
 
 fn get_page_numbers(api_response: &Value, current_page: u64) -> Option<PaginationInfo> {
@@ -92,7 +96,7 @@ pub async fn enrollments_page_index(
 
     // Get the viewers user ID
     let viewer: Option<Uuid> = identity.get_user_id().await?;
-    let prefix = "/admin/semesters/enrollments/".to_owned() + &semester_id + "/";
+    let prefix = "/coordinate/semesters/enrollments/".to_owned() + &semester_id + "/";
     let mut template = Template::new(TEMPLATE_PATH);
     let is_not_administrator: bool;
     match viewer {
