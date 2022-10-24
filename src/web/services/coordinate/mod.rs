@@ -1,5 +1,3 @@
-use crate::api::rcos::users::role_lookup::RoleLookup;
-use crate::api::rcos::users::UserRole;
 use crate::error::TelescopeError;
 use crate::templates::page::Page;
 use crate::templates::Template;
@@ -10,6 +8,7 @@ use actix_web::web as aweb;
 use actix_web::web::ServiceConfig;
 use actix_web::HttpRequest;
 use futures::future::LocalBoxFuture;
+use crate::api::rcos::users::navbar_auth::Authentication;
 use uuid::Uuid;
 
 mod enrollments;
@@ -18,15 +17,13 @@ mod enrollments;
 
 fn coordinator_authorization(user_id: Uuid) -> LocalBoxFuture<'static, AuthorizationResult>{
     Box::pin(async move{
-        //check that user is a coordinator+
-        let role: UserRole = RoleLookup::get(user_id)
-            .await?
-            .expect("Viewer's account does not exist.");
-
-        //forbid access if not the case
-        if !role.is_coordinator() {
+        // We use navbar_auth here to see if the user is currently coordinating or is an is an
+        // admin. Could probably do to rename navbar_auth?
+        let auth = Authentication::get(user_id).await?;
+        if !(auth.is_coordinating() || auth.is_admin()){
             Err(TelescopeError::Forbidden)
-        } else {
+        }
+        else{
             Ok(())
         }
     })

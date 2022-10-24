@@ -6,7 +6,7 @@
         <h3 class="card-title">
         {{user.first_name}} {{user.last_name}} 
         <span class = "float-right">
-           {{#unless (and is_not_admin user.coordinating)}} 
+           {{#unless (and ../is_not_admin user.coordinating)}} 
                 <a class="btn btn-primary" href="/coordinate/semesters/enrollments/{{../semester_id}}/{{user.id}}/edit"> Edit User</a>
            {{/unless}}
         </span> 

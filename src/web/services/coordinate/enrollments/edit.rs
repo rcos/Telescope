@@ -10,6 +10,11 @@ use crate::api::rcos::prelude::*;
 
 const ENROLLMENT_EDIT_FORM: &str = "coordinate/enrollments/edit/form";
 
+
+//there is one potential issue with this page, a coordinator probably shouldn't be able to edit
+//their own enrollment or the enrollments of other coordinators, while there won't be an edit
+//button on those restricted enrollments for coordinators, they can access the edit page for those
+//enrollments if they put in the url directly.  I don't have a solution for this right now
 pub fn register(config: &mut ServiceConfig){
     config
         .service(edit_page)
@@ -70,8 +75,6 @@ Form(form_data): Form<EnrollmentForm>,
     //Consider changing later?
     let enrollment_data =  EnrollmentByIds::get(uid, semester_id).await?;
    
-    dbg!("{}", &enrollment_data);
-
     let mut form = Template::new(ENROLLMENT_EDIT_FORM);
     form.fields = json!({
         "data": enrollment_data,

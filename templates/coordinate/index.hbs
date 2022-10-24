@@ -10,7 +10,6 @@
                 <th scope="col">Start
                 <th scope="col">End
                 <th scope="col">Project Pitches
-                <th scope="col">Meetings
                 <th scope="col">Enrollments
             </tr>
         </thead>
@@ -23,13 +22,6 @@
                     {{#with project_pitches_aggregate.aggregate}}
                         <td>
                             <a href="coordinate/semesters/pitches/{{semesters.semester_id}}"/1 class="btn btn-info">
-                                {{count}}
-                            </a>
-                        </td>
-                    {{/with}}
-                    {{#with meetings_aggregate.aggregate}}
-                        <td>
-                            <a href="coordinate/semesters/meetings/{{semesters.semester_id}}"/1 class="btn btn-info">
                                 {{count}}
                             </a>
                         </td>

@@ -102,7 +102,7 @@ pub async fn enrollments_page_index(
                 .expect("Viewer's account does not exist");
             is_not_administrator = !role.is_admin();
         },
-        None => is_not_administrator = false, 
+        None => is_not_administrator = true, 
     };
     
     template.fields = json!({
