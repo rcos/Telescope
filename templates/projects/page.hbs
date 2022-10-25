@@ -21,3 +21,21 @@
     </div>
 </div>
 
+{{! Stack Card }}
+<div class="col-12 col-lg-8">
+    <div class="card text-dark">
+        <div class="card-header">
+            <h4 class="m-0">Description</h4>
+        </div>
+
+        <div class="card-body">
+            {{#if project.description}}
+                {{render_markdown project.description}}
+            {{else}}
+                <span class="font-italic text-muted">
+                    No Description Available.
+                </span>
+            {{/if}}
+        </div>
+    </div>
+</div>
