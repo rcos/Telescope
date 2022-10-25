@@ -31,7 +31,6 @@ Path((semester_id, user_id)): Path<(String, String)>,
 ) -> Result<Page, TelescopeError>{
     let uuid = user_id.parse::<uuid>().ok().unwrap();
     let enrollment_data =  EnrollmentByIds::get(uuid, semester_id).await?;
-    dbg!(enrollment_data.clone());
    
     let mut form = Template::new(ENROLLMENT_EDIT_FORM);
     form.fields = json!({

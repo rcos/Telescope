@@ -14,7 +14,7 @@ use crate::templates::page::Page;
 use crate::templates::pagination::PaginationInfo;
 use crate::templates::Template;
 use crate::web::services::auth::identity::Identity;
-use crate::api::rcos::semesters::get::PER_PAGE;
+use crate::api::rcos::users::enrollments::user_enrollment_lookup::PER_PAGE;
 
 //mod create;
 mod edit;
@@ -108,7 +108,6 @@ pub async fn enrollments_page_index(
         },
         None => is_not_administrator = true, 
     };
-    
     template.fields = json!({
         "pagination": get_page_numbers(&api_data, page_num as u64 + 1),
         "title": semester.title,
