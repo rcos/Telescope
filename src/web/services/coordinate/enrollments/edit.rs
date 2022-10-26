@@ -87,6 +87,7 @@ Form(form_data): Form<EnrollmentForm>,
 }
 
 // Modification of a snippet found on an Actix Web github issue. Helps with null value numbers
+// https://github.com/actix/actix-web/issues/1815#issuecomment-740266354
 pub fn deserialize_option_ignore_error<'de, T, D>(d: D) -> Result<Option<T>, D::Error>
 where
     T: de::Deserialize<'de>,
