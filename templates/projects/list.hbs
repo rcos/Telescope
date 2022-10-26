@@ -1,4 +1,11 @@
 <h1>RCOS Projects</h1>
+<div class="row">
+    {{#if (or authorization.is_current_coordinator (or (eq authorization.role "faculty_advisor") (eq authorization.role "sysadmin")))}}
+        <div class="col-12 col-md-3">
+            <a href="/project/create" class="float-right btn btn-success">Create Project</a>
+        </div>
+    {{/if}}
+</div>
 
 {{#each projects}}
     {{> projects/card this}}
