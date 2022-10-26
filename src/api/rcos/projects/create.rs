@@ -23,7 +23,7 @@ impl CreateProject {
     pub async fn execute(
         title: Option<String>,
         stack: Option<Vec<String>>,
-        repository_urls: Option<String>,
+        repository_urls: Option<Vec<String>>,
         homepage_url: Option<String>,
         description: Option<String>,
         cover_image_url: Option<String>,
