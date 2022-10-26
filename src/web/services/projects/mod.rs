@@ -2,11 +2,11 @@
 
 use actix_web::web::ServiceConfig;
 
-mod projects_page;
+mod list;
 mod view;
 
 /// Register project services.
 pub fn register(conf: &mut ServiceConfig) {
-    conf.service(projects_page::get);
+    conf.service(list::get);
     conf.service(view::project);
 }
