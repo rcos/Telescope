@@ -21,6 +21,10 @@ impl AppData {
     fn new() -> Self {
         // Register handlebars templates
         let mut template_registry = Handlebars::new();
+        // If compiled in debug mode, do not cache templates
+        if cfg!(debug_assertions) {
+            template_registry.set_dev_mode(true);
+        }
         template_registry
             .register_templates_directory(".hbs", "templates")
             .map_err(|e| {
