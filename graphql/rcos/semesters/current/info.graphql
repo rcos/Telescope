@@ -1,34 +1,11 @@
 query CurrentSemesters($now: date!) {
-  semesters(where: {start_date: {_lte: $now}, end_date: {_gte: $now}}) {
-    start_date
-    end_date
-    semester_id
-    title
-    project_pitches {
-      proposal_url
-      user {
-        first_name
-        last_name
-        id
-      }
+    # Get all semesters containing the current date, as supplied in the
+    # query parameters.
+    semesters(where: {
+        start_date: {_lte: $now},
+        end_date: {_gte: $now}}
+    ) {
+        semester_id
+        title
     }
-    meetings {
-      meeting_id
-    }
-    project_pitches_aggregate {
-      aggregate {
-        count
-      }
-    }
-    meetings_aggregate {
-      aggregate {
-        count
-      }
-    }
-    enrollments_aggregate {
-      aggregate {
-        count
-      }
-    }
-  }
 }
