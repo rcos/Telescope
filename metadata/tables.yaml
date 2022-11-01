@@ -323,6 +323,9 @@
         foreign_key_constraint_on: semester_id
 - table:
     schema: public
+    name: project_repositories
+- table:
+    schema: public
     name: project_roles
   object_relationships:
     - name: project
