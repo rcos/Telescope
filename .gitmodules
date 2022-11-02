@@ -5,4 +5,3 @@ url = https://github.com/rcos/rcos-branding.git
 [submodule "rcos-data"]
 path = rcos-data
 url = https://github.com/rcos/rcos-data.git
-	branch = telescope-dev-version
