@@ -1,0 +1,16 @@
+query semesters_coordinators($semester_id: String!) {
+  coordinators: enrollments(
+    where: { semester_id: { _eq: $semester_id }, is_coordinator: { _eq: true } }
+  ) {
+    user {
+      id
+      first_name
+      last_name
+      role
+      cohort
+    }
+    credits
+    is_coordinator
+    is_for_pay
+  }
+}

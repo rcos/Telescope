@@ -1,0 +1,756 @@
+- table:
+    schema: public
+    name: announcements
+  object_relationships:
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+- table:
+    schema: public
+    name: bonus_attendances
+  object_relationships:
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: enrollments
+  object_relationships:
+    - name: final_grade_appeal
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: final_grade_appeal
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: mentor_proposal
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: mentor_proposals
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: pay_request
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: pay_requests
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: project
+      using:
+        foreign_key_constraint_on: project_id
+    - name: project_pitch
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: project_pitches
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  array_relationships:
+    - name: meetings
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: meetings
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: host_user_id
+    - name: mentor_proposals
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: mentor_proposals
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: reviewer_id
+    - name: project_pitches
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: project_pitches
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: reviewer_id
+    - name: project_presentation_grades
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: project_presentation_grades
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: grader_id
+    - name: workshopProposalsByUserIdSemesterId
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: workshop_proposals
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: workshop_proposals
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: workshop_proposals
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: reviewer_id
+- table:
+    schema: public
+    name: external_organizations
+  array_relationships:
+    - name: projects
+      using:
+        foreign_key_constraint_on:
+          column: external_organization_id
+          table:
+            schema: public
+            name: projects
+- table:
+    schema: public
+    name: final_grade_appeal
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: meeting_attendances
+  object_relationships:
+    - name: meeting
+      using:
+        foreign_key_constraint_on: meeting_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: meetings
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            host_user_id: user_id
+            semester_id: semester_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: host_user_id
+  array_relationships:
+    - name: meeting_attendances
+      using:
+        foreign_key_constraint_on:
+          column: meeting_id
+          table:
+            schema: public
+            name: meeting_attendances
+- table:
+    schema: public
+    name: mentor_proposals
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            reviewer_id: user_id
+    - name: enrollmentByUserIdSemesterId
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: user
+      using:
+        foreign_key_constraint_on: reviewer_id
+    - name: userByUserId
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: pay_requests
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: project_channels
+  object_relationships:
+    - name: project
+      using:
+        foreign_key_constraint_on: project_id
+- table:
+    schema: public
+    name: project_pitches
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            reviewer_id: user_id
+    - name: enrollmentByUserIdSemesterId
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: project
+      using:
+        foreign_key_constraint_on: existing_project_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: reviewer_id
+    - name: userByUserId
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: project_presentation_grades
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            grader_id: user_id
+            semester_id: semester_id
+    - name: project
+      using:
+        foreign_key_constraint_on: project_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: grader_id
+- table:
+    schema: public
+    name: project_presentations
+  object_relationships:
+    - name: project
+      using:
+        foreign_key_constraint_on: project_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+- table:
+    schema: public
+    name: project_repositories
+- table:
+    schema: public
+    name: project_roles
+  object_relationships:
+    - name: project
+      using:
+        foreign_key_constraint_on: project_id
+- table:
+    schema: public
+    name: project_stack
+- table:
+    schema: public
+    name: projects
+  object_relationships:
+    - name: external_organization
+      using:
+        foreign_key_constraint_on: external_organization_id
+    - name: project_role
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: project_roles
+  array_relationships:
+    - name: enrollments
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: enrollments
+    - name: project_channels
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: project_channels
+    - name: project_pitches
+      using:
+        foreign_key_constraint_on:
+          column: existing_project_id
+          table:
+            schema: public
+            name: project_pitches
+    - name: project_presentation_grades
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: project_presentation_grades
+    - name: project_presentations
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: project_presentations
+    - name: project_stack
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: project_stack
+    - name: small_group_projects
+      using:
+        foreign_key_constraint_on:
+          column: project_id
+          table:
+            schema: public
+            name: small_group_projects
+- table:
+    schema: public
+    name: semesters
+  array_relationships:
+    - name: announcements
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: announcements
+    - name: bonus_attendances
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: bonus_attendances
+    - name: enrollments
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: enrollments
+    - name: final_grade_appeals
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: final_grade_appeal
+    - name: meetings
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: meetings
+    - name: project_pitches
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: project_pitches
+    - name: project_presentation_grades
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: project_presentation_grades
+    - name: project_presentations
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: project_presentations
+    - name: small_groups
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: small_groups
+    - name: status_updates
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: status_updates
+    - name: workshop_proposals
+      using:
+        foreign_key_constraint_on:
+          column: semester_id
+          table:
+            schema: public
+            name: workshop_proposals
+- table:
+    schema: public
+    name: small_group_categories
+  object_relationships:
+    - name: small_group
+      using:
+        foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
+    name: small_group_channels
+  object_relationships:
+    - name: small_group
+      using:
+        foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
+    name: small_group_mentors
+  object_relationships:
+    - name: small_group
+      using:
+        foreign_key_constraint_on: small_group_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: small_group_projects
+  object_relationships:
+    - name: project
+      using:
+        foreign_key_constraint_on: project_id
+    - name: small_group
+      using:
+        foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
+    name: small_group_roles
+  object_relationships:
+    - name: small_group
+      using:
+        foreign_key_constraint_on: small_group_id
+- table:
+    schema: public
+    name: small_groups
+  object_relationships:
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: small_group_role
+      using:
+        foreign_key_constraint_on:
+          column: small_group_id
+          table:
+            schema: public
+            name: small_group_roles
+  array_relationships:
+    - name: small_group_categories
+      using:
+        foreign_key_constraint_on:
+          column: small_group_id
+          table:
+            schema: public
+            name: small_group_categories
+    - name: small_group_channels
+      using:
+        foreign_key_constraint_on:
+          column: small_group_id
+          table:
+            schema: public
+            name: small_group_channels
+    - name: small_group_mentors
+      using:
+        foreign_key_constraint_on:
+          column: small_group_id
+          table:
+            schema: public
+            name: small_group_mentors
+    - name: small_group_projects
+      using:
+        foreign_key_constraint_on:
+          column: small_group_id
+          table:
+            schema: public
+            name: small_group_projects
+- table:
+    schema: public
+    name: status_update_submissions
+  object_relationships:
+    - name: status_update
+      using:
+        foreign_key_constraint_on: status_update_id
+    - name: user
+      using:
+        foreign_key_constraint_on: grader_id
+    - name: userByUserId
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: status_updates
+  object_relationships:
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+  array_relationships:
+    - name: status_update_submissions
+      using:
+        foreign_key_constraint_on:
+          column: status_update_id
+          table:
+            schema: public
+            name: status_update_submissions
+- table:
+    schema: public
+    name: user_accounts
+  object_relationships:
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: users
+  array_relationships:
+    - name: bonus_attendances
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: bonus_attendances
+    - name: enrollments
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: enrollments
+    - name: final_grade_appeals
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: final_grade_appeal
+    - name: meeting_attendances
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: meeting_attendances
+    - name: meetings
+      using:
+        foreign_key_constraint_on:
+          column: host_user_id
+          table:
+            schema: public
+            name: meetings
+    - name: mentorProposalsByUserId
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: mentor_proposals
+    - name: mentor_proposals
+      using:
+        foreign_key_constraint_on:
+          column: reviewer_id
+          table:
+            schema: public
+            name: mentor_proposals
+    - name: pay_requests
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: pay_requests
+    - name: projectPitchesByUserId
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: project_pitches
+    - name: project_pitches
+      using:
+        foreign_key_constraint_on:
+          column: reviewer_id
+          table:
+            schema: public
+            name: project_pitches
+    - name: project_presentation_grades
+      using:
+        foreign_key_constraint_on:
+          column: grader_id
+          table:
+            schema: public
+            name: project_presentation_grades
+    - name: small_group_mentors
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: small_group_mentors
+    - name: statusUpdateSubmissionsByUserId
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: status_update_submissions
+    - name: status_update_submissions
+      using:
+        foreign_key_constraint_on:
+          column: grader_id
+          table:
+            schema: public
+            name: status_update_submissions
+    - name: user_accounts
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: user_accounts
+    - name: workshopProposalsByUserId
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: public
+            name: workshop_proposals
+    - name: workshop_proposals
+      using:
+        foreign_key_constraint_on:
+          column: reviewer_id
+          table:
+            schema: public
+            name: workshop_proposals
+- table:
+    schema: public
+    name: workshop_proposals
+  object_relationships:
+    - name: enrollment
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            reviewer_id: user_id
+    - name: enrollmentByUserIdSemesterId
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: enrollments
+          insertion_order: null
+          column_mapping:
+            semester_id: semester_id
+            user_id: user_id
+    - name: semester
+      using:
+        foreign_key_constraint_on: semester_id
+    - name: user
+      using:
+        foreign_key_constraint_on: reviewer_id
+    - name: userByUserId
+      using:
+        foreign_key_constraint_on: user_id

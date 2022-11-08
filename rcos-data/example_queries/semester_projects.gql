@@ -1,0 +1,17 @@
+query SemesterProjects($semesterIdOrTitle: String!, $withEnrollments: Boolean!) {
+  projects(order_by: {title: asc}, where: {enrollments: {_or: [{semester_id: {_eq: $semesterIdOrTitle}}, {semester: {title: {_ilike: $semesterIdOrTitle}}}]}}) {
+    project_id
+    title
+    enrollments @include(if: $withEnrollments) {
+      user {
+        id
+        first_name
+        last_name
+        cohort
+      }
+      is_project_lead
+      credits
+      is_for_pay
+    }
+  }
+}

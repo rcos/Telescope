@@ -1,0 +1,18 @@
+query CurrentSemesterProjects($withEnrollments: Boolean!) {
+  projects(order_by: {title: asc}, where: {enrollments: {semester: {_and: [{start_date: {_lte: "now()"}}, {end_date: {_gte: "now()"}}]}}}) {
+    project_id
+    title
+    enrollments(where: {semester: {_and: [{start_date: {_lte: "now()"}}, {end_date: {_gte: "now()"}}]}}) @include(if: $withEnrollments) {
+      user {
+        id
+        role
+        first_name
+        last_name
+        cohort
+      }
+      is_project_lead
+      credits
+      is_for_pay
+    }
+  }
+}

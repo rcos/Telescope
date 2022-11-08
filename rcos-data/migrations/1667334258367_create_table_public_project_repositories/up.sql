@@ -1,0 +1,1 @@
+CREATE TABLE "public"."project_repositories" ("language" url NOT NULL, "id" serial NOT NULL, "project_id" integer NOT NULL, PRIMARY KEY ("id") , FOREIGN KEY ("project_id") REFERENCES "public"."projects"("project_id") ON UPDATE restrict ON DELETE cascade);COMMENT ON TABLE "public"."project_repositories" IS E'All of the repo\'s associated with a project';
