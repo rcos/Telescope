@@ -1,0 +1,25 @@
+query semester_small_groups($semester_id: String!) {
+  small_groups(where: { semester_id: { _eq: $semester_id } }) {
+    small_group_id
+    title
+    location
+    small_group_projects {
+      project {
+        project_id
+        title
+        enrollments {
+          user {
+            id
+            first_name
+            last_name
+            cohort
+          }
+          is_coordinator
+          credits
+          is_for_pay
+          is_project_lead
+        }
+      }
+    }
+  }
+}

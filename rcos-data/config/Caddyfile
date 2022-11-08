@@ -1,0 +1,20 @@
+{
+    email rcos-leadership@googlegroups.com
+}
+
+rcos.io {
+    encode zstd gzip
+    
+    reverse_proxy telescope:80
+}
+
+gql.rcos.io {
+    encode zstd gzip
+    log { output discard }
+
+    reverse_proxy hasura:8080
+}
+
+telescope.rcos.io, www.rcos.io {
+    redir https://rcos.io{uri} permanent 
+}

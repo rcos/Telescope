@@ -1,0 +1,2 @@
+ALTER TABLE projects
+    ADD COLUMN is_external BOOLEAN NOT NULL DEFAULT FALSE;

@@ -1,0 +1,20 @@
+# See https://github.com/rcos/Telescope/blob/master/config_example.toml
+
+log_level = "warn,telescope=info,actix_server=info,actix_web=info,actix=info,reqwest=info"
+api_url = "http://hasura:8080/v1/graphql"
+telescope_url = "https://rcos.io"
+
+# RCOS JWT Secret
+jwt_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# GitHub credentials -- See the Telescope application owned by the RCOS organization on GitHub.
+[github_credentials]
+client_id = "xxxxxxxxxxxxxxxxxxxx"
+client_secret = "****************************************"
+
+# Discord credentials -- See the Telescope application owned by the RCOS team on Discord. 
+[discord_config]
+client_id = "xxxxxxxxxxxxxxxxxxxx"
+client_secret = "****************************************"
+bot_token = "xxxxxxxxxxxxxxxxxxxxxxxx.xxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxx"
+rcos_guild_id = "xxxxxxxxxxxxxxxxxx"

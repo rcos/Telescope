@@ -1,0 +1,23 @@
+query semester_enrollments($semester_id: String!) {
+  semester: semesters_by_pk(semester_id: $semester_id) {
+    title
+    start_date
+    end_date
+
+    enrollments {
+      user {
+        id
+        first_name
+        last_name
+        role
+      }
+      credits
+      is_for_pay
+      is_project_lead
+      project {
+        project_id
+        title
+      }
+    }
+  }
+}

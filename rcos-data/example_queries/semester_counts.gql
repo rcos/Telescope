@@ -1,0 +1,30 @@
+query semester_counts($semester_id: String!) {
+  no_credit_aggregate: enrollments_aggregate(
+    where: { semester_id: { _eq: $semester_id }, credits: { _eq: 0 } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  for_credit_aggregate: enrollments_aggregate(
+    where: { semester_id: { _eq: $semester_id }, credits: { _gt: 0 } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  projects_aggregate(
+    where: { enrollments: { semester_id: { _eq: $semester_id } } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  mentors_aggregate: small_group_mentors_aggregate(
+    where: { small_group: { semester_id: { _eq: $semester_id } } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
