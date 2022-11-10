@@ -5,8 +5,9 @@
 //! all users. Once the meeting creator has made a decision, they are directed to a form
 //! to finish meeting creation.
 
-use crate::api::rcos::projects::authorization_for::UserProjectAuthorization;
-use crate::api::rcos::projects::create::CreateProject;
+use crate::api::rcos::meetings::authorization_for::UserMeetingAuthorization;
+use crate::api::rcos::meetings::creation::context::CreationContext;
+use crate::api::rcos::meetings::creation::create::CreateMeeting;
 use crate::api::rcos::meetings::creation::host_selection::HostSelection;
 use crate::api::rcos::meetings::{MeetingType, ALL_MEETING_TYPES};
 use crate::error::TelescopeError;
