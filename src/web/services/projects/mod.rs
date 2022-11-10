@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 mod list;
 mod view;
-mod create;
+// mod create;
 
 /// Register project services.
 pub fn register(conf: &mut ServiceConfig) {
