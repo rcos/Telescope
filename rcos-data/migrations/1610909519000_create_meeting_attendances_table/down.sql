@@ -1,0 +1,1 @@
+DROP TABLE meeting_attendances;

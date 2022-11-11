@@ -5,5 +5,9 @@ localhost:8001 {
 
 localhost:443 {
     encode zstd gzip
-    reverse_proxy 172.18.0.1:8080
+    reverse_proxy {
+      lb_policy first
+      lb_retries 2
+      to 172.18.0.1:8080 host.internal:8080
+    }
 }

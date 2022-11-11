@@ -3,6 +3,7 @@
 use actix_web::web::ServiceConfig;
 
 mod admin;
+mod coordinate;
 pub mod auth;
 mod index;
 pub mod meetings;
@@ -26,6 +27,9 @@ pub fn register(config: &mut ServiceConfig) {
 
     // Admin panel services.
     admin::register(config);
+
+    // Coordinator panel services.
+    coordinate::register(config);
 
     config
         // Homepage
