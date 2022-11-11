@@ -94,18 +94,7 @@ following these *optional* instructions:
    will need to change that to 8080 by setting `address` to `0.0.0.0:8080` in
    `config.toml`. This is because port 80 is restricted.
    
-2. On macOS, Docker runs within a virtual machine. That means that you need to
-   change `Caddyfile.dev` to point to your computer outside the virtual machine.
-   You only need to do this if you are using Docker Desktop on macOS.
-
-    ```
-    localhost:443 {
-        encode zstd gzip
-        reverse_proxy host.docker.internal:8080
-    }
-    ```
-
-3. The commands you use to run and test Telescope need to be changed. To start
+2. The commands you use to run and test Telescope need to be changed. To start
    the supporting services like Hasura, Postgres, and Caddy, run `docker-compose
    -f docker-compose.dev.yml up -d`. To start Telescope, run `cargo run`.
 
