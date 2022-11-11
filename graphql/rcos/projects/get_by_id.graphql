@@ -2,8 +2,8 @@ query Project($id: Int!) {
   project: projects_by_pk(project_id: $id) {
     project_id
     description
-    stack
-    repository_urls
+    # stack
+    # repository_urls
     cover_image_url
     created_at
     external_organization_id
