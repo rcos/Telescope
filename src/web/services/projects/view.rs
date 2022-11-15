@@ -36,12 +36,8 @@ pub async fn project(
 
     let can_edit = authorization.can_edit();
 
-    if !authorization.can_view() {
-        return Err(TelescopeError::BadRequest {
-            header: "Project Not Visible".into(),
-            message: "You do not have permission to view this project".into(),
-            show_status_code: false,
-        })
+    if !authorization.can_view() { // currently not implemented (or needed)
+        return Err(TelescopeError::NotAuthenticated)
     }
 
     let mut template = Template::new(TEMPLATE_PATH);
