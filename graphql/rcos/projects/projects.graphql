@@ -4,7 +4,8 @@ fragment ProjectInfo on projects {
 
     cover_image_url
     homepage_url
-    repository_urls
+    description
+    # repository_urls
 
     # If externally owned, who owns it.
     external_organization {

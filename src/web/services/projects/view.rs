@@ -4,7 +4,10 @@ use crate::templates::Template;
 use actix_web::web::Path;
 use actix_web::HttpRequest;
 use crate::error::TelescopeError;
+use crate::web::services::auth::identity::Identity;
 use crate::api::rcos::projects::get_by_id::{project::ProjectProject, Project};
+use crate::api::rcos::projects::authorization_for::{AuthorizationFor, UserProjectAuthorization};
+
 
 const TEMPLATE_PATH: &'static str = "projects/page";
 
@@ -12,7 +15,14 @@ const TEMPLATE_PATH: &'static str = "projects/page";
 pub async fn project(
     req: HttpRequest,
     Path(project_id): Path<i64>,
+    identity: Identity,
 ) -> Result<Page, TelescopeError> {
+    //get the viewer's id
+    let viewer: Option<_> = identity.get_user_id().await?;
+
+    //get their authorization level
+    let authorization = AuthorizationFor::get(viewer).await?;
+
     let project: Option<ProjectProject> = Project::get(project_id).await?;
 
     if project.is_none() {
@@ -24,10 +34,17 @@ pub async fn project(
 
     let project = project.unwrap();
 
+    let can_edit = authorization.can_edit();
+
+    if !authorization.can_view() { // currently not implemented (or needed)
+        return Err(TelescopeError::NotAuthenticated)
+    }
 
     let mut template = Template::new(TEMPLATE_PATH);
+
     template.fields = json!({
         "project": &project,
+        "auth": authorization,
     });
 
     let mut tags = Tags::default();

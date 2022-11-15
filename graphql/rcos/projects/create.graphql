@@ -1,0 +1,19 @@
+mutation CreateProject(
+        $title: String,
+        $stack: _varchar = "",
+        $repository_urls: _url = "",
+        $homepage_url: String = "",
+        $description: String = "",
+        $cover_image_url: String = "") {
+
+    insert_projects_one(object: {
+        title: $title,
+        stack: $stack,
+        repository_urls: $repository_urls,
+        homepage_url: $homepage_url,
+        description: $description,
+        cover_image_url: $cover_image_url
+    }) {
+        project_id
+    }
+}
