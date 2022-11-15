@@ -1,4 +1,4 @@
-<h1>RCOS Projects</h1>
+<h1>Projects</h1>
 <div class="row">
     {{#if (or authorization.is_current_coordinator (or (eq authorization.role "faculty_advisor") (eq authorization.role "sysadmin")))}}
         <div class="col-12 col-md-3">
@@ -6,12 +6,15 @@
         </div>
     {{/if}}
 </div>
-
-{{#each projects}}
-    {{> projects/card this}}
-{{else}}
-    {{! No meetings -- display a message }}
-    <div class="justify-content-center">
-        Could not find any projects matching these parameters.
-    </div>
-{{/each}}
+<div class="g-4 justify-content-center row row-cols-xl-3 row-cols-md-2 row-cols-1">
+    {{#each projects}}
+        <div class="col">
+            {{> projects/card this}}
+        </div>
+    {{else}}
+        {{! No meetings -- display a message }}
+        <div class="justify-content-center">
+            Could not find any projects matching these parameters.
+        </div>
+    {{/each}}
+</div>
