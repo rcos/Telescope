@@ -1,18 +1,19 @@
 {{! Project card template -- this is used in the project list and on user profiles }}
 
-<div class="list-group-item">
-    <div class="card-image" style="position: relative;">
+<div class="card bg-light">
+    {{! <div classheight="50px"></div> }}
+    <div class="card-img-top" style="position: relative;">
         <a href="/project/{{project_id}}"> 
             <img src="{{cover_image_url}}" width="100%" height = "160px" style="object-fit: contain;">
         </a>
     </div>
-    <div class="card-body" style="height: 300px;">
+    <div class="overflow-auto card-body" style="height: 300px;">
         <div class="card-title">
             <a href="/project/{{project_id}}" style="text-decoration: none; color: black; font-size:200%">{{title}}</a>
         </div>
-        <div class"card-stack">
+        <div class="card-stack">
         </div>
-        <div class"card-text" style="color: black">
+        <div class="card-text" style="color: black">
             {{#if description}}
                 {{! <div class="list-group-item"> }}
                     {{render_markdown description}}
