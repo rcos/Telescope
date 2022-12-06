@@ -3,11 +3,13 @@ localhost:8001 {
     reverse_proxy hasura:8080
 }
 
+
 localhost:443 {
     encode zstd gzip
     reverse_proxy {
       lb_policy first
       lb_retries 2
-      to 172.18.0.1:8080 host.internal:8080
+      dynamic a host.docker.internal 8080
+      to 172.18.0.1:8080
     }
 }
