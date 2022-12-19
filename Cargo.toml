@@ -53,7 +53,7 @@ lazy_static = "~1.4"
 futures = "0.3.21"
 
 # async traits
-async-trait = "0.1.52"
+async-trait = "0.1.60"
 
 # Date and time utilities and formats
 chrono = {version = "~0.4", features = ["serde", "std", "clock"]}
