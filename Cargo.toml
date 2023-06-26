@@ -12,7 +12,7 @@ structopt = "~0.3"
 # environment variable reading through dotenv (.env files)
 dotenv = "~0.15"
 # config file reading
-toml = "~0.5"
+toml = "~0.7"
 
 # actix actor framework -- system for running server and other tasks.
 actix = "0.10.0"
